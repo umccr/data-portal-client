@@ -18,6 +18,9 @@ import Hidden from "@material-ui/core/Hidden";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import { API } from "aws-amplify";
+import Routes from "./Routes";
+import {Link} from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -76,9 +79,12 @@ class App extends Component {
           </div>
           <Divider />
           <List>
-            <ListItem button>
-            <ListItemIcon> <HomeIcon /></ListItemIcon>
-            <ListItemText primary="Home" />
+            <ListItem button component={Link} to="/">
+              <ListItemIcon> <HomeIcon /></ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItem>
+            <ListItem button component={Link} to="/login">
+              <ListItemText primary="Login" />
             </ListItem>
           </List>
         </Fragment>
@@ -131,19 +137,7 @@ class App extends Component {
         </nav>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          <form>
-            <Grid container xs={12} direction="row" alignItems="center">
-              <TextField
-                  id="outlined-bare"
-                  placeholder="Search Tables"
-                  margin="normal"
-                  variant="outlined"
-              />
-              <Button className={classes.button} >
-                Search
-              </Button>
-            </Grid>
-          </form>
+          <Routes />
         </main>
       </div>
     );
