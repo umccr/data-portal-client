@@ -1,16 +1,16 @@
-import React, { Component } from "react";
-import Grid from "@material-ui/core/Grid";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import { Auth } from "aws-amplify";
+import React, { Component } from 'react';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import { Auth } from 'aws-amplify';
 
 class Login extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            username: "",
-            password: ""
+            username: '',
+            password: '',
         };
     }
 
@@ -20,7 +20,7 @@ class Login extends Component {
 
     handleChange = event => {
         this.setState({
-            [event.target.id]: event.target.value
+            [event.target.id]: event.target.value,
         });
     };
 
@@ -29,7 +29,7 @@ class Login extends Component {
 
         try {
             await Auth.signIn(this.state.username, this.state.password);
-            alert("Logged in");
+            alert('Logged in');
         } catch (e) {
             alert(e.message);
         }
