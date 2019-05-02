@@ -18,7 +18,7 @@ Amplify.configure({
     API: {
         endpoints: [
             {
-                name: 'tables',
+                name: 'files',
                 endpoint: config.apiGateway.URL,
                 region: config.apiGateway.REGION,
             },

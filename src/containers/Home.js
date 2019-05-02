@@ -20,6 +20,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import * as PropTypes from 'prop-types';
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const styles = theme => ({
     close: {
@@ -35,7 +36,7 @@ class Home extends Component {
         searchRunning: false,
         tableInit: false,
         order: 'asc',
-        orderBy: null,
+        orderBy: '',
         rowsPerPage: 20,
         errorMessage: null,
     };
@@ -52,16 +53,16 @@ class Home extends Component {
                 .map(key => `&${key}=${extraParams[key]}`)
                 .join('');
             const data = await API.get(
-                'tables',
-                `/tables?filePath=${this.state.filePath}${extraParamsString}`,
+                'files',
+                `/files?filePath=${this.state.filePath}${extraParamsString}`,
                 {},
             );
             this.setState({
                 data: data,
                 tableInit: true,
             });
-            this.setState({ errorMessage: 'aa' });
         } catch (e) {
+            console.log(e);
             this.setState({ errorMessage: e });
         }
 
@@ -78,7 +79,7 @@ class Home extends Component {
     getSortParams = () => {
         const { orderBy, order } = this.state;
 
-        if (orderBy !== null) {
+        if (orderBy) {
             return {
                 sortCol: orderBy,
                 sortAsc: order === 'asc',
@@ -137,13 +138,13 @@ class Home extends Component {
                 vertical: 'bottom',
                 horizontal: 'left',
             }}
-            open={this.state.errorMessage}
+            open={false}
             autoHideDuration={6000}
             onClose={this.handleCloseErrorMessage}
             ContentProps={{
                 'aria-describedby': 'message-id',
             }}
-            message={message}
+            message={<span>message</span>}
             action={[
                 <IconButton
                     key="close"
@@ -156,6 +157,43 @@ class Home extends Component {
                 </IconButton>,
             ]}
         />
+    );
+
+    handleDownloadFile = async (bucket, key) => {
+        try {
+            const url = await API.get(
+                'files',
+                `/file-signed-url?bucket=${bucket}&key=${key}`,
+                {},
+            );
+
+            window.open(url, '_blank');
+        } catch (e) {
+            this.setState({ errorMessage: e });
+        }
+    };
+
+    renderRow = (headers, row, rowIndex) => (
+        <TableRow key={rowIndex}>
+            {row.map((col, colIndex) => {
+                const bucket = row[headers.findIndex(h => h.key === 'bucket')];
+                return (
+                    <TableCell key={colIndex}>
+                        {col}
+                        {headers[colIndex].key === 'key' && (
+                            <Button
+                                color="primary"
+                                onClick={() =>
+                                    this.handleDownloadFile(bucket, col)
+                                }
+                            >
+                                <GetAppIcon />
+                            </Button>
+                        )}
+                    </TableCell>
+                );
+            })}
+        </TableRow>
     );
 
     renderTable = () => {
@@ -185,13 +223,9 @@ class Home extends Component {
                             </TableRow>
                         )}
                         {!this.state.searchRunning &&
-                            dataRows.map((row, index) => (
-                                <TableRow>
-                                    {row.map(col => (
-                                        <TableCell key={index}>{col}</TableCell>
-                                    ))}
-                                </TableRow>
-                            ))}
+                            dataRows.map((row, rowIndex) => {
+                                return this.renderRow(headerRow, row, rowIndex);
+                            })}
                     </TableBody>
                     {!this.state.searchRunning && (
                         <TableFooter>
