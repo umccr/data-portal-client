@@ -138,13 +138,13 @@ class Home extends Component {
                 vertical: 'bottom',
                 horizontal: 'left',
             }}
-            open={false}
+            open={this.state.errorMessage !== null}
             autoHideDuration={6000}
             onClose={this.handleCloseErrorMessage}
             ContentProps={{
                 'aria-describedby': 'message-id',
             }}
-            message={<span>message</span>}
+            message={<span>{message}</span>}
             action={[
                 <IconButton
                     key="close"
@@ -215,10 +215,20 @@ class Home extends Component {
                         {this.state.searchRunning && (
                             <TableRow>
                                 <TableCell
-                                    colSpan={dataRows.length}
+                                    colSpan={headerRow.length}
                                     style={{ textAlign: 'center' }}
                                 >
                                     <CircularProgress />
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {!this.state.searchRunning && dataRows.length === 0 && (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={headerRow.length}
+                                    style={{ textAlign: 'center' }}
+                                >
+                                    No record found
                                 </TableCell>
                             </TableRow>
                         )}
