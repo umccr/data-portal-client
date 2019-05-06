@@ -6,6 +6,9 @@ import Amplify from 'aws-amplify';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import config from './config';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import reducer from './reducers';
 
 Amplify.configure({
     Auth: {
@@ -14,6 +17,7 @@ Amplify.configure({
         userPoolId: config.cognito.USER_POOL_ID,
         identityPoolId: config.cognito.IDENTITY_POOL_ID,
         userPoolWebClientId: config.cognito.APP_CLIENT_ID,
+        oauth: config.cognito.OAUTH,
     },
     API: {
         endpoints: [
@@ -26,10 +30,14 @@ Amplify.configure({
     },
 });
 
+const store = createStore(reducer);
+
 ReactDOM.render(
-    <Router>
-        <App />
-    </Router>,
+    <Provider store={store}>
+        <Router>
+            <App />
+        </Router>
+    </Provider>,
     document.getElementById('root'),
 );
 
