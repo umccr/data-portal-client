@@ -21,32 +21,36 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import * as PropTypes from 'prop-types';
 import GetAppIcon from '@material-ui/icons/GetApp';
+import InfoIcon from '@material-ui/icons/Info';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import Popper from '@material-ui/core/Popper';
+import Fade from '@material-ui/core/Fade';
+import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
     close: {
         padding: theme.spacing.unit / 2,
+    },
+    searchHintContainer: {
+        padding: theme.spacing.unit,
     },
 });
 
 class Search extends Component {
     state = {
         data: {},
-        filePath: '',
-        fileExtension: '',
+        searchQuery: '',
         searchRunning: false,
         tableInit: false,
         order: 'asc',
         orderBy: '',
         rowsPerPage: 20,
         errorMessage: null,
+        openSnackbar: false,
     };
 
     reloadData = async (extraParams = {}) => {
         this.setState({ searchRunning: true });
-
-        if (this.state.fileExtension) {
-            extraParams.fileExtension = this.state.fileExtension;
-        }
 
         try {
             const extraParamsString = Object.keys(extraParams)
@@ -54,7 +58,7 @@ class Search extends Component {
                 .join('');
             const data = await API.get(
                 'files',
-                `/files?filePath=${this.state.filePath}${extraParamsString}`,
+                `/files?query=${this.state.searchQuery}${extraParamsString}`,
                 {},
             );
             this.setState({
@@ -62,8 +66,19 @@ class Search extends Component {
                 tableInit: true,
             });
         } catch (e) {
-            console.log(e);
-            this.setState({ errorMessage: e });
+            let errorMessage;
+
+            if (e.response) {
+                errorMessage = e.response.data.errors;
+            } else {
+                errorMessage = e.message;
+            }
+
+            console.log(errorMessage);
+            this.setState({
+                errorMessage: `Query failed: ${errorMessage}`,
+                openSnackbar: true,
+            });
         }
 
         this.setState({ searchRunning: false });
@@ -129,22 +144,22 @@ class Search extends Component {
             return;
         }
 
-        this.setState({ errorMessage: null });
+        this.setState({ errorMessage: null, openSnackbar: false });
     };
 
-    renderErrorMessage = message => (
+    renderErrorMessage = () => (
         <Snackbar
             anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'left',
             }}
-            open={this.state.errorMessage !== null}
+            open={this.state.openSnackbar}
             autoHideDuration={6000}
             onClose={this.handleCloseErrorMessage}
             ContentProps={{
                 'aria-describedby': 'message-id',
             }}
-            message={<span>{message}</span>}
+            message={<span>{this.state.errorMessage}</span>}
             action={[
                 <IconButton
                     key="close"
@@ -197,7 +212,7 @@ class Search extends Component {
     );
 
     renderTable = () => {
-        const { order, orderBy, data, errorMessage } = this.state;
+        const { order, orderBy, data } = this.state;
         const headerRow = data.rows.headerRow;
         const dataRows = data.rows.dataRows;
         const metaData = data.meta;
@@ -261,26 +276,43 @@ class Search extends Component {
                         </TableFooter>
                     )}
                 </Table>
-                {this.renderErrorMessage(errorMessage)}
             </Paper>
         );
     };
 
-    handleFilePathQueryChange = e => {
-        this.setState({
-            filePath: e.target.value,
-            page: 0,
-        });
+    handleSearchQuerySyntaxClick = event => {
+        const { currentTarget } = event;
+        this.setState(state => ({
+            searchHintAnchorEl: currentTarget,
+            openSearchHint: !state.openSearchHint,
+        }));
     };
 
-    handleFileExtensionQueryChange = e => {
+    renderQuerySyntaxButton = () => {
+        const { classes } = this.props;
+
+        return (
+            <IconButton color="default" size="small">
+                <HelpOutlineIcon
+                    size="small"
+                    onClick={this.handleSearchQuerySyntaxClick}
+                />
+            </IconButton>
+        );
+    };
+
+    handleSearchQueryChange = e => {
         this.setState({
-            fileExtension: e.target.value,
+            searchQuery: e.target.value,
             page: 0,
         });
     };
 
     render() {
+        const { classes } = this.props;
+        const { openSearchHint } = this.state;
+        const searchHintPopperId = openSearchHint ? 'popper-search-hint' : null;
+
         return (
             <form>
                 <Grid
@@ -291,31 +323,22 @@ class Search extends Component {
                     alignItems="center"
                     spacing={16}
                 >
-                    <Grid item sm={12} md={8}>
+                    <Grid item container sm={12} md={10}>
                         <TextField
                             name="query"
-                            label="File Path"
-                            placeholder="File Path"
+                            label="Search"
+                            placeholder="Type in search query"
                             margin="normal"
                             variant="filled"
                             fullWidth
-                            value={this.state.filePath}
-                            onChange={this.handleFilePathQueryChange}
+                            value={this.state.searchQuery}
+                            onChange={this.handleSearchQueryChange}
+                            InputProps={{
+                                endAdornment: this.renderQuerySyntaxButton(),
+                            }}
                         />
                     </Grid>
-                    <Grid item sm={6} md={2}>
-                        <TextField
-                            name="query"
-                            label="File Extension"
-                            placeholder="File Extension"
-                            margin="normal"
-                            variant="filled"
-                            fullWidth
-                            value={this.state.fileExtension}
-                            onChange={this.handleFileExtensionQueryChange}
-                        />
-                    </Grid>
-                    <Grid item sm={6} md={1}>
+                    <Grid item sm={12} md={2}>
                         <Fab
                             color="primary"
                             size="medium"
@@ -332,6 +355,60 @@ class Search extends Component {
                     )}
                     {this.state.data.rows && this.renderTable()}
                 </Paper>
+                <Popper
+                    id={searchHintPopperId}
+                    open={this.state.openSearchHint}
+                    anchorEl={this.state.searchHintAnchorEl}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                    transition
+                >
+                    {({ TransitionProps }) => (
+                        <Fade {...TransitionProps} timeout={350}>
+                            <Paper>
+                                <Grid
+                                    container
+                                    className={classes.searchHintContainer}
+                                    direction="column"
+                                >
+                                    <Typography variant="subheading">
+                                        Search Query Syntax
+                                    </Typography>
+                                    <Typography>
+                                        [file path includes] // default filter{' '}
+                                        <br />
+                                        pathinc:[file path includes] // specify
+                                        a filter - pathinc <br />
+                                        ext:[file extension] // e.g. ext:csv
+                                        <br />
+                                        date:[operator][last modified date] //
+                                        e.g. date:>2011-01-01 <br />
+                                        size:[operator][file size]
+                                    </Typography>
+                                    <Grid container sm={12} justify="flex-end">
+                                        <Button
+                                            color="default"
+                                            size="small"
+                                            onClick={
+                                                this
+                                                    .handleSearchQuerySyntaxClick
+                                            }
+                                        >
+                                            Okay
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </Paper>
+                        </Fade>
+                    )}
+                </Popper>
+                {this.renderErrorMessage()}
             </form>
         );
     }
