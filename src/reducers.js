@@ -9,8 +9,8 @@ import {
 const defaultSearchParams = {
     query: '',
     sortCol: null,
-    sortAsc: true,
-    page: 0,
+    sortAsc: null,
+    page: null,
     rowsPerPage: 20,
 };
 
@@ -49,7 +49,7 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 searchParams: {
                     ...defaultSearchParams,
-                    ...state.payload,
+                    ...action.payload.params,
                 },
             };
         case SEARCH_QUERY_STARTED_RUNNING:
@@ -66,7 +66,7 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 searchResult: {
                     ...defaultSearchResult,
-                    ...action.payload,
+                    errorMessage: action.payload.errorMessage,
                     loading: false,
                 },
             };
@@ -75,7 +75,7 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 searchResult: {
                     ...defaultSearchResult,
-                    ...action.payload,
+                    data: action.payload.data,
                     loading: false,
                 },
             };

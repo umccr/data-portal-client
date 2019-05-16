@@ -196,6 +196,7 @@ class AppBar extends Component {
     handleSearchQueryChange = e => {
         this.props.handleSearchQueryParamsUpdate({
             query: e.target.value,
+            page: 0,
         });
     };
 
@@ -218,7 +219,13 @@ class AppBar extends Component {
     };
 
     render() {
-        const { title, classes, authUserInfo, handleDrawerToggle } = this.props;
+        const {
+            title,
+            classes,
+            authUserInfo,
+            handleDrawerToggle,
+            searchParams,
+        } = this.props;
         const { userMenuOpen } = this.state;
 
         return (
@@ -248,7 +255,7 @@ class AppBar extends Component {
                                         root: classes.inputRoot,
                                         input: classes.inputInput,
                                     }}
-                                    value={this.state.searchQuery}
+                                    value={searchParams.query}
                                     onChange={this.handleSearchQueryChange}
                                     onKeyPress={e =>
                                         e.key === 'Enter' &&

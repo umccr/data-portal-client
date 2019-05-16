@@ -32,21 +32,21 @@ export const startRunningSearchQuery = queryParams => {
 
         try {
             // Filter out null parameters
-            const params = Object.keys(queryParams).filter(
+            const paramKeys = Object.keys(queryParams).filter(
                 k => queryParams[k] !== null,
             );
-            const paramsString = Object.keys(params)
+            const paramsString = paramKeys
                 .map(key => `${key}=${queryParams[key]}`)
                 .join('&');
 
             const data = await API.get('files', `/files?${paramsString}`, {});
 
-            return {
+            dispatch({
                 type: SEARCH_QUERY_SUCCESS,
                 payload: {
                     data,
                 },
-            };
+            });
         } catch (e) {
             let errorMessage;
 
@@ -56,12 +56,12 @@ export const startRunningSearchQuery = queryParams => {
                 errorMessage = e.message;
             }
 
-            return {
+            dispatch({
                 type: SEARCH_QUERY_FAILURE,
                 payload: {
                     errorMessage: `Query failed: ${errorMessage}`,
                 },
-            };
+            });
         }
     };
 };

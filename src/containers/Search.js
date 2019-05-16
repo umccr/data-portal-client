@@ -213,7 +213,7 @@ class Search extends Component {
                         columns={headerRow}
                         onRequestSort={this.handleRequestSort}
                         order={sortAsc ? 'asc' : 'desc'}
-                        orderBy={sortCol}
+                        orderBy={sortCol === null ? '' : sortCol}
                     />
                     <TableBody>
                         {loading && (
@@ -281,6 +281,7 @@ class Search extends Component {
         const { classes, searchParams, searchResult } = this.props;
         const { openSearchHint } = this.state;
         const searchHintPopperId = openSearchHint ? 'popper-search-hint' : null;
+        const { loading, data } = searchResult;
 
         return (
             <Fragment>
@@ -312,10 +313,8 @@ class Search extends Component {
                 {/*    </Grid>*/}
                 {/*</Grid>*/}
                 <Paper>
-                    {searchResult.loading && !this.state.tableInit && (
-                        <LinearProgress />
-                    )}
-                    {searchResult.data.rows && this.renderTable()}
+                    {loading && !this.state.tableInit && <LinearProgress />}
+                    {data.rows && this.renderTable()}
                 </Paper>
                 <Popper
                     id={searchHintPopperId}
