@@ -1,7 +1,5 @@
 import React, { Component, Fragment } from 'react';
 import * as PropTypes from 'prop-types';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -14,27 +12,14 @@ import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import MenuIcon from '@material-ui/icons/Menu';
-import InputIcon from '@material-ui/icons/Input';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import Routes from './Routes';
 import { Link as RouterLink, Route, Switch } from 'react-router-dom';
-import Button from '@material-ui/core/Button';
 import { Auth, Hub } from 'aws-amplify';
 import { withOAuth } from 'aws-amplify-react';
-import Popper from '@material-ui/core/Popper';
-import Grow from '@material-ui/core/Grow';
-import Paper from '@material-ui/core/Paper';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import MenuList from '@material-ui/core/MenuList';
-import MenuItem from '@material-ui/core/MenuItem';
 import { connect } from 'react-redux';
 import authUpdate from './actions/auth';
-import Home from './containers/Home';
-import Login from './containers/Login';
-import Search from './containers/Search';
+import AppBar from './containers/AppBar';
 
 const drawerWidth = 240;
 
@@ -55,12 +40,6 @@ const styles = theme => ({
         marginLeft: drawerWidth,
         [theme.breakpoints.up('sm')]: {
             width: `calc(100% - ${drawerWidth}px)`,
-        },
-    },
-    menuButton: {
-        marginRight: 20,
-        [theme.breakpoints.up('sm')]: {
-            display: 'none',
         },
     },
     toolbar: theme.mixins.toolbar,
@@ -137,6 +116,10 @@ class App extends Component {
         }
     }
 
+    handleDrawerToggle = () => {
+        this.setState(state => ({ mobileOpen: !state.mobileOpen }));
+    };
+
     async signOut() {
         try {
             await Auth.signOut();
@@ -146,99 +129,8 @@ class App extends Component {
         }
     }
 
-    handleDrawerToggle = () => {
-        this.setState(state => ({ mobileOpen: !state.mobileOpen }));
-    };
-
-    handleToggleUserMenu = () => {
-        this.setState(state => ({ userMenuOpen: !state.userMenuOpen }));
-    };
-
-    handleCloseUserMenu = event => {
-        if (this.anchorEl.contains(event.target)) {
-            return;
-        }
-
-        this.setState({ userMenuOpen: false });
-    };
-
-    handleLogOutClicked = async event => {
-        this.handleCloseUserMenu(event);
+    handleSignOut = async () => {
         await this.signOut();
-    };
-
-    renderUserButton = () => {
-        const { classes, authUserInfo } = this.props;
-        const { userMenuOpen } = this.state;
-
-        return (
-            <Fragment>
-                {authUserInfo === null && (
-                    <Button color="inherit" onClick={this.props.OAuthSignIn}>
-                        <InputIcon className={classes.buttonIcon} />
-                        Login
-                    </Button>
-                )}
-                {authUserInfo !== null && (
-                    <Fragment>
-                        <Button
-                            color="inherit"
-                            buttonRef={node => {
-                                this.anchorEl = node;
-                            }}
-                            aria-owns={
-                                userMenuOpen ? 'menu-list-grow' : undefined
-                            }
-                            aria-haspopup="true"
-                            onClick={this.handleToggleUserMenu}
-                        >
-                            <AccountCircleIcon classes={classes.buttonIcon} />
-                            {authUserInfo.attributes.email}
-                        </Button>
-                    </Fragment>
-                )}
-            </Fragment>
-        );
-    };
-
-    renderUserMenu = () => {
-        const { userMenuOpen } = this.state;
-
-        return (
-            <Popper
-                open={userMenuOpen}
-                anchorEl={this.anchorEl}
-                transition
-                disablePortal
-            >
-                {({ TransitionProps, placement }) => (
-                    <Grow
-                        {...TransitionProps}
-                        id="menu-list-grow"
-                        style={{
-                            transformOrigin:
-                                placement === 'bottom'
-                                    ? 'center top'
-                                    : 'center bottom',
-                        }}
-                    >
-                        <Paper>
-                            <ClickAwayListener
-                                onClickAway={this.handleCloseUserMenu}
-                            >
-                                <MenuList>
-                                    <MenuItem
-                                        onClick={this.handleLogOutClicked}
-                                    >
-                                        Logout
-                                    </MenuItem>
-                                </MenuList>
-                            </ClickAwayListener>
-                        </Paper>
-                    </Grow>
-                )}
-            </Popper>
-        );
     };
 
     renderDrawerContent = () => {
@@ -285,38 +177,25 @@ class App extends Component {
     render() {
         const { classes, theme, authUserInfo } = this.props;
 
-        const { userMenuOpen } = this.state;
-
         return (
             <div className={classes.root}>
                 <CssBaseline />
-                <AppBar position="fixed" className={classes.appBar}>
-                    <Toolbar>
-                        <IconButton
-                            color="inherit"
-                            aria-label="Open drawer"
-                            onClick={this.handleDrawerToggle}
-                            className={classes.menuButton}
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                        <Typography
-                            variant="h6"
-                            color="inherit"
-                            className={classes.grow}
-                        >
-                            <Switch>
-                                <Route path="/" exact>
-                                    Home
-                                </Route>
-                                <Route path="/login">Login</Route>
-                                <Route path="/search">Search</Route>
-                            </Switch>
-                        </Typography>
-                        {this.renderUserButton(classes, authUserInfo)}
-                        {this.renderUserMenu(classes, userMenuOpen)}
-                    </Toolbar>
-                </AppBar>
+                <AppBar
+                    authUserInfo={authUserInfo}
+                    handleLogOutClicked={this.handleLogOutClicked}
+                    handleDrawerToggle={this.handleDrawerToggle}
+                    handleSignIn={this.props.OAuthSignIn}
+                    handleSignOut={this.handleSignOut}
+                    title={
+                        <Switch>
+                            <Route path="/" exact>
+                                Home
+                            </Route>
+                            <Route path="/login">Login</Route>
+                            <Route path="/search">Search</Route>
+                        </Switch>
+                    }
+                />
                 <nav className={classes.drawer}>
                     <Hidden smUp implementation="css">
                         <Drawer
@@ -384,9 +263,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     };
 };
 
-const ReduxApp = connect(
+const ConnectApp = connect(
     mapStateToProps,
     mapDispatchToProps,
 )(App);
 
-export default withStyles(styles, { withTheme: true })(withOAuth(ReduxApp));
+export default withStyles(styles, { withTheme: true })(withOAuth(ConnectApp));

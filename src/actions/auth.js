@@ -1,4 +1,4 @@
-import AUTH_UPDATE from '../actionTypes';
+import { AUTH_UPDATE } from '../actionTypes';
 
 const authUpdate = auth => {
     return {

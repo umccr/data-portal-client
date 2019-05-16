@@ -1,7 +1,6 @@
 import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
 import { Button, withStyles } from '@material-ui/core';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { API } from 'aws-amplify';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -14,18 +13,19 @@ import TableFooter from '@material-ui/core/TableFooter';
 import { TablePaginationActionsWrapped } from '../components/TablePagniationActionsWrapped';
 import EnhancedTableHead from '../components/EnhancedTableHead';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Fab from '@material-ui/core/Fab';
-import SearchIcon from '@material-ui/icons/Search';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import * as PropTypes from 'prop-types';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import InfoIcon from '@material-ui/icons/Info';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Popper from '@material-ui/core/Popper';
 import Fade from '@material-ui/core/Fade';
 import Typography from '@material-ui/core/Typography';
+import { connect } from 'react-redux';
+import {
+    startRunningSearchQuery,
+    updateSearchQueryPrams,
+} from '../actions/search';
 
 const styles = theme => ({
     close: {
@@ -38,104 +38,87 @@ const styles = theme => ({
 
 class Search extends Component {
     state = {
-        data: {},
-        searchQuery: '',
-        searchRunning: false,
-        tableInit: false,
-        order: 'asc',
-        orderBy: '',
-        rowsPerPage: 20,
-        errorMessage: null,
+        headerRow: null,
         openSnackbar: false,
+        openSearchHint: false,
     };
 
-    reloadData = async (extraParams = {}) => {
-        this.setState({ searchRunning: true });
+    reloadData = async (params = {}) => {
+        const { handleStartRunningSearchQuery } = this.props;
 
-        try {
-            const extraParamsString = Object.keys(extraParams)
-                .map(key => `&${key}=${extraParams[key]}`)
-                .join('');
-            const data = await API.get(
-                'files',
-                `/files?query=${this.state.searchQuery}${extraParamsString}`,
-                {},
-            );
+        // First submit our search query
+        await handleStartRunningSearchQuery(params);
+
+        const { searchResult } = this.props;
+
+        // If have received an error message, display it on snackbar.
+        if (searchResult.errorMessage) {
             this.setState({
-                data: data,
-                tableInit: true,
-            });
-        } catch (e) {
-            let errorMessage;
-
-            if (e.response) {
-                errorMessage = e.response.data.errors;
-            } else {
-                errorMessage = e.message;
-            }
-
-            console.log(errorMessage);
-            this.setState({
-                errorMessage: `Query failed: ${errorMessage}`,
                 openSnackbar: true,
             });
         }
 
-        this.setState({ searchRunning: false });
+        // Once we have got a result, we can save a copy of the header row
+        this.setState({
+            headerRow: {
+                ...searchResult.data.headerRow,
+            },
+        });
     };
 
     getBaseParams = () => {
+        const { rowsPerPage, query } = this.props.search.params;
+
         return {
-            rowsPerPage: this.state.rowsPerPage,
+            rowsPerPage,
+            query,
             ...this.getSortParams(),
         };
     };
 
     getSortParams = () => {
-        const { orderBy, order } = this.state;
+        const { sortCol, sortAsc } = this.props.search.params;
 
-        if (orderBy) {
-            return {
-                sortCol: orderBy,
-                sortAsc: order === 'asc',
-            };
-        }
+        return { sortCol, sortAsc };
+    };
 
-        return {};
+    handleSearchQueryChange = e => {
+        this.props.handleSearchQueryParamsUpdate({
+            query: e.target.value,
+        });
     };
 
     handleSearchClicked = async () => {
-        await this.reloadData(this.getBaseParams());
+        const { query } = this.props.search.params;
+
+        await this.reloadData({
+            query,
+        });
     };
 
     handlePageChange = async (event, page) => {
         await this.reloadData({
-            page: page,
             ...this.getBaseParams(),
+            page: page,
         });
     };
 
     handleRowsPerPageChange = async event => {
-        this.setState(
-            {
-                rowsPerPage: event.target.value,
-            },
-            async () => {
-                await this.reloadData(this.getBaseParams());
-            },
-        );
+        await this.reloadData({
+            ...this.getBaseParams(),
+            rowsPerPage: event.target.value,
+        });
     };
 
-    handleRequestSort = (event, property) => {
-        const orderBy = property;
-        let order = 'desc';
+    handleRequestSort = async (event, property) => {
+        const sortCol = property;
+        const { params } = this.props.search;
+        let sortAsc = params.sortCol === property && params.sortAsc === 'desc';
 
-        if (this.state.orderBy === property && this.state.order === 'desc') {
-            order = 'asc';
-        }
-
-        this.setState({ order, orderBy }, async () => {
-            await this.reloadData(this.getSortParams());
+        await this.reloadData({
+            sortAsc,
+            sortCol,
+            query: params.query,
         });
     };
 
@@ -144,35 +127,39 @@ class Search extends Component {
             return;
         }
 
-        this.setState({ errorMessage: null, openSnackbar: false });
+        this.setState({ openSnackbar: false });
     };
 
-    renderErrorMessage = () => (
-        <Snackbar
-            anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-            }}
-            open={this.state.openSnackbar}
-            autoHideDuration={6000}
-            onClose={this.handleCloseErrorMessage}
-            ContentProps={{
-                'aria-describedby': 'message-id',
-            }}
-            message={<span>{this.state.errorMessage}</span>}
-            action={[
-                <IconButton
-                    key="close"
-                    aria-label="Close"
-                    color="inherit"
-                    className={this.props.classes.close}
-                    onClick={this.handleCloseErrorMessage}
-                >
-                    <CloseIcon />
-                </IconButton>,
-            ]}
-        />
-    );
+    renderErrorMessage = () => {
+        const { errorMessage } = this.props.searchResult;
+
+        return (
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                open={this.state.openSnackbar}
+                autoHideDuration={6000}
+                onClose={this.handleCloseErrorMessage}
+                ContentProps={{
+                    'aria-describedby': 'message-id',
+                }}
+                message={<span>{errorMessage}</span>}
+                action={[
+                    <IconButton
+                        key="close"
+                        aria-label="Close"
+                        color="inherit"
+                        className={this.props.classes.close}
+                        onClick={this.handleCloseErrorMessage}
+                    >
+                        <CloseIcon />
+                    </IconButton>,
+                ]}
+            />
+        );
+    };
 
     handleDownloadFile = async (bucket, key) => {
         try {
@@ -212,10 +199,12 @@ class Search extends Component {
     );
 
     renderTable = () => {
-        const { order, orderBy, data } = this.state;
-        const headerRow = data.rows.headerRow;
-        const dataRows = data.rows.dataRows;
-        const metaData = data.meta;
+        const { sortAsc, sortCol } = this.props.searchParams;
+        const { data, loading } = this.props.searchResult;
+        const { rows, meta } = data;
+
+        const headerRow = rows.headerRow;
+        const dataRows = rows.dataRows;
 
         return (
             <Paper>
@@ -223,11 +212,11 @@ class Search extends Component {
                     <EnhancedTableHead
                         columns={headerRow}
                         onRequestSort={this.handleRequestSort}
-                        order={order}
-                        orderBy={orderBy}
+                        order={sortAsc ? 'asc' : 'desc'}
+                        orderBy={sortCol}
                     />
                     <TableBody>
-                        {this.state.searchRunning && (
+                        {loading && (
                             <TableRow>
                                 <TableCell
                                     colSpan={headerRow.length}
@@ -237,7 +226,7 @@ class Search extends Component {
                                 </TableCell>
                             </TableRow>
                         )}
-                        {!this.state.searchRunning && dataRows.length === 0 && (
+                        {!loading && dataRows.length === 0 && (
                             <TableRow>
                                 <TableCell
                                     colSpan={headerRow.length}
@@ -247,20 +236,20 @@ class Search extends Component {
                                 </TableCell>
                             </TableRow>
                         )}
-                        {!this.state.searchRunning &&
+                        {!loading &&
                             dataRows.map((row, rowIndex) => {
                                 return this.renderRow(headerRow, row, rowIndex);
                             })}
                     </TableBody>
-                    {!this.state.searchRunning && (
+                    {!loading && (
                         <TableFooter>
                             <TableRow>
                                 <TablePagination
                                     rowsPerPageOptions={[20, 50]}
                                     colSpan={3}
-                                    count={metaData.totalRows}
-                                    rowsPerPage={metaData.size}
-                                    page={metaData.page - 1}
+                                    count={meta.totalRows}
+                                    rowsPerPage={meta.size}
+                                    page={meta.page - 1}
                                     SelectProps={{
                                         native: true,
                                     }}
@@ -288,77 +277,45 @@ class Search extends Component {
         }));
     };
 
-    renderQuerySyntaxButton = () => {
-        const { classes } = this.props;
-
-        return (
-            <IconButton color="default" size="small">
-                <HelpOutlineIcon
-                    size="small"
-                    onClick={this.handleSearchQuerySyntaxClick}
-                />
-            </IconButton>
-        );
-    };
-
-    handleSearchQueryChange = e => {
-        this.setState({
-            searchQuery: e.target.value,
-            page: 0,
-        });
-    };
-
     render() {
-        const { classes } = this.props;
+        const { classes, searchParams, searchResult } = this.props;
         const { openSearchHint } = this.state;
         const searchHintPopperId = openSearchHint ? 'popper-search-hint' : null;
 
         return (
-            <form>
-                <Grid
-                    container
-                    item
-                    xs={12}
-                    direction="row"
-                    alignItems="center"
-                    spacing={16}
-                >
-                    <Grid item container sm={12} md={10}>
-                        <TextField
-                            name="query"
-                            label="Search"
-                            placeholder="Type in search query"
-                            margin="normal"
-                            variant="filled"
-                            fullWidth
-                            value={this.state.searchQuery}
-                            onChange={this.handleSearchQueryChange}
-                            InputProps={{
-                                endAdornment: this.renderQuerySyntaxButton(),
-                            }}
-                            onKeyPress={e =>
-                                e.key === 'Enter' &&
-                                this.handleSearchClicked() &&
-                                e.preventDefault()
-                            }
-                        />
-                    </Grid>
-                    <Grid item sm={12} md={2}>
-                        <Fab
-                            color="primary"
-                            size="medium"
-                            aria-label="Search"
-                            onClick={this.handleSearchClicked}
-                        >
-                            <SearchIcon />
-                        </Fab>
-                    </Grid>
-                </Grid>
+            <Fragment>
+                {/*<Grid*/}
+                {/*    container*/}
+                {/*    item*/}
+                {/*    xs={12}*/}
+                {/*    direction="row"*/}
+                {/*    alignItems="center"*/}
+                {/*    spacing={16}*/}
+                {/*>*/}
+                {/*    <Grid item container sm={12}>*/}
+                {/*        <TextField*/}
+                {/*            name="query"*/}
+                {/*            label="Search"*/}
+                {/*            placeholder="Type in search query"*/}
+                {/*            margin="normal"*/}
+                {/*            variant="filled"*/}
+                {/*            fullWidth*/}
+                {/*            value={searchParams.query}*/}
+                {/*            onChange={this.handleSearchQueryChange}*/}
+                {/*            InputProps={{*/}
+                {/*                endAdornment: this.renderQuerySyntaxButton(),*/}
+                {/*            }}*/}
+                {/*            onKeyPress={e =>*/}
+                {/*                e.key === 'Enter' && this.handleSearchClicked()*/}
+                {/*            }*/}
+                {/*        />*/}
+                {/*    </Grid>*/}
+                {/*</Grid>*/}
                 <Paper>
-                    {this.state.searchRunning && !this.state.tableInit && (
+                    {searchResult.loading && !this.state.tableInit && (
                         <LinearProgress />
                     )}
-                    {this.state.data.rows && this.renderTable()}
+                    {searchResult.data.rows && this.renderTable()}
                 </Paper>
                 <Popper
                     id={searchHintPopperId}
@@ -414,13 +371,42 @@ class Search extends Component {
                     )}
                 </Popper>
                 {this.renderErrorMessage()}
-            </form>
+            </Fragment>
         );
     }
 }
 
 Search.propTypes = {
     classes: PropTypes.object.isRequired,
+    authUserInfo: PropTypes.object,
+    handleStartRunningSearchQuery: PropTypes.func.isRequired,
+    handleSearchQueryParamsUpdate: PropTypes.func.isRequired,
+    searchParams: PropTypes.object.isRequired,
+    searchResult: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Search);
+const mapStateToProps = (state, ownProps) => {
+    return {
+        authUserInfo: state.authUserInfo,
+        searchParams: state.searchParams,
+        searchResult: state.searchResult,
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        handleSearchQueryParamsUpdate: async params => {
+            dispatch(updateSearchQueryPrams(params));
+        },
+        handleStartRunningSearchQuery: async params => {
+            dispatch(startRunningSearchQuery(params));
+        },
+    };
+};
+
+const ConnectSearch = connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(Search);
+
+export default withStyles(styles)(ConnectSearch);
