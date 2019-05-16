@@ -336,6 +336,11 @@ class Search extends Component {
                             InputProps={{
                                 endAdornment: this.renderQuerySyntaxButton(),
                             }}
+                            onKeyPress={e =>
+                                e.key === 'Enter' &&
+                                this.handleSearchClicked() &&
+                                e.preventDefault()
+                            }
                         />
                     </Grid>
                     <Grid item sm={12} md={2}>
