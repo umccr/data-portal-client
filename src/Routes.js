@@ -9,7 +9,6 @@ import Search from './containers/Search';
 class Routes extends Component {
     render() {
         const { authUser } = this.props;
-        console.log(authUser);
         return (
             <Switch>
                 <Route path="/" exact component={Home} />

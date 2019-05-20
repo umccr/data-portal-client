@@ -38,7 +38,6 @@ const initialState = {
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case AUTH_UPDATE:
-            console.log(action.payload);
             return {
                 ...state,
                 authState: action.payload.authState,

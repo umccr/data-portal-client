@@ -87,8 +87,6 @@ class Search extends Component {
         const { searchParams } = this.props;
         let sortAsc = searchParams.sortCol === sortCol && !searchParams.sortAsc;
 
-        console.log(searchParams.sortAsc);
-
         // Reset all other search params except query
         await this.reloadData({
             sortAsc,
