@@ -38,8 +38,7 @@ const styles = theme => ({
 
 class Search extends Component {
     state = {
-        headerRow: null,
-        openSnackbar: false,
+        hideSnackbar: false,
         openSearchHint: false,
     };
 
@@ -48,38 +47,10 @@ class Search extends Component {
 
         // First submit our search query
         await handleStartRunningSearchQuery(params);
-
-        const { searchResult } = this.props;
-
-        // If have received an error message, display it on snackbar.
-        if (searchResult.errorMessage) {
-            this.setState({
-                openSnackbar: true,
-            });
-        }
-
-        // Once we have got a result, we can save a copy of the header row
-        this.setState({
-            headerRow: {
-                ...searchResult.data.headerRow,
-            },
-        });
     };
 
     getBaseParams = () => {
-        const { rowsPerPage, query } = this.props.search.params;
-
-        return {
-            rowsPerPage,
-            query,
-            ...this.getSortParams(),
-        };
-    };
-
-    getSortParams = () => {
-        const { sortCol, sortAsc } = this.props.search.params;
-
-        return { sortCol, sortAsc };
+        return this.props.searchParams;
     };
 
     handleSearchQueryChange = e => {
@@ -89,10 +60,10 @@ class Search extends Component {
     };
 
     handleSearchClicked = async () => {
-        const { query } = this.props.search.params;
+        const { query } = this.props.searchParams;
 
         await this.reloadData({
-            query,
+            query, // Keep query only (starting new search)
         });
     };
 
@@ -106,19 +77,23 @@ class Search extends Component {
     handleRowsPerPageChange = async event => {
         await this.reloadData({
             ...this.getBaseParams(),
+            page: 0, // Reset page number if rows per page change
             rowsPerPage: event.target.value,
         });
     };
 
     handleRequestSort = async (event, property) => {
         const sortCol = property;
-        const { params } = this.props.search;
-        let sortAsc = params.sortCol === property && params.sortAsc === 'desc';
+        const { searchParams } = this.props;
+        let sortAsc = searchParams.sortCol === sortCol && !searchParams.sortAsc;
 
+        console.log(searchParams.sortAsc);
+
+        // Reset all other search params except query
         await this.reloadData({
             sortAsc,
             sortCol,
-            query: params.query,
+            query: searchParams.query,
         });
     };
 
@@ -127,8 +102,12 @@ class Search extends Component {
             return;
         }
 
-        this.setState({ openSnackbar: false });
+        this.setState({ hideSnackbar: true });
     };
+
+    // Show snackbar if we have an error message and it has not been hidden
+    openSnackbar = () =>
+        this.props.searchResult.errorMessage && !this.state.hideSnackbar;
 
     renderErrorMessage = () => {
         const { errorMessage } = this.props.searchResult;
@@ -139,7 +118,7 @@ class Search extends Component {
                     vertical: 'bottom',
                     horizontal: 'left',
                 }}
-                open={this.state.openSnackbar}
+                open={this.openSnackbar()}
                 autoHideDuration={6000}
                 onClose={this.handleCloseErrorMessage}
                 ContentProps={{
@@ -199,12 +178,13 @@ class Search extends Component {
     );
 
     renderTable = () => {
+        const { searchResultHeaderRow } = this.props;
         const { sortAsc, sortCol } = this.props.searchParams;
         const { data, loading } = this.props.searchResult;
         const { rows, meta } = data;
 
-        const headerRow = rows.headerRow;
-        const dataRows = rows.dataRows;
+        const dataRows = rows ? rows.dataRows : [];
+        const headerRow = searchResultHeaderRow;
 
         return (
             <Paper>
@@ -241,7 +221,7 @@ class Search extends Component {
                                 return this.renderRow(headerRow, row, rowIndex);
                             })}
                     </TableBody>
-                    {!loading && (
+                    {!loading && meta !== null && (
                         <TableFooter>
                             <TableRow>
                                 <TablePagination
@@ -278,43 +258,17 @@ class Search extends Component {
     };
 
     render() {
-        const { classes, searchParams, searchResult } = this.props;
+        const { classes, searchResult, searchResultHeaderRow } = this.props;
         const { openSearchHint } = this.state;
         const searchHintPopperId = openSearchHint ? 'popper-search-hint' : null;
         const { loading, data } = searchResult;
+        const tableInit = searchResultHeaderRow !== null;
 
         return (
             <Fragment>
-                {/*<Grid*/}
-                {/*    container*/}
-                {/*    item*/}
-                {/*    xs={12}*/}
-                {/*    direction="row"*/}
-                {/*    alignItems="center"*/}
-                {/*    spacing={16}*/}
-                {/*>*/}
-                {/*    <Grid item container sm={12}>*/}
-                {/*        <TextField*/}
-                {/*            name="query"*/}
-                {/*            label="Search"*/}
-                {/*            placeholder="Type in search query"*/}
-                {/*            margin="normal"*/}
-                {/*            variant="filled"*/}
-                {/*            fullWidth*/}
-                {/*            value={searchParams.query}*/}
-                {/*            onChange={this.handleSearchQueryChange}*/}
-                {/*            InputProps={{*/}
-                {/*                endAdornment: this.renderQuerySyntaxButton(),*/}
-                {/*            }}*/}
-                {/*            onKeyPress={e =>*/}
-                {/*                e.key === 'Enter' && this.handleSearchClicked()*/}
-                {/*            }*/}
-                {/*        />*/}
-                {/*    </Grid>*/}
-                {/*</Grid>*/}
                 <Paper>
-                    {loading && !this.state.tableInit && <LinearProgress />}
-                    {data.rows && this.renderTable()}
+                    {loading && !tableInit && <LinearProgress />}
+                    {(data.rows || tableInit) && this.renderTable()}
                 </Paper>
                 <Popper
                     id={searchHintPopperId}
@@ -382,6 +336,7 @@ Search.propTypes = {
     handleSearchQueryParamsUpdate: PropTypes.func.isRequired,
     searchParams: PropTypes.object.isRequired,
     searchResult: PropTypes.object.isRequired,
+    searchResultHeaderRow: PropTypes.object,
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -389,6 +344,7 @@ const mapStateToProps = (state, ownProps) => {
         authUserInfo: state.authUserInfo,
         searchParams: state.searchParams,
         searchResult: state.searchResult,
+        searchResultHeaderRow: state.searchResultHeaderRow,
     };
 };
 

@@ -19,7 +19,6 @@ export const beforeRunningSearchQuery = queryParams => {
     return {
         type: SEARCH_QUERY_STARTED_RUNNING,
         payload: {
-            running: true,
             searchParams: queryParams,
         },
     };
@@ -28,7 +27,7 @@ export const beforeRunningSearchQuery = queryParams => {
 export const startRunningSearchQuery = queryParams => {
     return async dispatch => {
         // Mark search query has started running
-        dispatch(() => beforeRunningSearchQuery(queryParams));
+        dispatch(beforeRunningSearchQuery(queryParams));
 
         try {
             // Filter out null parameters

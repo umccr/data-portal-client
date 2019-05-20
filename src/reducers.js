@@ -31,6 +31,8 @@ const initialState = {
     searchParams: {
         ...defaultSearchParams,
     },
+    // Save a copy of header row to always show table
+    searchResultHeaderRow: null,
 };
 
 const reducer = (state = initialState, action) => {
@@ -58,8 +60,8 @@ const reducer = (state = initialState, action) => {
                 searchResult: {
                     ...defaultSearchResult,
                     loading: true,
-                    searchParams: action.payload.searchParams,
                 },
+                searchParams: action.payload.searchParams,
             };
         case SEARCH_QUERY_FAILURE:
             return {
@@ -78,6 +80,7 @@ const reducer = (state = initialState, action) => {
                     data: action.payload.data,
                     loading: false,
                 },
+                searchResultHeaderRow: action.payload.data.rows.headerRow,
             };
         default:
             return state;
