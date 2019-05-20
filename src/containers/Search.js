@@ -334,7 +334,7 @@ Search.propTypes = {
     handleSearchQueryParamsUpdate: PropTypes.func.isRequired,
     searchParams: PropTypes.object.isRequired,
     searchResult: PropTypes.object.isRequired,
-    searchResultHeaderRow: PropTypes.object,
+    searchResultHeaderRow: PropTypes.array,
 };
 
 const mapStateToProps = (state, ownProps) => {
