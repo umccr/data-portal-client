@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import * as PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Home from './containers/Home';
 import Login from './containers/Login';
 import Search from './containers/Search';
+import Explore from './containers/Explore';
 
 class Routes extends Component {
     render() {
@@ -14,7 +15,10 @@ class Routes extends Component {
                 <Route path="/" exact component={Home} />
                 <Route path="/login" component={Login} />
                 {authUser !== null && (
-                    <Route path="/search" component={Search} />
+                    <Fragment>
+                        <Route path="/search" component={Search} />
+                        <Route path="/explore" component={Explore} />
+                    </Fragment>
                 )}
             </Switch>
         );

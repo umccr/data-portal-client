@@ -20,6 +20,7 @@ import { withOAuth } from 'aws-amplify-react';
 import { connect } from 'react-redux';
 import authUpdate from './actions/auth';
 import AppBar from './containers/AppBar';
+import ExploreIcon from '@material-ui/icons/Explore';
 
 const drawerWidth = 240;
 
@@ -162,12 +163,18 @@ class App extends Component {
                         <ListItemText primary="Home" />
                     </ListItem>
                     {authUser && (
-                        <ListItem button component={RouterLink} to="/search">
-                            <ListItemIcon>
-                                <SearchIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Search" />
-                        </ListItem>
+                        <Fragment>
+                            <ListItem
+                                button
+                                component={RouterLink}
+                                to="/explore"
+                            >
+                                <ListItemIcon>
+                                    <ExploreIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="Explore" />
+                            </ListItem>
+                        </Fragment>
                     )}
                 </List>
             </Fragment>
@@ -193,6 +200,7 @@ class App extends Component {
                             </Route>
                             <Route path="/login">Login</Route>
                             <Route path="/search">Search</Route>
+                            <Route path="/explore">Explore</Route>
                         </Switch>
                     }
                 />
