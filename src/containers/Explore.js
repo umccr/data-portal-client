@@ -21,6 +21,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import BubbleChartToolTip from './BubbleChartToolTip';
+import { scaleLog } from 'd3-scale';
 
 const styles = theme => ({
     chartContainer: {
@@ -114,7 +115,7 @@ class Explore extends Component {
     formatNodes = (rootNode, totalRecords) => {
         this.traverseTree(rootNode, node => {
             // Weight is the percentage of #descending nodes in #total records
-            node.weight = Math.floor((node.size / totalRecords) * 100);
+            node.weight = ((node.size / totalRecords) * 100).toFixed(2);
 
             let childrenCount = 0;
             this.traverseTree(node, () => (childrenCount += 1));
@@ -125,39 +126,6 @@ class Explore extends Component {
             const g = Math.floor(Math.random() * 256);
             const b = Math.floor(Math.random() * 256);
             node.color = `rgb(${r},${g},${b}, ${node.weight / 100 + 0.5})`;
-        });
-    };
-
-    /**
-     * Denormalise the tree into a plain array containing all nocdes
-     * @param dataArray will save nodes into this data array
-     */
-    denormaliseTree = (rootNode, dataArray) => {
-        const { selectedPath } = this.state;
-
-        this.traverseTree(rootNode, currNode => {
-            // Ignore root node
-            if (currNode.depth === 0) {
-                return;
-            }
-
-            let color = currNode.color;
-
-            if (selectedPath && selectedPath.length > 0) {
-                if (!currNode.fullPath.includes(selectedPath.join('/'))) {
-                    // Grey out the node if it is not in the current sunburst chart view
-                    color = `rgb(200,200,200,0.5)`;
-                }
-            }
-
-            dataArray.push({
-                name: currNode.name,
-                weight: currNode.weight,
-                depth: currNode.depth,
-                color: color,
-                childrenCount: currNode.childrenCount,
-                fullPath: currNode.fullPath,
-            });
         });
     };
 
@@ -249,6 +217,43 @@ class Explore extends Component {
     };
 
     /**
+     * Denormalise the tree into a plain array containing all nocdes
+     * @param dataArray will save nodes into this data array
+     */
+    denormaliseTree = (rootNode, dataArray) => {
+        const { selectedPath } = this.state;
+
+        this.traverseTree(rootNode, currNode => {
+            // Ignore root node
+            if (currNode.depth === 0) {
+                return;
+            }
+
+            let color = currNode.color;
+
+            if (selectedPath && selectedPath.length > 0) {
+                if (!currNode.fullPath.includes(selectedPath.join('/'))) {
+                    // Grey out the node if it is not in the current sunburst chart view
+                    color = `rgb(200,200,200,0.5)`;
+                }
+            }
+
+            dataArray.push({
+                name: currNode.name,
+                weight: currNode.weight,
+                depth: currNode.depth,
+                color: color,
+                childrenCount: currNode.childrenCount,
+                fullPath: currNode.fullPath,
+            });
+        });
+
+        this.setState({
+            maxWeight: Math.max.apply(Math, dataArray.map(d => d.weight)),
+        });
+    };
+
+    /**
      * When max depth change, refresh the tree as well as normalised data
      */
     handleMaxDepthChange = event => {
@@ -263,10 +268,10 @@ class Explore extends Component {
     };
 
     renderBubbleChart = () => {
-        const { denormalisedData } = this.state;
+        const { denormalisedData, maxWeight } = this.state;
 
         return (
-            <ResponsiveContainer width="100%" height={550}>
+            <ResponsiveContainer width="100%" height={600}>
                 <ScatterChart
                     height={550}
                     margin={{
@@ -282,7 +287,6 @@ class Explore extends Component {
                         dataKey="childrenCount"
                         name="Total Nodes"
                         allowDecimals={false}
-                        allowDataOverflow
                     >
                         <Label
                             value="Total Nodes"
@@ -290,7 +294,13 @@ class Explore extends Component {
                             position="insideBottom"
                         />
                     </XAxis>
-                    <YAxis type="number" dataKey="weight" allowDataOverflow>
+                    <YAxis
+                        type="number"
+                        dataKey="weight"
+                        allowDecimals={false}
+                        // Give some stretch space for higher bubbldes
+                        domain={[0, Math.floor(maxWeight * 1.2)]}
+                    >
                         <Label
                             value="Total Size (%)"
                             angle={-90}
@@ -301,7 +311,7 @@ class Explore extends Component {
                         type="number"
                         dataKey="weight"
                         name="Total Size"
-                        range={[0, 5000]}
+                        range={[0, 1000]}
                         unit="%"
                     />
                     <Tooltip
