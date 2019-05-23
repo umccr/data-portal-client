@@ -15,8 +15,8 @@ class CustomTooltip extends Component {
         const { active } = this.props;
 
         if (active) {
-            const { payload, label, classes } = this.props;
-            console.log(payload);
+            const { payload, classes } = this.props;
+
             return (
                 <Paper className={classes.container}>
                     <Typography variant="subtitle2">{`${
@@ -26,9 +26,9 @@ class CustomTooltip extends Component {
                     {payload.map(p => {
                         if (p.name !== 'weight') {
                             return (
-                                <Typography variant="body1">{`${p.name} : ${
-                                    p.value
-                                } ${p.unit}`}</Typography>
+                                <Typography variant="body1" key={p.name}>{`${
+                                    p.name
+                                } : ${p.value} ${p.unit}`}</Typography>
                             );
                         }
                         return null;
@@ -42,9 +42,7 @@ class CustomTooltip extends Component {
 }
 
 CustomTooltip.propTypes = {
-    type: PropTypes.string.isRequired,
     payload: PropTypes.array.isRequired,
-    label: PropTypes.string.isRequired,
     active: PropTypes.bool.isRequired,
     classes: PropTypes.object.isRequired,
 };
