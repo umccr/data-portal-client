@@ -21,7 +21,6 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import BubbleChartToolTip from './BubbleChartToolTip';
-import { scaleLog } from 'd3-scale';
 
 const styles = theme => ({
     chartContainer: {
