@@ -25,8 +25,12 @@ const textStyle = {
         'white -1px 0px 0.5px, white 0px -1px 0.5px, white 0px 1px 0.5px, white 1px 0px 0.5px',
 };
 
+const selectPath = d => {
+    return d3.select(`path[id='${d.fullPath}']`);
+};
+
 export default class SunburstD3 {
-    constructor(el, figure, onChange) {
+    constructor(el, figure, onChange, onArcMouseAction) {
         const self = this;
         self.update = self.update.bind(self);
         self._update = self._update.bind(self);
@@ -53,6 +57,7 @@ export default class SunburstD3 {
         self.figure = {};
 
         self.onChange = onChange;
+        self.onArcMouseAction = onArcMouseAction;
 
         self.initialized = false;
 
@@ -200,6 +205,13 @@ export default class SunburstD3 {
             return transition;
         };
 
+        /**
+         * d3 selects the element from the node
+         */
+        const selectPath = node => {
+            return d3.select(`path[id='${node.fullPath}']`);
+        };
+
         const updatePaths = (_paths, _texts, _dataChange) => {
             if (_dataChange) {
                 const enteringPaths = _paths
@@ -222,7 +234,22 @@ export default class SunburstD3 {
                                 }
                             });
                         });
+                    })
+                    .on('mouseenter', node => {
+                        self.onArcMouseAction(
+                            'mouseenter',
+                            node,
+                            selectPath(node),
+                        );
+                    })
+                    .on('mouseleave', node => {
+                        self.onArcMouseAction(
+                            'mouseleave',
+                            node,
+                            selectPath(node),
+                        );
                     });
+
                 enteringPaths.append('title');
 
                 _texts
@@ -232,10 +259,11 @@ export default class SunburstD3 {
                     .text(d => d.name);
             }
 
+            _paths.attr('id', d => d.fullPath);
+
             /*
              * Updates to attributes, that we need to do regardless of what changed
              */
-
             _paths
                 .attr('d', self.arc)
                 // coloring this way will be history-dependent: if you insert a

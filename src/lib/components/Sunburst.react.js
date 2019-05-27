@@ -4,16 +4,23 @@ import SunburstD3 from '../d3/sunburst';
 
 export default class Sunburst extends Component {
     componentDidMount() {
-        this.sunburst = new SunburstD3(this.el, this.props, figure => {
-            const { setProps } = this.props;
-            const { selectedPath } = figure;
+        const { handleArcMouseAction } = this.props;
 
-            if (setProps) {
-                setProps({ selectedPath });
-            } else {
-                this.setState({ selectedPath });
-            }
-        });
+        this.sunburst = new SunburstD3(
+            this.el,
+            this.props,
+            figure => {
+                const { setProps } = this.props;
+                const { selectedPath } = figure;
+
+                if (setProps) {
+                    setProps({ selectedPath });
+                } else {
+                    this.setState({ selectedPath });
+                }
+            },
+            handleArcMouseAction,
+        );
     }
 
     componentDidUpdate() {
@@ -34,6 +41,7 @@ export default class Sunburst extends Component {
 
 Sunburst.defaultProps = {
     interactive: true,
+    handleArcMouseAction: () => {},
 };
 
 Sunburst.propTypes = {
@@ -106,4 +114,12 @@ Sunburst.propTypes = {
      * Sets whether you can click a node to select that path
      */
     interactive: PropTypes.bool,
+
+    /**
+     * Handles when a mouse action is triggered on an arc
+     * (mouseAction, treeNode, d3Element) => { ... }
+     *
+     * Currently hooked actions: mouseenter, mouseleave
+     */
+    handleArcMouseAction: PropTypes.func,
 };

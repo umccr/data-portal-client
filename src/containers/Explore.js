@@ -21,6 +21,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import BubbleChartToolTip from './BubbleChartToolTip';
+import * as ColorString from 'color-string';
 
 const styles = theme => ({
     chartContainer: {
@@ -124,7 +125,7 @@ class Explore extends Component {
             const r = Math.floor(Math.random() * 256);
             const g = Math.floor(Math.random() * 256);
             const b = Math.floor(Math.random() * 256);
-            node.color = `rgb(${r},${g},${b}, ${node.weight / 100 + 0.5})`;
+            node.color = `rgba(${r},${g},${b}, ${0.8})`;
         });
     };
 
@@ -332,6 +333,19 @@ class Explore extends Component {
         );
     };
 
+    handleArcMouseAction = (action, node, d) => {
+        let opacity;
+
+        if (action === 'mouseenter') {
+            opacity = 0.5;
+        } else if (action === 'mouseleave') {
+            opacity = 1;
+        }
+
+        // Adjust current arc's opacity
+        d.attr('opacity', opacity);
+    };
+
     render() {
         const { selectedPath } = this.state;
         const { classes } = this.props;
@@ -362,6 +376,7 @@ class Explore extends Component {
                                 data={treeData}
                                 selectedPath={selectedPath}
                                 setProps={this.handleSelectedPathChange}
+                                handleArcMouseAction={this.handleArcMouseAction}
                             />
                         </Grid>
                         <Grid item xs>
