@@ -6,6 +6,10 @@ import TableCell from '@material-ui/core/TableCell';
 import Tooltip from '@material-ui/core/Tooltip';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 
+const HIDDEN_COLS = ['key', 'bucket'];
+
+export const isColVisible = col => !HIDDEN_COLS.includes(col);
+
 class EnhancedTableHead extends React.Component {
     createSortHandler = property => event => {
         this.props.onRequestSort(event, property);
@@ -18,34 +22,39 @@ class EnhancedTableHead extends React.Component {
             <TableHead>
                 <TableRow>
                     {columns.map(
-                        col => (
-                            <TableCell
-                                key={col.key}
-                                sortDirection={
-                                    orderBy === col.key ? order : false
-                                }
-                            >
-                                <Tooltip
-                                    title="Sort"
-                                    placement={
-                                        col.sortable
-                                            ? 'bottom-end'
-                                            : 'bottom-start'
+                        col =>
+                            isColVisible(col.key) && (
+                                <TableCell
+                                    key={col.key}
+                                    sortDirection={
+                                        orderBy === col.key ? order : false
                                     }
-                                    enterDelay={300}
                                 >
-                                    <TableSortLabel
-                                        active={orderBy === col.key}
-                                        direction={order}
-                                        onClick={this.createSortHandler(
-                                            col.key,
-                                        )}
-                                    >
-                                        {col.key}
-                                    </TableSortLabel>
-                                </Tooltip>
-                            </TableCell>
-                        ),
+                                    {col.sortable ? (
+                                        <Tooltip
+                                            title="Sort"
+                                            placement={
+                                                col.sortable
+                                                    ? 'bottom-end'
+                                                    : 'bottom-start'
+                                            }
+                                            enterDelay={300}
+                                        >
+                                            <TableSortLabel
+                                                active={orderBy === col.key}
+                                                direction={order}
+                                                onClick={this.createSortHandler(
+                                                    col.key,
+                                                )}
+                                            >
+                                                {col.key}
+                                            </TableSortLabel>
+                                        </Tooltip>
+                                    ) : (
+                                        col.key
+                                    )}
+                                </TableCell>
+                            ),
                         this,
                     )}
                 </TableRow>

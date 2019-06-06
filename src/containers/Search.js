@@ -11,7 +11,9 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableFooter from '@material-ui/core/TableFooter';
 import { TablePaginationActionsWrapped } from '../components/TablePagniationActionsWrapped';
-import EnhancedTableHead from '../components/EnhancedTableHead';
+import EnhancedTableHead, {
+    isColVisible,
+} from '../components/EnhancedTableHead';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -156,20 +158,23 @@ class Search extends Component {
         <TableRow key={rowIndex}>
             {row.map((col, colIndex) => {
                 const bucket = row[headers.findIndex(h => h.key === 'bucket')];
+                const key = row[headers.findIndex(h => h.key === 'key')];
                 return (
-                    <TableCell key={colIndex}>
-                        {col}
-                        {headers[colIndex].key === 'key' && (
-                            <Button
-                                color="primary"
-                                onClick={() =>
-                                    this.handleDownloadFile(bucket, col)
-                                }
-                            >
-                                <GetAppIcon />
-                            </Button>
-                        )}
-                    </TableCell>
+                    isColVisible(headers[colIndex].key) && (
+                        <TableCell key={colIndex}>
+                            {col}
+                            {headers[colIndex].key === 'path' && (
+                                <Button
+                                    color="primary"
+                                    onClick={() =>
+                                        this.handleDownloadFile(bucket, key)
+                                    }
+                                >
+                                    <GetAppIcon />
+                                </Button>
+                            )}
+                        </TableCell>
+                    )
                 );
             })}
         </TableRow>
