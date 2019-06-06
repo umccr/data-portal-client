@@ -10,6 +10,13 @@ const HIDDEN_COLS = ['key', 'bucket'];
 
 export const isColVisible = col => !HIDDEN_COLS.includes(col);
 
+const getDisplayTitle = col => {
+    return col
+        .split('_')
+        .join(' ')
+        .toUpperCase();
+};
+
 class EnhancedTableHead extends React.Component {
     createSortHandler = property => event => {
         this.props.onRequestSort(event, property);
@@ -47,11 +54,11 @@ class EnhancedTableHead extends React.Component {
                                                     col.key,
                                                 )}
                                             >
-                                                {col.key}
+                                                {getDisplayTitle(col.key)}
                                             </TableSortLabel>
                                         </Tooltip>
                                     ) : (
-                                        col.key
+                                        getDisplayTitle(col.key)
                                     )}
                                 </TableCell>
                             ),
