@@ -67,7 +67,7 @@ const getOrCreateChild = (parentNode, subPath, fullPath) => {
     return child;
 };
 
-class Explore extends Component {
+class Storage extends Component {
     state = {
         dataRows: [],
         selectedPath: [],
@@ -389,8 +389,8 @@ class Explore extends Component {
     }
 }
 
-Explore.propTypes = {
+Storage.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Explore);
+export default withStyles(styles)(Storage);

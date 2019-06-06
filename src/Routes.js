@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import Home from './containers/Home';
 import Login from './containers/Login';
 import Search from './containers/Search';
-import Explore from './containers/Explore';
+import Storage from './containers/Storage';
 
 class Routes extends Component {
     render() {
@@ -17,7 +17,7 @@ class Routes extends Component {
                 {authUser !== null && (
                     <Fragment>
                         <Route path="/search" component={Search} />
-                        <Route path="/explore" component={Explore} />
+                        <Route path="/storage" component={Storage} />
                     </Fragment>
                 )}
             </Switch>
