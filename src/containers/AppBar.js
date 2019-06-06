@@ -18,6 +18,7 @@ import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import InputIcon from '@material-ui/icons/Input';
+import HelpIcon from '@material-ui/icons/Help';
 import { connect } from 'react-redux';
 import {
     beforeRunningSearchQuery,
@@ -25,8 +26,43 @@ import {
     updateSearchQueryPrams,
 } from '../actions/search';
 import { withRouter } from 'react-router-dom';
+import Fade from '@material-ui/core/Fade';
+import Grid from '@material-ui/core/Grid';
+import Table from '@material-ui/core/Table';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
+import TableBody from '@material-ui/core/TableBody';
+import TableHead from '@material-ui/core/TableHead';
 
 const drawerWidth = 240;
+
+const querySyntax = [
+    {
+        syntax: '[string]',
+        description: 'Default filter, equivalent to pathinc.',
+    },
+    {
+        syntax: 'pathinc:[string]',
+        description: 'File path (includes). e.g. pathinc:umccrised',
+    },
+    {
+        syntax: 'ext:[string]',
+        description: 'File extension. e.g. ext:csv',
+    },
+    {
+        syntax: 'date:[comparator][date]',
+        description: 'Last modified date. e.g. date:>2019-04-01',
+    },
+    {
+        syntax: 'size:[comparator][integer]',
+        description: 'File size. e.g. size:>=1000',
+    },
+    {
+        syntax: 'case:[boolean]',
+        description:
+            'Case sensitivity (for string comparisons, default to false). e.g. case:true',
+    },
+];
 
 const styles = theme => ({
     appBar: {
@@ -95,11 +131,26 @@ const styles = theme => ({
     buttonIcon: {
         margin: theme.spacing.unit,
     },
+    searchHintContainer: {
+        paddingTop: theme.spacing.unit,
+        paddingBottom: theme.spacing.unit,
+    },
+    searchHintTitle: {
+        marginTop: 2 * theme.spacing.unit,
+        marginLeft: 2 * theme.spacing.unit,
+    },
+    searchHintButton: {
+        marginTop: theme.spacing.unit,
+    },
+    searchHintTable: {
+        maxWidth: 700,
+    },
 });
 
 class AppBar extends Component {
     state = {
         userMenuOpen: false,
+        openSearchHint: false,
     };
 
     handleToggleUserMenu = () => {
@@ -200,6 +251,14 @@ class AppBar extends Component {
         });
     };
 
+    handleSearchQuerySyntaxClick = event => {
+        const { currentTarget } = event;
+        this.setState(state => ({
+            searchHintAnchorEl: currentTarget,
+            openSearchHint: !state.openSearchHint,
+        }));
+    };
+
     handleSearchClicked = async e => {
         const {
             handleBeforeRunningSearchQuery,
@@ -218,14 +277,125 @@ class AppBar extends Component {
         history.push('/search');
     };
 
+    renderSearchBox = () => {
+        const { classes, searchParams } = this.props;
+
+        return (
+            <div className={classes.search}>
+                {this.renderSearchHint()}
+                <div className={classes.searchIcon}>
+                    <SearchIcon />
+                </div>
+                <InputBase
+                    placeholder="Search…"
+                    classes={{
+                        root: classes.inputRoot,
+                        input: classes.inputInput,
+                    }}
+                    value={searchParams.query}
+                    onChange={this.handleSearchQueryChange}
+                    onKeyPress={e =>
+                        e.key === 'Enter' && this.handleSearchClicked(e)
+                    }
+                    endAdornment={
+                        <div>
+                            <IconButton
+                                style={{ color: 'white' }}
+                                onClick={this.handleSearchQuerySyntaxClick}
+                            >
+                                <HelpIcon />
+                            </IconButton>
+                        </div>
+                    }
+                />
+            </div>
+        );
+    };
+
+    renderSearchHintTable = () => {
+        const { classes } = this.props;
+        return (
+            <Table size="small" className={classes.searchHintTable}>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Tag Syntax</TableCell>
+                        <TableCell>Description</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {querySyntax.map(s => (
+                        <TableRow>
+                            <TableCell>{s.syntax}</TableCell>
+                            <TableCell>{s.description}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        );
+    };
+
+    renderSearchHint = () => {
+        const { classes } = this.props;
+        const { openSearchHint } = this.state;
+        const searchHintPopperId = openSearchHint ? 'popper-search-hint' : null;
+
+        return (
+            <Popper
+                id={searchHintPopperId}
+                open={this.state.openSearchHint}
+                anchorEl={this.state.searchHintAnchorEl}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                transition
+            >
+                {({ TransitionProps }) => (
+                    <Fade {...TransitionProps} timeout={350}>
+                        <Paper>
+                            <Grid
+                                container
+                                className={classes.searchHintContainer}
+                                direction="column"
+                            >
+                                <Typography
+                                    variant="subheading"
+                                    className={classes.searchHintTitle}
+                                >
+                                    Search Query Syntax
+                                </Typography>
+                                {this.renderSearchHintTable()}
+
+                                <Grid
+                                    container
+                                    sm={12}
+                                    justify="flex-end"
+                                    className={classes.searchHintButton}
+                                >
+                                    <Button
+                                        color="default"
+                                        size="small"
+                                        onClick={
+                                            this.handleSearchQuerySyntaxClick
+                                        }
+                                    >
+                                        Okay
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </Fade>
+                )}
+            </Popper>
+        );
+    };
+
     render() {
-        const {
-            title,
-            classes,
-            authUserInfo,
-            handleDrawerToggle,
-            searchParams,
-        } = this.props;
+        const { title, classes, authUserInfo, handleDrawerToggle } = this.props;
         const { userMenuOpen } = this.state;
 
         return (
@@ -244,26 +414,7 @@ class AppBar extends Component {
                             {title}
                         </Typography>
                         <div className={classes.grow} />
-                        {authUserInfo && (
-                            <div className={classes.search}>
-                                <div className={classes.searchIcon}>
-                                    <SearchIcon />
-                                </div>
-                                <InputBase
-                                    placeholder="Search…"
-                                    classes={{
-                                        root: classes.inputRoot,
-                                        input: classes.inputInput,
-                                    }}
-                                    value={searchParams.query}
-                                    onChange={this.handleSearchQueryChange}
-                                    onKeyPress={e =>
-                                        e.key === 'Enter' &&
-                                        this.handleSearchClicked(e)
-                                    }
-                                />
-                            </div>
-                        )}
+                        {authUserInfo && this.renderSearchBox()}
                         {this.renderUserButton(classes, authUserInfo)}
                         {this.renderUserMenu(classes, userMenuOpen)}
                     </Toolbar>

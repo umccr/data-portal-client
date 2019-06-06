@@ -20,9 +20,6 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import * as PropTypes from 'prop-types';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import Popper from '@material-ui/core/Popper';
-import Fade from '@material-ui/core/Fade';
-import Typography from '@material-ui/core/Typography';
 import { connect } from 'react-redux';
 import {
     startRunningSearchQuery,
@@ -33,15 +30,11 @@ const styles = theme => ({
     close: {
         padding: theme.spacing.unit / 2,
     },
-    searchHintContainer: {
-        padding: theme.spacing.unit,
-    },
 });
 
 class Search extends Component {
     state = {
         hideSnackbar: false,
-        openSearchHint: false,
     };
 
     reloadData = async (params = {}) => {
@@ -252,18 +245,9 @@ class Search extends Component {
         );
     };
 
-    handleSearchQuerySyntaxClick = event => {
-        const { currentTarget } = event;
-        this.setState(state => ({
-            searchHintAnchorEl: currentTarget,
-            openSearchHint: !state.openSearchHint,
-        }));
-    };
-
     render() {
-        const { classes, searchResult, searchResultHeaderRow } = this.props;
-        const { openSearchHint } = this.state;
-        const searchHintPopperId = openSearchHint ? 'popper-search-hint' : null;
+        const { searchResult, searchResultHeaderRow } = this.props;
+
         const { loading, data } = searchResult;
         const tableInit = searchResultHeaderRow !== null;
 
@@ -273,59 +257,7 @@ class Search extends Component {
                     {loading && !tableInit && <LinearProgress />}
                     {(data.rows || tableInit) && this.renderTable()}
                 </Paper>
-                <Popper
-                    id={searchHintPopperId}
-                    open={this.state.openSearchHint}
-                    anchorEl={this.state.searchHintAnchorEl}
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'right',
-                    }}
-                    transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                    transition
-                >
-                    {({ TransitionProps }) => (
-                        <Fade {...TransitionProps} timeout={350}>
-                            <Paper>
-                                <Grid
-                                    container
-                                    className={classes.searchHintContainer}
-                                    direction="column"
-                                >
-                                    <Typography variant="subheading">
-                                        Search Query Syntax
-                                    </Typography>
-                                    <Typography>
-                                        [file path includes] // default filter{' '}
-                                        <br />
-                                        pathinc:[file path includes] // specify
-                                        a filter - pathinc <br />
-                                        ext:[file extension] // e.g. ext:csv
-                                        <br />
-                                        date:[operator][last modified date] //
-                                        e.g. date:>2011-01-01 <br />
-                                        size:[operator][file size]
-                                    </Typography>
-                                    <Grid container sm={12} justify="flex-end">
-                                        <Button
-                                            color="default"
-                                            size="small"
-                                            onClick={
-                                                this
-                                                    .handleSearchQuerySyntaxClick
-                                            }
-                                        >
-                                            Okay
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </Paper>
-                        </Fade>
-                    )}
-                </Popper>
+
                 {this.renderErrorMessage()}
             </Fragment>
         );
