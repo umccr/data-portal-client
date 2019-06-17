@@ -12,7 +12,6 @@ import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import SearchIcon from '@material-ui/icons/Search';
 import Routes from './Routes';
 import { Link as RouterLink, Route, Switch } from 'react-router-dom';
 import { Auth, Hub } from 'aws-amplify';

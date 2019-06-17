@@ -25,10 +25,6 @@ const textStyle = {
         'white -1px 0px 0.5px, white 0px -1px 0.5px, white 0px 1px 0.5px, white 1px 0px 0.5px',
 };
 
-const selectPath = d => {
-    return d3.select(`path[id='${d.fullPath}']`);
-};
-
 export default class SunburstD3 {
     constructor(el, figure, onChange, onArcMouseAction) {
         const self = this;
