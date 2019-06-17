@@ -27,8 +27,6 @@
     "start": "REACT_APP_STAGE=localhost react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "predeploy": "REACT_APP_STAGE=dev npm run build",
-    "deploy": "aws s3 sync build/ s3://umccr-data-portal-client-dev",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
