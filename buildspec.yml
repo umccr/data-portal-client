@@ -5,5 +5,5 @@ phases:
       nodejs: 8
   build:
     commands:
-      - REACT_APP_STAGE=${STAGE} npm run build
-      - aws s3 sync build/ ${S3}
+      - REACT_APP_STAGE=$STAGE npm run build
+      - aws s3 sync build/ $S3
