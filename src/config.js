@@ -1,7 +1,7 @@
 const base = {
     apiGateway: {
         REGION: 'ap-southeast-2',
-        URL: 'https://okhl40ool5.execute-api.ap-southeast-2.amazonaws.com/dev',
+        URL: 'https://2a0mvgomd8.execute-api.ap-southeast-2.amazonaws.com/dev',
     },
 };
 
