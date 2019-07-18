@@ -14,12 +14,7 @@
         "type": "string",
         "value": "ap-southeast-2:5f172e94-aad7-40e9-a7ba-624d36a85e30"
     },
-    "cognito_oauth_domain_localhost": {
-        "sensitive": false,
-        "type": "string",
-        "value": "data-portal-app-dev-localhost"
-    },
-    "cognito_oauth_domain_stage": {
+    "cognito_oauth_domain": {
         "sensitive": false,
         "type": "string",
         "value": "data-portal-app-dev"
