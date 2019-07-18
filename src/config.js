@@ -1,53 +1,47 @@
+import * as config from './config.json';
+
+const STAGE = process.env.REACT_APP_STAGE;
+
 const base = {
     apiGateway: {
-        REGION: 'ap-southeast-2',
-        URL: 'https://2a0mvgomd8.execute-api.ap-southeast-2.amazonaws.com/dev',
+        REGION: config.main_region,
+        URL: `https://2a0mvgomd8.execute-api.ap-southeast-2.amazonaws.com/${STAGE}`,
     },
 };
 
-const localhost = {
+const localhostConfig = {
     cognito: {
-        REGION: 'ap-southeast-2',
-        USER_POOL_ID: 'ap-southeast-2_lAsMCu1oi',
-        APP_CLIENT_ID: '917s0fndvbq0k8bf4qoj45na7',
-        IDENTITY_POOL_ID: 'ap-southeast-2:ead65687-fd1e-4d4d-999e-e95cec64b783',
+        REGION: config.main_region,
+        USER_POOL_ID: config.cognito_user_pool_id,
+        APP_CLIENT_ID: config.cognito_app_client_id_localhost,
+        IDENTITY_POOL_ID: config.cognito_identity_pool_id,
         OAUTH: {
-            domain: 'data-portal-app-dev.auth.ap-southeast-2.amazoncognito.com',
-            scope: [
-                'email',
-                'profile',
-                'openid',
-                'aws.cognito.signin.user.admin',
-            ],
-            redirectSignIn: 'http://localhost:3000',
-            redirectSignOut: 'http://localhost:3000',
-            responseType: 'code',
+            domain: `${config.cognito_oauth_domain_localhost}.auth.ap-southeast-2.amazoncognito.com`,
+            scope: config.cognito_oauth_scope,
+            redirectSignIn: config.cognito_oauth_redirect_signin_localhost,
+            redirectSignOut: config.cognito_oauth_redirect_signout_localhost,
+            responseType: config.cognito_oauth_response_type,
         },
     },
 };
 
-const dev = {
+const stageConfig = {
     cognito: {
-        REGION: 'ap-southeast-2',
-        USER_POOL_ID: 'ap-southeast-2_lAsMCu1oi',
-        APP_CLIENT_ID: '5quc4p7gebl2ms79ffbntvm3p',
-        IDENTITY_POOL_ID: 'ap-southeast-2:ead65687-fd1e-4d4d-999e-e95cec64b783',
+        REGION: config.main_region,
+        USER_POOL_ID: config.cognito_user_pool_id,
+        APP_CLIENT_ID: config.cognito_app_client_id_stage,
+        IDENTITY_POOL_ID: config.cognito_identity_pool_id,
         OAUTH: {
-            domain: 'data-portal-app-dev.auth.ap-southeast-2.amazoncognito.com',
-            scope: [
-                'email',
-                'profile',
-                'openid',
-                'aws.cognito.signin.user.admin',
-            ],
-            redirectSignIn: 'https://data-portal.dev.umccr.org',
-            redirectSignOut: 'https://data-portal.dev.umccr.org',
-            responseType: 'code',
+            domain: config.cognito_oauth_domain_stage,
+            scope: config.cognito_oauth_scope,
+            redirectSignIn: config.cognito_oauth_redirect_signin,
+            redirectSignOut: config.cognito_oauth_redirect_signout,
+            responseType: config.cognito_oauth_response_type,
         },
     },
 };
 
-const config = process.env.REACT_APP_STAGE === 'localhost' ? localhost : dev;
+const config = STAGE === 'localhost' ? localhostConfig : stageConfig;
 
 export default {
     ...base,
