@@ -9,7 +9,7 @@ const OAUTH_DOMAIN = `${process.env.REACT_APP_OAUTH_DOMAIN}.auth.${REGION}.amazo
 const config = {
     apiGateway: {
         REGION: REGION,
-        URL: `https://${process.env.API_ID}.execute-api.${REGION}.amazonaws.com/${STAGE}`,
+        URL: `https://${process.env.REACT_APP_API_ID}.execute-api.${REGION}.amazonaws.com/${STAGE}`,
     },
     cognito: {
         REGION: REGION,
