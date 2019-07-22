@@ -6,10 +6,11 @@ const IS_LOCAL = STAGE === 'localhost';
 
 const OAUTH_DOMAIN = `${process.env.REACT_APP_OAUTH_DOMAIN}.auth.${REGION}.amazoncognito.com`;
 
+//${IS_LOCAL ? 'dev' : STAGE}
 const config = {
     apiGateway: {
         REGION: REGION,
-        URL: process.env.REACT_APP_API_URL,
+        URL: `https://${process.env.REACT_APP_API_URL}`,
     },
     cognito: {
         REGION: REGION,
@@ -31,7 +32,5 @@ const config = {
         },
     },
 };
-
-console.log(config);
 
 export default config;
