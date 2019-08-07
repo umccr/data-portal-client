@@ -146,6 +146,33 @@ class Search extends Component {
         }
     };
 
+    handleIGVLink = (bucket, key) => {
+        const Http = new XMLHttpRequest();
+        const tokens = key.split("/");
+        const filename = tokens[tokens.length - 1];
+        const file = `s3://${bucket + "/" + key}`;
+        const url = `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${filename}`;
+        console.log(url);
+        Http.open("GET", url);
+        Http.send();
+    };
+
+    renderRowButtons = (bucket, key) => (
+        <Fragment>
+            <Button
+                color="primary"
+                onClick={() =>
+                    this.handleDownloadFile(bucket, key)
+                }
+            >
+                <GetAppIcon />
+            </Button>
+            { (key.endsWith('bam') || key.endsWith('vcf')) && <Button>
+                <img src="igv.png" alt="" width="20px" onClick={() => this.handleIGVLink(bucket, key)}/>
+            </Button> }
+        </Fragment>
+    );
+
     renderRow = (headers, row, rowIndex) => (
         <TableRow key={rowIndex}>
             {row.map((col, colIndex) => {
@@ -156,14 +183,7 @@ class Search extends Component {
                         <TableCell key={colIndex}>
                             {col}
                             {headers[colIndex].key === 'path' && (
-                                <Button
-                                    color="primary"
-                                    onClick={() =>
-                                        this.handleDownloadFile(bucket, key)
-                                    }
-                                >
-                                    <GetAppIcon />
-                                </Button>
+                                this.renderRowButtons(bucket, key)
                             )}
                         </TableCell>
                     )
