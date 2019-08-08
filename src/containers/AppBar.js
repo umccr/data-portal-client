@@ -300,8 +300,11 @@ class AppBar extends Component {
         const {
             handleStartRunningSearchQuery,
             searchParams,
+            history
         } = this.props;
-        
+
+        history.push('/search');
+
         // Start searching asynchronously (which allows us to jump to next action)
         handleStartRunningSearchQuery(searchParams);
     };
