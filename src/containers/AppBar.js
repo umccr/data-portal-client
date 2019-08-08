@@ -33,6 +33,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
+import queryString from 'query-string';
 
 const drawerWidth = 240;
 
@@ -153,6 +154,42 @@ class AppBar extends Component {
         openSearchHint: false,
     };
 
+    async componentDidMount() {
+        // Check whether we have query parameter,
+        // if there is, trigger a search action
+        if (this.props.location.pathname === '/search') {
+            const values = queryString.parse(this.props.location.search);
+
+            if (values.query) {
+                const searchParams = { query: values.query };
+
+                if (values.sortAsc !== undefined) {
+                    searchParams.sortAsc = values.sortAsc === 'true';
+                }
+
+                if (values.sortCol) {
+                    searchParams.sortCol = values.sortCol;
+                }
+
+                if (values.page !== undefined) {
+                    searchParams.page = values.page;
+                } else {
+                    searchParams.page = 0;
+                }
+
+                if (values.rowsPerPage !== undefined) {
+                    searchParams.rowsPerPage = values.rowsPerPage;
+                } else {
+                    searchParams.rowsPerPage = 20;
+                }
+
+                const { handleStartRunningSearchQuery } = this.props;
+
+                await handleStartRunningSearchQuery(searchParams);
+            }
+        }
+    }
+
     handleToggleUserMenu = () => {
         this.setState(state => ({ userMenuOpen: !state.userMenuOpen }));
     };
@@ -244,9 +281,9 @@ class AppBar extends Component {
         );
     };
 
-    handleSearchQueryChange = e => {
-        this.props.handleSearchQueryParamsUpdate({
-            query: e.target.value,
+    handleSearchQueryChange = async newQuery => {
+        await this.props.handleSearchQueryParamsUpdate({
+            query: newQuery,
             page: 0,
         });
     };
@@ -259,22 +296,14 @@ class AppBar extends Component {
         }));
     };
 
-    handleSearchClicked = async e => {
+    handleSearchClicked = async () => {
         const {
-            handleBeforeRunningSearchQuery,
             handleStartRunningSearchQuery,
             searchParams,
-            history,
         } = this.props;
-
-        // First mark we have started searching
-        await handleBeforeRunningSearchQuery(searchParams);
-
+        
         // Start searching asynchronously (which allows us to jump to next action)
         handleStartRunningSearchQuery(searchParams);
-
-        // Go to search result page and wait for search running there
-        history.push('/search');
     };
 
     renderSearchBox = () => {
@@ -293,9 +322,9 @@ class AppBar extends Component {
                         input: classes.inputInput,
                     }}
                     value={searchParams.query}
-                    onChange={this.handleSearchQueryChange}
+                    onChange={(e) => this.handleSearchQueryChange(e.target.value)}
                     onKeyPress={e =>
-                        e.key === 'Enter' && this.handleSearchClicked(e)
+                        e.key === 'Enter' && this.handleSearchClicked()
                     }
                     endAdornment={
                         <div>

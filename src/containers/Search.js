@@ -25,8 +25,6 @@ import {
     startRunningSearchQuery,
     updateSearchQueryPrams,
 } from '../actions/search';
-import Grid from '@material-ui/core/Grid';
-import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -53,20 +51,6 @@ class Search extends Component {
 
     getBaseParams = () => {
         return this.props.searchParams;
-    };
-
-    handleSearchQueryChange = e => {
-        this.props.handleSearchQueryParamsUpdate({
-            query: e.target.value,
-        });
-    };
-
-    handleSearchClicked = async () => {
-        const { query } = this.props.searchParams;
-
-        await this.reloadData({
-            query, // Keep query only (starting new search)
-        });
     };
 
     handlePageChange = async (event, page) => {
