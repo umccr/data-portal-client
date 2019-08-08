@@ -5,6 +5,7 @@ import {
     SEARCH_QUERY_SUCCESS,
     SEARCH_QUERY_FAILURE,
 } from '../actionTypes';
+import history from '../history';
 
 export const updateSearchQueryPrams = queryParams => {
     return {
@@ -16,6 +17,15 @@ export const updateSearchQueryPrams = queryParams => {
 };
 
 export const beforeRunningSearchQuery = queryParams => {
+    const paramList = [];
+
+    // Let's now compose a new url with new search params
+    for (let [key, value] of Object.entries(queryParams)) {
+        paramList.push(`${key}=${value}`);
+    }
+
+    history.push('/search?' + paramList.join('&'));
+
     return {
         type: SEARCH_QUERY_STARTED_RUNNING,
         payload: {
