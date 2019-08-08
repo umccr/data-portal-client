@@ -16,6 +16,7 @@ import EnhancedTableHead, {
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
 import * as PropTypes from 'prop-types';
 import GetAppIcon from '@material-ui/icons/GetApp';
@@ -24,6 +25,13 @@ import {
     startRunningSearchQuery,
     updateSearchQueryPrams,
 } from '../actions/search';
+import Grid from '@material-ui/core/Grid';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
+import ListItemText from '@material-ui/core/ListItemText';
 
 const styles = theme => ({
     close: {
@@ -157,40 +165,64 @@ class Search extends Component {
         Http.send();
     };
 
-    renderRowButtons = (bucket, key) => (
-        <Fragment>
-            <Button
+    renderRowButtons = (bucket, key, popupState) => (
+        <Menu {...bindMenu(popupState)}>
+            {/* Only show IGV button for .bam and .vcf files */}
+            { (key.endsWith('bam') || key.endsWith('vcf')) && <MenuItem onClick={() => this.handleIGVLink(bucket, key)}>
+                <ListItemIcon>
+                    <img src="igv.png" alt="" width="20px" height="20px" />
+                </ListItemIcon>
+                <ListItemText>
+                    Open in IGV
+                </ListItemText>
+            </MenuItem> }
+            {/* Download button will be shown if the file si not .bam type */}
+            { !key.endsWith('bam') && <MenuItem
                 color="primary"
                 onClick={() =>
                     this.handleDownloadFile(bucket, key)
                 }
             >
-                <GetAppIcon />
-            </Button>
-            { (key.endsWith('bam') || key.endsWith('vcf')) && <Button>
-                <img src="igv.png" alt="" width="20px" onClick={() => this.handleIGVLink(bucket, key)}/>
-            </Button> }
-        </Fragment>
+                <ListItemIcon>
+                    <GetAppIcon />
+                </ListItemIcon>
+                <ListItemText>
+                    Download
+                </ListItemText>
+            </MenuItem> }
+        </Menu>
     );
 
-    renderRow = (headers, row, rowIndex) => (
-        <TableRow key={rowIndex}>
-            {row.map((col, colIndex) => {
-                const bucket = row[headers.findIndex(h => h.key === 'bucket')];
-                const key = row[headers.findIndex(h => h.key === 'key')];
-                return (
-                    isColVisible(headers[colIndex].key) && (
-                        <TableCell key={colIndex}>
-                            {col}
-                            {headers[colIndex].key === 'path' && (
-                                this.renderRowButtons(bucket, key)
-                            )}
-                        </TableCell>
-                    )
-                );
-            })}
-        </TableRow>
-    );
+    renderRow = (headers, row, rowIndex) => {
+        const bucket = row[headers.findIndex(h => h.key === 'bucket')];
+        const key = row[headers.findIndex(h => h.key === 'key')];
+        const popupId = `rowMenu${rowIndex}`;
+        return (
+            <TableRow key={rowIndex}>
+                {row.map((col, colIndex) => {
+                    return (
+                        isColVisible(headers[colIndex].key) && (
+                            <TableCell key={colIndex}>
+                                {col}
+                            </TableCell>
+                        )
+                    );
+                })}
+                <TableCell>
+                    <PopupState variant="popover" popupId={popupId}>
+                        {popupState => (
+                            <Fragment>
+                                <Button {...bindTrigger(popupState)} color="primary">
+                                    <MenuIcon />
+                                </Button>
+                                {this.renderRowButtons(bucket, key, popupState)}
+                            </Fragment>
+                        )}
+                    </PopupState>
+                </TableCell>
+            </TableRow>
+        );
+    };
 
     renderTable = () => {
         const { searchResultHeaderRow } = this.props;
