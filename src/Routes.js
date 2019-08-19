@@ -6,6 +6,7 @@ import Home from './containers/Home';
 import Login from './containers/Login';
 import Search from './containers/Search';
 import Storage from './containers/Storage';
+import IGV from './containers/IGV';
 
 class Routes extends Component {
     render() {
@@ -18,6 +19,7 @@ class Routes extends Component {
                     <Fragment>
                         <Route path="/search" component={Search} />
                         <Route path="/storage" component={Storage} />
+                        <Route path="/igv" component={IGV} />
                     </Fragment>
                 )}
             </Switch>
