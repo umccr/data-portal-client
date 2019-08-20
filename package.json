@@ -24,7 +24,8 @@
     "recharts": "^1.7.1",
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "igv": "^2.2.15"
   },
   "scripts": {
     "start": "REACT_APP_STAGE=localhost react-scripts start",

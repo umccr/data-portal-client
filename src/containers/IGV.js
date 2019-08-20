@@ -1,6 +1,6 @@
-import { Component } from 'react';
+import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core';
-import { igv } from '../lib'
+import igv from 'igv/dist/igv.esm';
 
 const styles = theme => ({
     chartContainer: {
@@ -15,8 +15,7 @@ const styles = theme => ({
     },
 });
 
-var igvDiv = document.getElementById("igv-div");
-var options =
+const options =
     {
         genome: "hg38",
         locus: "chr8:127,736,588-127,739,371",
@@ -28,12 +27,20 @@ var options =
                 "format": "cram"
             }
         ]
-    }
+    };
 
 
 class IGV extends Component {
+    componentDidMount() {
+        const igvDiv = document.getElementById("igv-div");
+        igv.createBrowser(igvDiv, options);
+    }
+
     render() {
-        return igv.createBrowser(igvDiv, options);
+        return (
+            <div id="igv-div">
+            </div>
+        );
     }
 }
 
