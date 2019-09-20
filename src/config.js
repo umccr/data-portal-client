@@ -21,7 +21,7 @@ const config = {
         IDENTITY_POOL_ID: process.env.REACT_APP_COG_IDENTITY_POOL_ID,
         OAUTH: {
             domain: OAUTH_DOMAIN,
-            scope: ["email", "openid", "aws.cognito.signin.user.admin", "profile"],
+            scope: ["email", "openid", "profile"],
             redirectSignIn: IS_LOCAL
                 ? process.env.REACT_APP_OAUTH_REDIRECT_IN_LOCAL
                 : process.env.REACT_APP_OAUTH_REDIRECT_IN_STAGE,
