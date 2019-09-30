@@ -59,6 +59,14 @@ const querySyntax = [
         description: 'File size. e.g. size:>=1000',
     },
     {
+        syntax: 'subjectid:[string]',
+        description: 'SubjectID or ExternalSubjectId includes',
+    },
+    {
+        syntax: 'sampleid:[string]',
+        description: 'SampleId includes',
+    },
+    {
         syntax: 'case:[boolean]',
         description:
             'Case sensitivity (for string comparisons, default to false). e.g. case:true',
