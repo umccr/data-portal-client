@@ -60,11 +60,11 @@ const querySyntax = [
     },
     {
         syntax: 'subjectid:[string]',
-        description: 'SubjectID or ExternalSubjectId includes',
+        description: '(LIMS) SubjectID or ExternalSubjectId includes',
     },
     {
         syntax: 'sampleid:[string]',
-        description: 'SampleId includes',
+        description: '(LIMS) SampleId includes',
     },
     {
         syntax: 'case:[boolean]',
