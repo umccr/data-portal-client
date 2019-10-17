@@ -59,6 +59,14 @@ const querySyntax = [
         description: 'File size. e.g. size:>=1000',
     },
     {
+        syntax: 'subjectid:[string]',
+        description: '(LIMS) SubjectID or ExternalSubjectId includes',
+    },
+    {
+        syntax: 'sampleid:[string]',
+        description: '(LIMS) SampleId includes',
+    },
+    {
         syntax: 'case:[boolean]',
         description:
             'Case sensitivity (for string comparisons, default to false). e.g. case:true',
@@ -426,6 +434,14 @@ class AppBar extends Component {
         );
     };
 
+    /**
+     * Flags whether we are on storage page
+     * @returns {boolean}
+     */
+    notOnStoragePage = () => {
+        return this.props.location.pathname !== '/storage';
+    };
+
     render() {
         const { title, classes, authUserInfo, handleDrawerToggle } = this.props;
         const { userMenuOpen } = this.state;
@@ -446,7 +462,7 @@ class AppBar extends Component {
                             {title}
                         </Typography>
                         <div className={classes.grow} />
-                        {authUserInfo && this.renderSearchBox()}
+                        {authUserInfo && this.notOnStoragePage() && this.renderSearchBox()}
                         {this.renderUserButton(classes, authUserInfo)}
                         {this.renderUserMenu(classes, userMenuOpen)}
                     </Toolbar>
