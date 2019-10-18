@@ -49,7 +49,6 @@ export const startRunningSearchQuery = queryParams => {
                 .join('&');
 
             const data = await API.get('files', `/files?${paramsString}`, {});
-
             dispatch({
                 type: SEARCH_QUERY_SUCCESS,
                 payload: {
