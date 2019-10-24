@@ -219,7 +219,7 @@ class Search extends Component {
 
         return (
             <Paper>
-                <Table>
+                <Table size="small">
                     <EnhancedTableHead
                         columns={headerRow}
                         onRequestSort={this.handleRequestSort}
