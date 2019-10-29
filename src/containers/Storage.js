@@ -21,6 +21,11 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import BubbleChartToolTip from './BubbleChartToolTip';
+import CardContent from '@material-ui/core/CardContent';
+import Card from '@material-ui/core/Card';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import SearchIcon from '@material-ui/icons/Search';
 
 const styles = theme => ({
     chartContainer: {
@@ -71,9 +76,18 @@ class Storage extends Component {
         dataRows: [],
         selectedPath: [],
         maximumDepth: 3,
+        statsData: {}
     };
 
     async componentDidMount() {
+        const statsData = await API.get(
+            'files',
+            '/storage-stats',
+            {},
+        );
+
+        this.setState({statsData});
+
         const data = await API.get(
             'files',
             '/files?query=&randomSamples=200',
@@ -345,6 +359,61 @@ class Storage extends Component {
         d.attr('opacity', opacity);
     };
 
+    renderSingleStatData = stat => (
+        <Grid item xs={6} md={3} lg={2}>
+            <Card>
+                <CardContent>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <Typography  color="textSecondary">
+                                {stat.label}
+                            </Typography>
+                        </Grid>
+                        <Grid
+                            item
+                            xs={12}
+                            direction="row"
+                            container
+                            justify="space-between"
+                            alignItems="center"
+                        >
+                            <Typography variant="h5" component="h2">
+                                {stat.value}
+                            </Typography>
+                            {stat.query && (
+                                <Button
+                                    size="small"
+                                    color="primary"
+                                    href={`search?query=${stat.query}`}
+                                >
+                                    <SearchIcon />
+                                    View
+                                </Button>
+                            )}
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
+        </Grid>
+    );
+
+    renderStatsData = () => {
+        const statsList = Object.values(this.state.statsData);
+
+        return (
+            <Grid
+                item
+                xs={12}
+                spacing={2}
+                container
+                direction="row"
+                alignItems="stretch"
+            >
+                {statsList.map(stat => this.renderSingleStatData(stat))}
+            </Grid>
+        );
+    };
+
     render() {
         const { selectedPath } = this.state;
         const { classes } = this.props;
@@ -352,6 +421,8 @@ class Storage extends Component {
 
         return (
             <Grid className={classes.chartContainer} container>
+                {this.renderStatsData()}
+
                 {treeData === undefined && (
                     <CircularProgress className={classes.progress} />
                 )}
