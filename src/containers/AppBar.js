@@ -71,6 +71,11 @@ const querySyntax = [
         description:
             'Case sensitivity (for string comparisons, default to false). e.g. case:true',
     },
+    {
+        syntax: 'linked:[boolean]',
+        description:
+            'Linked with at least one LIMS Row. e.g. linked:true',
+    },
 ];
 
 const styles = theme => ({
