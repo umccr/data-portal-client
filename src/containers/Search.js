@@ -30,6 +30,9 @@ import Menu from '@material-ui/core/Menu';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
 import ListItemText from '@material-ui/core/ListItemText';
+import { withRouter } from 'react-router-dom';
+import getFileSignedURL from '../utils/signedURL';
+import {isValidIGVSourceKey} from './IGV';
 
 const styles = theme => ({
     close: {
@@ -126,19 +129,14 @@ class Search extends Component {
 
     handleDownloadFile = async (bucket, key) => {
         try {
-            const url = await API.get(
-                'files',
-                `/file-signed-url?bucket=${bucket}&key=${key}`,
-                {},
-            );
-
+            const url = getFileSignedURL(bucket, key);
             window.open(url, '_blank');
         } catch (e) {
             this.setState({ errorMessage: e });
         }
     };
 
-    handleIGVLink = (bucket, key) => {
+    handleIGVDesktopLink = (bucket, key) => {
         const Http = new XMLHttpRequest();
         const tokens = key.split("/");
         const filename = tokens[tokens.length - 1];
@@ -149,18 +147,43 @@ class Search extends Component {
         Http.send();
     };
 
+    handleIGVWebLink = (bucket, key) => {
+        const { history } = this.props;
+        history.push(`/igv?bucket=${bucket}&key=${key}`);
+    };
+
+    renderIGVIcon = () => (
+        <img src="igv.png" alt="" width="20px" height="20px" />
+    );
+
+    renderIGVButtons = (bucket, key) => {
+        return (
+            <Fragment>
+                <MenuItem onClick={() => this.handleIGVDesktopLink(bucket, key)}>
+                    <ListItemIcon>
+                        {this.renderIGVIcon()}
+                    </ListItemIcon>
+                    <ListItemText>
+                        Open in IGV Desktop
+                    </ListItemText>
+                </MenuItem>
+                <MenuItem onClick={() => this.handleIGVWebLink(bucket, key)}>
+                    <ListItemIcon>
+                        {this.renderIGVIcon()}
+                    </ListItemIcon>
+                    <ListItemText>
+                        Open in IGV Web
+                    </ListItemText>
+                </MenuItem>
+            </Fragment>
+        )
+    };
+
     renderRowButtons = (bucket, key, popupState) => (
         <Menu {...bindMenu(popupState)}>
             {/* Only show IGV button for .bam and .vcf files */}
-            { (key.endsWith('bam') || key.endsWith('vcf')) && <MenuItem onClick={() => this.handleIGVLink(bucket, key)}>
-                <ListItemIcon>
-                    <img src="igv.png" alt="" width="20px" height="20px" />
-                </ListItemIcon>
-                <ListItemText>
-                    Open in IGV
-                </ListItemText>
-            </MenuItem> }
-            {/* Download button will be shown if the file si not .bam type */}
+            { isValidIGVSourceKey(key) && this.renderIGVButtons(bucket, key)}
+            {/* Download button will be shown if the file is not .bam type */}
             { !key.endsWith('bam') && <MenuItem
                 color="primary"
                 onClick={() =>
@@ -334,4 +357,4 @@ const ConnectSearch = connect(
     mapDispatchToProps,
 )(Search);
 
-export default withStyles(styles)(ConnectSearch);
+export default withRouter(withStyles(styles)(ConnectSearch));
