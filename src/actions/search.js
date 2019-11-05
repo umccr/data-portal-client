@@ -3,7 +3,7 @@ import {
     SEARCH_QUERY_PARAMS_UPDATED,
     SEARCH_QUERY_STARTED_RUNNING,
     SEARCH_QUERY_SUCCESS,
-    SEARCH_QUERY_FAILURE,
+    SEARCH_QUERY_FAILURE, SEARCH_QUERY_CLEAR_ERR_MSG,
 } from '../actionTypes';
 import history from '../history';
 
@@ -54,23 +54,30 @@ export const startRunningSearchQuery = queryParams => {
                 type: SEARCH_QUERY_SUCCESS,
                 payload: {
                     data,
+                    errorMessage: null
                 },
             });
         } catch (e) {
             let errorMessage;
 
             if (e.response) {
-                errorMessage = e.response.data.errors;
+                errorMessage = `Query Failed - ${e.response.data.errors}`;
             } else {
-                errorMessage = e.message;
+                errorMessage = `Unknown Error - ${e.message}`;
             }
 
             dispatch({
                 type: SEARCH_QUERY_FAILURE,
                 payload: {
-                    errorMessage: `Query failed: ${errorMessage}`,
+                    errorMessage: errorMessage,
                 },
             });
         }
+    };
+};
+
+export const clearErrorMessage = () => {
+    return {
+        type: SEARCH_QUERY_CLEAR_ERR_MSG,
     };
 };

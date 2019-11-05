@@ -4,6 +4,7 @@ import {
     SEARCH_QUERY_STARTED_RUNNING,
     SEARCH_QUERY_FAILURE,
     SEARCH_QUERY_SUCCESS,
+    SEARCH_QUERY_CLEAR_ERR_MSG,
 } from './actionTypes';
 
 const defaultSearchParams = {
@@ -80,6 +81,14 @@ const reducer = (state = initialState, action) => {
                     loading: false,
                 },
                 searchResultHeaderRow: action.payload.data.rows.headerRow,
+            };
+        case SEARCH_QUERY_CLEAR_ERR_MSG:
+            return {
+                ...state,
+                searchResult: {
+                    ...state.searchResult,
+                    errorMessage: null
+                }
             };
         default:
             return state;
