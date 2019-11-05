@@ -22,6 +22,7 @@ import * as PropTypes from 'prop-types';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { connect } from 'react-redux';
 import {
+    clearErrorMessage,
     startRunningSearchQuery,
     updateSearchQueryPrams,
 } from '../actions/search';
@@ -38,10 +39,6 @@ const styles = theme => ({
 });
 
 class Search extends Component {
-    state = {
-        hideSnackbar: false,
-    };
-
     reloadData = async (params = {}) => {
         const { handleStartRunningSearchQuery } = this.props;
 
@@ -82,16 +79,15 @@ class Search extends Component {
     };
 
     handleCloseErrorMessage = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
+        // Clear error message in the state
+        const { handleClearErrorMessage } = this.props;
 
-        this.setState({ hideSnackbar: true });
+        handleClearErrorMessage();
     };
 
     // Show snackbar if we have an error message and it has not been hidden
     openSnackbar = () =>
-        this.props.searchResult.errorMessage && !this.state.hideSnackbar;
+        this.props.searchResult.errorMessage;
 
     renderErrorMessage = () => {
         const { errorMessage } = this.props.searchResult;
@@ -103,7 +99,6 @@ class Search extends Component {
                     horizontal: 'left',
                 }}
                 open={this.openSnackbar()}
-                autoHideDuration={6000}
                 onClose={this.handleCloseErrorMessage}
                 ContentProps={{
                     'aria-describedby': 'message-id',
@@ -290,7 +285,7 @@ class Search extends Component {
             <Fragment>
                 <Paper>
                     {loading && !tableInit && <LinearProgress />}
-                    {(data.rows || tableInit) && this.renderTable()}
+                    {(data.rows && tableInit) && this.renderTable()}
                 </Paper>
 
                 {this.renderErrorMessage()}
@@ -304,6 +299,7 @@ Search.propTypes = {
     authUserInfo: PropTypes.object,
     handleStartRunningSearchQuery: PropTypes.func.isRequired,
     handleSearchQueryParamsUpdate: PropTypes.func.isRequired,
+    handleClearErrorMessage: PropTypes.func.isRequired,
     searchParams: PropTypes.object.isRequired,
     searchResult: PropTypes.object.isRequired,
     searchResultHeaderRow: PropTypes.array,
@@ -325,6 +321,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
         },
         handleStartRunningSearchQuery: async params => {
             dispatch(startRunningSearchQuery(params));
+        },
+        handleClearErrorMessage: () => {
+            dispatch(clearErrorMessage());
         },
     };
 };
