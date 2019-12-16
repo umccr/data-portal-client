@@ -5,6 +5,11 @@ import {
     SEARCH_QUERY_FAILURE,
     SEARCH_QUERY_SUCCESS,
     SEARCH_QUERY_CLEAR_ERR_MSG,
+    HOME_QUERY_SUCCESS,
+    HOME_QUERY_FAILURE,
+    HOME_QUERY_STARTED_RUNNING,
+    HOME_QUERY_PARAMS_UPDATED,
+    HOME_QUERY_CLEAR_ERR_MSG,
 } from './actionTypes';
 
 const defaultSearchParams = {
@@ -16,6 +21,17 @@ const defaultSearchParams = {
 };
 
 const defaultSearchResult = {
+    data: {},
+    loading: false,
+    errorMessage: null,
+};
+
+const defaultHomeParams = {
+    page: null,
+    rowsPerPage: 20,
+};
+
+const defaultHomeResult = {
     data: {},
     loading: false,
     errorMessage: null,
@@ -34,6 +50,12 @@ const initialState = {
     },
     // Save a copy of header row to always show table
     searchResultHeaderRow: null,
+    homeResult: {
+        ...defaultHomeResult,
+    },
+    homeParams: {
+        ...defaultHomeParams,
+    },
 };
 
 const reducer = (state = initialState, action) => {
@@ -90,8 +112,50 @@ const reducer = (state = initialState, action) => {
                     errorMessage: null
                 }
             };
-        default:
-            return state;
+        case HOME_QUERY_PARAMS_UPDATED:
+            return {
+                ...state,
+                homeParams: {
+                    ...defaultHomeParams,
+                    ...action.payload.params,
+                },
+            };
+        case HOME_QUERY_STARTED_RUNNING:
+            return {
+                ...state,
+                homeResult: {
+                    ...defaultHomeResult,
+                    loading: true,
+                },
+                homeParams: action.payload.homeParams,
+            };
+        case HOME_QUERY_SUCCESS:
+            return {
+                ...state,
+                homeResult: {
+                    ...defaultHomeResult,
+                    data: action.payload.data,
+                    loading: false,
+                },
+            };
+        case HOME_QUERY_FAILURE:
+            return {
+                ...state,
+                homeResult: {
+                    ...defaultHomeResult,
+                    errorMessage: action.payload.errorMessage,
+                    loading: false,
+                },
+            };
+        case HOME_QUERY_CLEAR_ERR_MSG:
+            return {
+                ...state,
+                homeResult: {
+                    ...state.homeResult,
+                    errorMessage: null
+                }
+            };
+        default: return state;
     }
 };
 
