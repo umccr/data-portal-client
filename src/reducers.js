@@ -27,6 +27,8 @@ const defaultSearchResult = {
 };
 
 const defaultHomeParams = {
+    sortCol: 'subject_id',
+    sortAsc: false,
     page: null,
     rowsPerPage: 20,
 };

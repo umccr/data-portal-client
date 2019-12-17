@@ -446,6 +446,9 @@ class AppBar extends Component {
     notOnStoragePage = () => {
         return this.props.location.pathname !== '/storage';
     };
+    notOnHomePage = () => {
+        return this.props.location.pathname !== '/';
+    };
 
     render() {
         const { title, classes, authUserInfo, handleDrawerToggle } = this.props;
@@ -467,7 +470,7 @@ class AppBar extends Component {
                             {title}
                         </Typography>
                         <div className={classes.grow} />
-                        {authUserInfo && this.notOnStoragePage() && this.renderSearchBox()}
+                        {authUserInfo && this.notOnStoragePage() && this.notOnHomePage() && this.renderSearchBox()}
                         {this.renderUserButton(classes, authUserInfo)}
                         {this.renderUserMenu(classes, userMenuOpen)}
                     </Toolbar>

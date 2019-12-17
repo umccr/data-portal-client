@@ -214,7 +214,7 @@ class Search extends Component {
 
         return (
             <Paper>
-                <Table size="small">
+                <Table size="small" aria-label="a dense table">
                     <EnhancedTableHead
                         columns={headerRow}
                         onRequestSort={this.handleRequestSort}
@@ -251,8 +251,7 @@ class Search extends Component {
                         <TableFooter>
                             <TableRow>
                                 <TablePagination
-                                    rowsPerPageOptions={[20, 50]}
-                                    colSpan={3}
+                                    rowsPerPageOptions={[10, 20, 50, 100]}
                                     count={meta.totalRows}
                                     rowsPerPage={meta.size}
                                     page={meta.page - 1}

@@ -44,10 +44,19 @@ export const startRunningHomeQuery = queryParams => {
                 k => queryParams[k] !== null,
             );
 
-            const paramsString = paramKeys
+            let paramsString = paramKeys
                 .map(key => `${key}=${queryParams[key]}`)
                 .join('&');
 
+            // TODO improve when refactoring API call code
+            // append paramsString for Django REST API style ordering parameter based on sortCol and sortAsc
+            if (paramKeys.includes('sortCol')) {
+                let ordering = queryParams['sortCol'];
+                if (!queryParams['sortAsc']) {
+                    ordering = '-' + ordering;
+                }
+                paramsString += '&ordering=' + ordering;
+            }
             const data = await API.get('files', `/lims/?${paramsString}`, {});
 
             dispatch({

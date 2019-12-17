@@ -8,7 +8,6 @@ import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import TablePagination from '@material-ui/core/TablePagination';
-import TableHead from '@material-ui/core/TableHead';
 import { TablePaginationActionsWrapped } from '../components/TablePagniationActionsWrapped';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { clearErrorMessage, startRunningHomeQuery, updateHomeQueryPrams } from '../actions/home';
@@ -17,6 +16,9 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import { API } from 'aws-amplify';
+import { InfoOutlined } from '@material-ui/icons';
+import EnhancedTableHead from '../components/EnhancedTableHead';
+import MenuIcon from '@material-ui/icons/Menu';
 
 const styles = theme => ({
     close: {
@@ -39,7 +41,7 @@ class Home extends Component {
 
     reloadData = async (params = {}) => {
         // React pagination start at 0 whereas API start at 1, see also below for rowsPerPage
-        params.page += 1;
+        if (params.page != null) params.page += 1;
 
         const { handleStartRunningHomeQuery } = this.props;
         await handleStartRunningHomeQuery(params);
@@ -61,6 +63,19 @@ class Home extends Component {
             ...this.getBaseParams(),
             page: 0, // Reset page number if rows per page change
             rowsPerPage: event.target.value,
+        });
+    };
+
+    handleRequestSort = async (event, property) => {
+        const sortCol = property;
+        const { homeParams } = this.props;
+        let sortAsc = homeParams.sortCol === sortCol && !homeParams.sortAsc;
+
+        // Reset all other search params except query
+        await this.reloadData({
+            ...this.getBaseParams(),
+            sortAsc,
+            sortCol,
         });
     };
 
@@ -97,28 +112,69 @@ class Home extends Component {
     };
 
     renderHomeView = () => {
+        const { sortAsc, sortCol } = this.props.homeParams;
         const { loading, data } = this.props.homeResult;
         const { results, pagination } = data;
         const { dialog_open, row_id, row_data } = this.state;
+        const headerRow = [
+            {
+                key: 'run',
+                sortable: true,
+            },
+            {
+                key: 'type',
+                sortable: true,
+            },
+            {
+                key: 'timestamp',
+                sortable: true,
+            },
+            {
+                key: 'subject_id',
+                sortable: true,
+            },
+            {
+                key: 'sample_id',
+                sortable: true,
+            },
+            {
+                key: 'library_id',
+                sortable: false,
+            },
+            {
+                key: 'external_subject_id',
+                sortable: true,
+            },
+            {
+                key: 'external_sample_id',
+                sortable: false,
+            },
+            {
+                key: 'phenotype',
+                sortable: true,
+            },
+            {
+                key: 'project_name',
+                sortable: false,
+            },
+            {
+                key: 'info',
+                sortable: false,
+            },
+            {
+                key: 'results',
+                sortable: true,
+            },
+        ];
 
         return (
             <Paper>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>RN</TableCell>
-                            <TableCell>RUN</TableCell>
-                            <TableCell>Type</TableCell>
-                            <TableCell>Timestamp</TableCell>
-                            <TableCell>Subject ID</TableCell>
-                            <TableCell>External Subject ID</TableCell>
-                            <TableCell>Sample Name</TableCell>
-                            <TableCell>Sample ID</TableCell>
-                            <TableCell>External Sample ID</TableCell>
-                            <TableCell>Library ID</TableCell>
-                            <TableCell>Results</TableCell>
-                        </TableRow>
-                    </TableHead>
+                <Table size="small" aria-label="a dense table">
+                    <EnhancedTableHead
+                        onRequestSort={this.handleRequestSort}
+                        order={sortAsc ? 'asc' : 'desc'}
+                        orderBy={sortCol === null ? '' : sortCol}
+                        columns={headerRow} />
                     <TableBody>
                         {loading && (
                             <TableRow>
@@ -130,10 +186,7 @@ class Home extends Component {
                             </TableRow>
                         )}
                         {!loading && results != null && results.map((row, idx) =>
-                            <TableRow key={row.rn} onClick={this.handleRowClick(row.rn)}>
-                                <TableCell>
-                                    {row.rn}
-                                </TableCell>
+                            <TableRow key={row.rn}>
                                 <TableCell>
                                     {row.run}
                                 </TableCell>
@@ -147,22 +200,32 @@ class Home extends Component {
                                     {row.subject_id}
                                 </TableCell>
                                 <TableCell>
-                                    {row.external_subject_id}
-                                </TableCell>
-                                <TableCell>
-                                    {row.sample_name}
-                                </TableCell>
-                                <TableCell>
                                     {row.sample_id}
-                                </TableCell>
-                                <TableCell>
-                                    {row.external_sample_id}
                                 </TableCell>
                                 <TableCell>
                                     {row.library_id}
                                 </TableCell>
                                 <TableCell>
+                                    {row.external_subject_id}
+                                </TableCell>
+                                <TableCell>
+                                    {row.external_sample_id}
+                                </TableCell>
+                                <TableCell>
+                                    {row.phenotype}
+                                </TableCell>
+                                <TableCell>
+                                    {row.project_name}
+                                </TableCell>
+                                <TableCell>
+                                    <InfoOutlined
+                                        onClick={this.handleRowClick(row.rn)}/>
+                                </TableCell>
+                                <TableCell>
                                     {row.results}
+                                </TableCell>
+                                <TableCell>
+                                    <MenuIcon />
                                 </TableCell>
                             </TableRow>
                         )}
@@ -171,8 +234,7 @@ class Home extends Component {
                     <TableFooter>
                         <TableRow>
                             <TablePagination
-                                rowsPerPageOptions={[10, 20, 50]}
-                                colSpan={8}
+                                rowsPerPageOptions={[10, 20, 50, 100]}
                                 count={pagination.count}
                                 rowsPerPage={pagination.rowsPerPage}
                                 page={pagination.page - 1}
@@ -203,7 +265,7 @@ class Home extends Component {
                             (row_data.subject_id ? row_data.subject_id : row_data.sample_id) : 'Loading... ' + row_id}
                     </DialogTitle>
                     <DialogContent>
-                        <Table>
+                        <Table size="small" aria-label="a dense table">
                             <TableBody>
                                 {row_data === null && (
                                     <TableRow>
@@ -217,6 +279,7 @@ class Home extends Component {
                                 )}
                                 {row_data != null && Object.keys(row_data)
                                     .filter(function (k) { return k !== 'url';})
+                                    .filter(function (k) { return k !== 'rn';})
                                     .map((k) =>
                                     <TableRow key={k}>
                                         <TableCell>{k.toUpperCase()}</TableCell>

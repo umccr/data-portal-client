@@ -20,6 +20,7 @@ import { connect } from 'react-redux';
 import authUpdate from './actions/auth';
 import AppBar from './containers/AppBar';
 import StorageIcon from '@material-ui/icons/Storage';
+import SearchIcon from '@material-ui/icons/Search';
 
 const drawerWidth = 240;
 
@@ -172,6 +173,16 @@ class App extends Component {
                                     <StorageIcon />
                                 </ListItemIcon>
                                 <ListItemText primary="Storage" />
+                            </ListItem>
+                            <ListItem
+                                button
+                                component={RouterLink}
+                                to="/search"
+                            >
+                                <ListItemIcon>
+                                    <SearchIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="Search" />
                             </ListItem>
                         </Fragment>
                     )}
