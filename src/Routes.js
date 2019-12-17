@@ -6,16 +6,22 @@ import Home from './containers/Home';
 import Login from './containers/Login';
 import Search from './containers/Search';
 import Storage from './containers/Storage';
+import LandingPage from './containers/LandingPage';
 
 class Routes extends Component {
     render() {
         const { authUser } = this.props;
         return (
             <Switch>
-                <Route path="/" exact component={Home} />
-                <Route path="/login" component={Login} />
+                {authUser === null && (
+                    <Fragment>
+                        <Route path="/" exact component={LandingPage} />
+                        <Route path="/login" component={Login} />
+                    </Fragment>
+                )}
                 {authUser !== null && (
                     <Fragment>
+                        <Route path="/" exact component={Home} />
                         <Route path="/search" component={Search} />
                         <Route path="/storage" component={Storage} />
                     </Fragment>
