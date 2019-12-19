@@ -18,7 +18,12 @@ import DialogContent from '@material-ui/core/DialogContent';
 import { API } from 'aws-amplify';
 import { InfoOutlined } from '@material-ui/icons';
 import EnhancedTableHead from '../components/EnhancedTableHead';
-import MenuIcon from '@material-ui/icons/Menu';
+import TextField from '@material-ui/core/TextField';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
+import SearchIcon from '@material-ui/icons/Search';
+import Toolbar from '@material-ui/core/Toolbar';
+import Box from '@material-ui/core/Box';
 
 const styles = theme => ({
     close: {
@@ -29,9 +34,9 @@ const styles = theme => ({
 class Home extends Component {
 
     state = {
-        dialog_open: false,
-        row_id: null,
-        row_data: null,
+        dialogOpened: false,
+        rowId: null,
+        rowData: null,
     };
 
     async componentDidMount() {
@@ -79,6 +84,18 @@ class Home extends Component {
         });
     };
 
+    handleHomeQueryChange = async searchQuery => {
+        await this.props.handleHomeQueryParamsUpdate({
+            search: searchQuery,
+            page: 1,
+        });
+    };
+
+    handleSearchClicked = async () => {
+        const { handleStartRunningHomeQuery, homeParams } = this.props;
+        handleStartRunningHomeQuery(homeParams);
+    };
+
     handleCloseErrorMessage = (event, reason) => {
         // Clear error message in the state
         const { handleClearErrorMessage } = this.props;
@@ -93,93 +110,80 @@ class Home extends Component {
     };
 
     handleDialogOpen = (id) => {
-        const dialog_open = true;
-        const row_id = id;
-        this.setState({dialog_open});
-        this.setState({row_id}, () => this.processRowDetails());
+        const dialogOpened = true;
+        const rowId = id;
+        this.setState({dialogOpened});
+        this.setState({rowId}, () => this.processRowDetails());
     };
 
     handleDialogClose = () => {
-        const dialog_open = false;
-        const row_data = null;
-        this.setState({dialog_open, row_data});
+        const dialogOpened = false;
+        const rowData = null;
+        this.setState({dialogOpened, rowData});
     };
 
     processRowDetails = async () => {
-        const row_id = this.state.row_id;
-        const row_data = await API.get('files', `/lims/${row_id}/`, {});
-        this.setState({row_data});
+        const rowId = this.state.rowId;
+        const rowData = await API.get('files', `/lims/${rowId}/`, {});
+        this.setState({rowData});
     };
 
     renderHomeView = () => {
-        const { sortAsc, sortCol } = this.props.homeParams;
+        const { sortAsc, sortCol, search } = this.props.homeParams;
         const { loading, data } = this.props.homeResult;
         const { results, pagination } = data;
-        const { dialog_open, row_id, row_data } = this.state;
-        const headerRow = [
-            {
-                key: 'run',
-                sortable: true,
-            },
-            {
-                key: 'type',
-                sortable: true,
-            },
-            {
-                key: 'timestamp',
-                sortable: true,
-            },
-            {
-                key: 'subject_id',
-                sortable: true,
-            },
-            {
-                key: 'sample_id',
-                sortable: true,
-            },
-            {
-                key: 'library_id',
-                sortable: false,
-            },
-            {
-                key: 'external_subject_id',
-                sortable: true,
-            },
-            {
-                key: 'external_sample_id',
-                sortable: false,
-            },
-            {
-                key: 'phenotype',
-                sortable: true,
-            },
-            {
-                key: 'project_name',
-                sortable: false,
-            },
-            {
-                key: 'info',
-                sortable: false,
-            },
-            {
-                key: 'results',
-                sortable: true,
-            },
+        const { dialogOpened, rowData } = this.state;
+        const columns = [
+            { key: 'run', sortable: true, },
+            { key: 'type', sortable: true, },
+            { key: 'timestamp', sortable: true, },
+            { key: 'subject_id', sortable: true, },
+            { key: 'sample_id', sortable: true, },
+            { key: 'library_id', sortable: true, },
+            { key: 'external_subject_id', sortable: true, },
+            { key: 'external_sample_id', sortable: true, },
+            { key: 'phenotype', sortable: true, },
+            { key: 'project_name', sortable: true, },
+            { key: 'info', sortable: false, },
+            { key: 'results', sortable: true, },
         ];
 
         return (
             <Paper>
+                <Toolbar>
+                    <Box width={1/5}>
+                        <TextField
+                            fullWidth
+                            label={'Search Filter'}
+                            type={'search'}
+                            value={search}
+                            onChange={(e) =>
+                                this.handleHomeQueryChange(e.target.value)}
+                            onKeyPress={e => e.key === 'Enter' && this.handleSearchClicked()}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment color={'primary'} position={'end'}>
+                                        <IconButton color='primary' onClick={this.handleSearchClicked}>
+                                            <SearchIcon />
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }}
+                        />
+                    </Box>
+                </Toolbar>
+
                 <Table size="small" aria-label="a dense table">
                     <EnhancedTableHead
                         onRequestSort={this.handleRequestSort}
                         order={sortAsc ? 'asc' : 'desc'}
                         orderBy={sortCol === null ? '' : sortCol}
-                        columns={headerRow} />
+                        columns={columns} />
                     <TableBody>
                         {loading && (
                             <TableRow>
                                 <TableCell
-                                    colSpan={8}
+                                    colSpan={columns.length}
                                     style={{ textAlign: 'center' }}>
                                     <CircularProgress />
                                 </TableCell>
@@ -187,46 +191,11 @@ class Home extends Component {
                         )}
                         {!loading && results != null && results.map((row, idx) =>
                             <TableRow key={row.rn}>
-                                <TableCell>
-                                    {row.run}
-                                </TableCell>
-                                <TableCell>
-                                    {row.type}
-                                </TableCell>
-                                <TableCell>
-                                    {row.timestamp}
-                                </TableCell>
-                                <TableCell>
-                                    {row.subject_id}
-                                </TableCell>
-                                <TableCell>
-                                    {row.sample_id}
-                                </TableCell>
-                                <TableCell>
-                                    {row.library_id}
-                                </TableCell>
-                                <TableCell>
-                                    {row.external_subject_id}
-                                </TableCell>
-                                <TableCell>
-                                    {row.external_sample_id}
-                                </TableCell>
-                                <TableCell>
-                                    {row.phenotype}
-                                </TableCell>
-                                <TableCell>
-                                    {row.project_name}
-                                </TableCell>
-                                <TableCell>
-                                    <InfoOutlined
-                                        onClick={this.handleRowClick(row.rn)}/>
-                                </TableCell>
-                                <TableCell>
-                                    {row.results}
-                                </TableCell>
-                                <TableCell>
-                                    <MenuIcon />
-                                </TableCell>
+                                {columns.map(col =>
+                                    col.key === 'info'
+                                    ? <TableCell key={col.key}><InfoOutlined onClick={this.handleRowClick(row.rn)}/></TableCell>
+                                    : <TableCell key={col.key}>{row[col.key]}</TableCell>
+                                )}
                             </TableRow>
                         )}
                     </TableBody>
@@ -234,6 +203,7 @@ class Home extends Component {
                     <TableFooter>
                         <TableRow>
                             <TablePagination
+                                colSpan={8}
                                 rowsPerPageOptions={[10, 20, 50, 100]}
                                 count={pagination.count}
                                 rowsPerPage={pagination.rowsPerPage}
@@ -255,19 +225,21 @@ class Home extends Component {
                 </Table>
 
                 <Dialog
-                    open={dialog_open}
+                    open={dialogOpened}
                     onClose={this.handleDialogClose}
                     scroll={'paper'}
                     maxWidth={'lg'}
                 >
                     <DialogTitle>
-                        {row_data != null ?
-                            (row_data.subject_id ? row_data.subject_id : row_data.sample_id) : 'Loading... ' + row_id}
+                        {rowData != null
+                            ? (rowData.subject_id ? rowData.subject_id : rowData.sample_id)
+                            : 'Loading... '
+                        }
                     </DialogTitle>
                     <DialogContent>
                         <Table size="small" aria-label="a dense table">
                             <TableBody>
-                                {row_data === null && (
+                                {rowData === null && (
                                     <TableRow>
                                         <TableCell
                                             colSpan={2}
@@ -277,13 +249,13 @@ class Home extends Component {
                                         </TableCell>
                                     </TableRow>
                                 )}
-                                {row_data != null && Object.keys(row_data)
+                                {rowData != null && Object.keys(rowData)
                                     .filter(function (k) { return k !== 'url';})
                                     .filter(function (k) { return k !== 'rn';})
                                     .map((k) =>
                                     <TableRow key={k}>
                                         <TableCell>{k.toUpperCase()}</TableCell>
-                                        <TableCell>{row_data[k]}</TableCell>
+                                        <TableCell>{rowData[k]}</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>

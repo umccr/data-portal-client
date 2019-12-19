@@ -211,6 +211,7 @@ class Search extends Component {
 
         const dataRows = rows ? rows.dataRows : [];
         const headerRow = searchResultHeaderRow;
+        headerRow.push({ key: "actions", sortable: false, });
 
         return (
             <Paper>

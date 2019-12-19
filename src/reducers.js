@@ -31,6 +31,7 @@ const defaultHomeParams = {
     sortAsc: false,
     page: null,
     rowsPerPage: 20,
+    search: '',
 };
 
 const defaultHomeResult = {

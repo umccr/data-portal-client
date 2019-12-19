@@ -64,10 +64,6 @@ class EnhancedTableHead extends React.Component {
                             ),
                         this,
                     )}
-                    {/* Extra column for action button */}
-                    <TableCell>
-                        ACTIONS
-                    </TableCell>
                 </TableRow>
             </TableHead>
         );
