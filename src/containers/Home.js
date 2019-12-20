@@ -25,291 +25,280 @@ import SearchIcon from '@material-ui/icons/Search';
 import Toolbar from '@material-ui/core/Toolbar';
 import Box from '@material-ui/core/Box';
 
-const styles = theme => ({
-    close: {
-        padding: theme.spacing.unit / 2,
-    },
+const styles = (theme) => ({
+  close: {
+    padding: theme.spacing(0.5),
+  },
 });
 
 class Home extends Component {
+  state = {
+    dialogOpened: false,
+    rowId: null,
+    rowData: null,
+  };
 
-    state = {
-        dialogOpened: false,
-        rowId: null,
-        rowData: null,
+  async componentDidMount() {
+    const { handleStartRunningHomeQuery } = this.props;
+    await handleStartRunningHomeQuery(this.getBaseParams());
+  }
+
+  reloadData = async (params = {}) => {
+    // React pagination start at 0 whereas API start at 1, see also below for rowsPerPage
+    if (params.page != null) params.page += 1;
+
+    const { handleStartRunningHomeQuery } = this.props;
+    await handleStartRunningHomeQuery(params);
+  };
+
+  getBaseParams = () => {
+    return this.props.homeParams;
+  };
+
+  handlePageChange = async (event, page) => {
+    await this.reloadData({
+      ...this.getBaseParams(),
+      page: page,
+    });
+  };
+
+  handleRowsPerPageChange = async (event) => {
+    await this.reloadData({
+      ...this.getBaseParams(),
+      page: 0, // Reset page number if rows per page change
+      rowsPerPage: event.target.value,
+    });
+  };
+
+  handleRequestSort = async (event, property) => {
+    const sortCol = property;
+    const { homeParams } = this.props;
+    let sortAsc = homeParams.sortCol === sortCol && !homeParams.sortAsc;
+
+    // Reset all other search params except query
+    await this.reloadData({
+      ...this.getBaseParams(),
+      sortAsc,
+      sortCol,
+    });
+  };
+
+  handleHomeQueryChange = async (searchQuery) => {
+    await this.props.handleHomeQueryParamsUpdate({
+      search: searchQuery,
+      page: 1,
+    });
+  };
+
+  handleSearchClicked = async () => {
+    const { handleStartRunningHomeQuery, homeParams } = this.props;
+    handleStartRunningHomeQuery(homeParams);
+  };
+
+  handleRowClick = (id) => {
+    return () => {
+      this.handleDialogOpen(id);
     };
+  };
 
-    async componentDidMount() {
-        const { handleStartRunningHomeQuery } = this.props;
-        await handleStartRunningHomeQuery(this.getBaseParams());
-    }
+  handleDialogOpen = (id) => {
+    const dialogOpened = true;
+    const rowId = id;
+    this.setState({ dialogOpened });
+    this.setState({ rowId }, () => this.processRowDetails());
+  };
 
-    reloadData = async (params = {}) => {
-        // React pagination start at 0 whereas API start at 1, see also below for rowsPerPage
-        if (params.page != null) params.page += 1;
+  handleDialogClose = () => {
+    const dialogOpened = false;
+    const rowData = null;
+    this.setState({ dialogOpened, rowData });
+  };
 
-        const { handleStartRunningHomeQuery } = this.props;
-        await handleStartRunningHomeQuery(params);
-    };
+  processRowDetails = async () => {
+    const rowId = this.state.rowId;
+    const rowData = await API.get('files', `/lims/${rowId}/`, {});
+    this.setState({ rowData });
+  };
 
-    getBaseParams = () => {
-        return this.props.homeParams;
-    };
+  renderHomeView = () => {
+    const { sortAsc, sortCol, search } = this.props.homeParams;
+    const { loading, data } = this.props.homeResult;
+    const { results, pagination } = data;
+    const { dialogOpened, rowData } = this.state;
+    const columns = [
+      { key: 'run', sortable: true },
+      { key: 'type', sortable: true },
+      { key: 'timestamp', sortable: true },
+      { key: 'subject_id', sortable: true },
+      { key: 'sample_id', sortable: true },
+      { key: 'library_id', sortable: true },
+      { key: 'external_subject_id', sortable: true },
+      { key: 'external_sample_id', sortable: true },
+      { key: 'phenotype', sortable: true },
+      { key: 'project_name', sortable: true },
+      { key: 'info', sortable: false },
+      { key: 'results', sortable: true },
+    ];
 
-    handlePageChange = async (event, page) => {
-        await this.reloadData({
-            ...this.getBaseParams(),
-            page: page,
-        });
-    };
+    return (
+      <Paper>
+        <Toolbar>
+          <Box width={1 / 5}>
+            <TextField
+              fullWidth
+              label={'Search Filter'}
+              type={'search'}
+              value={search}
+              onChange={(e) => this.handleHomeQueryChange(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && this.handleSearchClicked()}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment color={'primary'} position={'end'}>
+                    <IconButton color='primary' onClick={this.handleSearchClicked}>
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </Toolbar>
 
-    handleRowsPerPageChange = async event => {
-        await this.reloadData({
-            ...this.getBaseParams(),
-            page: 0, // Reset page number if rows per page change
-            rowsPerPage: event.target.value,
-        });
-    };
+        <Table size='small' aria-label='a dense table'>
+          <EnhancedTableHead
+            onRequestSort={this.handleRequestSort}
+            order={sortAsc ? 'asc' : 'desc'}
+            orderBy={sortCol === null ? '' : sortCol}
+            columns={columns}
+          />
+          <TableBody>
+            {loading && (
+              <TableRow>
+                <TableCell colSpan={columns.length} style={{ textAlign: 'center' }}>
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading &&
+              results != null &&
+              results.map((row) => (
+                <TableRow key={row.rn}>
+                  {columns.map((col) =>
+                    col.key === 'info' ? (
+                      <TableCell key={col.key}>
+                        <InfoOutlined onClick={this.handleRowClick(row.rn)} />
+                      </TableCell>
+                    ) : (
+                      <TableCell key={col.key}>{row[col.key]}</TableCell>
+                    )
+                  )}
+                </TableRow>
+              ))}
+          </TableBody>
+          {pagination != null && (
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  colSpan={8}
+                  rowsPerPageOptions={[10, 20, 50, 100]}
+                  count={pagination.count}
+                  rowsPerPage={pagination.rowsPerPage}
+                  page={pagination.page - 1}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  onChangePage={this.handlePageChange}
+                  onChangeRowsPerPage={this.handleRowsPerPageChange}
+                  ActionsComponent={TablePaginationActionsWrapped}
+                />
+              </TableRow>
+            </TableFooter>
+          )}
+        </Table>
 
-    handleRequestSort = async (event, property) => {
-        const sortCol = property;
-        const { homeParams } = this.props;
-        let sortAsc = homeParams.sortCol === sortCol && !homeParams.sortAsc;
+        <Dialog
+          open={dialogOpened}
+          onClose={this.handleDialogClose}
+          scroll={'paper'}
+          maxWidth={'lg'}>
+          <DialogTitle>
+            {rowData != null
+              ? rowData.subject_id
+                ? rowData.subject_id
+                : rowData.sample_id
+              : 'Loading... '}
+          </DialogTitle>
+          <DialogContent>
+            <Table size='small' aria-label='a dense table'>
+              <TableBody>
+                {rowData === null && (
+                  <TableRow>
+                    <TableCell colSpan={2} style={{ textAlign: 'center' }}>
+                      <CircularProgress />
+                    </TableCell>
+                  </TableRow>
+                )}
+                {rowData != null &&
+                  Object.keys(rowData)
+                    .filter(function(k) {
+                      return k !== 'url';
+                    })
+                    .filter(function(k) {
+                      return k !== 'rn';
+                    })
+                    .map((k) => (
+                      <TableRow key={k}>
+                        <TableCell>{k.toUpperCase()}</TableCell>
+                        <TableCell>{rowData[k]}</TableCell>
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          </DialogContent>
+        </Dialog>
+      </Paper>
+    );
+  };
 
-        // Reset all other search params except query
-        await this.reloadData({
-            ...this.getBaseParams(),
-            sortAsc,
-            sortCol,
-        });
-    };
-
-    handleHomeQueryChange = async searchQuery => {
-        await this.props.handleHomeQueryParamsUpdate({
-            search: searchQuery,
-            page: 1,
-        });
-    };
-
-    handleSearchClicked = async () => {
-        const { handleStartRunningHomeQuery, homeParams } = this.props;
-        handleStartRunningHomeQuery(homeParams);
-    };
-
-    handleCloseErrorMessage = (event, reason) => {
-        // Clear error message in the state
-        const { handleClearErrorMessage } = this.props;
-
-        handleClearErrorMessage();
-    };
-
-    handleRowClick = (id) => {
-      return (event) => {
-          this.handleDialogOpen(id);
-      }
-    };
-
-    handleDialogOpen = (id) => {
-        const dialogOpened = true;
-        const rowId = id;
-        this.setState({dialogOpened});
-        this.setState({rowId}, () => this.processRowDetails());
-    };
-
-    handleDialogClose = () => {
-        const dialogOpened = false;
-        const rowData = null;
-        this.setState({dialogOpened, rowData});
-    };
-
-    processRowDetails = async () => {
-        const rowId = this.state.rowId;
-        const rowData = await API.get('files', `/lims/${rowId}/`, {});
-        this.setState({rowData});
-    };
-
-    renderHomeView = () => {
-        const { sortAsc, sortCol, search } = this.props.homeParams;
-        const { loading, data } = this.props.homeResult;
-        const { results, pagination } = data;
-        const { dialogOpened, rowData } = this.state;
-        const columns = [
-            { key: 'run', sortable: true, },
-            { key: 'type', sortable: true, },
-            { key: 'timestamp', sortable: true, },
-            { key: 'subject_id', sortable: true, },
-            { key: 'sample_id', sortable: true, },
-            { key: 'library_id', sortable: true, },
-            { key: 'external_subject_id', sortable: true, },
-            { key: 'external_sample_id', sortable: true, },
-            { key: 'phenotype', sortable: true, },
-            { key: 'project_name', sortable: true, },
-            { key: 'info', sortable: false, },
-            { key: 'results', sortable: true, },
-        ];
-
-        return (
-            <Paper>
-                <Toolbar>
-                    <Box width={1/5}>
-                        <TextField
-                            fullWidth
-                            label={'Search Filter'}
-                            type={'search'}
-                            value={search}
-                            onChange={(e) =>
-                                this.handleHomeQueryChange(e.target.value)}
-                            onKeyPress={e => e.key === 'Enter' && this.handleSearchClicked()}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment color={'primary'} position={'end'}>
-                                        <IconButton color='primary' onClick={this.handleSearchClicked}>
-                                            <SearchIcon />
-                                        </IconButton>
-                                    </InputAdornment>
-                                )
-                            }}
-                        />
-                    </Box>
-                </Toolbar>
-
-                <Table size="small" aria-label="a dense table">
-                    <EnhancedTableHead
-                        onRequestSort={this.handleRequestSort}
-                        order={sortAsc ? 'asc' : 'desc'}
-                        orderBy={sortCol === null ? '' : sortCol}
-                        columns={columns} />
-                    <TableBody>
-                        {loading && (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    style={{ textAlign: 'center' }}>
-                                    <CircularProgress />
-                                </TableCell>
-                            </TableRow>
-                        )}
-                        {!loading && results != null && results.map((row, idx) =>
-                            <TableRow key={row.rn}>
-                                {columns.map(col =>
-                                    col.key === 'info'
-                                    ? <TableCell key={col.key}><InfoOutlined onClick={this.handleRowClick(row.rn)}/></TableCell>
-                                    : <TableCell key={col.key}>{row[col.key]}</TableCell>
-                                )}
-                            </TableRow>
-                        )}
-                    </TableBody>
-                    {pagination != null && (
-                    <TableFooter>
-                        <TableRow>
-                            <TablePagination
-                                colSpan={8}
-                                rowsPerPageOptions={[10, 20, 50, 100]}
-                                count={pagination.count}
-                                rowsPerPage={pagination.rowsPerPage}
-                                page={pagination.page - 1}
-                                SelectProps={{
-                                    native: true,
-                                }}
-                                onChangePage={this.handlePageChange}
-                                onChangeRowsPerPage={
-                                    this.handleRowsPerPageChange
-                                }
-                                ActionsComponent={
-                                    TablePaginationActionsWrapped
-                                }
-                            />
-                        </TableRow>
-                    </TableFooter>
-                    )}
-                </Table>
-
-                <Dialog
-                    open={dialogOpened}
-                    onClose={this.handleDialogClose}
-                    scroll={'paper'}
-                    maxWidth={'lg'}
-                >
-                    <DialogTitle>
-                        {rowData != null
-                            ? (rowData.subject_id ? rowData.subject_id : rowData.sample_id)
-                            : 'Loading... '
-                        }
-                    </DialogTitle>
-                    <DialogContent>
-                        <Table size="small" aria-label="a dense table">
-                            <TableBody>
-                                {rowData === null && (
-                                    <TableRow>
-                                        <TableCell
-                                            colSpan={2}
-                                            style={{ textAlign: 'center' }}
-                                        >
-                                            <CircularProgress />
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                                {rowData != null && Object.keys(rowData)
-                                    .filter(function (k) { return k !== 'url';})
-                                    .filter(function (k) { return k !== 'rn';})
-                                    .map((k) =>
-                                    <TableRow key={k}>
-                                        <TableCell>{k.toUpperCase()}</TableCell>
-                                        <TableCell>{rowData[k]}</TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </DialogContent>
-                </Dialog>
-
-            </Paper>
-        )
-    };
-
-    render() {
-        const { authUserInfo } = this.props;
-        return (
-            <Fragment>
-                {authUserInfo && this.renderHomeView()}
-            </Fragment>
-        );
-    }
+  render() {
+    const { authUserInfo } = this.props;
+    return <Fragment>{authUserInfo && this.renderHomeView()}</Fragment>;
+  }
 }
 
-Home.proTypes = {
-    authUserInfo: PropTypes.object.isRequired,
-    handleStartRunningHomeQuery: PropTypes.func.isRequired,
-    handleHomeQueryParamsUpdate: PropTypes.func.isRequired,
-    homeParams: PropTypes.object.isRequired,
-    homeResult: PropTypes.object.isRequired,
+Home.propTypes = {
+  authUserInfo: PropTypes.object.isRequired,
+  handleStartRunningHomeQuery: PropTypes.func.isRequired,
+  handleHomeQueryParamsUpdate: PropTypes.func.isRequired,
+  homeParams: PropTypes.object.isRequired,
+  homeResult: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = (state, ownProps) => {
-    return {
-        authUserInfo: state.authUserInfo,
-        homeParams: state.homeParams,
-        homeResult: state.homeResult,
-    };
+const mapStateToProps = (state) => {
+  return {
+    authUserInfo: state.authUserInfo,
+    homeParams: state.homeParams,
+    homeResult: state.homeResult,
+  };
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-    return {
-        handleHomeQueryParamsUpdate: async params => {
-            dispatch(updateHomeQueryPrams(params));
-        },
-        handleStartRunningHomeQuery: async params => {
-            dispatch(startRunningHomeQuery(params));
-        },
-        handleClearErrorMessage: () => {
-            dispatch(clearErrorMessage());
-        },
-    };
+const mapDispatchToProps = (dispatch) => {
+  return {
+    handleHomeQueryParamsUpdate: async (params) => {
+      dispatch(updateHomeQueryPrams(params));
+    },
+    handleStartRunningHomeQuery: async (params) => {
+      dispatch(startRunningHomeQuery(params));
+    },
+    handleClearErrorMessage: () => {
+      dispatch(clearErrorMessage());
+    },
+  };
 };
 
 const ConnectHome = connect(
-    mapStateToProps,
-    mapDispatchToProps,
+  mapStateToProps,
+  mapDispatchToProps
 )(Home);
 
 export default withStyles(styles)(ConnectHome);

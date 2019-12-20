@@ -12,34 +12,34 @@ import thunk from 'redux-thunk';
 import reducer from './reducers';
 
 Amplify.configure({
-    Auth: {
-        mandatorySignIn: true,
-        region: config.cognito.REGION,
-        userPoolId: config.cognito.USER_POOL_ID,
-        identityPoolId: config.cognito.IDENTITY_POOL_ID,
-        userPoolWebClientId: config.cognito.APP_CLIENT_ID,
-        oauth: config.cognito.OAUTH,
-    },
-    API: {
-        endpoints: [
-            {
-                name: 'files',
-                endpoint: config.apiGateway.URL,
-                region: config.apiGateway.REGION,
-            },
-        ],
-    },
+  Auth: {
+    mandatorySignIn: true,
+    region: config.cognito.REGION,
+    userPoolId: config.cognito.USER_POOL_ID,
+    identityPoolId: config.cognito.IDENTITY_POOL_ID,
+    userPoolWebClientId: config.cognito.APP_CLIENT_ID,
+    oauth: config.cognito.OAUTH,
+  },
+  API: {
+    endpoints: [
+      {
+        name: 'files',
+        endpoint: config.apiGateway.URL,
+        region: config.apiGateway.REGION,
+      },
+    ],
+  },
 });
 
 const store = createStore(reducer, applyMiddleware(thunk));
 
 ReactDOM.render(
-    <Provider store={store}>
-        <Router>
-            <App />
-        </Router>
-    </Provider>,
-    document.getElementById('root'),
+  <Provider store={store}>
+    <Router>
+      <App />
+    </Router>
+  </Provider>,
+  document.getElementById('root')
 );
 
 // If you want your app to work offline and load faster, you can change

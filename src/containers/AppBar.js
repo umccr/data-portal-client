@@ -21,9 +21,9 @@ import InputIcon from '@material-ui/icons/Input';
 import HelpIcon from '@material-ui/icons/Help';
 import { connect } from 'react-redux';
 import {
-    beforeRunningSearchQuery,
-    startRunningSearchQuery,
-    updateSearchQueryPrams,
+  beforeRunningSearchQuery,
+  startRunningSearchQuery,
+  updateSearchQueryPrams,
 } from '../actions/search';
 import { withRouter } from 'react-router-dom';
 import Fade from '@material-ui/core/Fade';
@@ -38,490 +38,437 @@ import queryString from 'query-string';
 const drawerWidth = 240;
 
 const querySyntax = [
-    {
-        syntax: '[string]',
-        description: 'Default filter, equivalent to pathinc.',
-    },
-    {
-        syntax: 'pathinc:[string]',
-        description: 'File path (includes). e.g. pathinc:umccrised',
-    },
-    {
-        syntax: 'ext:[string]',
-        description: 'File extension. e.g. ext:csv',
-    },
-    {
-        syntax: 'date:[comparator][date]',
-        description: 'Last modified date. e.g. date:>2019-04-01',
-    },
-    {
-        syntax: 'size:[comparator][integer]',
-        description: 'File size. e.g. size:>=1000',
-    },
-    {
-        syntax: 'subjectid:[string]',
-        description: '(LIMS) SubjectID or ExternalSubjectId includes',
-    },
-    {
-        syntax: 'sampleid:[string]',
-        description: '(LIMS) SampleId includes',
-    },
-    {
-        syntax: 'case:[boolean]',
-        description:
-            'Case sensitivity (for string comparisons, default to false). e.g. case:true',
-    },
-    {
-        syntax: 'linked:[boolean]',
-        description:
-            'Linked with at least one LIMS Row. e.g. linked:true',
-    },
+  {
+    syntax: '[string]',
+    description: 'Default filter, equivalent to pathinc.',
+  },
+  {
+    syntax: 'pathinc:[string]',
+    description: 'File path (includes). e.g. pathinc:umccrised',
+  },
+  {
+    syntax: 'ext:[string]',
+    description: 'File extension. e.g. ext:csv',
+  },
+  {
+    syntax: 'date:[comparator][date]',
+    description: 'Last modified date. e.g. date:>2019-04-01',
+  },
+  {
+    syntax: 'size:[comparator][integer]',
+    description: 'File size. e.g. size:>=1000',
+  },
+  {
+    syntax: 'subjectid:[string]',
+    description: '(LIMS) SubjectID or ExternalSubjectId includes',
+  },
+  {
+    syntax: 'sampleid:[string]',
+    description: '(LIMS) SampleId includes',
+  },
+  {
+    syntax: 'case:[boolean]',
+    description: 'Case sensitivity (for string comparisons, default to false). e.g. case:true',
+  },
+  {
+    syntax: 'linked:[boolean]',
+    description: 'Linked with at least one LIMS Row. e.g. linked:true',
+  },
 ];
 
-const styles = theme => ({
-    appBar: {
-        marginLeft: drawerWidth,
-        [theme.breakpoints.up('sm')]: {
-            width: `calc(100% - ${drawerWidth}px)`,
-        },
+const styles = (theme) => ({
+  appBar: {
+    marginLeft: drawerWidth,
+    [theme.breakpoints.up('sm')]: {
+      width: `calc(100% - ${drawerWidth}px)`,
     },
-    grow: {
-        flexGrow: 1,
+  },
+  grow: {
+    flexGrow: 1,
+  },
+  menuButton: {
+    marginRight: 20,
+    [theme.breakpoints.up('sm')]: {
+      display: 'none',
     },
-    menuButton: {
-        marginRight: 20,
-        [theme.breakpoints.up('sm')]: {
-            display: 'none',
-        },
+  },
+  title: {
+    display: 'none',
+    [theme.breakpoints.up('sm')]: {
+      display: 'block',
     },
-    title: {
-        display: 'none',
-        [theme.breakpoints.up('sm')]: {
-            display: 'block',
-        },
+  },
+  search: {
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: fade(theme.palette.common.white, 0.15),
+    '&:hover': {
+      backgroundColor: fade(theme.palette.common.white, 0.25),
     },
-    search: {
-        position: 'relative',
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: fade(theme.palette.common.white, 0.15),
-        '&:hover': {
-            backgroundColor: fade(theme.palette.common.white, 0.25),
-        },
-        marginLeft: 0,
-        marginRight: 20,
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-            marginLeft: theme.spacing.unit,
-            width: 'auto',
-        },
+    marginLeft: 0,
+    marginRight: 20,
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing(1),
+      width: 'auto',
     },
-    searchIcon: {
-        width: theme.spacing.unit * 9,
-        height: '100%',
-        position: 'absolute',
-        pointerEvents: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+  },
+  searchIcon: {
+    width: theme.spacing(9),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputRoot: {
+    color: 'inherit',
+    width: '100%',
+  },
+  inputInput: {
+    paddingTop: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    paddingLeft: theme.spacing(10),
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      width: 120,
+      '&:focus': {
+        width: 200,
+      },
     },
-    inputRoot: {
-        color: 'inherit',
-        width: '100%',
-    },
-    inputInput: {
-        paddingTop: theme.spacing.unit,
-        paddingRight: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
-        paddingLeft: theme.spacing.unit * 10,
-        transition: theme.transitions.create('width'),
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-            width: 120,
-            '&:focus': {
-                width: 200,
-            },
-        },
-    },
-    buttonIcon: {
-        margin: theme.spacing.unit,
-    },
-    searchHintContainer: {
-        paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
-    },
-    searchHintTitle: {
-        marginTop: 2 * theme.spacing.unit,
-        marginLeft: 2 * theme.spacing.unit,
-    },
-    searchHintButton: {
-        marginTop: theme.spacing.unit,
-    },
-    searchHintTable: {
-        maxWidth: 700,
-    },
+  },
+  buttonIcon: {
+    margin: theme.spacing(1),
+  },
+  searchHintContainer: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+  },
+  searchHintTitle: {
+    marginTop: 2 * theme.spacing(1),
+    marginLeft: 2 * theme.spacing(1),
+  },
+  searchHintButton: {
+    marginTop: theme.spacing(1),
+  },
+  searchHintTable: {
+    maxWidth: 700,
+  },
 });
 
 class AppBar extends Component {
-    state = {
-        userMenuOpen: false,
-        openSearchHint: false,
-    };
+  state = {
+    userMenuOpen: false,
+    openSearchHint: false,
+  };
 
-    async componentDidMount() {
-        // Check whether we have query parameter,
-        // if there is, trigger a search action
-        if (this.props.location.pathname === '/search') {
-            const values = queryString.parse(this.props.location.search);
+  async componentDidMount() {
+    // Check whether we have query parameter,
+    // if there is, trigger a search action
+    if (this.props.location.pathname === '/search') {
+      const values = queryString.parse(this.props.location.search);
 
-            if (values.query) {
-                const searchParams = { query: values.query };
+      if (values.query) {
+        const searchParams = { query: values.query };
 
-                if (values.sortAsc !== undefined) {
-                    searchParams.sortAsc = values.sortAsc === 'true';
-                }
-
-                if (values.sortCol) {
-                    searchParams.sortCol = values.sortCol;
-                }
-
-                if (values.page !== undefined) {
-                    searchParams.page = values.page;
-                } else {
-                    searchParams.page = 0;
-                }
-
-                if (values.rowsPerPage !== undefined) {
-                    searchParams.rowsPerPage = values.rowsPerPage;
-                } else {
-                    searchParams.rowsPerPage = 20;
-                }
-
-                const { handleStartRunningSearchQuery } = this.props;
-
-                await handleStartRunningSearchQuery(searchParams);
-            }
+        if (values.sortAsc !== undefined) {
+          searchParams.sortAsc = values.sortAsc === 'true';
         }
+
+        if (values.sortCol) {
+          searchParams.sortCol = values.sortCol;
+        }
+
+        if (values.page !== undefined) {
+          searchParams.page = values.page;
+        } else {
+          searchParams.page = 0;
+        }
+
+        if (values.rowsPerPage !== undefined) {
+          searchParams.rowsPerPage = values.rowsPerPage;
+        } else {
+          searchParams.rowsPerPage = 20;
+        }
+
+        const { handleStartRunningSearchQuery } = this.props;
+
+        await handleStartRunningSearchQuery(searchParams);
+      }
+    }
+  }
+
+  handleToggleUserMenu = () => {
+    this.setState((state) => ({ userMenuOpen: !state.userMenuOpen }));
+  };
+
+  handleCloseUserMenu = (event) => {
+    if (this.anchorEl.contains(event.target)) {
+      return;
     }
 
-    handleToggleUserMenu = () => {
-        this.setState(state => ({ userMenuOpen: !state.userMenuOpen }));
-    };
+    this.setState({ userMenuOpen: false });
+  };
 
-    handleCloseUserMenu = event => {
-        if (this.anchorEl.contains(event.target)) {
-            return;
-        }
+  handleLogOutClicked = async (event) => {
+    this.handleCloseUserMenu(event);
+    this.props.handleSignOut();
+  };
 
-        this.setState({ userMenuOpen: false });
-    };
+  renderUserButton = () => {
+    const { classes, authUserInfo, handleSignIn } = this.props;
+    const { userMenuOpen } = this.state;
 
-    handleLogOutClicked = async event => {
-        this.handleCloseUserMenu(event);
-        this.props.handleSignOut();
-    };
+    return (
+      <Fragment>
+        {authUserInfo === null && (
+          <Button color='inherit' onClick={handleSignIn}>
+            <InputIcon className={classes.buttonIcon} />
+            Login
+          </Button>
+        )}
+        {authUserInfo !== null && (
+          <Fragment>
+            <Button
+              color='inherit'
+              buttonRef={(node) => {
+                this.anchorEl = node;
+              }}
+              aria-owns={userMenuOpen ? 'menu-list-grow' : undefined}
+              aria-haspopup='true'
+              onClick={this.handleToggleUserMenu}>
+              <AccountCircleIcon className={classes.buttonIcon} />
+              {authUserInfo.attributes.email}
+            </Button>
+          </Fragment>
+        )}
+      </Fragment>
+    );
+  };
 
-    renderUserButton = () => {
-        const { classes, authUserInfo, handleSignIn } = this.props;
-        const { userMenuOpen } = this.state;
+  renderUserMenu = () => {
+    const { userMenuOpen } = this.state;
 
-        return (
-            <Fragment>
-                {authUserInfo === null && (
-                    <Button color="inherit" onClick={handleSignIn}>
-                        <InputIcon className={classes.buttonIcon} />
-                        Login
-                    </Button>
-                )}
-                {authUserInfo !== null && (
-                    <Fragment>
-                        <Button
-                            color="inherit"
-                            buttonRef={node => {
-                                this.anchorEl = node;
-                            }}
-                            aria-owns={
-                                userMenuOpen ? 'menu-list-grow' : undefined
-                            }
-                            aria-haspopup="true"
-                            onClick={this.handleToggleUserMenu}
-                        >
-                            <AccountCircleIcon className={classes.buttonIcon} />
-                            {authUserInfo.attributes.email}
-                        </Button>
-                    </Fragment>
-                )}
-            </Fragment>
-        );
-    };
+    return (
+      <Popper open={userMenuOpen} anchorEl={this.anchorEl} transition disablePortal>
+        {({ TransitionProps, placement }) => (
+          <Grow
+            {...TransitionProps}
+            id='menu-list-grow'
+            style={{
+              transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+            }}>
+            <Paper>
+              <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
+                <MenuList>
+                  <MenuItem onClick={this.handleLogOutClicked}>Logout</MenuItem>
+                </MenuList>
+              </ClickAwayListener>
+            </Paper>
+          </Grow>
+        )}
+      </Popper>
+    );
+  };
 
-    renderUserMenu = () => {
-        const { userMenuOpen } = this.state;
+  handleSearchQueryChange = async (newQuery) => {
+    await this.props.handleSearchQueryParamsUpdate({
+      query: newQuery,
+      page: 0,
+    });
+  };
 
-        return (
-            <Popper
-                open={userMenuOpen}
-                anchorEl={this.anchorEl}
-                transition
-                disablePortal
-            >
-                {({ TransitionProps, placement }) => (
-                    <Grow
-                        {...TransitionProps}
-                        id="menu-list-grow"
-                        style={{
-                            transformOrigin:
-                                placement === 'bottom'
-                                    ? 'center top'
-                                    : 'center bottom',
-                        }}
-                    >
-                        <Paper>
-                            <ClickAwayListener
-                                onClickAway={this.handleCloseUserMenu}
-                            >
-                                <MenuList>
-                                    <MenuItem
-                                        onClick={this.handleLogOutClicked}
-                                    >
-                                        Logout
-                                    </MenuItem>
-                                </MenuList>
-                            </ClickAwayListener>
-                        </Paper>
-                    </Grow>
-                )}
-            </Popper>
-        );
-    };
+  handleSearchQuerySyntaxClick = (event) => {
+    const { currentTarget } = event;
+    this.setState((state) => ({
+      searchHintAnchorEl: currentTarget,
+      openSearchHint: !state.openSearchHint,
+    }));
+  };
 
-    handleSearchQueryChange = async newQuery => {
-        await this.props.handleSearchQueryParamsUpdate({
-            query: newQuery,
-            page: 0,
-        });
-    };
+  handleSearchClicked = async () => {
+    const { handleStartRunningSearchQuery, searchParams, history } = this.props;
 
-    handleSearchQuerySyntaxClick = event => {
-        const { currentTarget } = event;
-        this.setState(state => ({
-            searchHintAnchorEl: currentTarget,
-            openSearchHint: !state.openSearchHint,
-        }));
-    };
+    history.push('/search');
 
-    handleSearchClicked = async () => {
-        const {
-            handleStartRunningSearchQuery,
-            searchParams,
-            history
-        } = this.props;
+    // Start searching asynchronously (which allows us to jump to next action)
+    handleStartRunningSearchQuery(searchParams);
+  };
 
-        history.push('/search');
+  renderSearchBox = () => {
+    const { classes, searchParams } = this.props;
 
-        // Start searching asynchronously (which allows us to jump to next action)
-        handleStartRunningSearchQuery(searchParams);
-    };
-
-    renderSearchBox = () => {
-        const { classes, searchParams } = this.props;
-
-        return (
-            <div className={classes.search}>
-                {this.renderSearchHint()}
-                <div className={classes.searchIcon}>
-                    <SearchIcon />
-                </div>
-                <InputBase
-                    placeholder="Search…"
-                    classes={{
-                        root: classes.inputRoot,
-                        input: classes.inputInput,
-                    }}
-                    value={searchParams.query}
-                    onChange={(e) => this.handleSearchQueryChange(e.target.value)}
-                    onKeyPress={e =>
-                        e.key === 'Enter' && this.handleSearchClicked()
-                    }
-                    endAdornment={
-                        <div>
-                            <IconButton
-                                style={{ color: 'white' }}
-                                onClick={this.handleSearchQuerySyntaxClick}
-                            >
-                                <HelpIcon />
-                            </IconButton>
-                        </div>
-                    }
-                />
+    return (
+      <div className={classes.search}>
+        {this.renderSearchHint()}
+        <div className={classes.searchIcon}>
+          <SearchIcon />
+        </div>
+        <InputBase
+          placeholder='Search…'
+          classes={{
+            root: classes.inputRoot,
+            input: classes.inputInput,
+          }}
+          value={searchParams.query}
+          onChange={(e) => this.handleSearchQueryChange(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && this.handleSearchClicked()}
+          endAdornment={
+            <div>
+              <IconButton style={{ color: 'white' }} onClick={this.handleSearchQuerySyntaxClick}>
+                <HelpIcon />
+              </IconButton>
             </div>
-        );
-    };
+          }
+        />
+      </div>
+    );
+  };
 
-    renderSearchHintTable = () => {
-        const { classes } = this.props;
-        return (
-            <Table size="small" className={classes.searchHintTable}>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Tag Syntax</TableCell>
-                        <TableCell>Description</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {querySyntax.map(s => (
-                        <TableRow>
-                            <TableCell>{s.syntax}</TableCell>
-                            <TableCell>{s.description}</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        );
-    };
+  renderSearchHintTable = () => {
+    const { classes } = this.props;
+    return (
+      <Table size='small' className={classes.searchHintTable}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Tag Syntax</TableCell>
+            <TableCell>Description</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {querySyntax.map((s, idx) => (
+            <TableRow key={idx}>
+              <TableCell>{s.syntax}</TableCell>
+              <TableCell>{s.description}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
 
-    renderSearchHint = () => {
-        const { classes } = this.props;
-        const { openSearchHint } = this.state;
-        const searchHintPopperId = openSearchHint ? 'popper-search-hint' : null;
+  renderSearchHint = () => {
+    const { classes } = this.props;
+    const { openSearchHint } = this.state;
+    const searchHintPopperId = openSearchHint ? 'popper-search-hint' : null;
 
-        return (
-            <Popper
-                id={searchHintPopperId}
-                open={this.state.openSearchHint}
-                anchorEl={this.state.searchHintAnchorEl}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                transition
-            >
-                {({ TransitionProps }) => (
-                    <Fade {...TransitionProps} timeout={350}>
-                        <Paper>
-                            <Grid
-                                container
-                                className={classes.searchHintContainer}
-                                direction="column"
-                            >
-                                <Typography
-                                    variant="subheading"
-                                    className={classes.searchHintTitle}
-                                >
-                                    Search Query Syntax
-                                </Typography>
-                                {this.renderSearchHintTable()}
+    return (
+      <Popper
+        id={searchHintPopperId}
+        open={this.state.openSearchHint}
+        anchorEl={this.state.searchHintAnchorEl}
+        transition>
+        {({ TransitionProps }) => (
+          <Fade {...TransitionProps} timeout={350}>
+            <Paper>
+              <Grid container className={classes.searchHintContainer} direction='column'>
+                <Typography variant='h6' className={classes.searchHintTitle}>
+                  Search Query Syntax
+                </Typography>
+                {this.renderSearchHintTable()}
 
-                                <Grid
-                                    container
-                                    sm={12}
-                                    justify="flex-end"
-                                    className={classes.searchHintButton}
-                                >
-                                    <Button
-                                        color="default"
-                                        size="small"
-                                        onClick={
-                                            this.handleSearchQuerySyntaxClick
-                                        }
-                                    >
-                                        Okay
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                    </Fade>
-                )}
-            </Popper>
-        );
-    };
+                <Grid item sm={12} className={classes.searchHintButton}>
+                  <Button color='default' size='small' onClick={this.handleSearchQuerySyntaxClick}>
+                    Okay
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
+          </Fade>
+        )}
+      </Popper>
+    );
+  };
 
-    /**
-     * Flags whether we are on storage page
-     * @returns {boolean}
-     */
-    notOnStoragePage = () => {
-        return this.props.location.pathname !== '/storage';
-    };
-    notOnHomePage = () => {
-        return this.props.location.pathname !== '/';
-    };
+  /**
+   * Flags whether we are on storage page
+   * @returns {boolean}
+   */
+  notOnStoragePage = () => {
+    return this.props.location.pathname !== '/storage';
+  };
+  notOnHomePage = () => {
+    return this.props.location.pathname !== '/';
+  };
 
-    render() {
-        const { title, classes, authUserInfo, handleDrawerToggle } = this.props;
-        const { userMenuOpen } = this.state;
+  render() {
+    const { title, classes, authUserInfo, handleDrawerToggle } = this.props;
+    const { userMenuOpen } = this.state;
 
-        return (
-            <Fragment>
-                <DefaultAppBar position="fixed" className={classes.appBar}>
-                    <Toolbar>
-                        <IconButton
-                            color="inherit"
-                            aria-label="Open drawer"
-                            onClick={handleDrawerToggle}
-                            className={classes.menuButton}
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                        <Typography variant="h6" color="inherit">
-                            {title}
-                        </Typography>
-                        <div className={classes.grow} />
-                        {authUserInfo && this.notOnStoragePage() && this.notOnHomePage() && this.renderSearchBox()}
-                        {this.renderUserButton(classes, authUserInfo)}
-                        {this.renderUserMenu(classes, userMenuOpen)}
-                    </Toolbar>
-                </DefaultAppBar>
-            </Fragment>
-        );
-    }
+    return (
+      <Fragment>
+        <DefaultAppBar position='fixed' className={classes.appBar}>
+          <Toolbar>
+            <IconButton
+              color='inherit'
+              aria-label='Open drawer'
+              onClick={handleDrawerToggle}
+              className={classes.menuButton}>
+              <MenuIcon />
+            </IconButton>
+            <Typography variant='h6' color='inherit'>
+              {title}
+            </Typography>
+            <div className={classes.grow} />
+            {authUserInfo &&
+              this.notOnStoragePage() &&
+              this.notOnHomePage() &&
+              this.renderSearchBox()}
+            {this.renderUserButton(classes, authUserInfo)}
+            {this.renderUserMenu(classes, userMenuOpen)}
+          </Toolbar>
+        </DefaultAppBar>
+      </Fragment>
+    );
+  }
 }
 
 AppBar.defaultProps = {
-    authUserInfo: null,
+  authUserInfo: null,
 };
 
 AppBar.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
-    title: PropTypes.node.isRequired,
-    authUserInfo: PropTypes.object,
-    handleDrawerToggle: PropTypes.func.isRequired,
-    handleBeforeRunningSearchQuery: PropTypes.func.isRequired,
-    handleStartRunningSearchQuery: PropTypes.func.isRequired,
-    handleSearchQueryParamsUpdate: PropTypes.func.isRequired,
-    handleSignOut: PropTypes.func.isRequired,
-    handleSignIn: PropTypes.func.isRequired,
+  classes: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
+  title: PropTypes.node.isRequired,
+  authUserInfo: PropTypes.object,
+  handleDrawerToggle: PropTypes.func.isRequired,
+  handleBeforeRunningSearchQuery: PropTypes.func.isRequired,
+  handleStartRunningSearchQuery: PropTypes.func.isRequired,
+  handleSearchQueryParamsUpdate: PropTypes.func.isRequired,
+  handleSignOut: PropTypes.func.isRequired,
+  handleSignIn: PropTypes.func.isRequired,
+  location: PropTypes.object,
+  searchParams: PropTypes.object,
+  history: PropTypes.object,
 };
 
-const mapStateToProps = (state, ownProps) => {
-    return {
-        searchParams: state.searchParams,
-    };
+const mapStateToProps = (state) => {
+  return {
+    searchParams: state.searchParams,
+  };
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-    return {
-        handleBeforeRunningSearchQuery: params => {
-            dispatch(beforeRunningSearchQuery(params));
-        },
-        handleStartRunningSearchQuery: params => {
-            dispatch(startRunningSearchQuery(params));
-        },
-        handleSearchQueryParamsUpdate: params => {
-            dispatch(updateSearchQueryPrams(params));
-        },
-    };
+const mapDispatchToProps = (dispatch) => {
+  return {
+    handleBeforeRunningSearchQuery: (params) => {
+      dispatch(beforeRunningSearchQuery(params));
+    },
+    handleStartRunningSearchQuery: (params) => {
+      dispatch(startRunningSearchQuery(params));
+    },
+    handleSearchQueryParamsUpdate: (params) => {
+      dispatch(updateSearchQueryPrams(params));
+    },
+  };
 };
 
 const ConnectedAppBar = connect(
-    mapStateToProps,
-    mapDispatchToProps,
+  mapStateToProps,
+  mapDispatchToProps
 )(AppBar);
 
-export default withRouter(
-    withStyles(styles, { withTheme: true })(ConnectedAppBar),
-);
+export default withRouter(withStyles(styles, { withTheme: true })(ConnectedAppBar));

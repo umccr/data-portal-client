@@ -24,266 +24,254 @@ import SearchIcon from '@material-ui/icons/Search';
 
 const drawerWidth = 240;
 
-const styles = theme => ({
-    root: {
-        display: 'flex',
+const styles = (theme) => ({
+  root: {
+    display: 'flex',
+  },
+  grow: {
+    flexGrow: 1,
+  },
+  drawer: {
+    [theme.breakpoints.up('sm')]: {
+      width: drawerWidth,
+      flexShrink: 0,
     },
-    grow: {
-        flexGrow: 1,
+  },
+  appBar: {
+    marginLeft: drawerWidth,
+    [theme.breakpoints.up('sm')]: {
+      width: `calc(100% - ${drawerWidth}px)`,
     },
-    drawer: {
-        [theme.breakpoints.up('sm')]: {
-            width: drawerWidth,
-            flexShrink: 0,
-        },
-    },
-    appBar: {
-        marginLeft: drawerWidth,
-        [theme.breakpoints.up('sm')]: {
-            width: `calc(100% - ${drawerWidth}px)`,
-        },
-    },
-    toolbar: theme.mixins.toolbar,
-    drawerPaper: {
-        width: drawerWidth,
-    },
-    content: {
-        flexGrow: 1,
-        padding: theme.spacing.unit * 3,
-    },
-    button: {
-        margin: theme.spacing.unit,
-    },
-    buttonIcon: {
-        margin: theme.spacing.unit,
-    },
+  },
+  toolbar: theme.mixins.toolbar,
+  drawerPaper: {
+    width: drawerWidth,
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+  },
+  button: {
+    margin: theme.spacing(1),
+  },
+  buttonIcon: {
+    margin: theme.spacing(1),
+  },
 });
 
 class App extends Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.signOut = this.signOut.bind(this);
+    this.signOut = this.signOut.bind(this);
 
-        this.state = {
-            mobileOpen: false,
-            userMenuOpen: false,
-        };
-    }
-
-    async componentDidMount() {
-        const { handleAuthUpdate } = this.props;
-
-        Hub.listen('auth', async ({ payload: { event, data } }) => {
-            switch (event) {
-                case 'signIn':
-                    const userInfo = await Auth.currentUserInfo();
-                    handleAuthUpdate({
-                        authState: 'signedIn',
-                        authUser: data,
-                        authUserInfo: userInfo,
-                    });
-                    break;
-                case 'signIn_failure':
-                    handleAuthUpdate({
-                        authState: 'signIn',
-                        authUser: null,
-                        authUserInfo: null,
-                        authError: data,
-                    });
-                    break;
-                case 'signOut':
-                    handleAuthUpdate({
-                        authState: 'signedOut',
-                        authUser: null,
-                        authUserInfo: null,
-                    });
-                    break;
-                default:
-                //
-            }
-        });
-
-        try {
-            const user = await Auth.currentAuthenticatedUser();
-            const userInfo = await Auth.currentUserInfo();
-            handleAuthUpdate({
-                authState: 'signedIn',
-                authUser: user,
-                authUserInfo: userInfo,
-            });
-        } catch (e) {
-            console.log('not logged in');
-        }
-    }
-
-    handleDrawerToggle = () => {
-        this.setState(state => ({ mobileOpen: !state.mobileOpen }));
+    this.state = {
+      mobileOpen: false,
+      userMenuOpen: false,
     };
+  }
 
-    async signOut() {
-        try {
-            await Auth.signOut();
-            this.setState({ authState: 'signIn' });
-        } catch (e) {
-            console.log(e);
+  async componentDidMount() {
+    const { handleAuthUpdate } = this.props;
+
+    Hub.listen('auth', async ({ payload: { event, data } }) => {
+      switch (event) {
+        case 'signIn': {
+          const userInfo = await Auth.currentUserInfo();
+          handleAuthUpdate({
+            authState: 'signedIn',
+            authUser: data,
+            authUserInfo: userInfo,
+          });
+          break;
         }
+        case 'signIn_failure':
+          handleAuthUpdate({
+            authState: 'signIn',
+            authUser: null,
+            authUserInfo: null,
+            authError: data,
+          });
+          break;
+        case 'signOut':
+          handleAuthUpdate({
+            authState: 'signedOut',
+            authUser: null,
+            authUserInfo: null,
+          });
+          break;
+        default:
+        //
+      }
+    });
+
+    try {
+      const user = await Auth.currentAuthenticatedUser();
+      const userInfo = await Auth.currentUserInfo();
+      handleAuthUpdate({
+        authState: 'signedIn',
+        authUser: user,
+        authUserInfo: userInfo,
+      });
+    } catch (e) {
+      console.log('not logged in');
     }
+  }
 
-    handleSignOut = async () => {
-        await this.signOut();
-    };
+  handleDrawerToggle = () => {
+    this.setState((state) => ({ mobileOpen: !state.mobileOpen }));
+  };
 
-    renderDrawerContent = () => {
-        const { classes, authUser } = this.props;
+  async signOut() {
+    try {
+      await Auth.signOut();
+      this.setState({ authState: 'signIn' });
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
-        return (
+  handleSignOut = async () => {
+    await this.signOut();
+  };
+
+  renderDrawerContent = () => {
+    const { classes, authUser } = this.props;
+
+    return (
+      <Fragment>
+        <div className={classes.toolbar}>
+          <Grid
+            container
+            item
+            xs={12}
+            direction='row'
+            justify='center'
+            alignItems='center'
+            style={{ height: '100%' }}>
+            <Typography variant='h6'>UMCCR Data Portal</Typography>
+          </Grid>
+        </div>
+        <Divider />
+        <List>
+          <ListItem button component={RouterLink} to='/'>
+            <ListItemIcon>
+              <HomeIcon />
+            </ListItemIcon>
+            <ListItemText primary='Home' />
+          </ListItem>
+          {authUser && (
             <Fragment>
-                <div className={classes.toolbar}>
-                    <Grid
-                        container
-                        item
-                        xs={12}
-                        direction="row"
-                        justify="center"
-                        alignItems="center"
-                        style={{ height: '100%' }}
-                    >
-                        <Typography variant="title">
-                            UMCCR Data Portal
-                        </Typography>
-                    </Grid>
-                </div>
-                <Divider />
-                <List>
-                    <ListItem button component={RouterLink} to="/">
-                        <ListItemIcon>
-                            <HomeIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Home" />
-                    </ListItem>
-                    {authUser && (
-                        <Fragment>
-                            <ListItem
-                                button
-                                component={RouterLink}
-                                to="/storage"
-                            >
-                                <ListItemIcon>
-                                    <StorageIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Storage" />
-                            </ListItem>
-                            <ListItem
-                                button
-                                component={RouterLink}
-                                to="/search"
-                            >
-                                <ListItemIcon>
-                                    <SearchIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Search" />
-                            </ListItem>
-                        </Fragment>
-                    )}
-                </List>
+              <ListItem button component={RouterLink} to='/storage'>
+                <ListItemIcon>
+                  <StorageIcon />
+                </ListItemIcon>
+                <ListItemText primary='Storage' />
+              </ListItem>
+              <ListItem button component={RouterLink} to='/search'>
+                <ListItemIcon>
+                  <SearchIcon />
+                </ListItemIcon>
+                <ListItemText primary='Search' />
+              </ListItem>
             </Fragment>
-        );
-    };
+          )}
+        </List>
+      </Fragment>
+    );
+  };
 
-    render() {
-        const { classes, theme, authUserInfo } = this.props;
+  render() {
+    const { classes, theme, authUserInfo } = this.props;
 
-        return (
-            <div className={classes.root}>
-                <CssBaseline />
-                <AppBar
-                    authUserInfo={authUserInfo}
-                    handleLogOutClicked={this.handleLogOutClicked}
-                    handleDrawerToggle={this.handleDrawerToggle}
-                    handleSignIn={this.props.OAuthSignIn}
-                    handleSignOut={this.handleSignOut}
-                    title={
-                        <Switch>
-                            <Route path="/" exact>
-                                Home
-                            </Route>
-                            <Route path="/login">Login</Route>
-                            <Route path="/search">Search</Route>
-                            <Route path="/storage">Storage</Route>
-                        </Switch>
-                    }
-                />
-                <nav className={classes.drawer}>
-                    <Hidden smUp implementation="css">
-                        <Drawer
-                            container={this.props.container}
-                            variant="temporary"
-                            anchor={
-                                theme.direction === 'rtl' ? 'right' : 'left'
-                            }
-                            open={this.state.mobileOpen}
-                            onClose={this.handleDrawerToggle}
-                            classes={{
-                                paper: classes.drawerPaper,
-                            }}
-                        >
-                            {this.renderDrawerContent(classes)}
-                        </Drawer>
-                    </Hidden>
-                    <Hidden xsDown implementation="css">
-                        <Drawer
-                            classes={{
-                                paper: classes.drawerPaper,
-                            }}
-                            variant="permanent"
-                            open
-                        >
-                            {this.renderDrawerContent(classes)}
-                        </Drawer>
-                    </Hidden>
-                </nav>
-                <main className={classes.content}>
-                    <div className={classes.toolbar} />
-                    <Switch>
-                        <Routes />
-                    </Switch>{' '}
-                </main>
-            </div>
-        );
-    }
+    return (
+      <div className={classes.root}>
+        <CssBaseline />
+        <AppBar
+          authUserInfo={authUserInfo}
+          handleLogOutClicked={this.handleLogOutClicked}
+          handleDrawerToggle={this.handleDrawerToggle}
+          handleSignIn={this.props.OAuthSignIn}
+          handleSignOut={this.handleSignOut}
+          title={
+            <Switch>
+              <Route path='/' exact>
+                Home
+              </Route>
+              <Route path='/login'>Login</Route>
+              <Route path='/search'>Search</Route>
+              <Route path='/storage'>Storage</Route>
+            </Switch>
+          }
+        />
+        <nav className={classes.drawer}>
+          <Hidden smUp implementation='css'>
+            <Drawer
+              container={this.props.container}
+              variant='temporary'
+              anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+              open={this.state.mobileOpen}
+              onClose={this.handleDrawerToggle}
+              classes={{
+                paper: classes.drawerPaper,
+              }}>
+              {this.renderDrawerContent(classes)}
+            </Drawer>
+          </Hidden>
+          <Hidden xsDown implementation='css'>
+            <Drawer
+              classes={{
+                paper: classes.drawerPaper,
+              }}
+              variant='permanent'
+              open>
+              {this.renderDrawerContent(classes)}
+            </Drawer>
+          </Hidden>
+        </nav>
+        <main className={classes.content}>
+          <div className={classes.toolbar} />
+          <Switch>
+            <Routes />
+          </Switch>{' '}
+        </main>
+      </div>
+    );
+  }
 }
 
 App.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
-    handleAuthUpdate: PropTypes.func.isRequired,
-    authUser: PropTypes.object,
-    authUserInfo: PropTypes.object,
-    authState: PropTypes.string.isRequired,
-    authError: PropTypes.object,
+  classes: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
+  handleAuthUpdate: PropTypes.func.isRequired,
+  authUser: PropTypes.object,
+  authUserInfo: PropTypes.object,
+  authState: PropTypes.string.isRequired,
+  authError: PropTypes.object,
+  OAuthSignIn: PropTypes.func,
+  container: PropTypes.object,
 };
 
-const mapStateToProps = (state, ownProps) => {
-    return {
-        authUser: state.authUser,
-        authUserInfo: state.authUserInfo,
-        authState: state.authState,
-        authError: state.authError,
-    };
+const mapStateToProps = (state) => {
+  return {
+    authUser: state.authUser,
+    authUserInfo: state.authUserInfo,
+    authState: state.authState,
+    authError: state.authError,
+  };
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-    return {
-        handleAuthUpdate: auth => {
-            dispatch(authUpdate(auth));
-        },
-    };
+const mapDispatchToProps = (dispatch) => {
+  return {
+    handleAuthUpdate: (auth) => {
+      dispatch(authUpdate(auth));
+    },
+  };
 };
 
 const ConnectApp = connect(
-    mapStateToProps,
-    mapDispatchToProps,
+  mapStateToProps,
+  mapDispatchToProps
 )(App);
 
 export default withStyles(styles, { withTheme: true })(withOAuth(ConnectApp));

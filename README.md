@@ -1,6 +1,6 @@
 # UMCCR Data Portal App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React frontend for [UMCCR](https://umccr.org) [Data Portal API](https://github.com/umccr/data-portal-apis)
 
 ### Local development
 
@@ -23,6 +23,19 @@ REACT_APP_OAUTH_REDIRECT_OUT_LOCAL={cognito_oauth_redirect_signout_localhost}
 
 Use `npm start` to start the server on http://localhost:3000
 
+####  Lint
+
+- Run eslint as follows: `npm run lint`
+- Fix lint issue, if any: `npx eslint src --fix`
+
+#### Audit
+
+- Run `npm audit` for package security and follow `npm audit --fix` if any
+
+#### IDE
+
+- Recommend to use JetBrains WebStorm IDE
+- Code style use indent with `2` spaces, no tab 
 
 ### Deployment
 
