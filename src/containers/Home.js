@@ -182,11 +182,11 @@ class Home extends Component {
             {!loading &&
               results != null &&
               results.map((row) => (
-                <TableRow key={row.rn}>
+                <TableRow key={row.id}>
                   {columns.map((col) =>
                     col.key === 'info' ? (
                       <TableCell key={col.key}>
-                        <InfoOutlined onClick={this.handleRowClick(row.rn)} />
+                        <InfoOutlined onClick={this.handleRowClick(row.id)} />
                       </TableCell>
                     ) : (
                       <TableCell key={col.key}>{row[col.key]}</TableCell>
@@ -239,19 +239,12 @@ class Home extends Component {
                   </TableRow>
                 )}
                 {rowData != null &&
-                  Object.keys(rowData)
-                    .filter(function(k) {
-                      return k !== 'url';
-                    })
-                    .filter(function(k) {
-                      return k !== 'rn';
-                    })
-                    .map((k) => (
-                      <TableRow key={k}>
-                        <TableCell>{k.toUpperCase()}</TableCell>
-                        <TableCell>{rowData[k]}</TableCell>
-                      </TableRow>
-                    ))}
+                  Object.keys(rowData).map((k) => (
+                    <TableRow key={k}>
+                      <TableCell>{k.toUpperCase()}</TableCell>
+                      <TableCell>{rowData[k]}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </DialogContent>
