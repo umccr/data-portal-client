@@ -12,11 +12,7 @@ import { TablePaginationActionsWrapped } from '../components/TablePagniationActi
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { clearErrorMessage, startRunningHomeQuery, updateHomeQueryPrams } from '../actions/home';
 import * as PropTypes from 'prop-types';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
 import { API } from 'aws-amplify';
-import { InfoOutlined } from '@material-ui/icons';
 import EnhancedTableHead from '../components/EnhancedTableHead';
 import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -24,6 +20,8 @@ import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import Toolbar from '@material-ui/core/Toolbar';
 import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 
 const styles = (theme) => ({
   close: {
@@ -34,7 +32,6 @@ const styles = (theme) => ({
 class Home extends Component {
   state = {
     dialogOpened: false,
-    rowId: null,
     rowData: null,
   };
 
@@ -44,9 +41,6 @@ class Home extends Component {
   }
 
   reloadData = async (params = {}) => {
-    // React pagination start at 0 whereas API start at 1, see also below for rowsPerPage
-    if (params.page != null) params.page += 1;
-
     const { handleStartRunningHomeQuery } = this.props;
     await handleStartRunningHomeQuery(params);
   };
@@ -58,14 +52,14 @@ class Home extends Component {
   handlePageChange = async (event, page) => {
     await this.reloadData({
       ...this.getBaseParams(),
-      page: page,
+      page: page + 1, // React pagination start at 0 whereas API start at 1
     });
   };
 
   handleRowsPerPageChange = async (event) => {
     await this.reloadData({
       ...this.getBaseParams(),
-      page: 0, // Reset page number if rows per page change
+      page: 1, // Reset page number if rows per page change
       rowsPerPage: event.target.value,
     });
   };
@@ -78,6 +72,7 @@ class Home extends Component {
     // Reset all other search params except query
     await this.reloadData({
       ...this.getBaseParams(),
+      page: 1, // Reset page number if sorting change
       sortAsc,
       sortCol,
     });
@@ -103,9 +98,7 @@ class Home extends Component {
 
   handleDialogOpen = (id) => {
     const dialogOpened = true;
-    const rowId = id;
-    this.setState({ dialogOpened });
-    this.setState({ rowId }, () => this.processRowDetails());
+    this.setState({ dialogOpened }, () => this.processRowDetails(id));
   };
 
   handleDialogClose = () => {
@@ -114,9 +107,8 @@ class Home extends Component {
     this.setState({ dialogOpened, rowData });
   };
 
-  processRowDetails = async () => {
-    const rowId = this.state.rowId;
-    const rowData = await API.get('files', `/lims/${rowId}/`, {});
+  processRowDetails = async (id) => {
+    const rowData = await API.get('files', `/lims/${id}/`, {});
     this.setState({ rowData });
   };
 
@@ -136,7 +128,6 @@ class Home extends Component {
       { key: 'external_sample_id', sortable: true },
       { key: 'phenotype', sortable: true },
       { key: 'project_name', sortable: true },
-      { key: 'info', sortable: false },
       { key: 'results', sortable: true },
     ];
 
@@ -184,9 +175,19 @@ class Home extends Component {
               results.map((row) => (
                 <TableRow key={row.id}>
                   {columns.map((col) =>
-                    col.key === 'info' ? (
+                    col.key === 'run' ? (
                       <TableCell key={col.key}>
-                        <InfoOutlined onClick={this.handleRowClick(row.id)} />
+                        <Button color='primary' onClick={this.handleRowClick(row.id)}>
+                          {row[col.key]}
+                        </Button>
+                      </TableCell>
+                    ) : col.key === 'subject_id' ? (
+                      <TableCell key={col.key}>
+                        {row[col.key] && (
+                          <Button color='primary' href={'subjects/' + row[col.key]}>
+                            {row[col.key]}
+                          </Button>
+                        )}
                       </TableCell>
                     ) : (
                       <TableCell key={col.key}>{row[col.key]}</TableCell>
@@ -216,39 +217,11 @@ class Home extends Component {
           )}
         </Table>
 
-        <Dialog
-          open={dialogOpened}
-          onClose={this.handleDialogClose}
-          scroll={'paper'}
-          maxWidth={'lg'}>
-          <DialogTitle>
-            {rowData != null
-              ? rowData.subject_id
-                ? rowData.subject_id
-                : rowData.sample_id
-              : 'Loading... '}
-          </DialogTitle>
-          <DialogContent>
-            <Table size='small' aria-label='a dense table'>
-              <TableBody>
-                {rowData === null && (
-                  <TableRow>
-                    <TableCell colSpan={2} style={{ textAlign: 'center' }}>
-                      <CircularProgress />
-                    </TableCell>
-                  </TableRow>
-                )}
-                {rowData != null &&
-                  Object.keys(rowData).map((k) => (
-                    <TableRow key={k}>
-                      <TableCell>{k.toUpperCase()}</TableCell>
-                      <TableCell>{rowData[k]}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </DialogContent>
-        </Dialog>
+        <LimsRowDetailsDialog
+          dialogOpened={dialogOpened}
+          rowData={rowData}
+          onDialogClose={this.handleDialogClose}
+        />
       </Paper>
     );
   };

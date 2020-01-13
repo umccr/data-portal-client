@@ -6,11 +6,7 @@ import TableCell from '@material-ui/core/TableCell';
 import Tooltip from '@material-ui/core/Tooltip';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 
-const HIDDEN_COLS = ['key', 'bucket'];
-
-export const isColVisible = (col) => !HIDDEN_COLS.includes(col);
-
-const getDisplayTitle = (col) => {
+export const getDisplayTitle = (col) => {
   return col
     .split('_')
     .join(' ')
@@ -28,29 +24,25 @@ class EnhancedTableHead extends React.Component {
     return (
       <TableHead>
         <TableRow>
-          {columns.map(
-            (col) =>
-              isColVisible(col.key) && (
-                <TableCell key={col.key} sortDirection={orderBy === col.key ? order : false}>
-                  {col.sortable ? (
-                    <Tooltip
-                      title='Sort'
-                      placement={col.sortable ? 'bottom-end' : 'bottom-start'}
-                      enterDelay={300}>
-                      <TableSortLabel
-                        active={orderBy === col.key}
-                        direction={order}
-                        onClick={this.createSortHandler(col.key)}>
-                        {getDisplayTitle(col.key)}
-                      </TableSortLabel>
-                    </Tooltip>
-                  ) : (
-                    getDisplayTitle(col.key)
-                  )}
-                </TableCell>
-              ),
-            this
-          )}
+          {columns.map((col) => (
+            <TableCell key={col.key} sortDirection={orderBy === col.key ? order : false}>
+              {col.sortable ? (
+                <Tooltip
+                  title='Sort'
+                  placement={col.sortable ? 'bottom-end' : 'bottom-start'}
+                  enterDelay={300}>
+                  <TableSortLabel
+                    active={orderBy === col.key}
+                    direction={order}
+                    onClick={this.createSortHandler(col.key)}>
+                    {getDisplayTitle(col.key)}
+                  </TableSortLabel>
+                </Tooltip>
+              ) : (
+                getDisplayTitle(col.key)
+              )}
+            </TableCell>
+          ))}
         </TableRow>
       </TableHead>
     );

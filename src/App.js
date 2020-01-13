@@ -162,17 +162,17 @@ class App extends Component {
           </ListItem>
           {authUser && (
             <Fragment>
-              <ListItem button component={RouterLink} to='/storage'>
-                <ListItemIcon>
-                  <StorageIcon />
-                </ListItemIcon>
-                <ListItemText primary='Storage' />
-              </ListItem>
               <ListItem button component={RouterLink} to='/search'>
                 <ListItemIcon>
                   <SearchIcon />
                 </ListItemIcon>
                 <ListItemText primary='Search' />
+              </ListItem>
+              <ListItem button component={RouterLink} to='/storage'>
+                <ListItemIcon>
+                  <StorageIcon />
+                </ListItemIcon>
+                <ListItemText primary='Storage' />
               </ListItem>
             </Fragment>
           )}
@@ -199,6 +199,7 @@ class App extends Component {
                 Home
               </Route>
               <Route path='/login'>Login</Route>
+              <Route path='/subjects'>Subject</Route>
               <Route path='/search'>Search</Route>
               <Route path='/storage'>Storage</Route>
             </Switch>

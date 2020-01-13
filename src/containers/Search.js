@@ -10,7 +10,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableFooter from '@material-ui/core/TableFooter';
 import { TablePaginationActionsWrapped } from '../components/TablePagniationActionsWrapped';
-import EnhancedTableHead, { isColVisible } from '../components/EnhancedTableHead';
+import EnhancedTableHead from '../components/EnhancedTableHead';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -35,6 +35,9 @@ const styles = (theme) => ({
     padding: theme.spacing(0.5),
   },
 });
+
+const HIDDEN_COLS = ['key', 'bucket'];
+const isColVisible = (col) => !HIDDEN_COLS.includes(col);
 
 class Search extends Component {
   reloadData = async (params = {}) => {
@@ -209,12 +212,13 @@ class Search extends Component {
       { key: 'sample_id', sortable: false },
       { key: 'actions', sortable: false },
     ];
+    const displayColumns = headerRow.filter((row) => isColVisible(row.key));
 
     return (
       <Paper>
         <Table size='small' aria-label='a dense table'>
           <EnhancedTableHead
-            columns={headerRow}
+            columns={displayColumns}
             onRequestSort={this.handleRequestSort}
             order={sortAsc ? 'asc' : 'desc'}
             orderBy={sortCol === null ? '' : sortCol}

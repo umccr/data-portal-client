@@ -10,6 +10,11 @@ import {
   HOME_QUERY_STARTED_RUNNING,
   HOME_QUERY_PARAMS_UPDATED,
   HOME_QUERY_CLEAR_ERR_MSG,
+  SUBJECT_QUERY_SUCCESS,
+  SUBJECT_QUERY_FAILURE,
+  SUBJECT_QUERY_STARTED_RUNNING,
+  SUBJECT_QUERY_PARAMS_UPDATED,
+  SUBJECT_QUERY_CLEAR_ERR_MSG,
 } from './actionTypes';
 
 const defaultSearchParams = {
@@ -40,6 +45,20 @@ const defaultHomeResult = {
   errorMessage: null,
 };
 
+const defaultSubjectParams = {
+  sortCol: 'key',
+  sortAsc: true,
+  page: null,
+  rowsPerPage: 20,
+  search: '',
+};
+
+const defaultSubjectResult = {
+  data: {},
+  loading: false,
+  errorMessage: null,
+};
+
 const initialState = {
   authState: 'loading',
   authUser: null,
@@ -58,6 +77,12 @@ const initialState = {
   },
   homeParams: {
     ...defaultHomeParams,
+  },
+  subjectResult: {
+    ...defaultSubjectResult,
+  },
+  subjectParams: {
+    ...defaultSubjectParams,
   },
 };
 
@@ -155,6 +180,49 @@ const reducer = (state = initialState, action) => {
         ...state,
         homeResult: {
           ...state.homeResult,
+          errorMessage: null,
+        },
+      };
+    case SUBJECT_QUERY_PARAMS_UPDATED:
+      return {
+        ...state,
+        subjectParams: {
+          ...defaultSubjectParams,
+          ...action.payload.params,
+        },
+      };
+    case SUBJECT_QUERY_STARTED_RUNNING:
+      return {
+        ...state,
+        subjectResult: {
+          ...defaultSubjectResult,
+          loading: true,
+        },
+        subjectParams: action.payload.subjectParams,
+      };
+    case SUBJECT_QUERY_SUCCESS:
+      return {
+        ...state,
+        subjectResult: {
+          ...defaultSubjectResult,
+          data: action.payload.data,
+          loading: false,
+        },
+      };
+    case SUBJECT_QUERY_FAILURE:
+      return {
+        ...state,
+        subjectResult: {
+          ...defaultSubjectResult,
+          errorMessage: action.payload.errorMessage,
+          loading: false,
+        },
+      };
+    case SUBJECT_QUERY_CLEAR_ERR_MSG:
+      return {
+        ...state,
+        subjectResult: {
+          ...state.subjectResult,
           errorMessage: null,
         },
       };

@@ -7,6 +7,7 @@ import Login from './containers/Login';
 import Search from './containers/Search';
 import Storage from './containers/Storage';
 import LandingPage from './containers/LandingPage';
+import Subject from './containers/Subject';
 
 class Routes extends Component {
   render() {
@@ -22,6 +23,8 @@ class Routes extends Component {
         {authUser !== null && (
           <Fragment>
             <Route path='/' exact component={Home} />
+            <Route path='/subjects/' exact component={Subject} />
+            <Route path='/subjects/:subjectId' exact component={Subject} />
             <Route path='/search' component={Search} />
             <Route path='/storage' component={Storage} />
           </Fragment>
