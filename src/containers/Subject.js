@@ -35,10 +35,24 @@ import HumanReadableFileSize from '../components/HumanReadableFileSize';
 import CopyButton from '../components/CopyButton';
 import Button from '@material-ui/core/Button';
 import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
+import Chip from '@material-ui/core/Chip';
+import Avatar from '@material-ui/core/Avatar';
+import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 
 const styles = (theme) => ({
   close: {
     padding: theme.spacing(0.5),
+  },
+  root: {
+    display: 'flex',
+    justifyContent: 'left',
+    flexWrap: 'wrap',
+    '& > *': {
+      margin: theme.spacing(0.5),
+    },
+  },
+  chip: {
+    margin: theme.spacing(0.5),
   },
 });
 
@@ -134,6 +148,20 @@ class Subject extends Component {
     this.setState({ rowData });
   };
 
+  handleChipClick = (selected) => {
+    return async () => {
+      await this.handleChipFilter(selected);
+    };
+  };
+
+  handleChipFilter = async (selected) => {
+    await this.reloadData({
+      ...this.getBaseParams(),
+      search: selected['keyword'],
+      page: 1,
+    });
+  };
+
   renderSubjectView = () => {
     const { dialogOpened, rowData, subject } = this.state;
     const { id, lims } = subject;
@@ -149,6 +177,21 @@ class Subject extends Component {
       { key: 'phenotype', sortable: true },
       { key: 'project_name', sortable: true },
       { key: 'results', sortable: true },
+    ];
+    const chipData = [
+      { key: 0, label: 'reset', keyword: '' },
+      { key: 1, label: 'bam', keyword: 'bam' },
+      { key: 2, label: 'vcf', keyword: 'vcf' },
+      { key: 3, label: 'fastqc', keyword: 'fastqc html report' },
+      { key: 4, label: 'multiqc', keyword: 'multiqc html report' },
+      { key: 5, label: 'umccrised', keyword: 'umccrised html' },
+      { key: 6, label: 'pcgr', keyword: 'pcgr html' },
+      { key: 7, label: 'cpsr', keyword: 'cpsr html' },
+      { key: 8, label: 'somatic', keyword: 'somatic html' },
+      { key: 9, label: 'circos', keyword: 'circos png' },
+      { key: 10, label: 'rna', keyword: 'rna html report' },
+      { key: 11, label: 'wts report', keyword: 'wts-report' },
+      { key: 12, label: 'html report', keyword: 'html report' },
     ];
 
     return (
@@ -183,6 +226,25 @@ class Subject extends Component {
               </TableBody>
             </Table>
           </Paper>
+        </Grid>
+        <Grid item xs={12}>
+          <div className={this.props.classes.root}>
+            {chipData.map((data) => {
+              let avatar;
+              if (data.key !== 0) avatar = <Avatar>{data.label.charAt(0).toUpperCase()}</Avatar>;
+              return (
+                <Chip
+                  key={data.key}
+                  avatar={avatar}
+                  label={data.label}
+                  onClick={this.handleChipClick(data)}
+                  className={this.props.classes.chip}
+                  color={data.key === 0 ? 'primary' : 'default'}
+                  icon={data.key === 0 ? <EmojiEmotionsIcon /> : undefined}
+                />
+              );
+            })}
+          </div>
         </Grid>
         <Grid item xs={12}>
           {this.renderSubjectS3View()}
@@ -320,6 +382,7 @@ class Subject extends Component {
 }
 
 Subject.propTypes = {
+  classes: PropTypes.object.isRequired,
   match: PropTypes.object,
   authUserInfo: PropTypes.object.isRequired,
   handleStartRunningSubjectQuery: PropTypes.func.isRequired,
