@@ -22,6 +22,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
+import { Link as RouterLink } from 'react-router-dom';
 
 const styles = (theme) => ({
   close: {
@@ -184,7 +185,10 @@ class Home extends Component {
                     ) : col.key === 'subject_id' ? (
                       <TableCell key={col.key}>
                         {row[col.key] && (
-                          <Button color='primary' href={'subjects/' + row[col.key]}>
+                          <Button
+                            color='primary'
+                            component={RouterLink}
+                            to={'subjects/' + row[col.key]}>
                             {row[col.key]}
                           </Button>
                         )}
