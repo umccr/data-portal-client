@@ -36,7 +36,6 @@ import CopyButton from '../components/CopyButton';
 import Button from '@material-ui/core/Button';
 import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 import Chip from '@material-ui/core/Chip';
-import Avatar from '@material-ui/core/Avatar';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 
 const styles = (theme) => ({
@@ -230,12 +229,9 @@ class Subject extends Component {
         <Grid item xs={12}>
           <div className={this.props.classes.root}>
             {chipData.map((data) => {
-              let avatar;
-              if (data.key !== 0) avatar = <Avatar>{data.label.charAt(0).toUpperCase()}</Avatar>;
               return (
                 <Chip
                   key={data.key}
-                  avatar={avatar}
                   label={data.label}
                   onClick={this.handleChipClick(data)}
                   className={this.props.classes.chip}
