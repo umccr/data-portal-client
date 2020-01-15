@@ -179,8 +179,8 @@ class Subject extends Component {
     ];
     const chipData = [
       { key: 0, label: 'reset', keyword: '' },
-      { key: 1, label: 'bam', keyword: 'bam' },
-      { key: 2, label: 'vcf', keyword: 'vcf' },
+      { key: 1, label: 'bam', keyword: '.bam$' },
+      { key: 2, label: 'vcf', keyword: '.vcf.gz$' },
       { key: 3, label: 'fastqc', keyword: 'fastqc html report' },
       { key: 4, label: 'multiqc', keyword: 'multiqc html report' },
       { key: 5, label: 'umccrised', keyword: 'umccrised html' },
@@ -274,7 +274,7 @@ class Subject extends Component {
     return (
       <Paper elevation={1}>
         <Toolbar>
-          <Box width={1 / 5}>
+          <Box width={1 / 4}>
             <TextField
               fullWidth
               label={'Search Filter'}
