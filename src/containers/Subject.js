@@ -32,11 +32,11 @@ import Moment from 'react-moment';
 import history from '../history';
 import EnhancedTableHead, { getDisplayTitle } from '../components/EnhancedTableHead';
 import HumanReadableFileSize from '../components/HumanReadableFileSize';
-import CopyButton from '../components/CopyButton';
 import Button from '@material-ui/core/Button';
 import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 import Chip from '@material-ui/core/Chip';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
+import ActionMenuButton from '../components/ActionMenuButton';
 
 const styles = (theme) => ({
   close: {
@@ -180,7 +180,7 @@ class Subject extends Component {
     const chipData = [
       { key: 0, label: 'reset', keyword: '' },
       { key: 1, label: 'bam', keyword: '.bam$' },
-      { key: 2, label: 'vcf', keyword: '.vcf.gz$' },
+      { key: 2, label: 'vcf', keyword: '.vcf$' },
       { key: 3, label: 'fastqc', keyword: 'fastqc html report' },
       { key: 4, label: 'multiqc', keyword: 'multiqc html report' },
       { key: 5, label: 'umccrised', keyword: 'umccrised html' },
@@ -254,10 +254,6 @@ class Subject extends Component {
     );
   };
 
-  getS3Path = (row) => {
-    return 's3://' + row.bucket + '/' + row.key;
-  };
-
   renderSubjectS3View = () => {
     const { sortAsc, sortCol, search } = this.props.subjectParams;
     const { loading, data } = this.props.subjectResult;
@@ -265,7 +261,7 @@ class Subject extends Component {
     const columns = [
       { key: 'bucket', sortable: true },
       { key: 'key', sortable: true },
-      { key: 'path', sortable: false },
+      { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
       { key: 'last_modified_date', sortable: true },
       { key: 'e_tag', sortable: true },
@@ -314,23 +310,19 @@ class Subject extends Component {
               results != null &&
               results.map((row) => (
                 <TableRow key={row.id}>
-                  {columns.map((col) =>
-                    col.key === 'path' ? (
-                      <TableCell key={col.key}>
-                        <CopyButton url={this.getS3Path(row)} />
-                      </TableCell>
-                    ) : col.key === 'size' ? (
-                      <TableCell key={col.key}>
+                  {columns.map((col) => (
+                    <TableCell key={col.key}>
+                      {col.key === 'actions' ? (
+                        <ActionMenuButton data={row} />
+                      ) : col.key === 'size' ? (
                         <HumanReadableFileSize bytes={row[col.key]} />
-                      </TableCell>
-                    ) : col.key === 'last_modified_date' ? (
-                      <TableCell key={col.key}>
+                      ) : col.key === 'last_modified_date' ? (
                         <Moment local>{row[col.key]}</Moment>
-                      </TableCell>
-                    ) : (
-                      <TableCell key={col.key}>{row[col.key]}</TableCell>
-                    )
-                  )}
+                      ) : (
+                        row[col.key]
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))}
           </TableBody>
