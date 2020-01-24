@@ -178,19 +178,36 @@ class Subject extends Component {
       { key: 'results', sortable: true },
     ];
     const chipData = [
-      { key: 0, label: 'reset', keyword: '' },
-      { key: 1, label: 'bam', keyword: '.bam$' },
-      { key: 2, label: 'vcf', keyword: '.vcf$' },
-      { key: 3, label: 'fastqc', keyword: 'fastqc html report' },
-      { key: 4, label: 'multiqc', keyword: 'multiqc html report' },
-      { key: 5, label: 'umccrised', keyword: 'umccrised html' },
-      { key: 6, label: 'pcgr', keyword: 'pcgr html' },
-      { key: 7, label: 'cpsr', keyword: 'cpsr html' },
-      { key: 8, label: 'somatic', keyword: 'somatic html' },
-      { key: 9, label: 'circos', keyword: 'circos png' },
-      { key: 10, label: 'rna', keyword: 'rna html report' },
-      { key: 11, label: 'wts report', keyword: 'wts-report' },
-      { key: 12, label: 'html report', keyword: 'html report' },
+      { key: 0, label: 'reset', keyword: '', color: 'primary' },
+      { key: 1, label: 'wgs bam', keyword: 'wgs .bam$', color: 'default' },
+      {
+        key: 2,
+        label: 'wgs multiqc',
+        keyword: 'wgs multiqc/ multiqc_report.html$',
+        color: 'default',
+      },
+      { key: 3, label: 'vcf', keyword: '.vcf$', color: 'default' },
+      {
+        key: 4,
+        label: 'umccrised cancer report',
+        keyword: 'umccrised cancer_report.html$',
+        color: 'default',
+      },
+      {
+        key: 5,
+        label: 'pcgr report',
+        keyword: 'umccrised pcgr/ (pcgr|cpsr).html$',
+        color: 'default',
+      },
+      { key: 6, label: 'purple', keyword: 'circos_baf/ circos_baf.png$', color: 'default' },
+      { key: 7, label: 'wts bam', keyword: 'wts .bam$', color: 'default' },
+      {
+        key: 8,
+        label: 'wts multiqc',
+        keyword: 'wts multiqc/ multiqc_report.html$',
+        color: 'default',
+      },
+      { key: 9, label: 'rnasum report', keyword: 'RNAseq_report.html$', color: 'default' },
     ];
 
     return (
@@ -235,7 +252,7 @@ class Subject extends Component {
                   label={data.label}
                   onClick={this.handleChipClick(data)}
                   className={this.props.classes.chip}
-                  color={data.key === 0 ? 'primary' : 'default'}
+                  color={data.color}
                   icon={data.key === 0 ? <EmojiEmotionsIcon /> : undefined}
                 />
               );
