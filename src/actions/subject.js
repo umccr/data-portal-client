@@ -67,7 +67,7 @@ export const startRunningSubjectQuery = (queryParams, subjectId) => {
       let errorMessage;
 
       if (e.response) {
-        errorMessage = `Query Failed - ${e.response.data.errors}`;
+        errorMessage = `Query Failed - ${e.response.data.error}`;
       } else {
         errorMessage = `Unknown Error - ${e.message}`;
       }

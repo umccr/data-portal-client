@@ -37,6 +37,8 @@ import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 import Chip from '@material-ui/core/Chip';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import ActionMenuButton from '../components/ActionMenuButton';
+import Snackbar from '@material-ui/core/Snackbar';
+import CloseIcon from '@material-ui/icons/Close';
 
 const styles = (theme) => ({
   close: {
@@ -179,18 +181,18 @@ class Subject extends Component {
     ];
     const chipData = [
       { key: 0, label: 'reset', keyword: '', color: 'primary' },
-      { key: 1, label: 'wgs bam', keyword: 'wgs .bam$', color: 'default' },
+      { key: 1, label: 'wgs bam', keyword: 'wgs ready .bam$', color: 'default' },
+      { key: 2, label: 'vcf', keyword: '.vcf$', color: 'default' },
       {
-        key: 2,
-        label: 'wgs multiqc',
-        keyword: 'wgs multiqc/ multiqc_report.html$',
-        color: 'default',
-      },
-      { key: 3, label: 'vcf', keyword: '.vcf$', color: 'default' },
-      {
-        key: 4,
+        key: 3,
         label: 'umccrised cancer report',
         keyword: 'umccrised cancer_report.html$',
+        color: 'default',
+      },
+      {
+        key: 4,
+        label: 'umccrised multiqc report',
+        keyword: 'umccrised multiqc_report.html$',
         color: 'default',
       },
       {
@@ -199,15 +201,21 @@ class Subject extends Component {
         keyword: 'umccrised pcgr/ (pcgr|cpsr).html$',
         color: 'default',
       },
-      { key: 6, label: 'purple', keyword: 'circos_baf/ circos_baf.png$', color: 'default' },
-      { key: 7, label: 'wts bam', keyword: 'wts .bam$', color: 'default' },
       {
-        key: 8,
+        key: 6,
+        label: 'coverage report',
+        keyword: 'cacao html (cacao_normal|cacao_tumor)',
+        color: 'default',
+      },
+      { key: 7, label: 'circos', keyword: 'work/ purple/ circos baf .png$', color: 'default' },
+      { key: 8, label: 'wts bam', keyword: 'wts ready .bam$', color: 'default' },
+      {
+        key: 9,
         label: 'wts multiqc',
         keyword: 'wts multiqc/ multiqc_report.html$',
         color: 'default',
       },
-      { key: 9, label: 'rnasum report', keyword: 'RNAseq_report.html$', color: 'default' },
+      { key: 10, label: 'rnasum report', keyword: 'RNAseq_report.html$', color: 'default' },
     ];
 
     return (
@@ -381,9 +389,48 @@ class Subject extends Component {
       <Fragment>
         {authUserInfo && !subject && <LinearProgress />}
         {authUserInfo && subject && this.renderSubjectView()}
+        {this.renderErrorMessage()}
       </Fragment>
     );
   }
+
+  handleCloseErrorMessage = () => {
+    // Clear error message in the state
+    const { handleClearErrorMessage } = this.props;
+    handleClearErrorMessage();
+  };
+
+  // Show snackbar if we have an error message and it has not been hidden
+  openSnackbar = () => this.props.subjectResult.errorMessage !== null;
+
+  renderErrorMessage = () => {
+    const { errorMessage } = this.props.subjectResult;
+
+    return (
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={this.openSnackbar()}
+        onClose={this.handleCloseErrorMessage}
+        ContentProps={{
+          'aria-describedby': 'message-id',
+        }}
+        message={<span>{errorMessage}</span>}
+        action={[
+          <IconButton
+            key='close'
+            aria-label='Close'
+            color='inherit'
+            className={this.props.classes.close}
+            onClick={this.handleCloseErrorMessage}>
+            <CloseIcon />
+          </IconButton>,
+        ]}
+      />
+    );
+  };
 }
 
 Subject.propTypes = {
@@ -392,6 +439,7 @@ Subject.propTypes = {
   authUserInfo: PropTypes.object.isRequired,
   handleStartRunningSubjectQuery: PropTypes.func.isRequired,
   handleSubjectQueryParamsUpdate: PropTypes.func.isRequired,
+  handleClearErrorMessage: PropTypes.func.isRequired,
   subjectParams: PropTypes.object.isRequired,
   subjectResult: PropTypes.object.isRequired,
 };
