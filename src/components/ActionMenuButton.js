@@ -26,6 +26,9 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import Grid from '@material-ui/core/Grid';
 import Backdrop from '@material-ui/core/Backdrop';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 const styles = (theme) => ({
   close: {
@@ -48,6 +51,7 @@ class ActionMenuButton extends React.Component {
     copied: false,
     url: null,
     expires: null,
+    errorMessage: null,
   };
 
   handleClose = () => {
@@ -74,7 +78,13 @@ class ActionMenuButton extends React.Component {
     const filename = tokens[tokens.length - 1];
     const file = `s3://${bucket + '/' + key}`;
     const url = `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${filename}`;
-    xhr.open('GET', url);
+    xhr.open('GET', url, true);
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4 && xhr.status === 0) {
+        const errorMessage = 'Error "Open in IGV". Make sure you have opened IGV app.';
+        this.setState({ errorMessage: errorMessage });
+      }
+    };
     xhr.send();
   };
 
@@ -110,7 +120,7 @@ class ActionMenuButton extends React.Component {
   renderMenu = (bucket, key, popupState) => {
     return (
       <Menu {...bindMenu(popupState)}>
-        {(key.endsWith('bam') || key.endsWith('vcf')) && (
+        {(key.endsWith('bam') || key.endsWith('vcf') || key.endsWith('vcf.gz')) && (
           <MenuItem onClick={popupState.close}>
             <List
               className={this.props.classes.root}
@@ -255,9 +265,47 @@ class ActionMenuButton extends React.Component {
           onAbort={this.handleClose}>
           <CircularProgress color='inherit' />
         </Backdrop>
+        {this.renderErrorMessage()}
       </div>
     );
   }
+
+  handleCloseErrorMessage = () => {
+    // Clear error message in the state
+    this.setState({ errorMessage: null });
+  };
+
+  // Show snackbar if we have an error message and it has not been hidden
+  openSnackbar = () => this.state.errorMessage !== null;
+
+  renderErrorMessage = () => {
+    const { errorMessage } = this.state;
+
+    return (
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={this.openSnackbar()}
+        onClose={this.handleCloseErrorMessage}
+        ContentProps={{
+          'aria-describedby': 'message-id',
+        }}
+        message={<span>{errorMessage}</span>}
+        action={[
+          <IconButton
+            key='close'
+            aria-label='Close'
+            color='inherit'
+            className={this.props.classes.close}
+            onClick={this.handleCloseErrorMessage}>
+            <CloseIcon />
+          </IconButton>,
+        ]}
+      />
+    );
+  };
 }
 
 ActionMenuButton.propTypes = {

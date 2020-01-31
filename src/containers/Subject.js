@@ -182,7 +182,12 @@ class Subject extends Component {
     const chipData = [
       { key: 0, label: 'reset', keyword: '', color: 'primary' },
       { key: 1, label: 'wgs bam', keyword: 'wgs ready .bam$', color: 'default' },
-      { key: 2, label: 'vcf', keyword: '.vcf$', color: 'default' },
+      {
+        key: 2,
+        label: 'vcf',
+        keyword: 'umccrised/[^(work)*] (somatic-ensemble|normal-ensemble-predispose_genes).vcf.gz$',
+        color: 'default',
+      },
       {
         key: 3,
         label: 'umccrised cancer report',
@@ -295,7 +300,7 @@ class Subject extends Component {
     return (
       <Paper elevation={1}>
         <Toolbar>
-          <Box width={1 / 4}>
+          <Box width={1 / 3}>
             <TextField
               fullWidth
               label={'Search Filter'}
