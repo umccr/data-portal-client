@@ -119,7 +119,7 @@ class Home extends Component {
     const { results, pagination } = data;
     const { dialogOpened, rowData } = this.state;
     const columns = [
-      { key: 'run', sortable: true },
+      { key: 'illumina_id', sortable: true },
       { key: 'type', sortable: true },
       { key: 'timestamp', sortable: true },
       { key: 'subject_id', sortable: true },
@@ -135,7 +135,7 @@ class Home extends Component {
     return (
       <Paper>
         <Toolbar>
-          <Box width={1 / 5}>
+          <Box width={1 / 4}>
             <TextField
               fullWidth
               label={'Search Filter'}
@@ -176,7 +176,7 @@ class Home extends Component {
               results.map((row) => (
                 <TableRow key={row.id}>
                   {columns.map((col) =>
-                    col.key === 'run' ? (
+                    col.key === 'illumina_id' ? (
                       <TableCell key={col.key}>
                         <Button color='primary' onClick={this.handleRowClick(row.id)}>
                           {row[col.key]}
@@ -204,7 +204,7 @@ class Home extends Component {
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  colSpan={8}
+                  colSpan={7}
                   rowsPerPageOptions={[10, 20, 50, 100]}
                   count={pagination.count}
                   rowsPerPage={pagination.rowsPerPage}

@@ -167,7 +167,7 @@ class Subject extends Component {
     const { dialogOpened, rowData, subject } = this.state;
     const { id, lims } = subject;
     const columns = [
-      { key: 'run', sortable: true },
+      { key: 'illumina_id', sortable: true },
       { key: 'type', sortable: true },
       { key: 'timestamp', sortable: true },
       { key: 'subject_id', sortable: true },
@@ -240,7 +240,7 @@ class Subject extends Component {
                   lims.map((row) => (
                     <TableRow key={row.id}>
                       {columns.map((col) =>
-                        col.key === 'run' ? (
+                        col.key === 'illumina_id' ? (
                           <TableCell key={col.key}>
                             <Button color='primary' onClick={this.handleRowClick(row.id)}>
                               {row[col.key]}
