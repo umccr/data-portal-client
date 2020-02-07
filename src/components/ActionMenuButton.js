@@ -62,6 +62,7 @@ class ActionMenuButton extends React.Component {
       copied: false,
       url: null,
       expires: null,
+      errorMessage: null,
     });
   };
 
@@ -81,8 +82,11 @@ class ActionMenuButton extends React.Component {
     xhr.open('GET', url, true);
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4 && xhr.status === 0) {
-        const errorMessage = 'Error "Open in IGV". Make sure you have opened IGV app.';
+        const errorMessage =
+          'Cannot open automatically in IGV. Please make sure you have opened IGV app and try again. ' +
+          'Otherwise please click "Copy" button and open the URL in browser new tab.';
         this.setState({ errorMessage: errorMessage });
+        this.setState({ open: true, url: url });
       }
     };
     xhr.send();
@@ -193,7 +197,7 @@ class ActionMenuButton extends React.Component {
           )}
         </PopupState>
         <Dialog open={open} onClose={this.handleClose} scroll={'paper'} maxWidth={'lg'}>
-          <DialogTitle>Download Link</DialogTitle>
+          <DialogTitle>{this.state.expires ? 'Download Link' : 'Message'}</DialogTitle>
           <DialogContent>
             {this.state.signing && (
               <div align={'center'}>
@@ -211,13 +215,17 @@ class ActionMenuButton extends React.Component {
                       <TableRow>
                         <TableCell>
                           <Typography variant='button' display='block' gutterBottom noWrap>
-                            EXPIRES IN
+                            {this.state.expires ? 'EXPIRES IN' : 'Info'}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant='button' display='block' gutterBottom>
-                            <Moment unix>{this.state.expires}</Moment>
-                          </Typography>
+                          {this.state.expires ? (
+                            <Typography variant='button' display='block' gutterBottom>
+                              <Moment unix>{this.state.expires}</Moment>
+                            </Typography>
+                          ) : (
+                            this.state.errorMessage
+                          )}
                         </TableCell>
                       </TableRow>
                       <TableRow>
@@ -276,7 +284,7 @@ class ActionMenuButton extends React.Component {
   };
 
   // Show snackbar if we have an error message and it has not been hidden
-  openSnackbar = () => this.state.errorMessage !== null;
+  openSnackbar = () => false;
 
   renderErrorMessage = () => {
     const { errorMessage } = this.state;
