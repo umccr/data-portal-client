@@ -23,6 +23,7 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 import { Link as RouterLink } from 'react-router-dom';
+import MoreIcon from '@material-ui/icons/More';
 
 const styles = (theme) => ({
   close: {
@@ -119,6 +120,7 @@ class Home extends Component {
     const { results, pagination } = data;
     const { dialogOpened, rowData } = this.state;
     const columns = [
+      { key: 'info', sortable: false },
       { key: 'illumina_id', sortable: true },
       { key: 'type', sortable: true },
       { key: 'timestamp', sortable: true },
@@ -176,9 +178,15 @@ class Home extends Component {
               results.map((row) => (
                 <TableRow key={row.id}>
                   {columns.map((col) =>
-                    col.key === 'illumina_id' ? (
+                    col.key === 'info' ? (
                       <TableCell key={col.key}>
-                        <Button color='primary' onClick={this.handleRowClick(row.id)}>
+                        <IconButton aria-label='info' onClick={this.handleRowClick(row.id)}>
+                          <MoreIcon color={'primary'} />
+                        </IconButton>
+                      </TableCell>
+                    ) : col.key === 'illumina_id' ? (
+                      <TableCell key={col.key}>
+                        <Button color='primary' component={RouterLink} to={'/runs/' + row[col.key]}>
                           {row[col.key]}
                         </Button>
                       </TableCell>
@@ -188,7 +196,7 @@ class Home extends Component {
                           <Button
                             color='primary'
                             component={RouterLink}
-                            to={'subjects/' + row[col.key]}>
+                            to={'/subjects/' + row[col.key]}>
                             {row[col.key]}
                           </Button>
                         )}
@@ -204,7 +212,7 @@ class Home extends Component {
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  colSpan={7}
+                  colSpan={8}
                   rowsPerPageOptions={[10, 20, 50, 100]}
                   count={pagination.count}
                   rowsPerPage={pagination.rowsPerPage}

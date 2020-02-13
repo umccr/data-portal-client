@@ -200,6 +200,7 @@ class App extends Component {
               </Route>
               <Route path='/login'>Login</Route>
               <Route path='/subjects'>Subject</Route>
+              <Route path='/runs'>Run</Route>
               <Route path='/search'>Search</Route>
               <Route path='/storage'>Storage</Route>
             </Switch>

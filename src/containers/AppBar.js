@@ -396,6 +396,9 @@ class AppBar extends Component {
   notOnSubjectPage = () => {
     return !this.props.location.pathname.startsWith('/subjects');
   };
+  notOnRunPage = () => {
+    return !this.props.location.pathname.startsWith('/runs');
+  };
 
   render() {
     const { title, classes, authUserInfo, handleDrawerToggle } = this.props;
@@ -420,6 +423,7 @@ class AppBar extends Component {
               this.notOnStoragePage() &&
               this.notOnHomePage() &&
               this.notOnSubjectPage() &&
+              this.notOnRunPage() &&
               this.renderSearchBox()}
             {this.renderUserButton(classes, authUserInfo)}
             {this.renderUserMenu(classes, userMenuOpen)}

@@ -15,6 +15,16 @@ import {
   SUBJECT_QUERY_STARTED_RUNNING,
   SUBJECT_QUERY_PARAMS_UPDATED,
   SUBJECT_QUERY_CLEAR_ERR_MSG,
+  RUN_QUERY_SUCCESS,
+  RUN_QUERY_FAILURE,
+  RUN_QUERY_STARTED_RUNNING,
+  RUN_QUERY_PARAMS_UPDATED,
+  RUN_QUERY_CLEAR_ERR_MSG,
+  RUN_META_QUERY_SUCCESS,
+  RUN_META_QUERY_FAILURE,
+  RUN_META_QUERY_STARTED_RUNNING,
+  RUN_META_QUERY_PARAMS_UPDATED,
+  RUN_META_QUERY_CLEAR_ERR_MSG,
 } from './actionTypes';
 
 const defaultSearchParams = {
@@ -59,6 +69,34 @@ const defaultSubjectResult = {
   errorMessage: null,
 };
 
+const defaultRunParams = {
+  sortCol: 'key',
+  sortAsc: true,
+  page: null,
+  rowsPerPage: 10,
+  search: '',
+};
+
+const defaultRunResult = {
+  data: {},
+  loading: false,
+  errorMessage: null,
+};
+
+const defaultRunMetaParams = {
+  sortCol: 'subject_id',
+  sortAsc: false,
+  page: null,
+  rowsPerPage: 10,
+  search: '',
+};
+
+const defaultRunMetaResult = {
+  data: {},
+  loading: false,
+  errorMessage: null,
+};
+
 const initialState = {
   authState: 'loading',
   authUser: null,
@@ -83,6 +121,18 @@ const initialState = {
   },
   subjectParams: {
     ...defaultSubjectParams,
+  },
+  runResult: {
+    ...defaultRunResult,
+  },
+  runParams: {
+    ...defaultRunParams,
+  },
+  runMetaResult: {
+    ...defaultRunMetaResult,
+  },
+  runMetaParams: {
+    ...defaultRunMetaParams,
   },
 };
 
@@ -223,6 +273,92 @@ const reducer = (state = initialState, action) => {
         ...state,
         subjectResult: {
           ...state.subjectResult,
+          errorMessage: null,
+        },
+      };
+    case RUN_QUERY_PARAMS_UPDATED:
+      return {
+        ...state,
+        runParams: {
+          ...defaultRunParams,
+          ...action.payload.params,
+        },
+      };
+    case RUN_QUERY_STARTED_RUNNING:
+      return {
+        ...state,
+        runResult: {
+          ...defaultRunResult,
+          loading: true,
+        },
+        runParams: action.payload.runParams,
+      };
+    case RUN_QUERY_SUCCESS:
+      return {
+        ...state,
+        runResult: {
+          ...defaultRunResult,
+          data: action.payload.data,
+          loading: false,
+        },
+      };
+    case RUN_QUERY_FAILURE:
+      return {
+        ...state,
+        runResult: {
+          ...defaultRunResult,
+          errorMessage: action.payload.errorMessage,
+          loading: false,
+        },
+      };
+    case RUN_QUERY_CLEAR_ERR_MSG:
+      return {
+        ...state,
+        runResult: {
+          ...state.runResult,
+          errorMessage: null,
+        },
+      };
+    case RUN_META_QUERY_PARAMS_UPDATED:
+      return {
+        ...state,
+        runMetaParams: {
+          ...defaultRunMetaParams,
+          ...action.payload.params,
+        },
+      };
+    case RUN_META_QUERY_STARTED_RUNNING:
+      return {
+        ...state,
+        runMetaResult: {
+          ...defaultRunMetaResult,
+          loading: true,
+        },
+        runMetaParams: action.payload.runMetaParams,
+      };
+    case RUN_META_QUERY_SUCCESS:
+      return {
+        ...state,
+        runMetaResult: {
+          ...defaultRunMetaResult,
+          data: action.payload.data,
+          loading: false,
+        },
+      };
+    case RUN_META_QUERY_FAILURE:
+      return {
+        ...state,
+        runMetaResult: {
+          ...defaultRunMetaResult,
+          errorMessage: action.payload.errorMessage,
+          loading: false,
+        },
+      };
+    case RUN_META_QUERY_CLEAR_ERR_MSG:
+      return {
+        ...state,
+        runMetaResult: {
+          ...state.runMetaResult,
           errorMessage: null,
         },
       };

@@ -8,6 +8,7 @@ import Search from './containers/Search';
 import Storage from './containers/Storage';
 import LandingPage from './containers/LandingPage';
 import Subject from './containers/Subject';
+import Run from './containers/Run';
 
 class Routes extends Component {
   render() {
@@ -25,6 +26,8 @@ class Routes extends Component {
             <Route path='/' exact component={Home} />
             <Route path='/subjects/' exact component={Subject} />
             <Route path='/subjects/:subjectId' exact component={Subject} />
+            <Route path='/runs/' exact component={Run} />
+            <Route path='/runs/:runId' exact component={Run} />
             <Route path='/search' component={Search} />
             <Route path='/storage' component={Storage} />
           </Fragment>

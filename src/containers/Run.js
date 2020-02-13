@@ -1,12 +1,12 @@
 import React, { Component, Fragment } from 'react';
 import { Link as RouterLink, Redirect } from 'react-router-dom';
 import { API } from 'aws-amplify';
+import { clearErrorMessage, startRunQuery, updateRunQueryPrams } from '../actions/run';
 import {
-  clearErrorMessage,
-  startRunningSubjectQuery,
-  updateSubjectQueryPrams,
-} from '../actions/subject';
-
+  clearRunMetaErrorMessage,
+  startRunMetaQuery,
+  updateRunMetaQueryPrams,
+} from '../actions/runmeta';
 import { connect } from 'react-redux';
 import * as PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core';
@@ -15,7 +15,6 @@ import Table from '@material-ui/core/Table';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import TableBody from '@material-ui/core/TableBody';
-import TableHead from '@material-ui/core/TableHead';
 import Toolbar from '@material-ui/core/Toolbar';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
@@ -30,7 +29,7 @@ import Grid from '@material-ui/core/Grid';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Moment from 'react-moment';
 import history from '../history';
-import EnhancedTableHead, { getDisplayTitle } from '../components/EnhancedTableHead';
+import EnhancedTableHead from '../components/EnhancedTableHead';
 import HumanReadableFileSize from '../components/HumanReadableFileSize';
 import Button from '@material-ui/core/Button';
 import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
@@ -58,33 +57,34 @@ const styles = (theme) => ({
   },
 });
 
-class Subject extends Component {
+class Run extends Component {
   state = {
-    subject: null,
+    runId: null,
     redirect: false,
     dialogOpened: false,
     rowData: null,
   };
 
   async componentDidMount() {
-    const { subjectId } = this.props.match.params;
-    if (subjectId) {
-      const subject = await API.get('files', '/subjects/' + subjectId, {});
-      this.setState({ subject });
-      const { handleStartRunningSubjectQuery } = this.props;
-      await handleStartRunningSubjectQuery(this.getBaseParams(), subjectId);
+    const { runId } = this.props.match.params;
+    if (runId) {
+      this.setState({ runId: runId });
+      const { handleStartRunMetaQuery } = this.props;
+      await handleStartRunMetaQuery(this.getRunMetaBaseParams(), runId);
+      const { handleStartRunQuery } = this.props;
+      await handleStartRunQuery(this.getBaseParams(), runId);
     } else {
       this.setState({ redirect: true });
     }
   }
 
   reloadData = async (params = {}) => {
-    const { handleStartRunningSubjectQuery } = this.props;
-    await handleStartRunningSubjectQuery(params, this.state.subject.id);
+    const { handleStartRunQuery } = this.props;
+    await handleStartRunQuery(params, this.state.runId);
   };
 
   getBaseParams = () => {
-    return this.props.subjectParams;
+    return this.props.runParams;
   };
 
   handlePageChange = async (event, page) => {
@@ -104,8 +104,8 @@ class Subject extends Component {
 
   handleRequestSort = async (event, property) => {
     const sortCol = property;
-    const { subjectParams } = this.props;
-    let sortAsc = subjectParams.sortCol === sortCol && !subjectParams.sortAsc;
+    const { runParams } = this.props;
+    let sortAsc = runParams.sortCol === sortCol && !runParams.sortAsc;
 
     // Reset all other search params except query
     await this.reloadData({
@@ -116,16 +116,66 @@ class Subject extends Component {
     });
   };
 
-  handleSubjectQueryChange = async (searchQuery) => {
-    await this.props.handleSubjectQueryParamsUpdate({
+  handleQueryParamsChange = async (searchQuery) => {
+    await this.props.handleRunQueryParamsUpdate({
       search: searchQuery,
       page: 1,
     });
   };
 
   handleSearchClicked = async () => {
-    const { handleStartRunningSubjectQuery, subjectParams } = this.props;
-    handleStartRunningSubjectQuery(subjectParams, this.state.subject.id);
+    const { handleStartRunQuery, runParams } = this.props;
+    handleStartRunQuery(runParams, this.state.runId);
+  };
+
+  reloadRunMetaData = async (params = {}) => {
+    const { handleStartRunMetaQuery } = this.props;
+    await handleStartRunMetaQuery(params, this.state.runId);
+  };
+
+  getRunMetaBaseParams = () => {
+    return this.props.runMetaParams;
+  };
+
+  handleRunMetaPageChange = async (event, page) => {
+    await this.reloadRunMetaData({
+      ...this.getRunMetaBaseParams(),
+      page: page + 1, // React pagination start at 0 whereas API start at 1
+    });
+  };
+
+  handleRunMetaRowsPerPageChange = async (event) => {
+    await this.reloadRunMetaData({
+      ...this.getRunMetaBaseParams(),
+      page: 1, // Reset page number if rows per page change
+      rowsPerPage: event.target.value,
+    });
+  };
+
+  handleRunMetaRequestSort = async (event, property) => {
+    const sortCol = property;
+    const { runMetaParams } = this.props;
+    let sortAsc = runMetaParams.sortCol === sortCol && !runMetaParams.sortAsc;
+
+    // Reset all other search params except query
+    await this.reloadRunMetaData({
+      ...this.getRunMetaBaseParams(),
+      page: 1, // Reset page number if sorting change
+      sortAsc,
+      sortCol,
+    });
+  };
+
+  handleRunMetaQueryParamsChange = async (searchQuery) => {
+    await this.props.handleRunMetaQueryParamsUpdate({
+      search: searchQuery,
+      page: 1,
+    });
+  };
+
+  handleRunMetaSearchClicked = async () => {
+    const { handleStartRunMetaQuery, runMetaParams } = this.props;
+    handleStartRunMetaQuery(runMetaParams, this.state.runId);
   };
 
   handleRowClick = (id) => {
@@ -164,19 +214,18 @@ class Subject extends Component {
     });
   };
 
-  renderSubjectView = () => {
+  renderRunView = () => {
     const { dialogOpened, rowData } = this.state;
-
     return (
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          {this.renderSubjectMetaDataView()}
+          {this.renderRunMetaDataView()}
         </Grid>
         <Grid item xs={12}>
           {this.renderChipFilterView()}
         </Grid>
         <Grid item xs={12}>
-          {this.renderSubjectS3View()}
+          {this.renderRunS3View()}
         </Grid>
         <LimsRowDetailsDialog
           dialogOpened={dialogOpened}
@@ -187,8 +236,12 @@ class Subject extends Component {
     );
   };
 
-  renderSubjectMetaDataView = () => {
-    const { id, lims } = this.state.subject;
+  renderRunMetaDataView = () => {
+    const { sortAsc, sortCol, search } = this.props.runMetaParams;
+    const { loading, data } = this.props.runMetaResult;
+    const { results, pagination } = data;
+    const { dialogOpened, rowData } = this.state;
+
     const columns = [
       { key: 'info', sortable: false },
       { key: 'illumina_id', sortable: true },
@@ -206,17 +259,46 @@ class Subject extends Component {
 
     return (
       <Paper>
-        <Table size={'small'} aria-label={'a dense table'}>
-          <TableHead>
-            <TableRow>
-              {columns.map((col) => (
-                <TableCell key={col.key}>{getDisplayTitle(col.key)}</TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
+        <Toolbar>
+          <Box width={1 / 4}>
+            <TextField
+              fullWidth
+              label={'Search Filter'}
+              type={'search'}
+              value={search}
+              onChange={(e) => this.handleRunMetaQueryParamsChange(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && this.handleRunMetaSearchClicked()}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment color={'primary'} position={'end'}>
+                    <IconButton color='primary' onClick={this.handleRunMetaSearchClicked}>
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </Toolbar>
+
+        <Table size='small' aria-label='a dense table'>
+          <EnhancedTableHead
+            onRequestSort={this.handleRunMetaRequestSort}
+            order={sortAsc ? 'asc' : 'desc'}
+            orderBy={sortCol === null ? '' : sortCol}
+            columns={columns}
+          />
           <TableBody>
-            {id != null &&
-              lims.map((row) => (
+            {loading && (
+              <TableRow>
+                <TableCell colSpan={columns.length} style={{ textAlign: 'center' }}>
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading &&
+              results != null &&
+              results.map((row) => (
                 <TableRow key={row.id}>
                   {columns.map((col) =>
                     col.key === 'info' ? (
@@ -225,11 +307,16 @@ class Subject extends Component {
                           <MoreIcon color={'primary'} />
                         </IconButton>
                       </TableCell>
-                    ) : col.key === 'illumina_id' ? (
+                    ) : col.key === 'subject_id' ? (
                       <TableCell key={col.key}>
-                        <Button color='primary' component={RouterLink} to={'/runs/' + row[col.key]}>
-                          {row[col.key]}
-                        </Button>
+                        {row[col.key] && (
+                          <Button
+                            color='primary'
+                            component={RouterLink}
+                            to={'/subjects/' + row[col.key]}>
+                            {row[col.key]}
+                          </Button>
+                        )}
                       </TableCell>
                     ) : (
                       <TableCell key={col.key}>{row[col.key]}</TableCell>
@@ -238,7 +325,32 @@ class Subject extends Component {
                 </TableRow>
               ))}
           </TableBody>
+          {pagination != null && (
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  colSpan={8}
+                  rowsPerPageOptions={[10, 20, 50, 100]}
+                  count={pagination.count}
+                  rowsPerPage={pagination.rowsPerPage}
+                  page={pagination.page - 1}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  onChangePage={this.handleRunMetaPageChange}
+                  onChangeRowsPerPage={this.handleRunMetaRowsPerPageChange}
+                  ActionsComponent={TablePaginationActionsWrapped}
+                />
+              </TableRow>
+            </TableFooter>
+          )}
         </Table>
+
+        <LimsRowDetailsDialog
+          dialogOpened={dialogOpened}
+          rowData={rowData}
+          onDialogClose={this.handleDialogClose}
+        />
       </Paper>
     );
   };
@@ -246,46 +358,7 @@ class Subject extends Component {
   renderChipFilterView = () => {
     const chipData = [
       { key: 0, label: 'reset', keyword: '', color: 'primary' },
-      { key: 1, label: 'wgs bam', keyword: 'wgs ready .bam$', color: 'default' },
-      {
-        key: 2,
-        label: 'vcf',
-        keyword: 'umccrised/[^(work)*] (somatic-ensemble|normal-ensemble-predispose_genes).vcf.gz$',
-        color: 'default',
-      },
-      {
-        key: 3,
-        label: 'umccrised cancer report',
-        keyword: 'umccrised cancer_report.html$',
-        color: 'default',
-      },
-      {
-        key: 4,
-        label: 'umccrised multiqc report',
-        keyword: 'umccrised multiqc_report.html$',
-        color: 'default',
-      },
-      {
-        key: 5,
-        label: 'pcgr report',
-        keyword: 'umccrised pcgr/ (pcgr|cpsr).html$',
-        color: 'default',
-      },
-      {
-        key: 6,
-        label: 'coverage report',
-        keyword: 'cacao html (cacao_normal|cacao_tumor)',
-        color: 'default',
-      },
-      { key: 7, label: 'circos', keyword: 'work/ purple/ circos baf .png$', color: 'default' },
-      { key: 8, label: 'wts bam', keyword: 'wts ready .bam$', color: 'default' },
-      {
-        key: 9,
-        label: 'wts multiqc',
-        keyword: 'wts multiqc/ multiqc_report.html$',
-        color: 'default',
-      },
-      { key: 10, label: 'rnasum report', keyword: 'RNAseq_report.html$', color: 'default' },
+      { key: 1, label: 'qc reports', keyword: '.html$', color: 'default' },
     ];
 
     return (
@@ -306,9 +379,9 @@ class Subject extends Component {
     );
   };
 
-  renderSubjectS3View = () => {
-    const { sortAsc, sortCol, search } = this.props.subjectParams;
-    const { loading, data } = this.props.subjectResult;
+  renderRunS3View = () => {
+    const { sortAsc, sortCol, search } = this.props.runParams;
+    const { loading, data } = this.props.runResult;
     const { results, pagination } = data;
     const columns = [
       { key: 'bucket', sortable: true },
@@ -322,13 +395,13 @@ class Subject extends Component {
     return (
       <Paper elevation={1}>
         <Toolbar>
-          <Box width={1 / 3}>
+          <Box width={1 / 4}>
             <TextField
               fullWidth
               label={'Search Filter'}
               type={'search'}
               value={search}
-              onChange={(e) => this.handleSubjectQueryChange(e.target.value)}
+              onChange={(e) => this.handleQueryParamsChange(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && this.handleSearchClicked()}
               InputProps={{
                 endAdornment: (
@@ -404,7 +477,7 @@ class Subject extends Component {
 
   render() {
     const { authUserInfo } = this.props;
-    const { redirect, subject } = this.state;
+    const { redirect, runId } = this.state;
 
     if (authUserInfo && redirect) {
       const homePath = '/';
@@ -414,8 +487,8 @@ class Subject extends Component {
 
     return (
       <Fragment>
-        {authUserInfo && !subject && <LinearProgress />}
-        {authUserInfo && subject && this.renderSubjectView()}
+        {authUserInfo && !runId && <LinearProgress />}
+        {authUserInfo && runId && this.renderRunView()}
         {this.renderErrorMessage()}
       </Fragment>
     );
@@ -428,10 +501,10 @@ class Subject extends Component {
   };
 
   // Show snackbar if we have an error message and it has not been hidden
-  openSnackbar = () => this.props.subjectResult.errorMessage !== null;
+  openSnackbar = () => this.props.runResult.errorMessage !== null;
 
   renderErrorMessage = () => {
-    const { errorMessage } = this.props.subjectResult;
+    const { errorMessage } = this.props.runResult;
 
     return (
       <Snackbar
@@ -460,42 +533,58 @@ class Subject extends Component {
   };
 }
 
-Subject.propTypes = {
+Run.propTypes = {
   classes: PropTypes.object.isRequired,
   match: PropTypes.object,
   authUserInfo: PropTypes.object.isRequired,
-  handleStartRunningSubjectQuery: PropTypes.func.isRequired,
-  handleSubjectQueryParamsUpdate: PropTypes.func.isRequired,
+  handleStartRunQuery: PropTypes.func.isRequired,
+  handleRunQueryParamsUpdate: PropTypes.func.isRequired,
   handleClearErrorMessage: PropTypes.func.isRequired,
-  subjectParams: PropTypes.object.isRequired,
-  subjectResult: PropTypes.object.isRequired,
+  runParams: PropTypes.object.isRequired,
+  runResult: PropTypes.object.isRequired,
+  handleStartRunMetaQuery: PropTypes.func.isRequired,
+  handleRunMetaQueryParamsUpdate: PropTypes.func.isRequired,
+  handleRunMetaClearErrorMessage: PropTypes.func.isRequired,
+  runMetaParams: PropTypes.object.isRequired,
+  runMetaResult: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = (state) => {
   return {
     authUserInfo: state.authUserInfo,
-    subjectParams: state.subjectParams,
-    subjectResult: state.subjectResult,
+    runParams: state.runParams,
+    runResult: state.runResult,
+    runMetaParams: state.runMetaParams,
+    runMetaResult: state.runMetaResult,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    handleSubjectQueryParamsUpdate: async (params) => {
-      dispatch(updateSubjectQueryPrams(params));
+    handleRunQueryParamsUpdate: async (params) => {
+      dispatch(updateRunQueryPrams(params));
     },
-    handleStartRunningSubjectQuery: async (params, subjectId) => {
-      dispatch(startRunningSubjectQuery(params, subjectId));
+    handleStartRunQuery: async (params, runId) => {
+      dispatch(startRunQuery(params, runId));
     },
     handleClearErrorMessage: () => {
       dispatch(clearErrorMessage());
     },
+    handleRunMetaQueryParamsUpdate: async (params) => {
+      dispatch(updateRunMetaQueryPrams(params));
+    },
+    handleStartRunMetaQuery: async (params, runId) => {
+      dispatch(startRunMetaQuery(params, runId));
+    },
+    handleRunMetaClearErrorMessage: () => {
+      dispatch(clearRunMetaErrorMessage());
+    },
   };
 };
 
-const ConnectSubject = connect(
+const ConnectRun = connect(
   mapStateToProps,
   mapDispatchToProps
-)(Subject);
+)(Run);
 
-export default withStyles(styles)(ConnectSubject);
+export default withStyles(styles)(ConnectRun);
