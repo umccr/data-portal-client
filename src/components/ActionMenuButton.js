@@ -270,7 +270,8 @@ class ActionMenuButton extends React.Component {
         <Backdrop
           className={this.props.classes.backdrop}
           open={openBackdrop}
-          onAbort={this.handleClose}>
+          onAbort={this.handleClose}
+          timeout={500}>
           <CircularProgress color='inherit' />
         </Backdrop>
         {this.renderErrorMessage()}

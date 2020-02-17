@@ -26,7 +26,6 @@ import TableFooter from '@material-ui/core/TableFooter';
 import TablePagination from '@material-ui/core/TablePagination';
 import { TablePaginationActionsWrapped } from '../components/TablePagniationActionsWrapped';
 import Grid from '@material-ui/core/Grid';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import Moment from 'react-moment';
 import history from '../history';
 import EnhancedTableHead from '../components/EnhancedTableHead';
@@ -39,6 +38,14 @@ import ActionMenuButton from '../components/ActionMenuButton';
 import Snackbar from '@material-ui/core/Snackbar';
 import CloseIcon from '@material-ui/icons/Close';
 import MoreIcon from '@material-ui/icons/More';
+import Link from '@material-ui/core/Link';
+import Typography from '@material-ui/core/Typography';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { defaultRunMetaParams, defaultRunParams } from '../reducers';
+import Backdrop from '@material-ui/core/Backdrop';
 
 const styles = (theme) => ({
   close: {
@@ -55,6 +62,33 @@ const styles = (theme) => ({
   chip: {
     margin: theme.spacing(0.5),
   },
+  heading: {
+    fontSize: theme.typography.pxToRem(18),
+    flexBasis: '33.33%',
+    flexShrink: 0,
+  },
+  secondaryHeading: {
+    fontSize: theme.typography.pxToRem(15),
+    color: theme.palette.text.secondary,
+  },
+  expSummaryExpanded: {
+    backgroundColor: '#E0E0E0',
+  },
+  expSummaryRoot: {
+    backgroundColor: '#E0E0E0',
+  },
+  expDetailsRoot: {
+    padding: '8px 24px 8px 24px',
+  },
+  tableRow: {
+    '&:last-child th, &:last-child td': {
+      borderBottom: 0,
+    },
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
 });
 
 class Run extends Component {
@@ -63,6 +97,8 @@ class Run extends Component {
     redirect: false,
     dialogOpened: false,
     rowData: null,
+    openBackdrop: false,
+    clickedLinks: [],
   };
 
   async componentDidMount() {
@@ -70,9 +106,9 @@ class Run extends Component {
     if (runId) {
       this.setState({ runId: runId });
       const { handleStartRunMetaQuery } = this.props;
-      await handleStartRunMetaQuery(this.getRunMetaBaseParams(), runId);
+      await handleStartRunMetaQuery(defaultRunMetaParams, runId);
       const { handleStartRunQuery } = this.props;
-      await handleStartRunQuery(this.getBaseParams(), runId);
+      await handleStartRunQuery(defaultRunParams, runId);
     } else {
       this.setState({ redirect: true });
     }
@@ -215,23 +251,46 @@ class Run extends Component {
   };
 
   renderRunView = () => {
-    const { dialogOpened, rowData } = this.state;
+    const { classes } = this.props;
     return (
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          {this.renderRunMetaDataView()}
+          <ExpansionPanel elevation={3} defaultExpanded>
+            <ExpansionPanelSummary
+              classes={{ expanded: classes.expSummaryExpanded, root: classes.expSummaryRoot }}
+              expandIcon={<ExpandMoreIcon />}
+              id='panel1-header'>
+              <Typography className={classes.heading}>Run Data</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails classes={{ root: classes.expDetailsRoot }}>
+              <Grid container spacing={1}>
+                <Grid item xs={12}>
+                  {this.renderChipFilterView()}
+                </Grid>
+                <Grid item xs={12}>
+                  {this.renderRunS3View()}
+                </Grid>
+              </Grid>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
         </Grid>
         <Grid item xs={12}>
-          {this.renderChipFilterView()}
+          <ExpansionPanel elevation={3}>
+            <ExpansionPanelSummary
+              classes={{ expanded: classes.expSummaryExpanded, root: classes.expSummaryRoot }}
+              expandIcon={<ExpandMoreIcon />}
+              id='panel2-header'>
+              <Typography className={classes.heading}>LIMS Metadata</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails classes={{ root: classes.expDetailsRoot }}>
+              <Grid container spacing={1}>
+                <Grid item xs={12}>
+                  {this.renderRunMetaDataView()}
+                </Grid>
+              </Grid>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
         </Grid>
-        <Grid item xs={12}>
-          {this.renderRunS3View()}
-        </Grid>
-        <LimsRowDetailsDialog
-          dialogOpened={dialogOpened}
-          rowData={rowData}
-          onDialogClose={this.handleDialogClose}
-        />
       </Grid>
     );
   };
@@ -258,7 +317,7 @@ class Run extends Component {
     ];
 
     return (
-      <Paper>
+      <Paper elevation={0}>
         <Toolbar>
           <Box width={1 / 4}>
             <TextField
@@ -327,7 +386,7 @@ class Run extends Component {
           </TableBody>
           {pagination != null && (
             <TableFooter>
-              <TableRow>
+              <TableRow className={this.props.classes.tableRow}>
                 <TablePagination
                   colSpan={8}
                   rowsPerPageOptions={[10, 20, 50, 100]}
@@ -379,6 +438,43 @@ class Run extends Component {
     );
   };
 
+  handleClose = () => {
+    this.setState({
+      openBackdrop: false,
+    });
+  };
+
+  getPreSignedUrl = async (bucket, key) => {
+    return await API.get('files', `/file-signed-url?bucket=${bucket}&key=${key}`, {});
+  };
+
+  handleOpenInBrowser = async (bucket, key, id) => {
+    const { clickedLinks } = this.state;
+    clickedLinks.push(id);
+    this.setState({ clickedLinks: clickedLinks });
+    this.setState({ openBackdrop: true });
+    const url = await this.getPreSignedUrl(bucket, key);
+    window.open(url, '_blank');
+    this.setState({ openBackdrop: false });
+  };
+
+  renderClickableColumn = (data) => {
+    const { clickedLinks } = this.state;
+    const { bucket, key, id } = data;
+
+    if (key.endsWith('html')) {
+      return (
+        <Link
+          color={clickedLinks.includes(id) ? 'secondary' : 'primary'}
+          href={'#'}
+          onClick={() => this.handleOpenInBrowser(bucket, key, id)}>
+          {key}
+        </Link>
+      );
+    }
+    return key;
+  };
+
   renderRunS3View = () => {
     const { sortAsc, sortCol, search } = this.props.runParams;
     const { loading, data } = this.props.runResult;
@@ -393,7 +489,7 @@ class Run extends Component {
     ];
 
     return (
-      <Paper elevation={1}>
+      <Paper elevation={0}>
         <Toolbar>
           <Box width={1 / 4}>
             <TextField
@@ -439,6 +535,8 @@ class Run extends Component {
                     <TableCell key={col.key}>
                       {col.key === 'actions' ? (
                         <ActionMenuButton data={row} />
+                      ) : col.key === 'key' ? (
+                        this.renderClickableColumn(row)
                       ) : col.key === 'size' ? (
                         <HumanReadableFileSize bytes={row[col.key]} />
                       ) : col.key === 'last_modified_date' ? (
@@ -453,7 +551,7 @@ class Run extends Component {
           </TableBody>
           {pagination != null && (
             <TableFooter>
-              <TableRow>
+              <TableRow className={this.props.classes.tableRow}>
                 <TablePagination
                   colSpan={columns.length * 0.5}
                   rowsPerPageOptions={[10, 20, 50, 100]}
@@ -477,7 +575,7 @@ class Run extends Component {
 
   render() {
     const { authUserInfo } = this.props;
-    const { redirect, runId } = this.state;
+    const { redirect, openBackdrop } = this.state;
 
     if (authUserInfo && redirect) {
       const homePath = '/';
@@ -487,9 +585,15 @@ class Run extends Component {
 
     return (
       <Fragment>
-        {authUserInfo && !runId && <LinearProgress />}
-        {authUserInfo && runId && this.renderRunView()}
+        {authUserInfo && this.renderRunView()}
         {this.renderErrorMessage()}
+        <Backdrop
+          className={this.props.classes.backdrop}
+          open={openBackdrop}
+          onAbort={this.handleClose}
+          timeout={500}>
+          <CircularProgress color='inherit' />
+        </Backdrop>
       </Fragment>
     );
   }

@@ -69,12 +69,12 @@ const defaultSubjectResult = {
   errorMessage: null,
 };
 
-const defaultRunParams = {
+export const defaultRunParams = {
   sortCol: 'key',
   sortAsc: true,
   page: null,
   rowsPerPage: 10,
-  search: '',
+  search: '.html$',
 };
 
 const defaultRunResult = {
@@ -83,7 +83,7 @@ const defaultRunResult = {
   errorMessage: null,
 };
 
-const defaultRunMetaParams = {
+export const defaultRunMetaParams = {
   sortCol: 'subject_id',
   sortAsc: false,
   page: null,
