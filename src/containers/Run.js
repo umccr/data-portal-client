@@ -80,6 +80,12 @@ const styles = (theme) => ({
   expDetailsRoot: {
     padding: '8px 24px 8px 24px',
   },
+  expExpandIcon: {
+    order: -1,
+  },
+  linkCursorPointer: {
+    cursor: 'pointer',
+  },
   tableRow: {
     '&:last-child th, &:last-child td': {
       borderBottom: 0,
@@ -257,7 +263,12 @@ class Run extends Component {
         <Grid item xs={12}>
           <ExpansionPanel elevation={3} defaultExpanded>
             <ExpansionPanelSummary
-              classes={{ expanded: classes.expSummaryExpanded, root: classes.expSummaryRoot }}
+              classes={{
+                expanded: classes.expSummaryExpanded,
+                root: classes.expSummaryRoot,
+                expandIcon: classes.expExpandIcon,
+              }}
+              IconButtonProps={{ edge: 'start' }}
               expandIcon={<ExpandMoreIcon />}
               id='panel1-header'>
               <Typography className={classes.heading}>Run Data</Typography>
@@ -277,7 +288,12 @@ class Run extends Component {
         <Grid item xs={12}>
           <ExpansionPanel elevation={3}>
             <ExpansionPanelSummary
-              classes={{ expanded: classes.expSummaryExpanded, root: classes.expSummaryRoot }}
+              classes={{
+                expanded: classes.expSummaryExpanded,
+                root: classes.expSummaryRoot,
+                expandIcon: classes.expExpandIcon,
+              }}
+              IconButtonProps={{ edge: 'start' }}
               expandIcon={<ExpandMoreIcon />}
               id='panel2-header'>
               <Typography className={classes.heading}>LIMS Metadata</Typography>
@@ -465,8 +481,8 @@ class Run extends Component {
     if (key.endsWith('html')) {
       return (
         <Link
+          className={this.props.classes.linkCursorPointer}
           color={clickedLinks.includes(id) ? 'secondary' : 'primary'}
-          href={'#'}
           onClick={() => this.handleOpenInBrowser(bucket, key, id)}>
           {key}
         </Link>
