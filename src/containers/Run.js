@@ -460,30 +460,34 @@ class Run extends Component {
     });
   };
 
-  getPreSignedUrl = async (bucket, key) => {
-    return await API.get('files', `/file-signed-url?bucket=${bucket}&key=${key}`, {});
+  getPreSignedUrl = async (id) => {
+    const { error, signed_url } = await API.get('files', `/s3/${id}/presign`, {});
+    if (error) {
+      return error;
+    }
+    return signed_url;
   };
 
-  handleOpenInBrowser = async (bucket, key, id) => {
+  handleOpenInBrowser = async (id) => {
     const { clickedLinks } = this.state;
     clickedLinks.push(id);
     this.setState({ clickedLinks: clickedLinks });
     this.setState({ openBackdrop: true });
-    const url = await this.getPreSignedUrl(bucket, key);
+    const url = await this.getPreSignedUrl(id);
     window.open(url, '_blank');
     this.setState({ openBackdrop: false });
   };
 
   renderClickableColumn = (data) => {
     const { clickedLinks } = this.state;
-    const { bucket, key, id } = data;
+    const { id, key } = data;
 
     if (key.endsWith('html')) {
       return (
         <Link
           className={this.props.classes.linkCursorPointer}
           color={clickedLinks.includes(id) ? 'secondary' : 'primary'}
-          onClick={() => this.handleOpenInBrowser(bucket, key, id)}>
+          onClick={() => this.handleOpenInBrowser(id)}>
           {key}
         </Link>
       );

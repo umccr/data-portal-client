@@ -52,6 +52,10 @@ class ActionMenuButton extends React.Component {
     url: null,
     expires: null,
     errorMessage: null,
+    dialogMessage: null,
+    archived: false,
+    restore: false,
+    restoredMessage: null,
   };
 
   handleClose = () => {
@@ -63,17 +67,22 @@ class ActionMenuButton extends React.Component {
       url: null,
       expires: null,
       errorMessage: null,
+      dialogMessage: null,
+      archived: false,
+      restore: false,
+      restoredMessage: null,
     });
   };
 
-  handleOpenInBrowser = async (bucket, key) => {
+  handleOpenInBrowser = async (id) => {
     this.setState({ openBackdrop: true });
-    const url = await this.getPreSignedUrl(bucket, key);
+    const url = await this.getPreSignedUrl(id);
     window.open(url, '_blank');
     this.setState({ openBackdrop: false });
   };
 
-  handleOpenIGVLink = (bucket, key) => {
+  handleOpenIGVLink = (id, bucket, key) => {
+    if (this.state.archived) return;
     const xhr = new XMLHttpRequest();
     const tokens = key.split('/');
     const filename = tokens[tokens.length - 1];
@@ -82,19 +91,19 @@ class ActionMenuButton extends React.Component {
     xhr.open('GET', url, true);
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4 && xhr.status === 0) {
-        const errorMessage =
+        const dialogMessage =
           'Cannot open automatically in IGV. Please make sure you have opened IGV app and try again. ' +
           'Otherwise please click "Copy" button and open the URL in browser new tab.';
-        this.setState({ errorMessage: errorMessage });
+        this.setState({ dialogMessage: dialogMessage });
         this.setState({ open: true, url: url });
       }
     };
     xhr.send();
   };
 
-  handleGeneratePreSignedUrl = async (bucket, key) => {
+  handleGeneratePreSignedUrl = async (id) => {
     this.setState({ signing: true, open: true });
-    const url = await this.getPreSignedUrl(bucket, key);
+    const url = await this.getPreSignedUrl(id);
     const params = this.parseUrlParams(url);
     const expires = params['Expires'];
     this.setState({ expires });
@@ -113,15 +122,75 @@ class ActionMenuButton extends React.Component {
       }, {});
   };
 
-  getPreSignedUrl = async (bucket, key) => {
-    return await API.get('files', `/file-signed-url?bucket=${bucket}&key=${key}`, {});
+  checkS3ObjectStatus = async (id, callback) => {
+    this.setState({ openBackdrop: true });
+    const data = await API.get('files', `/s3/${id}/status`, {});
+    const { bucket, key, head_object } = data;
+    if (head_object) {
+      // NOTE: head_object contains S3 API response as described follows
+      // https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.head_object
+
+      // head request has raised some error
+      const { error } = head_object;
+      if (error) {
+        this.setState({ errorMessage: error });
+      }
+
+      // check if we have archive header
+      const archived = head_object['StorageClass'] === 'DEEP_ARCHIVE';
+      if (archived) {
+        // check if we have Restore header
+        const restore_header = head_object['Restore'];
+        if (restore_header) {
+          if (!restore_header.includes('expiry-date')) {
+            // restore in progress
+            const dialogMessage =
+              'The requested file is restoring in progress from archival storage (Glacier Deep Archive). ' +
+              'Please try again later. Retrieval may take up to 48 hours.';
+            this.setState({ dialogMessage: dialogMessage, archived: archived });
+            this.setState({ open: true, url: this.getS3Path(bucket, key) });
+          }
+        } else {
+          const dialogMessage =
+            'The requested file is in archival storage (Glacier Deep Archive). ' +
+            'Please request to restore the file before accessing. Retrieval may take up to 48 hours.';
+          this.setState({ dialogMessage: dialogMessage, archived: archived, restore: true });
+          this.setState({ open: true, url: this.getS3Path(bucket, key) });
+        }
+      }
+    }
+    this.setState({ openBackdrop: false });
+    callback(id, bucket, key);
+  };
+
+  handleRestoreClicked = async (id) => {
+    this.setState({ restore: false }); // eagerly disable restore button
+
+    // TODO allow specify days parameter?
+    const data = await API.get('files', `/s3/${id}/restore?days=90`, {});
+    const { error } = data;
+
+    if (error) {
+      this.setState({ errorMessage: error });
+    } else {
+      const restoredMessage = 'Successfully submitted restore request!';
+      this.setState({ restoredMessage: restoredMessage });
+    }
+  };
+
+  getPreSignedUrl = async (id) => {
+    const { error, signed_url } = await API.get('files', `/s3/${id}/presign`, {});
+    if (error) {
+      return error;
+    }
+    return signed_url;
   };
 
   getS3Path = (bucket, key) => {
     return 's3://' + bucket + '/' + key;
   };
 
-  renderMenu = (bucket, key, popupState) => {
+  renderMenu = (id, bucket, key, popupState) => {
     return (
       <Menu {...bindMenu(popupState)}>
         {(key.endsWith('bam') || key.endsWith('vcf') || key.endsWith('vcf.gz')) && (
@@ -129,7 +198,7 @@ class ActionMenuButton extends React.Component {
             <List
               className={this.props.classes.root}
               component={'div'}
-              onClick={() => this.handleOpenIGVLink(bucket, key)}>
+              onClick={() => this.checkS3ObjectStatus(id, this.handleOpenIGVLink)}>
               <ListItemIcon>
                 <img src={'/igv.png'} alt='igv.png' width='24px' height='24px' />
               </ListItemIcon>
@@ -154,7 +223,7 @@ class ActionMenuButton extends React.Component {
             <List
               className={this.props.classes.root}
               component={'div'}
-              onClick={() => this.handleGeneratePreSignedUrl(bucket, key)}>
+              onClick={() => this.handleGeneratePreSignedUrl(id)}>
               <ListItemIcon>
                 <LinkIcon />
               </ListItemIcon>
@@ -168,7 +237,7 @@ class ActionMenuButton extends React.Component {
             <List
               className={this.props.classes.root}
               component={'div'}
-              onClick={() => this.handleOpenInBrowser(bucket, key)}>
+              onClick={() => this.handleOpenInBrowser(id)}>
               <ListItemIcon>
                 <OpenInBrowserIcon />
               </ListItemIcon>
@@ -192,7 +261,7 @@ class ActionMenuButton extends React.Component {
               <Button {...bindTrigger(popupState)} color='primary'>
                 <MenuIcon />
               </Button>
-              {this.renderMenu(bucket, key, popupState)}
+              {this.renderMenu(id, bucket, key, popupState)}
             </Fragment>
           )}
         </PopupState>
@@ -224,7 +293,7 @@ class ActionMenuButton extends React.Component {
                               <Moment unix>{this.state.expires}</Moment>
                             </Typography>
                           ) : (
-                            this.state.errorMessage
+                            this.state.dialogMessage
                           )}
                         </TableCell>
                       </TableRow>
@@ -251,8 +320,6 @@ class ActionMenuButton extends React.Component {
                       Copy
                     </Button>
                   </CopyToClipboard>
-                </Grid>
-                <Grid item xs={3}>
                   {this.state.copied ? (
                     <Typography
                       style={{ color: 'red' }}
@@ -263,6 +330,25 @@ class ActionMenuButton extends React.Component {
                     </Typography>
                   ) : null}
                 </Grid>
+                {/*<Grid item xs={3}>*/}
+                {/*  <Button*/}
+                {/*    fullWidth*/}
+                {/*    variant='contained'*/}
+                {/*    color='secondary'*/}
+                {/*    disabled={!this.state.restore}*/}
+                {/*    onClick={() => this.handleRestoreClicked(id)}>*/}
+                {/*    Restore*/}
+                {/*  </Button>*/}
+                {/*  {this.state.restoredMessage != null ? (*/}
+                {/*    <Typography*/}
+                {/*      style={{ color: 'red' }}*/}
+                {/*      variant='body2'*/}
+                {/*      display='block'*/}
+                {/*      gutterBottom>*/}
+                {/*      {this.state.restoredMessage}*/}
+                {/*    </Typography>*/}
+                {/*  ) : null}*/}
+                {/*</Grid>*/}
               </Grid>
             )}
           </DialogContent>
@@ -285,7 +371,7 @@ class ActionMenuButton extends React.Component {
   };
 
   // Show snackbar if we have an error message and it has not been hidden
-  openSnackbar = () => false;
+  openSnackbar = () => this.state.errorMessage !== null;
 
   renderErrorMessage = () => {
     const { errorMessage } = this.state;
