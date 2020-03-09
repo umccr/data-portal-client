@@ -554,7 +554,7 @@ class Run extends Component {
                   {columns.map((col) => (
                     <TableCell key={col.key}>
                       {col.key === 'actions' ? (
-                        <ActionMenuButton data={row} />
+                        <ActionMenuButton data={row} authUserInfo={this.props.authUserInfo} />
                       ) : col.key === 'key' ? (
                         this.renderClickableColumn(row)
                       ) : col.key === 'size' ? (

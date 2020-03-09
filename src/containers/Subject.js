@@ -365,7 +365,7 @@ class Subject extends Component {
                   {columns.map((col) => (
                     <TableCell key={col.key}>
                       {col.key === 'actions' ? (
-                        <ActionMenuButton data={row} />
+                        <ActionMenuButton data={row} authUserInfo={this.props.authUserInfo} />
                       ) : col.key === 'size' ? (
                         <HumanReadableFileSize bytes={row[col.key]} />
                       ) : col.key === 'last_modified_date' ? (

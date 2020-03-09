@@ -140,20 +140,43 @@ class ActionMenuButton extends React.Component {
       const archived = head_object['StorageClass'] === 'DEEP_ARCHIVE';
       if (archived) {
         // check if we have Restore header
-        const restore_header = head_object['Restore'];
-        if (restore_header) {
-          if (!restore_header.includes('expiry-date')) {
-            // restore in progress
+        const restoreStatus = head_object['Restore'];
+        if (restoreStatus) {
+          const isOngoingRequest = restoreStatus.includes('true');
+          if (isOngoingRequest) {
             const dialogMessage =
               'The requested file is restoring in progress from archival storage (Glacier Deep Archive). ' +
               'Please try again later. Retrieval may take up to 48 hours.';
             this.setState({ dialogMessage: dialogMessage, archived: archived });
             this.setState({ open: true, url: this.getS3Path(bucket, key) });
+          } else {
+            const expiryChunk = restoreStatus.slice(25);
+            if (!isOngoingRequest && expiryChunk) {
+              const expiryDateStr = expiryChunk.split('=')[1];
+              const expiryDate = Date.parse(expiryDateStr);
+              const expired = expiryDate < Date.now();
+              if (expired) {
+                const dialogMessage =
+                  `The restored file has expired since ${new Date(expiryDate)}` +
+                  '. Please restore it again from archival storage (Glacier Deep Archive). ' +
+                  'Once restored, it will be valid for 7 days. ' +
+                  'Retrieval may take up to 48 hours and, will incur cost. ' +
+                  'Generally, bigger file size cost higher for restore request. ' +
+                  'If in doubt, please reach out or, do due diligence check at https://aws.amazon.com/s3/pricing/. ' +
+                  'Request will be logged for audit trail purpose.';
+                this.setState({ dialogMessage: dialogMessage, archived: archived, restore: true });
+                this.setState({ open: true, url: this.getS3Path(bucket, key) });
+              }
+            }
           }
         } else {
           const dialogMessage =
             'The requested file is in archival storage (Glacier Deep Archive). ' +
-            'Please request to restore the file before accessing. Retrieval may take up to 48 hours.';
+            'Please restore the file before accessing. Once restored, it will be valid for 7 days. ' +
+            'Retrieval may take up to 48 hours and, will incur cost. ' +
+            'Generally, bigger file size cost higher for restore request. ' +
+            'If in doubt, please reach out or, do due diligence check at https://aws.amazon.com/s3/pricing/. ' +
+            'Request will be logged for audit trail purpose.';
           this.setState({ dialogMessage: dialogMessage, archived: archived, restore: true });
           this.setState({ open: true, url: this.getS3Path(bucket, key) });
         }
@@ -164,10 +187,18 @@ class ActionMenuButton extends React.Component {
   };
 
   handleRestoreClicked = async (id) => {
+    const { authUserInfo } = this.props;
     this.setState({ restore: false }); // eagerly disable restore button
 
-    // TODO allow specify days parameter?
-    const data = await API.get('files', `/s3/${id}/restore?days=90`, {});
+    const init = {
+      headers: { 'Content-Type': 'application/json' },
+      body: {
+        email: authUserInfo['attributes']['email'],
+        days: 7,
+        tier: 'Bulk',
+      },
+    };
+    const data = await API.post('files', `/s3/${id}/restore`, init);
     const { error } = data;
 
     if (error) {
@@ -330,25 +361,25 @@ class ActionMenuButton extends React.Component {
                     </Typography>
                   ) : null}
                 </Grid>
-                {/*<Grid item xs={3}>*/}
-                {/*  <Button*/}
-                {/*    fullWidth*/}
-                {/*    variant='contained'*/}
-                {/*    color='secondary'*/}
-                {/*    disabled={!this.state.restore}*/}
-                {/*    onClick={() => this.handleRestoreClicked(id)}>*/}
-                {/*    Restore*/}
-                {/*  </Button>*/}
-                {/*  {this.state.restoredMessage != null ? (*/}
-                {/*    <Typography*/}
-                {/*      style={{ color: 'red' }}*/}
-                {/*      variant='body2'*/}
-                {/*      display='block'*/}
-                {/*      gutterBottom>*/}
-                {/*      {this.state.restoredMessage}*/}
-                {/*    </Typography>*/}
-                {/*  ) : null}*/}
-                {/*</Grid>*/}
+                <Grid item xs={3}>
+                  <Button
+                    fullWidth
+                    variant='contained'
+                    color='secondary'
+                    disabled={!this.state.restore}
+                    onClick={() => this.handleRestoreClicked(id)}>
+                    Restore
+                  </Button>
+                  {this.state.restoredMessage != null ? (
+                    <Typography
+                      style={{ color: 'red' }}
+                      variant='body2'
+                      display='block'
+                      gutterBottom>
+                      {this.state.restoredMessage}
+                    </Typography>
+                  ) : null}
+                </Grid>
               </Grid>
             )}
           </DialogContent>
@@ -406,6 +437,7 @@ class ActionMenuButton extends React.Component {
 ActionMenuButton.propTypes = {
   classes: PropTypes.object.isRequired,
   data: PropTypes.object,
+  authUserInfo: PropTypes.object,
 };
 
 export default withStyles(styles)(ActionMenuButton);
