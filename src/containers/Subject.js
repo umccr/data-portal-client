@@ -39,7 +39,12 @@ import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import ActionMenuButton from '../components/ActionMenuButton';
 import Snackbar from '@material-ui/core/Snackbar';
 import CloseIcon from '@material-ui/icons/Close';
-import MoreIcon from '@material-ui/icons/More';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import TableContainer from '@material-ui/core/TableContainer';
+import { TabPanel, TabView } from 'primereact/tabview';
+import { Panel } from 'primereact/panel';
+import Link from '@material-ui/core/Link';
+import Backdrop from '@material-ui/core/Backdrop';
 
 const styles = (theme) => ({
   close: {
@@ -56,6 +61,18 @@ const styles = (theme) => ({
   chip: {
     margin: theme.spacing(0.5),
   },
+  linkCursorPointer: {
+    cursor: 'pointer',
+  },
+  tableRow: {
+    '&:last-child th, &:last-child td': {
+      borderBottom: 0,
+    },
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
 });
 
 class Subject extends Component {
@@ -64,6 +81,8 @@ class Subject extends Component {
     redirect: false,
     dialogOpened: false,
     rowData: null,
+    openBackdrop: false,
+    clickedLinks: [],
   };
 
   async componentDidMount() {
@@ -164,82 +183,285 @@ class Subject extends Component {
     });
   };
 
-  renderSubjectView = () => {
-    const { dialogOpened, rowData } = this.state;
+  handleClose = () => {
+    this.setState({
+      openBackdrop: false,
+    });
+  };
 
+  getPreSignedUrl = async (id) => {
+    const { error, signed_url } = await API.get('files', `/s3/${id}/presign`, {});
+    if (error) {
+      return error;
+    }
+    return signed_url;
+  };
+
+  handleOpenInBrowser = async (id) => {
+    const { clickedLinks } = this.state;
+    clickedLinks.push(id);
+    this.setState({ clickedLinks: clickedLinks });
+    this.setState({ openBackdrop: true });
+    const url = await this.getPreSignedUrl(id);
+    window.open(url, '_blank');
+    this.setState({ openBackdrop: false });
+  };
+
+  renderClickableColumn = (data) => {
+    const { clickedLinks } = this.state;
+    const { id, key } = data;
+    const baseName = key.split('/')[key.split('/').length - 1];
+
+    if (key.endsWith('html') || key.endsWith('png')) {
+      return (
+        <Link
+          className={this.props.classes.linkCursorPointer}
+          color={clickedLinks.includes(id) ? 'secondary' : 'primary'}
+          onClick={() => this.handleOpenInBrowser(id)}>
+          {baseName}
+        </Link>
+      );
+    }
+    return baseName;
+  };
+
+  renderSubjectView = () => {
     return (
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          {this.renderSubjectMetaDataView()}
+          {this.renderSubjectLandingView()}
         </Grid>
         <Grid item xs={12}>
-          {this.renderChipFilterView()}
+          <Panel header={'Subject Data'} toggleable={true}>
+            {this.renderChipFilterView()}
+            {this.renderSubjectS3View()}
+          </Panel>
         </Grid>
-        <Grid item xs={12}>
-          {this.renderSubjectS3View()}
-        </Grid>
-        <LimsRowDetailsDialog
-          dialogOpened={dialogOpened}
-          rowData={rowData}
-          onDialogClose={this.handleDialogClose}
-        />
       </Grid>
     );
   };
 
-  renderSubjectMetaDataView = () => {
-    const { id, lims } = this.state.subject;
+  renderSubjectLandingView = () => {
+    const { features, results } = this.state.subject;
+    const wgs = results.filter((r) => r.key.includes('WGS/'));
+    const wts = results.filter((r) => r.key.includes('WTS/'));
+    const bams = wgs.filter((r) => r.key.endsWith('bam'));
+    const vcfs = wgs.filter((r) => r.key.endsWith('vcf.gz'));
+    const circos = wgs.filter((r) => r.key.endsWith('png'));
+    const pcgr = wgs.filter((r) => r.key.endsWith('pcgr.html'));
+    const cpsr = wgs.filter((r) => r.key.endsWith('cpsr.html'));
+    const multiqc = wgs.filter(
+      (r) => r.key.includes('umccrised') && r.key.endsWith('multiqc_report.html')
+    );
+    const cancer = wgs.filter(
+      (r) => r.key.includes('umccrised') && r.key.endsWith('cancer_report.html')
+    );
+    const coverage = wgs.filter(
+      (r) => r.key.includes('coverage') && r.key.includes('cacao') && r.key.endsWith('html')
+    );
+    const wtsBams = wts.filter((r) => r.key.endsWith('bam'));
+    const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
+    const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
+
+    return (
+      <div className={'p-grid'}>
+        <div className={'p-col-12 p-lg-5'}>
+          <Panel header={'Overview'}>{this.renderSubjectLandingOverview()}</Panel>
+          <Panel header={'Feature'} toggleable={true} style={{ marginTop: '1em' }}>
+            <img src={features[0]} style={{ width: '100%', height: 'auto' }} alt={features[0]} />
+            <TableContainer>
+              <Paper elevation={0}>
+                <Table size={'small'} aria-label={'a dense table'}>
+                  {this.renderResultTable('circos plot', circos)}
+                </Table>
+              </Paper>
+            </TableContainer>
+          </Panel>
+        </div>
+        <div className={'p-col-12 p-lg-7'}>
+          <Panel header={'Sample Info'} toggleable={true}>
+            {this.renderSubjectSampleInfoView()}
+          </Panel>
+          <Panel header={'Analysis Results'} toggleable={true} style={{ marginTop: '1em' }}>
+            <TabView>
+              <TabPanel header='WGS'>
+                <TableContainer>
+                  <Paper elevation={0}>
+                    <Table size={'small'} aria-label={'a dense table'}>
+                      {this.renderResultTable('cancer report', cancer)}
+                      {this.renderResultTable('pcgr', pcgr)}
+                      {this.renderResultTable('cpsr', cpsr)}
+                      {this.renderResultTable('qc report', multiqc)}
+                      {this.renderResultTable('coverage report', coverage)}
+                      {this.renderResultTable('vcf', vcfs)}
+                      {this.renderResultTable('bam', bams)}
+                    </Table>
+                  </Paper>
+                </TableContainer>
+              </TabPanel>
+              <TabPanel header='WTS'>
+                <TableContainer>
+                  <Paper elevation={0}>
+                    <Table size={'small'} aria-label={'a dense table'}>
+                      {this.renderResultTable('rnasum report', rnasum)}
+                      {this.renderResultTable('qc report', wtsQc)}
+                      {this.renderResultTable('bam', wtsBams)}
+                    </Table>
+                  </Paper>
+                </TableContainer>
+              </TabPanel>
+              <TabPanel header={'IAP'} disabled={true} />
+              <TabPanel header={'DRAGEN'} disabled={true} />
+              <TabPanel header={'TSO500'} disabled={true} />
+            </TabView>
+          </Panel>
+        </div>
+      </div>
+    );
+  };
+
+  renderSubjectLandingOverview = () => {
+    const { lims } = this.state.subject;
     const columns = [
-      { key: 'info', sortable: false },
-      { key: 'illumina_id', sortable: true },
-      { key: 'type', sortable: true },
-      { key: 'timestamp', sortable: true },
       { key: 'subject_id', sortable: true },
-      { key: 'sample_id', sortable: true },
-      { key: 'library_id', sortable: true },
       { key: 'external_subject_id', sortable: true },
-      { key: 'external_sample_id', sortable: true },
-      { key: 'phenotype', sortable: true },
+      { key: 'illumina_id', sortable: true },
+      { key: 'run', sortable: true },
+      { key: 'timestamp', sortable: true },
       { key: 'project_name', sortable: true },
-      { key: 'results', sortable: true },
+      { key: 'project_owner', sortable: true },
+    ];
+    const d = lims[0];
+
+    return (
+      <TableContainer>
+        <Paper elevation={0}>
+          <Table size={'small'} aria-label={'a dense table'}>
+            <TableBody>
+              {d != null &&
+                columns.map((col) => (
+                  <TableRow key={col.key} className={this.props.classes.tableRow}>
+                    <TableCell>{getDisplayTitle(col.key)}</TableCell>
+                    {col.key === 'illumina_id' ? (
+                      <TableCell>
+                        <Link color='primary' component={RouterLink} to={'/runs/' + d[col.key]}>
+                          {d[col.key]}
+                        </Link>
+                      </TableCell>
+                    ) : (
+                      <TableCell>{d[col.key]}</TableCell>
+                    )}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </Paper>
+      </TableContainer>
+    );
+  };
+
+  renderResultTable = (title, data, label) => {
+    const columns = [
+      { key: 'key', sortable: true },
+      { key: 'actions', sortable: false },
+      { key: 'size', sortable: true },
     ];
 
     return (
-      <Paper>
-        <Table size={'small'} aria-label={'a dense table'}>
-          <TableHead>
-            <TableRow>
+      <Fragment>
+        <TableHead>
+          <TableRow>
+            <TableCell colSpan={columns.length + 1}>{title.toUpperCase()}</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow key={row.id} className={this.props.classes.tableRow}>
+              <TableCell>{label ? label : ' '}</TableCell>
               {columns.map((col) => (
-                <TableCell key={col.key}>{getDisplayTitle(col.key)}</TableCell>
+                <TableCell key={col.key}>
+                  {col.key === 'actions' ? (
+                    <ActionMenuButton data={row} authUserInfo={this.props.authUserInfo} />
+                  ) : col.key === 'key' ? (
+                    this.renderClickableColumn(row)
+                  ) : col.key === 'size' ? (
+                    <HumanReadableFileSize bytes={row[col.key]} />
+                  ) : col.key === 'last_modified_date' ? (
+                    <Moment local>{row[col.key]}</Moment>
+                  ) : (
+                    row[col.key]
+                  )}
+                </TableCell>
               ))}
             </TableRow>
-          </TableHead>
-          <TableBody>
-            {id != null &&
-              lims.map((row) => (
-                <TableRow key={row.id}>
-                  {columns.map((col) =>
-                    col.key === 'info' ? (
-                      <TableCell key={col.key}>
-                        <IconButton aria-label='info' onClick={this.handleRowClick(row.id)}>
-                          <MoreIcon color={'primary'} />
-                        </IconButton>
-                      </TableCell>
-                    ) : col.key === 'illumina_id' ? (
-                      <TableCell key={col.key}>
-                        <Button color='primary' component={RouterLink} to={'/runs/' + row[col.key]}>
-                          {row[col.key]}
-                        </Button>
-                      </TableCell>
-                    ) : (
-                      <TableCell key={col.key}>{row[col.key]}</TableCell>
-                    )
-                  )}
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </Paper>
+          ))}
+        </TableBody>
+      </Fragment>
+    );
+  };
+
+  renderSubjectSampleInfoView = () => {
+    const { dialogOpened, rowData } = this.state;
+    const { id, lims } = this.state.subject;
+    const columns = [
+      { key: 'info', sortable: false },
+      { key: 'type', sortable: true },
+      { key: 'sample_id', sortable: true },
+      { key: 'external_sample_id', sortable: true },
+      { key: 'library_id', sortable: true },
+      { key: 'phenotype', sortable: true },
+      { key: 'assay', sortable: true },
+    ];
+
+    return (
+      <TableContainer>
+        <Paper elevation={0}>
+          <Table size={'small'} aria-label={'a dense table'}>
+            <TableHead>
+              <TableRow>
+                {columns.map((col) => (
+                  <TableCell key={col.key}>{getDisplayTitle(col.key)}</TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {id != null &&
+                lims.map((row) => (
+                  <TableRow key={row.id} className={this.props.classes.tableRow}>
+                    {columns.map((col) =>
+                      col.key === 'info' ? (
+                        <TableCell key={col.key}>
+                          <IconButton
+                            aria-label='info'
+                            onClick={this.handleRowClick(row.id)}
+                            size={'small'}>
+                            <MoreVertIcon color={'primary'} fontSize={'small'} />
+                          </IconButton>
+                        </TableCell>
+                      ) : col.key === 'illumina_id' ? (
+                        <TableCell key={col.key}>
+                          <Button
+                            color='primary'
+                            component={RouterLink}
+                            to={'/runs/' + row[col.key]}>
+                            {row[col.key]}
+                          </Button>
+                        </TableCell>
+                      ) : (
+                        <TableCell key={col.key}>{row[col.key]}</TableCell>
+                      )
+                    )}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <LimsRowDetailsDialog
+            dialogOpened={dialogOpened}
+            rowData={rowData}
+            onDialogClose={this.handleDialogClose}
+          />
+        </Paper>
+      </TableContainer>
     );
   };
 
@@ -261,19 +483,19 @@ class Subject extends Component {
       },
       {
         key: 4,
-        label: 'umccrised multiqc report',
+        label: 'umccrised multiqc',
         keyword: 'umccrised multiqc_report.html$',
         color: 'default',
       },
       {
         key: 5,
-        label: 'pcgr report',
+        label: 'pcgr cpsr',
         keyword: 'umccrised pcgr/ (pcgr|cpsr).html$',
         color: 'default',
       },
       {
         key: 6,
-        label: 'coverage report',
+        label: 'coverage',
         keyword: 'cacao html (cacao_normal|cacao_tumor)',
         color: 'default',
       },
@@ -316,11 +538,10 @@ class Subject extends Component {
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
       { key: 'last_modified_date', sortable: true },
-      { key: 'e_tag', sortable: true },
     ];
 
     return (
-      <Paper elevation={1}>
+      <Paper elevation={0}>
         <Toolbar>
           <Box width={1 / 3}>
             <TextField
@@ -380,7 +601,7 @@ class Subject extends Component {
           </TableBody>
           {pagination != null && (
             <TableFooter>
-              <TableRow>
+              <TableRow className={this.props.classes.tableRow}>
                 <TablePagination
                   colSpan={columns.length * 0.5}
                   rowsPerPageOptions={[10, 20, 50, 100]}
@@ -404,7 +625,7 @@ class Subject extends Component {
 
   render() {
     const { authUserInfo } = this.props;
-    const { redirect, subject } = this.state;
+    const { redirect, subject, openBackdrop } = this.state;
 
     if (authUserInfo && redirect) {
       const homePath = '/';
@@ -417,6 +638,13 @@ class Subject extends Component {
         {authUserInfo && !subject && <LinearProgress />}
         {authUserInfo && subject && this.renderSubjectView()}
         {this.renderErrorMessage()}
+        <Backdrop
+          className={this.props.classes.backdrop}
+          open={openBackdrop}
+          onAbort={this.handleClose}
+          timeout={500}>
+          <CircularProgress color='inherit' />
+        </Backdrop>
       </Fragment>
     );
   }

@@ -281,7 +281,7 @@ class ActionMenuButton extends React.Component {
   };
 
   render() {
-    const { data } = this.props;
+    const { data, dense } = this.props;
     const { id, bucket, key } = data;
     const { open, openBackdrop } = this.state;
     return (
@@ -289,9 +289,12 @@ class ActionMenuButton extends React.Component {
         <PopupState variant='popover' popupId={id.toString()}>
           {(popupState) => (
             <Fragment>
-              <Button {...bindTrigger(popupState)} color='primary'>
-                <MenuIcon />
-              </Button>
+              <IconButton
+                {...bindTrigger(popupState)}
+                color='primary'
+                size={dense ? 'small' : 'medium'}>
+                <MenuIcon fontSize={dense ? 'small' : 'default'} />
+              </IconButton>
               {this.renderMenu(id, bucket, key, popupState)}
             </Fragment>
           )}
@@ -435,9 +438,10 @@ class ActionMenuButton extends React.Component {
 }
 
 ActionMenuButton.propTypes = {
-  classes: PropTypes.object.isRequired,
-  data: PropTypes.object,
-  authUserInfo: PropTypes.object,
+  classes: PropTypes.object,
+  dense: PropTypes.bool,
+  data: PropTypes.object.isRequired,
+  authUserInfo: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(ActionMenuButton);

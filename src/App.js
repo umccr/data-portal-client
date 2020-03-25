@@ -21,6 +21,11 @@ import authUpdate from './actions/auth';
 import AppBar from './containers/AppBar';
 import StorageIcon from '@material-ui/icons/Storage';
 import SearchIcon from '@material-ui/icons/Search';
+import 'primereact/resources/themes/nova-light/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
+import './primeflex.css';
+import './primeod.css';
 
 const drawerWidth = 240;
 
