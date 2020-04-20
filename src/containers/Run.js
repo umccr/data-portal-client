@@ -52,6 +52,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import { Panel } from 'primereact/panel';
 import TableContainer from '@material-ui/core/TableContainer';
 import { TabPanel, TabView } from 'primereact/tabview';
+import Typography from '@material-ui/core/Typography';
 
 const styles = (theme) => ({
   close: {
@@ -621,6 +622,14 @@ class Run extends Component {
 
     return (
       <Paper elevation={0}>
+        <Typography variant={'h6'} color={'secondary'}>
+          THIS IS SHOWCASE FEATURE. DEMO PURPOSE ONLY. NOT FOR PRODUCTION USE.
+        </Typography>
+        <Typography variant={'subtitle2'}>
+          Data from Illumina Analytics Platform - Genomic Data Store Service
+        </Typography>
+        <hr />
+
         <Toolbar>
           <Box width={1 / 4}>
             <TextField

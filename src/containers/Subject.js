@@ -49,6 +49,7 @@ import { TabPanel, TabView } from 'primereact/tabview';
 import { Panel } from 'primereact/panel';
 import Link from '@material-ui/core/Link';
 import Backdrop from '@material-ui/core/Backdrop';
+import Typography from '@material-ui/core/Typography';
 
 const styles = (theme) => ({
   close: {
@@ -339,14 +340,7 @@ class Subject extends Component {
         <div className={'p-col-12 p-lg-5'}>
           <Panel header={'Overview'}>{this.renderSubjectLandingOverview()}</Panel>
           <Panel header={'Feature'} toggleable={true} style={{ marginTop: '1em' }}>
-            <img src={features[0]} style={{ width: '100%', height: 'auto' }} alt={'features'} />
-            <TableContainer>
-              <Paper elevation={0}>
-                <Table size={'small'} aria-label={'a dense table'}>
-                  {this.renderResultTable('circos plot', circos)}
-                </Table>
-              </Paper>
-            </TableContainer>
+            <img src={features[0]} style={{ width: '100%', height: 'auto' }} alt={''} />
           </Panel>
         </div>
         <div className={'p-col-12 p-lg-7'}>
@@ -366,6 +360,7 @@ class Subject extends Component {
                       {this.renderResultTable('coverage report', coverage)}
                       {this.renderResultTable('vcf', vcfs)}
                       {this.renderResultTable('bam', bams)}
+                      {this.renderResultTable('circos plot', circos)}
                     </Table>
                   </Paper>
                 </TableContainer>
@@ -436,6 +431,7 @@ class Subject extends Component {
       { key: 'key', sortable: true },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
+      { key: 'last_modified_date', sortable: true },
     ];
 
     return (
@@ -710,6 +706,14 @@ class Subject extends Component {
 
     return (
       <Paper elevation={0}>
+        <Typography variant={'h6'} color={'secondary'}>
+          THIS IS SHOWCASE FEATURE. DEMO PURPOSE ONLY. NOT FOR PRODUCTION USE.
+        </Typography>
+        <Typography variant={'subtitle2'}>
+          Data from Illumina Analytics Platform - Genomic Data Store Service
+        </Typography>
+        <hr />
+
         <Toolbar>
           <Box width={1 / 3}>
             <TextField
