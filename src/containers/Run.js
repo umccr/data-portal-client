@@ -1,7 +1,14 @@
 import React, { Component, Fragment } from 'react';
 import { Link as RouterLink, Redirect } from 'react-router-dom';
 import { API } from 'aws-amplify';
-import { clearErrorMessage, startRunQuery, updateRunQueryPrams } from '../actions/run';
+import {
+  clearErrorMessage,
+  startRunQuery,
+  updateRunQueryPrams,
+  clearGDSErrorMessage,
+  startRunGDSQuery,
+  updateRunGDSQueryPrams,
+} from '../actions/run';
 import {
   clearRunMetaErrorMessage,
   startRunMetaQuery,
@@ -35,17 +42,16 @@ import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 import Chip from '@material-ui/core/Chip';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import ActionMenuButton from '../components/ActionMenuButton';
+import GDSActionMenuButton from '../components/GDSActionMenuButton';
 import Snackbar from '@material-ui/core/Snackbar';
 import CloseIcon from '@material-ui/icons/Close';
 import MoreIcon from '@material-ui/icons/More';
 import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { defaultRunMetaParams, defaultRunParams } from '../reducers';
+import { defaultRunMetaParams, defaultRunParams, defaultRunGDSParams } from '../reducers';
 import Backdrop from '@material-ui/core/Backdrop';
+import { Panel } from 'primereact/panel';
+import TableContainer from '@material-ui/core/TableContainer';
+import { TabPanel, TabView } from 'primereact/tabview';
 
 const styles = (theme) => ({
   close: {
@@ -61,27 +67,6 @@ const styles = (theme) => ({
   },
   chip: {
     margin: theme.spacing(0.5),
-  },
-  heading: {
-    fontSize: theme.typography.pxToRem(18),
-    flexBasis: '33.33%',
-    flexShrink: 0,
-  },
-  secondaryHeading: {
-    fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary,
-  },
-  expSummaryExpanded: {
-    backgroundColor: '#E0E0E0',
-  },
-  expSummaryRoot: {
-    backgroundColor: '#E0E0E0',
-  },
-  expDetailsRoot: {
-    padding: '8px 24px 8px 24px',
-  },
-  expExpandIcon: {
-    order: -1,
   },
   linkCursorPointer: {
     cursor: 'pointer',
@@ -115,10 +100,14 @@ class Run extends Component {
       await handleStartRunMetaQuery(defaultRunMetaParams, runId);
       const { handleStartRunQuery } = this.props;
       await handleStartRunQuery(defaultRunParams, runId);
+      const { handleStartRunGDSQuery } = this.props;
+      await handleStartRunGDSQuery(defaultRunGDSParams, runId);
     } else {
       this.setState({ redirect: true });
     }
   }
+
+  // ---
 
   reloadData = async (params = {}) => {
     const { handleStartRunQuery } = this.props;
@@ -158,7 +147,7 @@ class Run extends Component {
     });
   };
 
-  handleQueryParamsChange = async (searchQuery) => {
+  handleRunQueryChange = async (searchQuery) => {
     await this.props.handleRunQueryParamsUpdate({
       search: searchQuery,
       page: 1,
@@ -169,6 +158,60 @@ class Run extends Component {
     const { handleStartRunQuery, runParams } = this.props;
     handleStartRunQuery(runParams, this.state.runId);
   };
+
+  // ---
+
+  reloadGDSData = async (params = {}) => {
+    const { handleStartRunGDSQuery } = this.props;
+    await handleStartRunGDSQuery(params, this.state.runId);
+  };
+
+  getGDSBaseParams = () => {
+    return this.props.runGDSParams;
+  };
+
+  handleGDSPageChange = async (event, page) => {
+    await this.reloadGDSData({
+      ...this.getGDSBaseParams(),
+      page: page + 1, // React pagination start at 0 whereas API start at 1
+    });
+  };
+
+  handleGDSRowsPerPageChange = async (event) => {
+    await this.reloadGDSData({
+      ...this.getGDSBaseParams(),
+      page: 1, // Reset page number if rows per page change
+      rowsPerPage: event.target.value,
+    });
+  };
+
+  handleGDSRequestSort = async (event, property) => {
+    const sortCol = property;
+    const { runGDSParams } = this.props;
+    let sortAsc = runGDSParams.sortCol === sortCol && !runGDSParams.sortAsc;
+
+    // Reset all other search params except query
+    await this.reloadGDSData({
+      ...this.getGDSBaseParams(),
+      page: 1, // Reset page number if sorting change
+      sortAsc,
+      sortCol,
+    });
+  };
+
+  handleRunGDSQueryChange = async (searchQuery) => {
+    await this.props.handleRunGDSQueryParamsUpdate({
+      search: searchQuery,
+      page: 1,
+    });
+  };
+
+  handleGDSSearchClicked = async () => {
+    const { handleStartRunGDSQuery, runGDSParams } = this.props;
+    handleStartRunGDSQuery(runGDSParams, this.state.runId);
+  };
+
+  // ---
 
   reloadRunMetaData = async (params = {}) => {
     const { handleStartRunMetaQuery } = this.props;
@@ -257,55 +300,27 @@ class Run extends Component {
   };
 
   renderRunView = () => {
-    const { classes } = this.props;
     return (
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <ExpansionPanel elevation={3} defaultExpanded>
-            <ExpansionPanelSummary
-              classes={{
-                expanded: classes.expSummaryExpanded,
-                root: classes.expSummaryRoot,
-                expandIcon: classes.expExpandIcon,
-              }}
-              IconButtonProps={{ edge: 'start' }}
-              expandIcon={<ExpandMoreIcon />}
-              id='panel1-header'>
-              <Typography className={classes.heading}>Run Data</Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails classes={{ root: classes.expDetailsRoot }}>
-              <Grid container spacing={1}>
-                <Grid item xs={12}>
+          <Panel header={'Run Data'} toggleable={true}>
+            <TabView>
+              <TabPanel header={'S3'}>
+                <TableContainer>
                   {this.renderChipFilterView()}
-                </Grid>
-                <Grid item xs={12}>
                   {this.renderRunS3View()}
-                </Grid>
-              </Grid>
-            </ExpansionPanelDetails>
-          </ExpansionPanel>
+                </TableContainer>
+              </TabPanel>
+              <TabPanel header={'GDS'}>
+                <TableContainer>{this.renderRunGDSView()}</TableContainer>
+              </TabPanel>
+            </TabView>
+          </Panel>
         </Grid>
         <Grid item xs={12}>
-          <ExpansionPanel elevation={3}>
-            <ExpansionPanelSummary
-              classes={{
-                expanded: classes.expSummaryExpanded,
-                root: classes.expSummaryRoot,
-                expandIcon: classes.expExpandIcon,
-              }}
-              IconButtonProps={{ edge: 'start' }}
-              expandIcon={<ExpandMoreIcon />}
-              id='panel2-header'>
-              <Typography className={classes.heading}>LIMS Metadata</Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails classes={{ root: classes.expDetailsRoot }}>
-              <Grid container spacing={1}>
-                <Grid item xs={12}>
-                  {this.renderRunMetaDataView()}
-                </Grid>
-              </Grid>
-            </ExpansionPanelDetails>
-          </ExpansionPanel>
+          <Panel header={'LIMS Metadata'} toggleable={true} collapsed>
+            <TableContainer>{this.renderRunMetaDataView()}</TableContainer>
+          </Panel>
         </Grid>
       </Grid>
     );
@@ -329,7 +344,7 @@ class Run extends Component {
       { key: 'external_sample_id', sortable: true },
       { key: 'phenotype', sortable: true },
       { key: 'project_name', sortable: true },
-      { key: 'results', sortable: true },
+      // { key: 'results', sortable: true },
     ];
 
     return (
@@ -404,7 +419,7 @@ class Run extends Component {
             <TableFooter>
               <TableRow className={this.props.classes.tableRow}>
                 <TablePagination
-                  colSpan={8}
+                  colSpan={7}
                   rowsPerPageOptions={[10, 20, 50, 100]}
                   count={pagination.count}
                   rowsPerPage={pagination.rowsPerPage}
@@ -505,7 +520,6 @@ class Run extends Component {
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
       { key: 'last_modified_date', sortable: true },
-      { key: 'e_tag', sortable: true },
     ];
 
     return (
@@ -517,7 +531,7 @@ class Run extends Component {
               label={'Search Filter'}
               type={'search'}
               value={search}
-              onChange={(e) => this.handleQueryParamsChange(e.target.value)}
+              onChange={(e) => this.handleRunQueryChange(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && this.handleSearchClicked()}
               InputProps={{
                 endAdornment: (
@@ -583,6 +597,105 @@ class Run extends Component {
                   }}
                   onChangePage={this.handlePageChange}
                   onChangeRowsPerPage={this.handleRowsPerPageChange}
+                  ActionsComponent={TablePaginationActionsWrapped}
+                />
+              </TableRow>
+            </TableFooter>
+          )}
+        </Table>
+      </Paper>
+    );
+  };
+
+  renderRunGDSView = () => {
+    const { sortAsc, sortCol, search } = this.props.runGDSParams;
+    const { loading, data } = this.props.runGDSResult;
+    const { results, pagination } = data;
+    const columns = [
+      { key: 'volume_name', sortable: true },
+      { key: 'path', sortable: true },
+      { key: 'actions', sortable: false },
+      { key: 'size', sortable: true, label: 'size_in_bytes' },
+      { key: 'time_modified', sortable: true },
+    ];
+
+    return (
+      <Paper elevation={0}>
+        <Toolbar>
+          <Box width={1 / 4}>
+            <TextField
+              fullWidth
+              label={'Search Filter'}
+              type={'search'}
+              value={search}
+              onChange={(e) => this.handleRunGDSQueryChange(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && this.handleGDSSearchClicked()}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment color={'primary'} position={'end'}>
+                    <IconButton color='primary' onClick={this.handleGDSSearchClicked}>
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </Toolbar>
+
+        <Table size='small' aria-label='a dense table'>
+          <EnhancedTableHead
+            onRequestSort={this.handleGDSRequestSort}
+            order={sortAsc ? 'asc' : 'desc'}
+            orderBy={sortCol === null ? '' : sortCol}
+            columns={columns}
+          />
+          <TableBody>
+            {loading && (
+              <TableRow>
+                <TableCell colSpan={columns.length} style={{ textAlign: 'center' }}>
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading &&
+              results != null &&
+              results.map((row) => (
+                <TableRow key={row.id}>
+                  {columns.map((col) => (
+                    <TableCell key={col.key}>
+                      {col.key === 'actions' ? (
+                        <GDSActionMenuButton data={row} authUserInfo={this.props.authUserInfo} />
+                      ) : col.key === 'path' ? (
+                        // TODO pending GDSFile presigned url support
+                        // this.renderClickableColumn(row)
+                        row[col.key]
+                      ) : col.key === 'size' ? (
+                        <HumanReadableFileSize bytes={row[col.label]} />
+                      ) : col.key === 'time_modified' ? (
+                        <Moment local>{row[col.key]}</Moment>
+                      ) : (
+                        row[col.key]
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+          </TableBody>
+          {pagination != null && (
+            <TableFooter>
+              <TableRow className={this.props.classes.tableRow}>
+                <TablePagination
+                  colSpan={columns.length * 0.5}
+                  rowsPerPageOptions={[10, 20, 50, 100]}
+                  count={pagination.count}
+                  rowsPerPage={pagination.rowsPerPage}
+                  page={pagination.page - 1}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  onChangePage={this.handleGDSPageChange}
+                  onChangeRowsPerPage={this.handleGDSRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>
@@ -666,6 +779,11 @@ Run.propTypes = {
   handleClearErrorMessage: PropTypes.func.isRequired,
   runParams: PropTypes.object.isRequired,
   runResult: PropTypes.object.isRequired,
+  handleStartRunGDSQuery: PropTypes.func.isRequired,
+  handleRunGDSQueryParamsUpdate: PropTypes.func.isRequired,
+  handleClearGDSErrorMessage: PropTypes.func.isRequired,
+  runGDSParams: PropTypes.object.isRequired,
+  runGDSResult: PropTypes.object.isRequired,
   handleStartRunMetaQuery: PropTypes.func.isRequired,
   handleRunMetaQueryParamsUpdate: PropTypes.func.isRequired,
   handleRunMetaClearErrorMessage: PropTypes.func.isRequired,
@@ -678,6 +796,8 @@ const mapStateToProps = (state) => {
     authUserInfo: state.authUserInfo,
     runParams: state.runParams,
     runResult: state.runResult,
+    runGDSParams: state.runGDSParams,
+    runGDSResult: state.runGDSResult,
     runMetaParams: state.runMetaParams,
     runMetaResult: state.runMetaResult,
   };
@@ -693,6 +813,15 @@ const mapDispatchToProps = (dispatch) => {
     },
     handleClearErrorMessage: () => {
       dispatch(clearErrorMessage());
+    },
+    handleRunGDSQueryParamsUpdate: async (params) => {
+      dispatch(updateRunGDSQueryPrams(params));
+    },
+    handleStartRunGDSQuery: async (params, runId) => {
+      dispatch(startRunGDSQuery(params, runId));
+    },
+    handleClearGDSErrorMessage: () => {
+      dispatch(clearGDSErrorMessage());
     },
     handleRunMetaQueryParamsUpdate: async (params) => {
       dispatch(updateRunMetaQueryPrams(params));

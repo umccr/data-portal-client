@@ -43,6 +43,9 @@ REACT_APP_OAUTH_REDIRECT_OUT_LOCAL={cognito_oauth_redirect_signout_localhost}
 
 - Recommended to use JetBrains WebStorm IDE
 - Code style use indent with `2` spaces, no tab 
+- For Visual Studio Code, the following extensions are recommended
+    - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+    - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 
 ### Deployment
 

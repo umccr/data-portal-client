@@ -5,6 +5,9 @@ import {
   clearErrorMessage,
   startRunningSubjectQuery,
   updateSubjectQueryPrams,
+  clearGDSErrorMessage,
+  startRunningSubjectGDSQuery,
+  updateSubjectGDSQueryPrams,
 } from '../actions/subject';
 
 import { connect } from 'react-redux';
@@ -37,6 +40,7 @@ import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 import Chip from '@material-ui/core/Chip';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import ActionMenuButton from '../components/ActionMenuButton';
+import GDSActionMenuButton from '../components/GDSActionMenuButton';
 import Snackbar from '@material-ui/core/Snackbar';
 import CloseIcon from '@material-ui/icons/Close';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -92,10 +96,14 @@ class Subject extends Component {
       this.setState({ subject });
       const { handleStartRunningSubjectQuery } = this.props;
       await handleStartRunningSubjectQuery(this.getBaseParams(), subjectId);
+      const { handleStartRunningSubjectGDSQuery } = this.props;
+      await handleStartRunningSubjectGDSQuery(this.getGDSBaseParams(), subjectId);
     } else {
       this.setState({ redirect: true });
     }
   }
+
+  // ---
 
   reloadData = async (params = {}) => {
     const { handleStartRunningSubjectQuery } = this.props;
@@ -146,6 +154,60 @@ class Subject extends Component {
     const { handleStartRunningSubjectQuery, subjectParams } = this.props;
     handleStartRunningSubjectQuery(subjectParams, this.state.subject.id);
   };
+
+  // ---
+
+  reloadGDSData = async (params = {}) => {
+    const { handleStartRunningSubjectGDSQuery } = this.props;
+    await handleStartRunningSubjectGDSQuery(params, this.state.subject.id);
+  };
+
+  getGDSBaseParams = () => {
+    return this.props.subjectGDSParams;
+  };
+
+  handleGDSPageChange = async (event, page) => {
+    await this.reloadGDSData({
+      ...this.getGDSBaseParams(),
+      page: page + 1, // React pagination start at 0 whereas API start at 1
+    });
+  };
+
+  handleGDSRowsPerPageChange = async (event) => {
+    await this.reloadGDSData({
+      ...this.getGDSBaseParams(),
+      page: 1, // Reset page number if rows per page change
+      rowsPerPage: event.target.value,
+    });
+  };
+
+  handleGDSRequestSort = async (event, property) => {
+    const sortCol = property;
+    const { subjectGDSParams } = this.props;
+    let sortAsc = subjectGDSParams.sortCol === sortCol && !subjectGDSParams.sortAsc;
+
+    // Reset all other search params except query
+    await this.reloadGDSData({
+      ...this.getGDSBaseParams(),
+      page: 1, // Reset page number if sorting change
+      sortAsc,
+      sortCol,
+    });
+  };
+
+  handleSubjectGDSQueryChange = async (searchQuery) => {
+    await this.props.handleSubjectGDSQueryParamsUpdate({
+      search: searchQuery,
+      page: 1,
+    });
+  };
+
+  handleGDSSearchClicked = async () => {
+    const { handleStartRunningSubjectGDSQuery, subjectGDSParams } = this.props;
+    handleStartRunningSubjectGDSQuery(subjectGDSParams, this.state.subject.id);
+  };
+
+  // ---
 
   handleRowClick = (id) => {
     return () => {
@@ -233,8 +295,17 @@ class Subject extends Component {
         </Grid>
         <Grid item xs={12}>
           <Panel header={'Subject Data'} toggleable={true}>
-            {this.renderChipFilterView()}
-            {this.renderSubjectS3View()}
+            <TabView>
+              <TabPanel header={'S3'}>
+                <TableContainer>
+                  {this.renderChipFilterView()}
+                  {this.renderSubjectS3View()}
+                </TableContainer>
+              </TabPanel>
+              <TabPanel header={'GDS'}>
+                <TableContainer>{this.renderSubjectGDSView()}</TableContainer>
+              </TabPanel>
+            </TabView>
           </Panel>
         </Grid>
       </Grid>
@@ -268,7 +339,7 @@ class Subject extends Component {
         <div className={'p-col-12 p-lg-5'}>
           <Panel header={'Overview'}>{this.renderSubjectLandingOverview()}</Panel>
           <Panel header={'Feature'} toggleable={true} style={{ marginTop: '1em' }}>
-            <img src={features[0]} style={{ width: '100%', height: 'auto' }} alt={features[0]} />
+            <img src={features[0]} style={{ width: '100%', height: 'auto' }} alt={'features'} />
             <TableContainer>
               <Paper elevation={0}>
                 <Table size={'small'} aria-label={'a dense table'}>
@@ -623,6 +694,103 @@ class Subject extends Component {
     );
   };
 
+  // ---
+
+  renderSubjectGDSView = () => {
+    const { sortAsc, sortCol, search } = this.props.subjectGDSParams;
+    const { loading, data } = this.props.subjectGDSResult;
+    const { results, pagination } = data;
+    const columns = [
+      { key: 'volume_name', sortable: true },
+      { key: 'path', sortable: true },
+      { key: 'actions', sortable: false },
+      { key: 'size', sortable: true, label: 'size_in_bytes' },
+      { key: 'time_modified', sortable: true },
+    ];
+
+    return (
+      <Paper elevation={0}>
+        <Toolbar>
+          <Box width={1 / 3}>
+            <TextField
+              fullWidth
+              label={'Search Filter'}
+              type={'search'}
+              value={search}
+              onChange={(e) => this.handleSubjectGDSQueryChange(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && this.handleGDSSearchClicked()}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment color={'primary'} position={'end'}>
+                    <IconButton color='primary' onClick={this.handleGDSSearchClicked}>
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </Toolbar>
+
+        <Table size='small' aria-label='a dense table'>
+          <EnhancedTableHead
+            onRequestSort={this.handleGDSRequestSort}
+            order={sortAsc ? 'asc' : 'desc'}
+            orderBy={sortCol === null ? '' : sortCol}
+            columns={columns}
+          />
+          <TableBody>
+            {loading && (
+              <TableRow>
+                <TableCell colSpan={columns.length} style={{ textAlign: 'center' }}>
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading &&
+              results != null &&
+              results.map((row) => (
+                <TableRow key={row.id}>
+                  {columns.map((col) => (
+                    <TableCell key={col.key}>
+                      {col.key === 'actions' ? (
+                        <GDSActionMenuButton data={row} authUserInfo={this.props.authUserInfo} />
+                      ) : col.key === 'size' ? (
+                        <HumanReadableFileSize bytes={row[col.label]} />
+                      ) : col.key === 'time_modified' ? (
+                        <Moment local>{row[col.key]}</Moment>
+                      ) : (
+                        row[col.key]
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+          </TableBody>
+          {pagination != null && (
+            <TableFooter>
+              <TableRow className={this.props.classes.tableRow}>
+                <TablePagination
+                  colSpan={columns.length * 0.5}
+                  rowsPerPageOptions={[10, 20, 50, 100]}
+                  count={pagination.count}
+                  rowsPerPage={pagination.rowsPerPage}
+                  page={pagination.page - 1}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  onChangePage={this.handleGDSPageChange}
+                  onChangeRowsPerPage={this.handleGDSRowsPerPageChange}
+                  ActionsComponent={TablePaginationActionsWrapped}
+                />
+              </TableRow>
+            </TableFooter>
+          )}
+        </Table>
+      </Paper>
+    );
+  };
+
   render() {
     const { authUserInfo } = this.props;
     const { redirect, subject, openBackdrop } = this.state;
@@ -697,6 +865,11 @@ Subject.propTypes = {
   handleClearErrorMessage: PropTypes.func.isRequired,
   subjectParams: PropTypes.object.isRequired,
   subjectResult: PropTypes.object.isRequired,
+  handleStartRunningSubjectGDSQuery: PropTypes.func.isRequired,
+  handleSubjectGDSQueryParamsUpdate: PropTypes.func.isRequired,
+  handleClearGDSErrorMessage: PropTypes.func.isRequired,
+  subjectGDSParams: PropTypes.object.isRequired,
+  subjectGDSResult: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = (state) => {
@@ -704,6 +877,8 @@ const mapStateToProps = (state) => {
     authUserInfo: state.authUserInfo,
     subjectParams: state.subjectParams,
     subjectResult: state.subjectResult,
+    subjectGDSParams: state.subjectGDSParams,
+    subjectGDSResult: state.subjectGDSResult,
   };
 };
 
@@ -717,6 +892,15 @@ const mapDispatchToProps = (dispatch) => {
     },
     handleClearErrorMessage: () => {
       dispatch(clearErrorMessage());
+    },
+    handleSubjectGDSQueryParamsUpdate: async (params) => {
+      dispatch(updateSubjectGDSQueryPrams(params));
+    },
+    handleStartRunningSubjectGDSQuery: async (params, subjectId) => {
+      dispatch(startRunningSubjectGDSQuery(params, subjectId));
+    },
+    handleClearGDSErrorMessage: () => {
+      dispatch(clearGDSErrorMessage());
     },
   };
 };

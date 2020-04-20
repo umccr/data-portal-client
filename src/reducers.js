@@ -15,11 +15,21 @@ import {
   SUBJECT_QUERY_STARTED_RUNNING,
   SUBJECT_QUERY_PARAMS_UPDATED,
   SUBJECT_QUERY_CLEAR_ERR_MSG,
+  SUBJECT_GDS_QUERY_SUCCESS,
+  SUBJECT_GDS_QUERY_FAILURE,
+  SUBJECT_GDS_QUERY_STARTED_RUNNING,
+  SUBJECT_GDS_QUERY_PARAMS_UPDATED,
+  SUBJECT_GDS_QUERY_CLEAR_ERR_MSG,
   RUN_QUERY_SUCCESS,
   RUN_QUERY_FAILURE,
   RUN_QUERY_STARTED_RUNNING,
   RUN_QUERY_PARAMS_UPDATED,
   RUN_QUERY_CLEAR_ERR_MSG,
+  RUN_GDS_QUERY_SUCCESS,
+  RUN_GDS_QUERY_FAILURE,
+  RUN_GDS_QUERY_STARTED_RUNNING,
+  RUN_GDS_QUERY_PARAMS_UPDATED,
+  RUN_GDS_QUERY_CLEAR_ERR_MSG,
   RUN_META_QUERY_SUCCESS,
   RUN_META_QUERY_FAILURE,
   RUN_META_QUERY_STARTED_RUNNING,
@@ -69,6 +79,20 @@ const defaultSubjectResult = {
   errorMessage: null,
 };
 
+const defaultSubjectGDSParams = {
+  sortCol: 'path',
+  sortAsc: true,
+  page: null,
+  rowsPerPage: 20,
+  search: '',
+};
+
+const defaultSubjectGDSResult = {
+  data: {},
+  loading: false,
+  errorMessage: null,
+};
+
 export const defaultRunParams = {
   sortCol: 'key',
   sortAsc: true,
@@ -78,6 +102,20 @@ export const defaultRunParams = {
 };
 
 const defaultRunResult = {
+  data: {},
+  loading: false,
+  errorMessage: null,
+};
+
+export const defaultRunGDSParams = {
+  sortCol: 'path',
+  sortAsc: true,
+  page: null,
+  rowsPerPage: 10,
+  search: '.html$',
+};
+
+const defaultRunGDSResult = {
   data: {},
   loading: false,
   errorMessage: null,
@@ -122,11 +160,23 @@ const initialState = {
   subjectParams: {
     ...defaultSubjectParams,
   },
+  subjectGDSResult: {
+    ...defaultSubjectGDSResult,
+  },
+  subjectGDSParams: {
+    ...defaultSubjectGDSParams,
+  },
   runResult: {
     ...defaultRunResult,
   },
   runParams: {
     ...defaultRunParams,
+  },
+  runGDSResult: {
+    ...defaultRunGDSResult,
+  },
+  runGDSParams: {
+    ...defaultRunGDSParams,
   },
   runMetaResult: {
     ...defaultRunMetaResult,
@@ -276,6 +326,49 @@ const reducer = (state = initialState, action) => {
           errorMessage: null,
         },
       };
+    case SUBJECT_GDS_QUERY_PARAMS_UPDATED:
+      return {
+        ...state,
+        subjectGDSParams: {
+          ...defaultSubjectGDSParams,
+          ...action.payload.params,
+        },
+      };
+    case SUBJECT_GDS_QUERY_STARTED_RUNNING:
+      return {
+        ...state,
+        subjectGDSResult: {
+          ...defaultSubjectGDSResult,
+          loading: true,
+        },
+        subjectGDSParams: action.payload.subjectGDSParams,
+      };
+    case SUBJECT_GDS_QUERY_SUCCESS:
+      return {
+        ...state,
+        subjectGDSResult: {
+          ...defaultSubjectGDSResult,
+          data: action.payload.data,
+          loading: false,
+        },
+      };
+    case SUBJECT_GDS_QUERY_FAILURE:
+      return {
+        ...state,
+        subjectGDSResult: {
+          ...defaultSubjectGDSResult,
+          errorMessage: action.payload.errorMessage,
+          loading: false,
+        },
+      };
+    case SUBJECT_GDS_QUERY_CLEAR_ERR_MSG:
+      return {
+        ...state,
+        subjectGDSResult: {
+          ...state.subjectGDSResult,
+          errorMessage: null,
+        },
+      };
     case RUN_QUERY_PARAMS_UPDATED:
       return {
         ...state,
@@ -316,6 +409,49 @@ const reducer = (state = initialState, action) => {
         ...state,
         runResult: {
           ...state.runResult,
+          errorMessage: null,
+        },
+      };
+    case RUN_GDS_QUERY_PARAMS_UPDATED:
+      return {
+        ...state,
+        runGDSParams: {
+          ...defaultRunGDSParams,
+          ...action.payload.params,
+        },
+      };
+    case RUN_GDS_QUERY_STARTED_RUNNING:
+      return {
+        ...state,
+        runGDSResult: {
+          ...defaultRunGDSResult,
+          loading: true,
+        },
+        runGDSParams: action.payload.runGDSParams,
+      };
+    case RUN_GDS_QUERY_SUCCESS:
+      return {
+        ...state,
+        runGDSResult: {
+          ...defaultRunGDSResult,
+          data: action.payload.data,
+          loading: false,
+        },
+      };
+    case RUN_GDS_QUERY_FAILURE:
+      return {
+        ...state,
+        runGDSResult: {
+          ...defaultRunGDSResult,
+          errorMessage: action.payload.errorMessage,
+          loading: false,
+        },
+      };
+    case RUN_GDS_QUERY_CLEAR_ERR_MSG:
+      return {
+        ...state,
+        runGDSResult: {
+          ...state.runGDSResult,
           errorMessage: null,
         },
       };
