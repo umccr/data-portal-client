@@ -1,6 +1,6 @@
 # UMCCR Data Portal App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React frontend for [UMCCR](https://umccr.org) [Data Portal API](https://github.com/umccr/data-portal-apis)
 
 ### Local development
 
@@ -21,9 +21,32 @@ REACT_APP_OAUTH_REDIRECT_IN_LOCAL={cognito_oauth_redirect_signin_localhost}
 REACT_APP_OAUTH_REDIRECT_OUT_LOCAL={cognito_oauth_redirect_signout_localhost}
 ```
 
-Use `npm start` to start the server on http://localhost:3000
+#### [Yarn](https://yarnpkg.com/cli/install)
 
+- Have it installed globally: `npm i -g yarn`
+- Use `yarn install` to install dependencies
+- Use `yarn start` to start the server on http://localhost:3000
+- Use `yarn build` to build the client
+
+#### Lint
+
+- Run eslint as follows: `yarn lint`
+- Fix lint issue, if any: `npx eslint src --fix`
+
+#### Audit
+
+- Run `yarn audit` for package vulnerabilities
+- Recommended to fix/update any package with _direct_ dependencies
+- If vulnerabilities found in transitive dependency, but it has yet to resolve, then list them in `package.json > resolutions` node as [Selective Dependency Resolutions condition explained here](https://classic.yarnpkg.com/en/docs/selective-version-resolutions/).
+
+#### IDE
+
+- Recommended to use JetBrains WebStorm IDE
+- Code style use indent with `2` spaces, no tab 
+- For Visual Studio Code, the following extensions are recommended
+    - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+    - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 
 ### Deployment
 
-`buildspec.yml` - build specification reference for AWS CodeBuild
+- Build specification `buildspec.yml` reference for AWS CodeBuild

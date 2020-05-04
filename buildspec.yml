@@ -2,9 +2,9 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 8
+      nodejs: 12
     commands:
-      - npm install
+      - yarn install
   build:
     commands:
       - |
@@ -20,5 +20,5 @@ phases:
         REACT_APP_OAUTH_REDIRECT_OUT_STAGE=$OAUTH_REDIRECT_OUT_STAGE \
         REACT_APP_OAUTH_REDIRECT_IN_LOCAL=$OAUTH_REDIRECT_IN_LOCAL \
         REACT_APP_OAUTH_REDIRECT_OUT_LOCAL=$OAUTH_REDIRECT_OUT_LOCAL \
-        npm run build
+        yarn build
       - aws s3 sync build/ $S3

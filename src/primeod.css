@@ -1,0 +1,10 @@
+/* PrimeReact CSS Override */
+
+/* https://forum.primefaces.org/viewtopic.php?t=37137 */
+.p-panel .p-panel-titlebar-icon {
+    float: left;
+}
+
+body .p-panel .p-panel-titlebar .p-panel-titlebar-icon {
+    margin-right: 5px;
+}

@@ -1,46 +1,282 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { withStyles } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
+import { connect } from 'react-redux';
+import Paper from '@material-ui/core/Paper';
+import Table from '@material-ui/core/Table';
+import TableFooter from '@material-ui/core/TableFooter';
+import TableBody from '@material-ui/core/TableBody';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
+import TablePagination from '@material-ui/core/TablePagination';
+import { TablePaginationActionsWrapped } from '../components/TablePagniationActionsWrapped';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { clearErrorMessage, startRunningHomeQuery, updateHomeQueryPrams } from '../actions/home';
+import * as PropTypes from 'prop-types';
+import { API } from 'aws-amplify';
+import EnhancedTableHead from '../components/EnhancedTableHead';
+import TextField from '@material-ui/core/TextField';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
+import SearchIcon from '@material-ui/icons/Search';
+import Toolbar from '@material-ui/core/Toolbar';
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
+import { Link as RouterLink } from 'react-router-dom';
+import MoreIcon from '@material-ui/icons/More';
 
-const styles = theme => ({
-    close: {
-        padding: theme.spacing.unit / 2,
-    },
+const styles = (theme) => ({
+  close: {
+    padding: theme.spacing(0.5),
+  },
 });
 
 class Home extends Component {
-    render() {
-        return (
-            <div>
-                <Typography variant="body1" gutterBottom>
-                    Led by Professor Sean Grimmond, the UMCCR aims to foster
-                    innovation and integration in cancer care, research,
-                    education and training to achieve a world-leading cancer
-                    centre and workforce.
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                    The UMCCR focuses on improving the molecular detection and
-                    diagnosis of cancer, improving therapeutic decisions for
-                    patients through computational oncology, and enabling
-                    innovative programs in personalised cancer care.
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                    Based at the Victorian Comprehensive Cancer Centre (VCCC),
-                    the UMCCR facilitates the sharing of infrastructure and
-                    supports collaboration within the Melbourne Biomedical
-                    Precinct and the wider VCCC alliance.
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                    The UMCCR works in a wide variety of cancers including
-                    breast, ovarian, prostate, colorectal, pancreatic,
-                    neuroendocrine, gastric, oesophageal and melanoma, but
-                    recalcitrant cancers – for which the standard of care has
-                    changed little over the last 30 years – is an emerging
-                    theme.
-                </Typography>
-            </div>
-        );
-    }
+  state = {
+    dialogOpened: false,
+    rowData: null,
+  };
+
+  async componentDidMount() {
+    const { handleStartRunningHomeQuery } = this.props;
+    await handleStartRunningHomeQuery(this.getBaseParams());
+  }
+
+  reloadData = async (params = {}) => {
+    const { handleStartRunningHomeQuery } = this.props;
+    await handleStartRunningHomeQuery(params);
+  };
+
+  getBaseParams = () => {
+    return this.props.homeParams;
+  };
+
+  handlePageChange = async (event, page) => {
+    await this.reloadData({
+      ...this.getBaseParams(),
+      page: page + 1, // React pagination start at 0 whereas API start at 1
+    });
+  };
+
+  handleRowsPerPageChange = async (event) => {
+    await this.reloadData({
+      ...this.getBaseParams(),
+      page: 1, // Reset page number if rows per page change
+      rowsPerPage: event.target.value,
+    });
+  };
+
+  handleRequestSort = async (event, property) => {
+    const sortCol = property;
+    const { homeParams } = this.props;
+    let sortAsc = homeParams.sortCol === sortCol && !homeParams.sortAsc;
+
+    // Reset all other search params except query
+    await this.reloadData({
+      ...this.getBaseParams(),
+      page: 1, // Reset page number if sorting change
+      sortAsc,
+      sortCol,
+    });
+  };
+
+  handleHomeQueryChange = async (searchQuery) => {
+    await this.props.handleHomeQueryParamsUpdate({
+      search: searchQuery,
+      page: 1,
+    });
+  };
+
+  handleSearchClicked = async () => {
+    const { handleStartRunningHomeQuery, homeParams } = this.props;
+    handleStartRunningHomeQuery(homeParams);
+  };
+
+  handleRowClick = (id) => {
+    return () => {
+      this.handleDialogOpen(id);
+    };
+  };
+
+  handleDialogOpen = (id) => {
+    const dialogOpened = true;
+    this.setState({ dialogOpened }, () => this.processRowDetails(id));
+  };
+
+  handleDialogClose = () => {
+    const dialogOpened = false;
+    const rowData = null;
+    this.setState({ dialogOpened, rowData });
+  };
+
+  processRowDetails = async (id) => {
+    const rowData = await API.get('files', `/lims/${id}/`, {});
+    this.setState({ rowData });
+  };
+
+  renderHomeView = () => {
+    const { sortAsc, sortCol, search } = this.props.homeParams;
+    const { loading, data } = this.props.homeResult;
+    const { results, pagination } = data;
+    const { dialogOpened, rowData } = this.state;
+    const columns = [
+      { key: 'info', sortable: false },
+      { key: 'illumina_id', sortable: true },
+      { key: 'type', sortable: true },
+      { key: 'timestamp', sortable: true },
+      { key: 'subject_id', sortable: true },
+      { key: 'sample_id', sortable: true },
+      { key: 'library_id', sortable: true },
+      { key: 'external_subject_id', sortable: true },
+      { key: 'external_sample_id', sortable: true },
+      { key: 'phenotype', sortable: true },
+      { key: 'project_name', sortable: true },
+      { key: 'results', sortable: true },
+    ];
+
+    return (
+      <Paper>
+        <Toolbar>
+          <Box width={1 / 4}>
+            <TextField
+              fullWidth
+              label={'Search Filter'}
+              type={'search'}
+              value={search}
+              onChange={(e) => this.handleHomeQueryChange(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && this.handleSearchClicked()}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment color={'primary'} position={'end'}>
+                    <IconButton color='primary' onClick={this.handleSearchClicked}>
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </Toolbar>
+
+        <Table size='small' aria-label='a dense table'>
+          <EnhancedTableHead
+            onRequestSort={this.handleRequestSort}
+            order={sortAsc ? 'asc' : 'desc'}
+            orderBy={sortCol === null ? '' : sortCol}
+            columns={columns}
+          />
+          <TableBody>
+            {loading && (
+              <TableRow>
+                <TableCell colSpan={columns.length} style={{ textAlign: 'center' }}>
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading &&
+              results != null &&
+              results.map((row) => (
+                <TableRow key={row.id}>
+                  {columns.map((col) =>
+                    col.key === 'info' ? (
+                      <TableCell key={col.key}>
+                        <IconButton aria-label='info' onClick={this.handleRowClick(row.id)}>
+                          <MoreIcon color={'primary'} />
+                        </IconButton>
+                      </TableCell>
+                    ) : col.key === 'illumina_id' ? (
+                      <TableCell key={col.key}>
+                        <Button color='primary' component={RouterLink} to={'/runs/' + row[col.key]}>
+                          {row[col.key]}
+                        </Button>
+                      </TableCell>
+                    ) : col.key === 'subject_id' ? (
+                      <TableCell key={col.key}>
+                        {row[col.key] && (
+                          <Button
+                            color='primary'
+                            component={RouterLink}
+                            to={'/subjects/' + row[col.key]}>
+                            {row[col.key]}
+                          </Button>
+                        )}
+                      </TableCell>
+                    ) : (
+                      <TableCell key={col.key}>{row[col.key]}</TableCell>
+                    )
+                  )}
+                </TableRow>
+              ))}
+          </TableBody>
+          {pagination != null && (
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  colSpan={8}
+                  rowsPerPageOptions={[10, 20, 50, 100]}
+                  count={pagination.count}
+                  rowsPerPage={pagination.rowsPerPage}
+                  page={pagination.page - 1}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  onChangePage={this.handlePageChange}
+                  onChangeRowsPerPage={this.handleRowsPerPageChange}
+                  ActionsComponent={TablePaginationActionsWrapped}
+                />
+              </TableRow>
+            </TableFooter>
+          )}
+        </Table>
+
+        <LimsRowDetailsDialog
+          dialogOpened={dialogOpened}
+          rowData={rowData}
+          onDialogClose={this.handleDialogClose}
+        />
+      </Paper>
+    );
+  };
+
+  render() {
+    const { authUserInfo } = this.props;
+    return <Fragment>{authUserInfo && this.renderHomeView()}</Fragment>;
+  }
 }
 
-export default withStyles(styles)(Home);
+Home.propTypes = {
+  authUserInfo: PropTypes.object.isRequired,
+  handleStartRunningHomeQuery: PropTypes.func.isRequired,
+  handleHomeQueryParamsUpdate: PropTypes.func.isRequired,
+  homeParams: PropTypes.object.isRequired,
+  homeResult: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => {
+  return {
+    authUserInfo: state.authUserInfo,
+    homeParams: state.homeParams,
+    homeResult: state.homeResult,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    handleHomeQueryParamsUpdate: async (params) => {
+      dispatch(updateHomeQueryPrams(params));
+    },
+    handleStartRunningHomeQuery: async (params) => {
+      dispatch(startRunningHomeQuery(params));
+    },
+    handleClearErrorMessage: () => {
+      dispatch(clearErrorMessage());
+    },
+  };
+};
+
+const ConnectHome = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);
+
+export default withStyles(styles)(ConnectHome);
