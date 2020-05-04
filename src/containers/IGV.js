@@ -64,7 +64,7 @@ class IGV extends Component {
   };
 
   async componentDidMount() {
-    const values = queryString.parse(this.props.location);
+    const values = queryString.parse(this.props.location.search);
 
     if (values.bucket && values.key) {
       const bucket = values.bucket;
