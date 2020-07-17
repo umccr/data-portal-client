@@ -61,11 +61,11 @@ class IGV extends Component {
     signedURL: null,
     signedIndexURL: null,
     format: null,
+    htsget_req: null,
   };
 
   async componentDidMount() {
     const values = queryString.parse(this.props.location.search);
-
     if (values.bucket && values.key) {
       const bucket = values.bucket;
       const key = values.key;
@@ -94,19 +94,32 @@ class IGV extends Component {
           return;
         }
       }
+      //  htsget mode
+    } else if (values.htsget) {
+      const htsget_req = values.htsget;
+
+      this.setState(
+        {
+          htsget: htsget_req,
+        },
+        () => {
+          console.log(this.state);
+        }
+      );
     }
   }
 
   renderIgv = () => {
-    const { filename, signedURL, signedIndexURL, format } = this.state;
+    //const { filename, signedURL, signedIndexURL, format } = this.state;
     const options = {
       genome: 'hg38',
       tracks: [
         {
-          name: filename,
-          url: signedURL,
-          indexURL: signedIndexURL,
-          format: format,
+          type: 'alignment',
+          sourceType: 'htsget',
+          url: 'https://htsget.wtsi-npg-test.co.uk:9090',
+          endpoint: '/npg_ranger/',
+          id: 'ga4gh/sample/NA12878',
         },
       ],
     };
@@ -118,7 +131,8 @@ class IGV extends Component {
   render() {
     return (
       <div id='igv-div'>
-        {this.state.signedURL ? this.renderIgv() : <div>No url specified</div>}
+        {/* {this.state.signedURL ? this.renderIgv() : <div>No url specified</div>} */}
+        {this.renderIgv()}
       </div>
     );
   }
