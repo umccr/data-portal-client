@@ -66,6 +66,8 @@
     "yarn": "^1.22.1"
   },
   "resolutions": {
-    "yargs-parser": "^18.1.2"
+    "yargs-parser": "^18.1.2",
+    "http-proxy": "^1.18.1",
+    "lodash": "^4.17.19"
   }
 }
