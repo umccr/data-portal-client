@@ -67,45 +67,47 @@ class IGV extends Component {
   async componentDidMount() {
     const values = queryString.parse(this.props.location.search);
     if (values.bucket && values.key) {
-      const bucket = values.bucket;
-      const key = values.key;
-
-      // Find the supported file extension and set up IGV config
-      for (let [extension, conversion] of Object.entries(urlConversionMap)) {
-        if (key.endsWith(extension)) {
-          // Replace extension with the corresponding index extension
-          const s3IndexKey = key.replace(extension, conversion.index);
-          const filename = key.split('/')[-1];
-
-          this.setState(
-            {
-              name: filename,
-              s3Bucket: bucket,
-              s3Key: key,
-              signedURL: await getFileSignedURL(bucket, key),
-              signedIndexURL: await getFileSignedURL(bucket, s3IndexKey),
-              format: conversion.format,
-            },
-            () => {
-              console.log(this.state);
-            }
-          );
-
-          return;
-        }
-      }
-      //  htsget mode
+      this.directS3IGVAccess(values.bucket, values.key);
     } else if (values.htsget) {
-      const htsget_req = values.htsget;
+      this.htsgetAccess(values.htsget);
+    }
+  }
 
-      this.setState(
-        {
-          htsget: htsget_req,
-        },
-        () => {
-          console.log(this.state);
-        }
-      );
+  htsgetAccess(htsget_req) {
+    this.setState(
+      {
+        htsget: htsget_req,
+      },
+      () => {
+        console.log(this.state);
+      }
+    );
+  }
+
+  async directS3IGVAccess(bucket, key) {
+    // Find the supported file extension and set up IGV config
+    for (let [extension, conversion] of Object.entries(urlConversionMap)) {
+      if (key.endsWith(extension)) {
+        // Replace extension with the corresponding index extension
+        const s3IndexKey = key.replace(extension, conversion.index);
+        const filename = key.split('/')[-1];
+
+        this.setState(
+          {
+            name: filename,
+            s3Bucket: bucket,
+            s3Key: key,
+            signedURL: await getFileSignedURL(bucket, key),
+            signedIndexURL: await getFileSignedURL(bucket, s3IndexKey),
+            format: conversion.format,
+          },
+          () => {
+            console.log(this.state);
+          }
+        );
+
+        return;
+      }
     }
   }
 
