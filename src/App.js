@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import ReactGA from 'react-ga';
 import * as PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import ListItem from '@material-ui/core/ListItem';
@@ -64,6 +65,8 @@ const styles = (theme) => ({
   },
 });
 
+// Google Analytics
+ReactGA.initialize('UA-134504725-2');
 class App extends Component {
   constructor(props) {
     super(props);

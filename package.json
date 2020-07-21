@@ -23,6 +23,7 @@
     "react": "^16.12.0",
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.11.0",
+    "react-ga": "^3.1.2",
     "react-moment": "^0.9.7",
     "react-redux": "^7.1.1",
     "react-router-dom": "^5.1.2",
@@ -32,7 +33,8 @@
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
     "typescript": "^3.6.4",
-    "igv": "^2.5.5"
+    "igv": "^2.6.2"
+    "yargs-parser": "18.1.3"
   },
   "scripts": {
     "start": "REACT_APP_STAGE=localhost react-scripts start",
@@ -65,9 +67,4 @@
     "react-test-renderer": "^16.12.0",
     "yarn": "^1.22.1"
   },
-  "resolutions": {
-    "yargs-parser": "^18.1.2",
-    "http-proxy": "^1.18.1",
-    "lodash": "^4.17.19"
-  }
 }
