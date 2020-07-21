@@ -9,6 +9,7 @@ import Storage from './containers/Storage';
 import LandingPage from './containers/LandingPage';
 import Subject from './containers/Subject';
 import Run from './containers/Run';
+import IGV from './containers/IGV';
 
 class Routes extends Component {
   render() {
@@ -30,6 +31,7 @@ class Routes extends Component {
             <Route path='/runs/:runId' exact component={Run} />
             <Route path='/search' component={Search} />
             <Route path='/storage' component={Storage} />
+            <Route path='/igv' component={IGV} />
           </Fragment>
         )}
       </Switch>

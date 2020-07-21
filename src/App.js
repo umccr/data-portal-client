@@ -211,6 +211,7 @@ class App extends Component {
               <Route path='/runs'>Run</Route>
               <Route path='/search'>Search</Route>
               <Route path='/storage'>Storage</Route>
+              <Route path='/igv'>IGV</Route>
             </Switch>
           }
         />

@@ -46,22 +46,14 @@ export const startRunningSearchQuery = (queryParams) => {
       const paramsString = paramKeys.map((key) => `${key}=${queryParams[key]}`).join('&');
 
       const data = await API.get('files', `/files?${paramsString}`, {});
-
       dispatch({
         type: SEARCH_QUERY_SUCCESS,
         payload: {
           data,
-          errorMessage: null,
         },
       });
     } catch (e) {
       let errorMessage;
-
-      if (e.response) {
-        errorMessage = `Query Failed - ${e.response.data.errors}`;
-      } else {
-        errorMessage = `Unknown Error - ${e.message}`;
-      }
 
       dispatch({
         type: SEARCH_QUERY_FAILURE,
