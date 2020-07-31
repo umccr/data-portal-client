@@ -2,42 +2,36 @@
 
 React frontend for [UMCCR](https://umccr.org) [Data Portal API](https://github.com/umccr/data-portal-apis)
 
-### Local development
+### Local Development
 
-Use Terraform output and create a `.env.local` file to store the env variables needed 
-for the app to run locally. `{var}` refers to the variable name in Terraform output.
-
+#### TL;DR
 ```
-REACT_APP_REGION={main_region}
-REACT_APP_API_URL={api_domain}
-REACT_APP_COG_USER_POOL_ID={cognito_user_pool_id}
-REACT_APP_COG_IDENTITY_POOL_ID={cognito_identity_pool_id}
-REACT_APP_COG_APP_CLIENT_ID_STAGE={cognito_app_client_id_stage}
-REACT_APP_COG_APP_CLIENT_ID_LOCAL={cognito_app_client_id_localhost}
-REACT_APP_OAUTH_DOMAIN={cognito_oauth_domain}
-REACT_APP_OAUTH_REDIRECT_IN_STAGE={cognito_oauth_redirect_signin}
-REACT_APP_OAUTH_REDIRECT_OUT_STAGE={cognito_oauth_redirect_signout}
-REACT_APP_OAUTH_REDIRECT_IN_LOCAL={cognito_oauth_redirect_signin_localhost}
-REACT_APP_OAUTH_REDIRECT_OUT_LOCAL={cognito_oauth_redirect_signout_localhost}
+node --version
+v12.18.2
+
+npm i -g yarn
+yarn install
+
+aws sso login --profile dev
+export AWS_PROFILE=dev
+yarn start
+(CTRL+C to stop the dev server)
 ```
 
-#### [Yarn](https://yarnpkg.com/cli/install)
-
-- Have it installed globally: `npm i -g yarn`
-- Use `yarn install` to install dependencies
-- Use `yarn start` to start the server on http://localhost:3000
-- Use `yarn build` to build the client
+- http://localhost:3000
 
 #### Lint
 
-- Run eslint as follows: `yarn lint`
-- Fix lint issue, if any: `npx eslint src --fix`
+- Run lint: `yarn lint`
+- Fix lint issue: `yarn lint --fix`
 
 #### Audit
 
-- Run `yarn audit` for package vulnerabilities
-- Recommended to fix/update any package with _direct_ dependencies
+- Run `yarn audit` for package security vulnerabilities
+- Recommend fixing/updating any package with _direct_ dependencies
 - If vulnerabilities found in transitive dependency, but it has yet to resolve, then list them in `package.json > resolutions` node as [Selective Dependency Resolutions condition explained here](https://classic.yarnpkg.com/en/docs/selective-version-resolutions/).
+
+> NOTE: [husky](.huskyrc.json) :dog2: will guard and enforce both `lint` and `audit` via pre-commit hook. You are encourage to fix those. If you wish to skip this for good reason, you can by-pass husky by using [`--no-verify`](https://github.com/typicode/husky/issues/124) flag in `git` command.
 
 #### IDE
 
