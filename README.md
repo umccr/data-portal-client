@@ -31,7 +31,18 @@ yarn start
 - Recommend fixing/updating any package with _direct_ dependencies
 - If vulnerabilities found in transitive dependency, but it has yet to resolve, then list them in `package.json > resolutions` node as [Selective Dependency Resolutions condition explained here](https://classic.yarnpkg.com/en/docs/selective-version-resolutions/).
 
-> NOTE: [husky](.huskyrc.json) :dog2: will guard and enforce both `lint` and `audit` via pre-commit hook. You are encourage to fix those. If you wish to skip this for good reason, you can by-pass husky by using [`--no-verify`](https://github.com/typicode/husky/issues/124) flag in `git` command.
+#### Husky & Git
+
+> NOTE: [husky](.huskyrc.json) :dog2: will guard and enforce static code analysis such as `lint` and any security `audit` via pre-commit hook. You are encourage to fix those. If you wish to skip this for good reason, you can by-pass husky by using [`--no-verify`](https://github.com/typicode/husky/issues/124) flag in `git` command.
+
+- The default branch is `dev`. Any merges are CI/CD to `DEV` account environment.
+- The `master` branch is production. Any merges are CI/CD to `PROD` account environment.
+- Merge to `master` should be fast-forward merge from `dev` to maintain sync and linearity as follows:
+```
+git checkout master
+git merge --ff-only dev
+git push origin master
+```
 
 #### IDE
 

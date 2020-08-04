@@ -318,7 +318,7 @@ class Subject extends Component {
     const wgs = results.filter((r) => r.key.includes('WGS/'));
     const wts = results.filter((r) => r.key.includes('WTS/'));
     const bams = wgs.filter((r) => r.key.endsWith('bam'));
-    const vcfs = wgs.filter((r) => r.key.endsWith('vcf.gz'));
+    const vcfs = wgs.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf'));
     const circos = wgs.filter((r) => r.key.endsWith('png'));
     const pcgr = wgs.filter((r) => r.key.endsWith('pcgr.html'));
     const cpsr = wgs.filter((r) => r.key.endsWith('cpsr.html'));
@@ -539,7 +539,7 @@ class Subject extends Component {
       {
         key: 2,
         label: 'vcf',
-        keyword: 'umccrised/[^(work)*] (somatic-ensemble|normal-ensemble-predispose_genes).vcf.gz$',
+        keyword: 'umccrised/[^(work)*] small_variants/[^\\/]*(.vcf.gz$|.maf$)',
         color: 'default',
       },
       {
@@ -557,7 +557,7 @@ class Subject extends Component {
       {
         key: 5,
         label: 'pcgr cpsr',
-        keyword: 'umccrised pcgr/ (pcgr|cpsr).html$',
+        keyword: 'umccrised/[^\\/]*/[^\\/]*(pcgr|cpsr).html$',
         color: 'default',
       },
       {
