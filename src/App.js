@@ -280,9 +280,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-const ConnectApp = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(App);
+const ConnectApp = connect(mapStateToProps, mapDispatchToProps)(App);
 
 export default withStyles(styles, { withTheme: true })(withOAuth(ConnectApp));

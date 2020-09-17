@@ -320,9 +320,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-const ConnectSearch = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Search);
+const ConnectSearch = connect(mapStateToProps, mapDispatchToProps)(Search);
 
 export default withStyles(styles)(ConnectSearch);

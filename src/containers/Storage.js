@@ -252,7 +252,10 @@ class Storage extends Component {
     });
 
     this.setState({
-      maxWeight: Math.max.apply(Math, dataArray.map((d) => d.weight)),
+      maxWeight: Math.max.apply(
+        Math,
+        dataArray.map((d) => d.weight)
+      ),
     });
   };
 

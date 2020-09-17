@@ -37,7 +37,7 @@ class LimsRowDetailsDialog extends React.Component {
               )}
               {rowData != null &&
                 Object.keys(rowData)
-                  .filter(function(k) {
+                  .filter(function (k) {
                     return k !== 'id';
                   })
                   .map((k) => (

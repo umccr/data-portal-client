@@ -7,10 +7,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 
 export const getDisplayTitle = (col) => {
-  return col
-    .split('_')
-    .join(' ')
-    .toUpperCase();
+  return col.split('_').join(' ').toUpperCase();
 };
 
 class EnhancedTableHead extends React.Component {

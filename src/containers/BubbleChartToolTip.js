@@ -24,9 +24,9 @@ class CustomTooltip extends Component {
           {payload.map((p) => {
             if (p.name !== 'weight') {
               return (
-                <Typography variant='body1' key={p.name}>{`${p.name} : ${p.value} ${
-                  p.unit
-                }`}</Typography>
+                <Typography
+                  variant='body1'
+                  key={p.name}>{`${p.name} : ${p.value} ${p.unit}`}</Typography>
               );
             }
             return null;

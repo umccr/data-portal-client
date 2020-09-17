@@ -474,9 +474,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-const ConnectedAppBar = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AppBar);
+const ConnectedAppBar = connect(mapStateToProps, mapDispatchToProps)(AppBar);
 
 export default withRouter(withStyles(styles, { withTheme: true })(ConnectedAppBar));

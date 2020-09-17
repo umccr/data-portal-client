@@ -274,9 +274,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-const ConnectHome = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Home);
+const ConnectHome = connect(mapStateToProps, mapDispatchToProps)(Home);
 
 export default withStyles(styles)(ConnectHome);

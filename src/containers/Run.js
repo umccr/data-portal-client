@@ -844,9 +844,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-const ConnectRun = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Run);
+const ConnectRun = connect(mapStateToProps, mapDispatchToProps)(Run);
 
 export default withStyles(styles)(ConnectRun);

@@ -909,9 +909,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-const ConnectSubject = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Subject);
+const ConnectSubject = connect(mapStateToProps, mapDispatchToProps)(Subject);
 
 export default withStyles(styles)(ConnectSubject);

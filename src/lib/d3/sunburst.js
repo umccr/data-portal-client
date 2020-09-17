@@ -159,7 +159,7 @@ export default class SunburstD3 {
           const angularDomain = d3.interpolate(self.angularScale.domain(), selectedX(node));
           const radialDomain = d3.interpolate(self.radialScale.domain(), selectedY(node));
           const radialRange = d3.interpolate(self.radialScale.range(), selectedRadius(node));
-          return function(t) {
+          return function (t) {
             self.angularScale.domain(angularDomain(t));
             self.radialScale.domain(radialDomain(t)).range(radialRange(t));
           };
