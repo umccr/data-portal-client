@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Link as RouterLink, Redirect } from 'react-router-dom';
-import { API } from 'aws-amplify';
+import { API, Auth, Signer } from 'aws-amplify';
 import {
   clearErrorMessage,
   startRunningSubjectQuery,
@@ -50,6 +50,7 @@ import { Panel } from 'primereact/panel';
 import Link from '@material-ui/core/Link';
 import Backdrop from '@material-ui/core/Backdrop';
 import Typography from '@material-ui/core/Typography';
+import config from '../config';
 
 const styles = (theme) => ({
   close: {
@@ -83,6 +84,7 @@ const styles = (theme) => ({
 class Subject extends Component {
   state = {
     subject: null,
+    feature_content_url: null,
     redirect: false,
     dialogOpened: false,
     rowData: null,
@@ -99,6 +101,11 @@ class Subject extends Component {
       await handleStartRunningSubjectQuery(this.getBaseParams(), subjectId);
       const { handleStartRunningSubjectGDSQuery } = this.props;
       await handleStartRunningSubjectGDSQuery(this.getGDSBaseParams(), subjectId);
+      const { features } = subject;
+      if (Array.isArray(features) && features.length) {
+        const feature_content_url = await this.getContentSignedUrl(features[0].id);
+        this.setState({ feature_content_url });
+      }
     } else {
       this.setState({ redirect: true });
     }
@@ -260,13 +267,36 @@ class Subject extends Component {
     return signed_url;
   };
 
+  getContentSignedUrl = async (id, expiration = 3600) => {
+    if (expiration > 604800 || expiration < 1) {
+      expiration = 604800;
+    }
+    const content_endpoint = config.apiGateway.URL + `/s3/${id}/content`;
+    const credentials = await Auth.currentCredentials();
+    const serviceInfo = {
+      region: config.apiGateway.REGION,
+      service: 'execute-api',
+    };
+    const cred = {
+      access_key: credentials.accessKeyId,
+      secret_key: credentials.secretAccessKey,
+      session_token: credentials.sessionToken,
+    };
+    const params = {
+      url: content_endpoint,
+      method: 'GET',
+    };
+    return Signer.signUrl(params, cred, serviceInfo, expiration);
+  };
+
   handleOpenInBrowser = async (id) => {
     const { clickedLinks } = this.state;
     clickedLinks.push(id);
     this.setState({ clickedLinks: clickedLinks });
     this.setState({ openBackdrop: true });
-    const url = await this.getPreSignedUrl(id);
-    window.open(url, '_blank');
+    // const url = await this.getPreSignedUrl(id);
+    const url = await this.getContentSignedUrl(id, 60);
+    url && window.open(url, '_blank');
     this.setState({ openBackdrop: false });
   };
 
@@ -314,7 +344,9 @@ class Subject extends Component {
   };
 
   renderSubjectLandingView = () => {
-    const { features, results } = this.state.subject;
+    const { results } = this.state.subject;
+    const feature_content_url = this.state.feature_content_url;
+
     const wgs = results.filter((r) => r.key.includes('WGS/'));
     const wts = results.filter((r) => r.key.includes('WTS/'));
     const bams = wgs.filter((r) => r.key.endsWith('bam'));
@@ -340,7 +372,14 @@ class Subject extends Component {
         <div className={'p-col-12 p-lg-5'}>
           <Panel header={'Overview'}>{this.renderSubjectLandingOverview()}</Panel>
           <Panel header={'Feature'} toggleable={true} style={{ marginTop: '1em' }}>
-            <img src={features[0]} style={{ width: '100%', height: 'auto' }} alt={''} />
+            {feature_content_url ? (
+              <img src={feature_content_url} style={{ width: '100%', height: 'auto' }} alt={''} />
+            ) : (
+              <img
+                src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs='
+                alt={''}
+              />
+            )}
           </Panel>
         </div>
         <div className={'p-col-12 p-lg-7'}>
