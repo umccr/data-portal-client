@@ -103,7 +103,8 @@ class Subject extends Component {
       await handleStartRunningSubjectGDSQuery(this.getGDSBaseParams(), subjectId);
       const { features } = subject;
       if (Array.isArray(features) && features.length) {
-        const feature_content_url = await this.getContentSignedUrl(features[0].id);
+        const feature_content_url = features[0];
+        // const feature_content_url = await this.getContentSignedUrl(features[0].id);
         this.setState({ feature_content_url });
       }
     } else {
@@ -294,8 +295,8 @@ class Subject extends Component {
     clickedLinks.push(id);
     this.setState({ clickedLinks: clickedLinks });
     this.setState({ openBackdrop: true });
-    // const url = await this.getPreSignedUrl(id);
-    const url = await this.getContentSignedUrl(id, 60);
+    const url = await this.getPreSignedUrl(id);
+    // const url = await this.getContentSignedUrl(id, 60);
     url && window.open(url, '_blank');
     this.setState({ openBackdrop: false });
   };
