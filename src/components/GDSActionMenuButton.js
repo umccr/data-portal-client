@@ -70,20 +70,28 @@ class GDSActionMenuButton extends React.Component {
 
   handleOpenInBrowser = async (id) => {
     this.setState({ openBackdrop: true });
-    const url = await this.getPreSignedUrl(id);
-    window.open(url, '_blank');
+    const { error, signed_url } = await this.getPreSignedUrl(id);
+    if (error) {
+      this.setState({ errorMessage: error });
+    } else {
+      window.open(signed_url, '_blank');
+    }
     this.setState({ openBackdrop: false });
   };
 
   handleGeneratePreSignedUrl = async (id) => {
     this.setState({ signing: true, open: true });
-    // const url = await this.getPreSignedUrl(id);
-    // const params = this.parseUrlParams(url);
-    // const expires = params['Expires'];
-    // this.setState({ expires });
-    this.setState({ url: `${id}` });
-    const dialogMessage = `THIS FEATURE IS NOT AVAILABLE YET`;
-    this.setState({ dialogMessage: dialogMessage });
+    const { error, signed_url } = await this.getPreSignedUrl(id);
+    if (error) {
+      this.setState({ url: error });
+      this.setState({ dialogMessage: 'ERROR' });
+    } else {
+      const url = signed_url;
+      const params = this.parseUrlParams(url);
+      const expires = params['X-Amz-Expires'];
+      this.setState({ expires });
+      this.setState({ url });
+    }
     this.setState({ signing: false });
   };
 
@@ -99,12 +107,7 @@ class GDSActionMenuButton extends React.Component {
   };
 
   getPreSignedUrl = async (id) => {
-    // TODO go through our backend or direct to GDS API endpoint?
-    const { error, signed_url } = await API.get('files', `/gds/${id}/presign`, {});
-    if (error) {
-      return error;
-    }
-    return signed_url;
+    return await API.get('files', `/gds/${id}/presign`, {});
   };
 
   getGDSPath = (volume_name, path) => {
@@ -144,7 +147,7 @@ class GDSActionMenuButton extends React.Component {
             <List
               className={this.props.classes.root}
               component={'div'}
-              onClick={() => this.handleGeneratePreSignedUrl(id)}>
+              onClick={() => this.handleOpenInBrowser(id)}>
               <ListItemIcon>
                 <OpenInBrowserIcon />
               </ListItemIcon>
@@ -160,6 +163,8 @@ class GDSActionMenuButton extends React.Component {
     const { data, dense } = this.props;
     const { id, volume_name, path } = data;
     const { open, openBackdrop } = this.state;
+    const dateExpires = new Date();
+
     return (
       <div>
         <PopupState variant='popover' popupId={id.toString()}>
@@ -200,7 +205,7 @@ class GDSActionMenuButton extends React.Component {
                         <TableCell>
                           {this.state.expires ? (
                             <Typography variant='button' display='block' gutterBottom>
-                              <Moment unix>{this.state.expires}</Moment>
+                              <Moment add={{ seconds: this.state.expires }}>{dateExpires}</Moment>
                             </Typography>
                           ) : (
                             this.state.dialogMessage

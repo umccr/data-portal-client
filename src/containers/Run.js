@@ -300,6 +300,20 @@ class Run extends Component {
     });
   };
 
+  handleGDSChipClick = (selected) => {
+    return async () => {
+      await this.handleGDSChipFilter(selected);
+    };
+  };
+
+  handleGDSChipFilter = async (selected) => {
+    await this.reloadGDSData({
+      ...this.getGDSBaseParams(),
+      search: selected['keyword'],
+      page: 1,
+    });
+  };
+
   renderRunView = () => {
     return (
       <Grid container spacing={3}>
@@ -313,7 +327,18 @@ class Run extends Component {
                 </TableContainer>
               </TabPanel>
               <TabPanel header={'GDS'}>
-                <TableContainer>{this.renderRunGDSView()}</TableContainer>
+                <Typography variant={'h6'} color={'secondary'}>
+                  THIS IS SHOWCASE FEATURE. DEMO PURPOSE ONLY. NOT FOR PRODUCTION USE.
+                </Typography>
+                <Typography variant={'subtitle2'}>
+                  Data from Genomic Data Store Service (GDS) - Illumina Analytics Platform (IAP)
+                  Pipeline
+                </Typography>
+                <hr />
+                <TableContainer>
+                  {this.renderGDSChipFilterView()}
+                  {this.renderRunGDSView()}
+                </TableContainer>
               </TabPanel>
             </TabView>
           </Panel>
@@ -470,6 +495,31 @@ class Run extends Component {
     );
   };
 
+  renderGDSChipFilterView = () => {
+    const chipData = [
+      { key: 0, label: 'reset', keyword: '', color: 'primary' },
+      { key: 1, label: 'qc reports', keyword: '.html$', color: 'default' },
+      { key: 2, label: 'fastq', keyword: '.fastq.gz$', color: 'default' },
+    ];
+
+    return (
+      <div className={this.props.classes.root}>
+        {chipData.map((data) => {
+          return (
+            <Chip
+              key={data.key}
+              label={data.label}
+              onClick={this.handleGDSChipClick(data)}
+              className={this.props.classes.chip}
+              color={data.color}
+              icon={data.key === 0 ? <EmojiEmotionsIcon /> : undefined}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
   handleClose = () => {
     this.setState({
       openBackdrop: false,
@@ -509,6 +559,41 @@ class Run extends Component {
       );
     }
     return key;
+  };
+
+  getGDSPreSignedUrl = async (id) => {
+    return await API.get('files', `/gds/${id}/presign`, {});
+  };
+
+  handleGDSOpenInBrowser = async (id) => {
+    const { clickedLinks } = this.state;
+    clickedLinks.push(id);
+    this.setState({ clickedLinks: clickedLinks });
+    this.setState({ openBackdrop: true });
+    const { error, signed_url } = await this.getGDSPreSignedUrl(id);
+    if (error) {
+      this.props.runResult.errorMessage = error;
+    } else {
+      window.open(signed_url, '_blank');
+    }
+    this.setState({ openBackdrop: false });
+  };
+
+  renderGDSClickableColumn = (data) => {
+    const { clickedLinks } = this.state;
+    const { id, path } = data;
+
+    if (path.endsWith('html')) {
+      return (
+        <Link
+          className={this.props.classes.linkCursorPointer}
+          color={clickedLinks.includes(id) ? 'secondary' : 'primary'}
+          onClick={() => this.handleGDSOpenInBrowser(id)}>
+          {path}
+        </Link>
+      );
+    }
+    return path;
   };
 
   renderRunS3View = () => {
@@ -622,14 +707,6 @@ class Run extends Component {
 
     return (
       <Paper elevation={0}>
-        <Typography variant={'h6'} color={'secondary'}>
-          THIS IS SHOWCASE FEATURE. DEMO PURPOSE ONLY. NOT FOR PRODUCTION USE.
-        </Typography>
-        <Typography variant={'subtitle2'}>
-          Data from Illumina Analytics Platform - Genomic Data Store Service
-        </Typography>
-        <hr />
-
         <Toolbar>
           <Box width={1 / 4}>
             <TextField
@@ -676,9 +753,7 @@ class Run extends Component {
                       {col.key === 'actions' ? (
                         <GDSActionMenuButton data={row} authUserInfo={this.props.authUserInfo} />
                       ) : col.key === 'path' ? (
-                        // TODO pending GDSFile presigned url support
-                        // this.renderClickableColumn(row)
-                        row[col.key]
+                        this.renderGDSClickableColumn(row)
                       ) : col.key === 'size' ? (
                         <HumanReadableFileSize bytes={row[col.label]} />
                       ) : col.key === 'time_modified' ? (
