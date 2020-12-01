@@ -25,7 +25,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import 'primereact/resources/themes/nova-light/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
-import './primeflex.css';
+import 'primeflex/primeflex.css';
 import './primeod.css';
 
 const drawerWidth = 240;
