@@ -119,9 +119,9 @@ class IGV extends Component {
         {
           type: 'alignment',
           sourceType: 'htsget',
-          url: 'https://htsget.wtsi-npg-test.co.uk:9090',
-          endpoint: '/npg_ranger/',
-          id: 'ga4gh/sample/NA12878',
+          url: 'https://htsget.dev.umccr.org/',
+          endpoint: '/reads/',
+          id: 'tabulamuris.A1-B000126-3_39_F-1-1_R2',
         },
       ],
     };
