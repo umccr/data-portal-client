@@ -361,9 +361,7 @@ class Subject extends Component {
     const cancer = wgs.filter(
       (r) => r.key.includes('umccrised') && r.key.endsWith('cancer_report.html')
     );
-    const coverage = wgs.filter(
-      (r) => r.key.includes('coverage') && r.key.includes('cacao') && r.key.endsWith('html')
-    );
+    const coverage = wgs.filter((r) => r.key.includes('cacao') && r.key.endsWith('html'));
     const wtsBams = wts.filter((r) => r.key.endsWith('bam'));
     const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
     const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
@@ -603,10 +601,15 @@ class Subject extends Component {
       {
         key: 6,
         label: 'coverage',
-        keyword: 'cacao html (cacao_normal|cacao_tumor)',
+        keyword: 'umccrised/[^\\/]*/[^\\/]*(normal|tumor).cacao.html$',
         color: 'default',
       },
-      { key: 7, label: 'circos', keyword: 'work/ purple/ circos baf .png$', color: 'default' },
+      {
+        key: 7,
+        label: 'circos',
+        keyword: 'umccrised/[^(work)*] purple/ circos baf .png$',
+        color: 'default',
+      },
       { key: 8, label: 'wts bam', keyword: 'wts ready .bam$', color: 'default' },
       {
         key: 9,
