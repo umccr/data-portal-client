@@ -113,16 +113,16 @@ class IGV extends Component {
 
   renderIgv = () => {
     const options = {
-      genome: 'hg19',
-      locus: 'chr8:128,747,267-128,754,546',
+      genome: 'hg38',
+      locus: 'chr13:32,315,086-32,400,266',
       tracks: [
         {
           type: 'alignment',
           sourceType: 'htsget',
           url: 'http://htsget.dev.umccr.org',
           endpoint: '/reads/',
-          id: 'tabulamuris.A1-B000126-3_39_F-1-1_R2',
-          name: 'NA12878',
+          id: 'gatk.NA12878',
+          name: 'gatk.NA12878',
         },
       ],
     };
