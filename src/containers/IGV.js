@@ -119,7 +119,7 @@ class IGV extends Component {
         {
           type: 'alignment',
           sourceType: 'htsget',
-          url: 'http://htsget.dev.umccr.org',
+          url: 'https://htsget.dev.umccr.org',
           endpoint: '/reads/',
           id: 'giab.NA12878.NIST7035.1',
           name: 'giab.NA12878.NIST7035.1',
