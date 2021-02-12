@@ -45,7 +45,7 @@ import ActionMenuButton from '../components/ActionMenuButton';
 import GDSActionMenuButton from '../components/GDSActionMenuButton';
 import Snackbar from '@material-ui/core/Snackbar';
 import CloseIcon from '@material-ui/icons/Close';
-import MoreIcon from '@material-ui/icons/More';
+import InfoIcon from '@material-ui/icons/Info';
 import Link from '@material-ui/core/Link';
 import { defaultRunMetaParams, defaultRunParams, defaultRunGDSParams } from '../reducers';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -419,19 +419,19 @@ class Run extends Component {
                   {columns.map((col) =>
                     col.key === 'info' ? (
                       <TableCell key={col.key}>
-                        <IconButton aria-label='info' onClick={this.handleRowClick(row.id)}>
-                          <MoreIcon color={'primary'} />
-                        </IconButton>
+                        <Button aria-label='info' onClick={this.handleRowClick(row.id)}>
+                          <InfoIcon color={'primary'} />
+                        </Button>
                       </TableCell>
                     ) : col.key === 'subject_id' ? (
                       <TableCell key={col.key}>
                         {row[col.key] && (
-                          <Button
+                          <Link
                             color='primary'
                             component={RouterLink}
                             to={'/subjects/' + row[col.key]}>
                             {row[col.key]}
-                          </Button>
+                          </Link>
                         )}
                       </TableCell>
                     ) : (

@@ -23,7 +23,8 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 import { Link as RouterLink } from 'react-router-dom';
-import MoreIcon from '@material-ui/icons/More';
+import InfoIcon from '@material-ui/icons/Info';
+import Link from '@material-ui/core/Link';
 
 const styles = (theme) => ({
   close: {
@@ -131,7 +132,7 @@ class Home extends Component {
       { key: 'external_sample_id', sortable: true },
       { key: 'phenotype', sortable: true },
       { key: 'project_name', sortable: true },
-      { key: 'results', sortable: true },
+      // { key: 'results', sortable: true },
     ];
 
     return (
@@ -180,25 +181,25 @@ class Home extends Component {
                   {columns.map((col) =>
                     col.key === 'info' ? (
                       <TableCell key={col.key}>
-                        <IconButton aria-label='info' onClick={this.handleRowClick(row.id)}>
-                          <MoreIcon color={'primary'} />
-                        </IconButton>
+                        <Button aria-label='info' onClick={this.handleRowClick(row.id)}>
+                          <InfoIcon color={'primary'} />
+                        </Button>
                       </TableCell>
                     ) : col.key === 'illumina_id' ? (
                       <TableCell key={col.key}>
-                        <Button color='primary' component={RouterLink} to={'/runs/' + row[col.key]}>
+                        <Link color='primary' component={RouterLink} to={'/runs/' + row[col.key]}>
                           {row[col.key]}
-                        </Button>
+                        </Link>
                       </TableCell>
                     ) : col.key === 'subject_id' ? (
                       <TableCell key={col.key}>
                         {row[col.key] && (
-                          <Button
+                          <Link
                             color='primary'
                             component={RouterLink}
                             to={'/subjects/' + row[col.key]}>
                             {row[col.key]}
-                          </Button>
+                          </Link>
                         )}
                       </TableCell>
                     ) : (
@@ -212,7 +213,7 @@ class Home extends Component {
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  colSpan={8}
+                  colSpan={7}
                   rowsPerPageOptions={[10, 20, 50, 100]}
                   count={pagination.count}
                   rowsPerPage={pagination.rowsPerPage}

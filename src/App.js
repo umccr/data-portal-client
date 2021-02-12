@@ -22,11 +22,12 @@ import authUpdate from './actions/auth';
 import AppBar from './containers/AppBar';
 import StorageIcon from '@material-ui/icons/Storage';
 import SearchIcon from '@material-ui/icons/Search';
-import 'primereact/resources/themes/nova-light/theme.css';
+import 'primereact/resources/themes/bootstrap4-light-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 import './primeod.css';
+import LandingPage from './containers/LandingPage';
 
 const drawerWidth = 240;
 
@@ -189,9 +190,8 @@ class App extends Component {
     );
   };
 
-  render() {
+  renderMainLayout() {
     const { classes, theme, authUserInfo } = this.props;
-
     return (
       <div className={classes.root}>
         <CssBaseline />
@@ -246,6 +246,21 @@ class App extends Component {
             <Routes />
           </Switch>{' '}
         </main>
+      </div>
+    );
+  }
+
+  renderLanding() {
+    return <LandingPage handleSignIn={this.props.OAuthSignIn} />;
+  }
+
+  render() {
+    const { authUser } = this.props;
+
+    return (
+      <div>
+        {authUser && this.renderMainLayout()}
+        {authUser === null && this.renderLanding()}
       </div>
     );
   }

@@ -1,10 +1,15 @@
 /* PrimeReact CSS Override */
 
-/* https://forum.primefaces.org/viewtopic.php?t=37137 */
-.p-panel .p-panel-titlebar-icon {
+.p-panel .p-panel-header {
+    display: inherit;
+}
+
+.p-panel .p-panel-header .p-panel-icons {
     float: left;
 }
 
-body .p-panel .p-panel-titlebar .p-panel-titlebar-icon {
+body .p-panel .p-panel-header .p-panel-header-icon {
     margin-right: 5px;
+    align-items: inherit;
+    height: 1em;
 }

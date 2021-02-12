@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import reducer from './reducers';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 Amplify.configure({
   Auth: {
@@ -33,10 +34,65 @@ Amplify.configure({
 
 const store = createStore(reducer, applyMiddleware(thunk));
 
+const theme = createMuiTheme({
+  props: {
+    MuiButton: {
+      size: 'small',
+    },
+    MuiFilledInput: {
+      margin: 'dense',
+    },
+    MuiFormControl: {
+      margin: 'dense',
+    },
+    MuiFormHelperText: {
+      margin: 'dense',
+    },
+    MuiIconButton: {
+      size: 'small',
+    },
+    MuiInputBase: {
+      margin: 'dense',
+    },
+    MuiInputLabel: {
+      margin: 'dense',
+    },
+    MuiListItem: {
+      dense: true,
+    },
+    MuiOutlinedInput: {
+      margin: 'dense',
+    },
+    MuiFab: {
+      size: 'small',
+    },
+    MuiTable: {
+      size: 'small',
+    },
+    MuiTextField: {
+      margin: 'dense',
+    },
+    MuiToolbar: {
+      variant: 'dense',
+    },
+  },
+  overrides: {
+    MuiIconButton: {
+      sizeSmall: {
+        marginLeft: 4,
+        marginRight: 4,
+        padding: 12,
+      },
+    },
+  },
+});
+
 ReactDOM.render(
   <Provider store={store}>
     <Router>
-      <App />
+      <MuiThemeProvider theme={theme}>
+        <App />
+      </MuiThemeProvider>
     </Router>
   </Provider>,
   document.getElementById('root')

@@ -43,7 +43,7 @@ import ActionMenuButton from '../components/ActionMenuButton';
 import GDSActionMenuButton from '../components/GDSActionMenuButton';
 import Snackbar from '@material-ui/core/Snackbar';
 import CloseIcon from '@material-ui/icons/Close';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
+import InfoIcon from '@material-ui/icons/Info';
 import TableContainer from '@material-ui/core/TableContainer';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { Panel } from 'primereact/panel';
@@ -297,7 +297,10 @@ class Subject extends Component {
     this.setState({ openBackdrop: true });
     const url = await this.getPreSignedUrl(id);
     // const url = await this.getContentSignedUrl(id, 60);
-    url && window.open(url, '_blank');
+    if (url) {
+      let win = window.open(url, '_blank');
+      win && win.focus();
+    }
     this.setState({ openBackdrop: false });
   };
 
@@ -414,9 +417,8 @@ class Subject extends Component {
                   </Paper>
                 </TableContainer>
               </TabPanel>
-              <TabPanel header={'IAP'} disabled={true} />
-              <TabPanel header={'DRAGEN'} disabled={true} />
               <TabPanel header={'TSO500'} disabled={true} />
+              <TabPanel header={'ICA'} disabled={true} />
             </TabView>
           </Panel>
         </div>
@@ -536,12 +538,9 @@ class Subject extends Component {
                     {columns.map((col) =>
                       col.key === 'info' ? (
                         <TableCell key={col.key}>
-                          <IconButton
-                            aria-label='info'
-                            onClick={this.handleRowClick(row.id)}
-                            size={'small'}>
-                            <MoreVertIcon color={'primary'} fontSize={'small'} />
-                          </IconButton>
+                          <Button aria-label='info' onClick={this.handleRowClick(row.id)}>
+                            <InfoIcon color={'primary'} />
+                          </Button>
                         </TableCell>
                       ) : col.key === 'illumina_id' ? (
                         <TableCell key={col.key}>
