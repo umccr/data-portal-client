@@ -31,7 +31,8 @@ class Routes extends Component {
             <Route path='/runs/:runId' exact component={Run} />
             <Route path='/search' component={Search} />
             <Route path='/storage' component={Storage} />
-            <Route path='/igv' component={IGV} />
+            <Route path='/igv' exact component={IGV} />
+            <Route path='/igv/:subjectId' exact component={IGV} />
           </Fragment>
         )}
       </Switch>

@@ -51,6 +51,10 @@ import Link from '@material-ui/core/Link';
 import Backdrop from '@material-ui/core/Backdrop';
 import Typography from '@material-ui/core/Typography';
 import config from '../config';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import List from '@material-ui/core/List';
 
 const styles = (theme) => ({
   close: {
@@ -84,6 +88,7 @@ const styles = (theme) => ({
 class Subject extends Component {
   state = {
     subject: null,
+    subjectId: null,
     feature_content_url: null,
     redirect: false,
     dialogOpened: false,
@@ -96,7 +101,7 @@ class Subject extends Component {
     const { subjectId } = this.props.match.params;
     if (subjectId) {
       const subject = await API.get('files', '/subjects/' + subjectId, {});
-      this.setState({ subject });
+      this.setState({ subject: subject, subjectId: subjectId });
       const { handleStartRunningSubjectQuery } = this.props;
       await handleStartRunningSubjectQuery(this.getBaseParams(), subjectId);
       const { handleStartRunningSubjectGDSQuery } = this.props;
@@ -305,7 +310,7 @@ class Subject extends Component {
   };
 
   renderClickableColumn = (data) => {
-    const { clickedLinks } = this.state;
+    const { clickedLinks, subject } = this.state;
     const { id, key } = data;
     const baseName = key.split('/')[key.split('/').length - 1];
 
@@ -319,6 +324,15 @@ class Subject extends Component {
         </Link>
       );
     }
+
+    if (subject && (key.endsWith('bam') || key.endsWith('vcf.gz') || key.endsWith('vcf'))) {
+      return (
+        <Link color={'primary'} component={RouterLink} to={'/igv/' + subject.id}>
+          {baseName}
+        </Link>
+      );
+    }
+
     return baseName;
   };
 
@@ -373,6 +387,9 @@ class Subject extends Component {
       <div className={'p-grid'}>
         <div className={'p-col-12 p-lg-5'}>
           <Panel header={'Overview'}>{this.renderSubjectLandingOverview()}</Panel>
+          <Panel header={'Tools'} toggleable={true} style={{ marginTop: '1em' }}>
+            {this.renderSubjectToolPanel()}
+          </Panel>
           <Panel header={'Feature'} toggleable={true} style={{ marginTop: '1em' }}>
             {feature_content_url ? (
               <img src={feature_content_url} style={{ width: '100%', height: 'auto' }} alt={''} />
@@ -463,6 +480,22 @@ class Subject extends Component {
           </Table>
         </Paper>
       </TableContainer>
+    );
+  };
+
+  renderSubjectToolPanel = () => {
+    const { subjectId } = this.state;
+    return (
+      <Fragment>
+        <List>
+          <ListItem button component={RouterLink} to={'/igv/' + subjectId}>
+            <ListItemIcon>
+              <img src={'/igv.png'} alt='igv.png' width='24px' height='24px' />
+            </ListItemIcon>
+            <ListItemText primary='Open Subject Data in Online Integrative Genomics Viewer' />
+          </ListItem>
+        </List>
+      </Fragment>
     );
   };
 

@@ -56,6 +56,7 @@ if [ -n "$1" ] && [ "$1" = "unset" ]; then
 fi
 
 api_url=${DATA_PORTAL_API_URL:-localhost:8000}
+htsget_url=${HTSGET_URL:-localhost:3100}
 
 cog_user_pool_id=$(aws ssm get-parameter --name '/data_portal/client/cog_user_pool_id' --with-decryption | jq -r .Parameter.Value)
 if [[ "$cog_user_pool_id" == "" ]]; then
@@ -69,6 +70,7 @@ oauth_redirect_in_local=$(aws ssm get-parameter --name '/data_portal/client/oaut
 oauth_redirect_out_local=$(aws ssm get-parameter --name '/data_portal/client/oauth_redirect_out_local' --with-decryption | jq -r .Parameter.Value)
 
 export REACT_APP_API_URL=$api_url
+export REACT_APP_HTSGET_URL=$htsget_url
 export REACT_APP_STAGE=localhost
 export REACT_APP_REGION=ap-southeast-2
 export REACT_APP_COG_USER_POOL_ID=$cog_user_pool_id

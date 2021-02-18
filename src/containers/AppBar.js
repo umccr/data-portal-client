@@ -34,6 +34,13 @@ import TableCell from '@material-ui/core/TableCell';
 import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
 import queryString from 'query-string';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Moment from 'react-moment';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { getIdToken } from '../utils/signer';
 
 const drawerWidth = 240;
 
@@ -163,6 +170,11 @@ class AppBar extends Component {
   state = {
     userMenuOpen: false,
     openSearchHint: false,
+    tokeDialogOpened: false,
+    copied: false,
+    signing: false,
+    token: null,
+    expires: null,
   };
 
   async componentDidMount() {
@@ -218,6 +230,101 @@ class AppBar extends Component {
     this.props.handleSignOut();
   };
 
+  handleTokenClicked = async () => {
+    this.setState({
+      signing: true,
+      tokeDialogOpened: true,
+    });
+
+    const token = await getIdToken();
+    this.setState({
+      token: token.getJwtToken(),
+      expires: token.getExpiration(),
+      signing: false,
+    });
+  };
+
+  handleTokenDialogClose = () => {
+    this.setState({
+      tokeDialogOpened: false,
+      signing: false,
+      copied: false,
+      token: null,
+      expires: null,
+    });
+  };
+
+  renderTokenDialog = () => {
+    const { tokeDialogOpened } = this.state;
+    return (
+      <Dialog
+        open={tokeDialogOpened}
+        onClose={this.handleTokenDialogClose}
+        scroll={'paper'}
+        maxWidth={'lg'}>
+        <DialogTitle>{'Token'}</DialogTitle>
+        <DialogContent>
+          {this.state.signing && (
+            <div align={'center'}>
+              <Typography variant='button' display='block' gutterBottom noWrap>
+                Generating, Please wait...
+              </Typography>
+              <CircularProgress />
+            </div>
+          )}
+          {this.state.token && (
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <Table size={'small'} aria-label={'a dense table'}>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant='button' display='block' gutterBottom noWrap>
+                          {'EXPIRES IN'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant='button' display='block' gutterBottom>
+                          <Moment unix>{this.state.expires}</Moment>
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant='button' display='block' gutterBottom>
+                          JWT
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant='body2' gutterBottom>
+                          {this.state.token}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </Grid>
+              <Grid item xs={3}>
+                <CopyToClipboard
+                  text={this.state.token}
+                  onCopy={() => this.setState({ copied: true })}>
+                  <Button fullWidth variant='contained' color='primary' onClick={this.onClick}>
+                    Copy
+                  </Button>
+                </CopyToClipboard>
+              </Grid>
+              {this.state.copied ? (
+                <Typography style={{ color: 'red' }} variant='body2' display='block' gutterBottom>
+                  Token is copied into the clipboard!
+                </Typography>
+              ) : null}
+            </Grid>
+          )}
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   renderUserButton = () => {
     const { classes, authUserInfo, handleSignIn } = this.props;
     const { userMenuOpen } = this.state;
@@ -264,6 +371,7 @@ class AppBar extends Component {
             <Paper>
               <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
                 <MenuList>
+                  <MenuItem onClick={this.handleTokenClicked}>Token</MenuItem>
                   <MenuItem onClick={this.handleLogOutClicked}>Logout</MenuItem>
                 </MenuList>
               </ClickAwayListener>
@@ -399,6 +507,9 @@ class AppBar extends Component {
   notOnRunPage = () => {
     return !this.props.location.pathname.startsWith('/runs');
   };
+  notOnIGVPage = () => {
+    return !this.props.location.pathname.startsWith('/igv');
+  };
 
   render() {
     const { title, classes, authUserInfo, handleDrawerToggle } = this.props;
@@ -424,9 +535,11 @@ class AppBar extends Component {
               this.notOnHomePage() &&
               this.notOnSubjectPage() &&
               this.notOnRunPage() &&
+              this.notOnIGVPage() &&
               this.renderSearchBox()}
             {this.renderUserButton(classes, authUserInfo)}
             {this.renderUserMenu(classes, userMenuOpen)}
+            {authUserInfo && this.renderTokenDialog()}
           </Toolbar>
         </DefaultAppBar>
       </Fragment>

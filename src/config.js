@@ -1,12 +1,8 @@
 const STAGE = process.env.REACT_APP_STAGE;
 const REGION = process.env.REACT_APP_REGION;
-
-// Determine whether current environment is local
 const IS_LOCAL = STAGE === 'localhost';
-
 const OAUTH_DOMAIN = `${process.env.REACT_APP_OAUTH_DOMAIN}.auth.${REGION}.amazoncognito.com`;
 
-//${IS_LOCAL ? 'dev' : STAGE}
 const config = {
   apiGateway: {
     REGION: REGION,
@@ -32,6 +28,13 @@ const config = {
         : process.env.REACT_APP_OAUTH_REDIRECT_OUT_STAGE,
       responseType: 'code',
     },
+  },
+  htsget: {
+    URL: IS_LOCAL
+      ? `http://${process.env.REACT_APP_HTSGET_URL}`
+      : `https://${process.env.REACT_APP_HTSGET_URL}`,
+    ENDPOINT_READS: '/reads/',
+    ENDPOINT_VARIANTS: '/variants/',
   },
 };
 

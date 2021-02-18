@@ -50,7 +50,10 @@ const styles = (theme) => ({
       width: `calc(100% - ${drawerWidth}px)`,
     },
   },
-  toolbar: theme.mixins.toolbar,
+  toolbar: {
+    minHeight: '48px',
+    // ...theme.mixins.toolbar,
+  },
   drawerPaper: {
     width: drawerWidth,
   },
@@ -163,25 +166,31 @@ class App extends Component {
         </div>
         <Divider />
         <List>
-          <ListItem button component={RouterLink} to='/'>
-            <ListItemIcon>
-              <HomeIcon />
-            </ListItemIcon>
-            <ListItemText primary='Home' />
-          </ListItem>
           {authUser && (
             <Fragment>
+              <ListItem button component={RouterLink} to='/'>
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText primary='LIMS' />
+              </ListItem>
+              <ListItem button component={RouterLink} to='/igv'>
+                <ListItemIcon>
+                  <img src={'/igv.png'} alt='igv.png' width='24px' height='24px' />
+                </ListItemIcon>
+                <ListItemText primary='Genomics Viewer' />
+              </ListItem>
               <ListItem button component={RouterLink} to='/search'>
                 <ListItemIcon>
                   <SearchIcon />
                 </ListItemIcon>
-                <ListItemText primary='Search' />
+                <ListItemText primary='Global Search' />
               </ListItem>
               <ListItem button component={RouterLink} to='/storage'>
                 <ListItemIcon>
                   <StorageIcon />
                 </ListItemIcon>
-                <ListItemText primary='Storage' />
+                <ListItemText primary='Storage Stat' />
               </ListItem>
             </Fragment>
           )}
