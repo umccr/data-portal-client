@@ -40,7 +40,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Moment from 'react-moment';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { getIdToken } from '../utils/signer';
+import { Auth } from 'aws-amplify';
 
 const drawerWidth = 240;
 
@@ -213,6 +213,19 @@ class AppBar extends Component {
     }
   }
 
+  generateNewToken = async () => {
+    const cognitoUser = await Auth.currentAuthenticatedUser();
+    const currentSession = cognitoUser.getSignInUserSession();
+    cognitoUser.refreshSession(currentSession.getRefreshToken(), (err, session) => {
+      const { idToken } = session;
+      this.setState({
+        token: idToken.getJwtToken(),
+        expires: idToken.getExpiration(),
+        signing: false,
+      });
+    });
+  };
+
   handleToggleUserMenu = () => {
     this.setState((state) => ({ userMenuOpen: !state.userMenuOpen }));
   };
@@ -236,12 +249,7 @@ class AppBar extends Component {
       tokeDialogOpened: true,
     });
 
-    const token = await getIdToken();
-    this.setState({
-      token: token.getJwtToken(),
-      expires: token.getExpiration(),
-      signing: false,
-    });
+    await this.generateNewToken();
   };
 
   handleTokenDialogClose = () => {

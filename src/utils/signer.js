@@ -8,8 +8,3 @@ export const getJwtToken = async () => {
   const session = await Auth.currentSession();
   return session.getIdToken().getJwtToken();
 };
-
-export const getIdToken = async () => {
-  const session = await Auth.currentSession();
-  return session.getIdToken();
-};

@@ -4,9 +4,11 @@ services:
 
   htsget:
     image: victorskl/htsget-refserver:latest
-    command: "./htsget-refserver -config /htsget-config.json"
+    command: "./htsget-refserver -config /htsget-config-local.json"
     ports:
       - 3100:3100
     volumes:
       - ./htsget-config-local.json:/htsget-config-local.json
       - ~/.aws:/root/.aws:ro
+    environment:
+      - AWS_PROFILE=dev

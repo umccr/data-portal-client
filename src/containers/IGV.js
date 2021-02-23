@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import {
   AppBar,
+  Badge,
   Button,
   Dialog,
   DialogActions,
@@ -9,6 +10,7 @@ import {
   DialogTitle,
   FormControl,
   IconButton,
+  LinearProgress,
   List,
   ListItem,
   ListItemText,
@@ -73,6 +75,7 @@ class IGV extends Component {
     loadedTracks: [],
     extTrackPath: '',
     errorMessage: null,
+    showLoading: false,
   };
 
   async componentDidMount() {
@@ -86,20 +89,26 @@ class IGV extends Component {
   }
 
   initIgv = () => {
+    this.setState({ showLoading: true });
     const igvDiv = document.getElementById('igvDiv');
     const options = {
       reference: genomes[this.state.refGenome],
     };
-    igv.createBrowser(igvDiv, options).then(function (browser) {
+    igv.createBrowser(igvDiv, options).then((browser) => {
       igv.browser = browser;
+      this.setState({ showLoading: false });
     });
     igv.oauth.setToken(getJwtToken, '*htsget*');
+  };
+
+  getBaseName = (key) => {
+    return key.split('/')[key.split('/').length - 1];
   };
 
   loadTrackInIgvJs = async (data) => {
     const { loadedTracks } = this.state;
     const { bucket, key } = data;
-    const baseName = key.split('/')[key.split('/').length - 1];
+    const baseName = this.getBaseName(key);
     const id = bucket + '/' + key;
 
     if (loadedTracks.includes(baseName)) {
@@ -118,8 +127,9 @@ class IGV extends Component {
           name: baseName,
           removable: false,
         })
-        .then(function (newTrack) {
-          loadedTracks.push(newTrack.name); // BAMTrack
+        .then((bamTrack) => {
+          loadedTracks.push(bamTrack.name); // BAMTrack
+          this.setState({ loadedTracks: loadedTracks });
         });
     } else if (key.endsWith('vcf') || key.endsWith('vcf.gz')) {
       // TODO
@@ -145,7 +155,6 @@ class IGV extends Component {
   handleLoadAllTracks = () => {
     const { results } = this.state.subject;
     results.map((row) => this.loadTrackInIgvJs(row));
-    this.handleLoadTrackDialogClose();
   };
 
   handleClearAllTracks = () => {
@@ -215,17 +224,30 @@ class IGV extends Component {
   };
 
   renderRowItem = (row) => {
+    const { loadedTracks } = this.state;
     return (
       <ListItem key={row.id} button onClick={() => this.loadTrackInIgvJs(row)}>
         <ListItemText
-          primary={row.key}
+          primary={
+            loadedTracks.includes(this.getBaseName(row.key)) ? (
+              <Badge color='secondary' variant='dot'>
+                <Typography variant={'subtitle2'} color={'textPrimary'}>
+                  {row.key}
+                </Typography>
+              </Badge>
+            ) : (
+              row.key
+            )
+          }
           secondary={
             <Fragment>
               <Typography component={'span'} variant={'subtitle2'} color={'textSecondary'}>
                 <Moment local>{row.last_modified_date}</Moment>
               </Typography>
               {' -- ' + row.bucket + ' -- '}
-              <HumanReadableFileSize bytes={row.size} />
+              <Typography component={'span'} variant={'subtitle2'} color={'textSecondary'}>
+                <HumanReadableFileSize bytes={row.size} />
+              </Typography>
             </Fragment>
           }
         />
@@ -252,7 +274,7 @@ class IGV extends Component {
         <AppBar className={classes.appBar}>
           <Toolbar>
             <Typography variant='h6' className={classes.title}>
-              {subjectId} Available Tracks
+              {subjectId} - Select BAM
             </Typography>
             <Button
               className={this.props.classes.menuButton}
@@ -264,9 +286,17 @@ class IGV extends Component {
               Load All
             </Button>
             <Button
+              disableElevation
               className={this.props.classes.menuButton}
               size={'medium'}
-              autoFocus
+              variant={'outlined'}
+              color='inherit'
+              onClick={this.handleClearAllTracks}>
+              Clear All
+            </Button>
+            <Button
+              className={this.props.classes.menuButton}
+              size={'medium'}
               variant={'outlined'}
               color='inherit'
               onClick={this.handleLoadTrackDialogClose}>
@@ -352,7 +382,9 @@ class IGV extends Component {
             <li>
               +Add button can add any valid S3 path as a track regardless of subject selected.
             </li>
-            <li>Select chromosome number or enter locus at IGV toolbar panel.</li>
+            <li>
+              Select chromosome number or enter locus at IGV toolbar panel. e.g. <em>KRAS</em>
+            </li>
             <li>Click zoom in until the track is getting started loading spinning wheel.</li>
             <li>
               Select dropdown box to switch Reference Genome (Refseq Genes) track. Please refer{' '}
@@ -387,7 +419,7 @@ class IGV extends Component {
   };
 
   render() {
-    const { subject, subjectId, refGenome } = this.state;
+    const { subject, subjectId, refGenome, showLoading } = this.state;
     return (
       <Fragment>
         <div>
@@ -448,6 +480,7 @@ class IGV extends Component {
             Help
           </Button>
         </div>
+        {showLoading && <LinearProgress color='secondary' />}
         <div id='igvDiv' />
         {subject && this.renderLoadTrackDialog()}
         {this.renderAddExtTrackDialog()}
