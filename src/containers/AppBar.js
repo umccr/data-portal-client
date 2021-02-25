@@ -286,6 +286,19 @@ class AppBar extends Component {
                 <Table size={'small'} aria-label={'a dense table'}>
                   <TableBody>
                     <TableRow>
+                      <TableCell colSpan={2}>
+                        <Typography
+                          variant='button'
+                          display='block'
+                          color={'secondary'}
+                          gutterBottom
+                          noWrap>
+                          Warning: This is your Personal Access Token (PAT). You should not share
+                          with any third party.
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
                       <TableCell>
                         <Typography variant='button' display='block' gutterBottom noWrap>
                           {'EXPIRES IN'}
