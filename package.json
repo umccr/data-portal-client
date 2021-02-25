@@ -10,7 +10,7 @@
     "classnames": "^2.2.6",
     "d3": "^3.5.17",
     "d3-scale": "^3.2.3",
-    "igv": "^2.7.5",
+    "igv": "2.7.4",
     "material-ui-popup-state": "^1.7.1",
     "moment": "^2.29.1",
     "primeflex": "^2.0.0",
