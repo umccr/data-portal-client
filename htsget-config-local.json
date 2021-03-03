@@ -52,7 +52,7 @@
         "createdAt": "2019-09-15T12:00:00Z",
         "updatedAt": "2020-09-04T14:40:00Z",
         "environment": "production",
-        "version": "1.4.1"
+        "version": "1.4.1_2"
       }
     },
     "variants": {
@@ -74,6 +74,10 @@
           {
             "pattern": "^giab\\.(?P<accession>NA12878)$",
             "path": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/{accession}_HG001/NISTv3.3/NA12878_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-Solid-10X_CHROM1-X_v3.3_highconf.vcf.gz"
+          },
+          {
+            "pattern": "^umccr-primary-data(?P<accession>.*)$",
+            "path": "s3://umccr-primary-data{accession}"
           }
         ]
       },
@@ -90,7 +94,7 @@
         "createdAt": "2020-08-31T08:00:00Z",
         "updatedAt": "2020-09-04T14:40:00Z",
         "environment": "production",
-        "version": "1.4.1"
+        "version": "1.4.1_2"
       }
     }
   }
