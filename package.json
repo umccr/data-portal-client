@@ -5,25 +5,25 @@
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
-    "aws-amplify": "^3.3.20",
-    "aws-amplify-react": "^4.2.24",
+    "aws-amplify": "^3.3.25",
+    "aws-amplify-react": "^4.2.29",
     "classnames": "^2.2.6",
     "d3": "^3.5.17",
     "d3-scale": "^3.2.3",
     "igv": "2.7.4",
-    "material-ui-popup-state": "^1.7.1",
+    "material-ui-popup-state": "^1.8.0",
     "moment": "^2.29.1",
     "primeflex": "^2.0.0",
     "primeicons": "^4.1.0",
-    "primereact": "^6.0.2",
+    "primereact": "^6.2.1",
     "prop-types": "^15.7.2",
-    "query-string": "^6.14.0",
-    "react": "^17.0.1",
+    "query-string": "^7.0.0",
+    "react": "^17.0.2",
     "react-copy-to-clipboard": "^5.0.3",
-    "react-dom": "^17.0.1",
+    "react-dom": "^17.0.2",
     "react-ga": "^3.3.0",
     "react-moment": "^1.1.1",
-    "react-redux": "^7.2.2",
+    "react-redux": "^7.2.3",
     "react-router-dom": "^5.1.2",
     "react-scripts": "^4.0.3",
     "react-transition-group": "^4.4.1",
@@ -37,7 +37,7 @@
     "test": "react-scripts test --env=jsdom --watchAll=false",
     "eject": "react-scripts eject",
     "lint": "eslint src",
-    "postinstall": "husky install"
+    "prepare": "husky install"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -49,21 +49,23 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@babel/core": "^7.13.1",
+    "@babel/core": "^7.13.10",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
-    "@babel/preset-env": "^7.13.5",
+    "@babel/preset-env": "^7.13.12",
     "@babel/preset-react": "^7.12.13",
-    "@typescript-eslint/eslint-plugin": "^4.15.2",
-    "@typescript-eslint/parser": "^4.15.2",
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.20.0",
-    "eslint-config-prettier": "^7.2.0",
+    "eslint": "^7.22.0",
+    "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-react": "^7.22.0",
-    "husky": "^5.1.1",
+    "eslint-plugin-react": "^7.23.0",
+    "husky": "^5.2.0",
     "prettier": "^2.2.1",
-    "typescript": "^4.2.2",
+    "typescript": "^4.2.3",
     "yarn": "^1.22.10"
   },
-  "resolutions": {}
+  "resolutions": {
+    "elliptic": "6.5.4"
+  }
 }
