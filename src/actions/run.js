@@ -59,7 +59,13 @@ export const startRunQuery = (queryParams, runId) => {
         paramsString += '&ordering=' + ordering;
       }
 
-      const data = await API.get('files', `/runs/${runId}/s3/?${paramsString}`, {});
+      const extraPrams = {
+        queryStringParameters: {
+          run: `${runId}`,
+        },
+      };
+
+      const data = await API.get('files', `/s3/?${paramsString}`, extraPrams);
 
       dispatch({
         type: RUN_QUERY_SUCCESS,
@@ -141,7 +147,13 @@ export const startRunGDSQuery = (queryParams, runId) => {
         paramsString += '&ordering=' + ordering;
       }
 
-      const data = await API.get('files', `/runs/${runId}/gds/?${paramsString}`, {});
+      const extraPrams = {
+        queryStringParameters: {
+          run: `${runId}`,
+        },
+      };
+
+      const data = await API.get('files', `/gds/?${paramsString}`, extraPrams);
 
       dispatch({
         type: RUN_GDS_QUERY_SUCCESS,

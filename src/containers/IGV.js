@@ -83,7 +83,12 @@ class IGV extends Component {
     const { subjectId } = this.props.match.params;
     const searchQuery = encodeURIComponent('final .bam$');
     if (subjectId) {
-      const subject = await API.get('files', `/subjects/${subjectId}/s3?search=${searchQuery}`, {});
+      const extraPrams = {
+        queryStringParameters: {
+          subject: `${subjectId}`,
+        },
+      };
+      const subject = await API.get('files', `/s3?search=${searchQuery}`, extraPrams);
       this.setState({ subject: subject, subjectId: subjectId });
     }
   }
