@@ -59,13 +59,13 @@ export const startRunningSubjectQuery = (queryParams, subjectId) => {
         paramsString += '&ordering=' + ordering;
       }
 
-      const extraPrams = {
+      const extraParams = {
         queryStringParameters: {
           subject: `${subjectId}`,
         },
       };
 
-      const data = await API.get('files', `/s3/?${paramsString}`, extraPrams);
+      const data = await API.get('files', `/s3/?${paramsString}`, extraParams);
 
       dispatch({
         type: SUBJECT_QUERY_SUCCESS,
@@ -147,13 +147,13 @@ export const startRunningSubjectGDSQuery = (queryParams, subjectId) => {
         paramsString += '&ordering=' + ordering;
       }
 
-      const extraPrams = {
+      const extraParams = {
         queryStringParameters: {
           subject: `${subjectId}`,
         },
       };
 
-      const data = await API.get('files', `/gds/?${paramsString}`, extraPrams);
+      const data = await API.get('files', `/gds/?${paramsString}`, extraParams);
 
       dispatch({
         type: SUBJECT_GDS_QUERY_SUCCESS,

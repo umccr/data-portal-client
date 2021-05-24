@@ -54,13 +54,13 @@ export const startRunMetaQuery = (queryParams, runId) => {
         paramsString += '&ordering=' + ordering;
       }
 
-      const extraPrams = {
+      const extraParams = {
         queryStringParameters: {
           run: `${runId}`,
         },
       };
 
-      const data = await API.get('files', `/lims/?${paramsString}`, extraPrams);
+      const data = await API.get('files', `/lims/?${paramsString}`, extraParams);
 
       dispatch({
         type: RUN_META_QUERY_SUCCESS,
