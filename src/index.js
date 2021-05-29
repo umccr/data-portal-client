@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import { BrowserRouter as Router } from 'react-router-dom';
-import Amplify from 'aws-amplify';
+import { Amplify, Auth } from 'aws-amplify';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import config from './config';
@@ -27,6 +27,11 @@ Amplify.configure({
         name: 'files',
         endpoint: config.apiGateway.URL,
         region: config.apiGateway.REGION,
+        custom_header: async () => {
+          return {
+            Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`,
+          };
+        },
       },
     ],
   },
