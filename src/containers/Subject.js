@@ -605,51 +605,57 @@ class Subject extends Component {
   renderChipFilterView = () => {
     const chipData = [
       { key: 0, label: 'reset', keyword: '', color: 'primary' },
-      { key: 1, label: 'wgs bam', keyword: 'wgs ready .bam$', color: 'default' },
+      {
+        key: 1,
+        label: 'cancer report tables',
+        keyword: 'umccrised cancer_report_tables .tsv.gz$',
+        color: 'default',
+      },
       {
         key: 2,
+        label: 'cancer report',
+        keyword: 'umccrised cancer_report.html$',
+        color: 'default',
+      },
+      { key: 3, label: 'wgs bam', keyword: 'wgs ready .bam$', color: 'default' },
+      {
+        key: 4,
         label: 'vcf',
         keyword: 'umccrised/[^(work)*] small_variants/[^\\/]*(.vcf.gz$|.maf$)',
         color: 'default',
       },
       {
-        key: 3,
-        label: 'umccrised cancer report',
-        keyword: 'umccrised cancer_report.html$',
-        color: 'default',
-      },
-      {
-        key: 4,
-        label: 'umccrised multiqc',
+        key: 5,
+        label: 'wgs qc',
         keyword: 'umccrised multiqc_report.html$',
         color: 'default',
       },
       {
-        key: 5,
+        key: 6,
         label: 'pcgr cpsr',
         keyword: 'umccrised/[^\\/]*/[^\\/]*(pcgr|cpsr).html$',
         color: 'default',
       },
       {
-        key: 6,
+        key: 7,
         label: 'coverage',
         keyword: 'umccrised/[^\\/]*/[^\\/]*(normal|tumor).cacao.html$',
         color: 'default',
       },
       {
-        key: 7,
+        key: 8,
         label: 'circos',
         keyword: 'umccrised/[^(work)*] purple/ circos baf .png$',
         color: 'default',
       },
-      { key: 8, label: 'wts bam', keyword: 'wts ready .bam$', color: 'default' },
+      { key: 9, label: 'wts bam', keyword: 'wts ready .bam$', color: 'default' },
       {
-        key: 9,
-        label: 'wts multiqc',
+        key: 10,
+        label: 'wts qc',
         keyword: 'wts multiqc/ multiqc_report.html$',
         color: 'default',
       },
-      { key: 10, label: 'rnasum report', keyword: 'RNAseq_report.html$', color: 'default' },
+      { key: 11, label: 'rnasum report', keyword: 'RNAseq_report.html$', color: 'default' },
     ];
 
     return (
@@ -782,10 +788,10 @@ class Subject extends Component {
     return (
       <Paper elevation={0}>
         <Typography variant={'h6'} color={'secondary'}>
-          THIS IS SHOWCASE FEATURE. DEMO PURPOSE ONLY. NOT FOR PRODUCTION USE.
+          THIS IS BETA FEATURE. PLEASE ASK FOR PRODUCTION USE IF ANY.
         </Typography>
         <Typography variant={'subtitle2'}>
-          Data from Illumina Analytics Platform - Genomic Data Store Service
+          Data from Genomic Data Store (GDS) - Illumina Connected Analytics (ICA) Pipeline
         </Typography>
         <hr />
 

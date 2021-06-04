@@ -328,11 +328,10 @@ class Run extends Component {
               </TabPanel>
               <TabPanel header={'GDS'}>
                 <Typography variant={'h6'} color={'secondary'}>
-                  THIS IS SHOWCASE FEATURE. DEMO PURPOSE ONLY. NOT FOR PRODUCTION USE.
+                  THIS IS BETA FEATURE. PLEASE ASK FOR PRODUCTION USE IF ANY.
                 </Typography>
                 <Typography variant={'subtitle2'}>
-                  Data from Genomic Data Store Service (GDS) - Illumina Analytics Platform (IAP)
-                  Pipeline
+                  Data from Genomic Data Store (GDS) - Illumina Connected Analytics (ICA) Pipeline
                 </Typography>
                 <hr />
                 <TableContainer>
