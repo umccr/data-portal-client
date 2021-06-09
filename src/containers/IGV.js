@@ -103,8 +103,8 @@ class IGV extends Component {
       igv.browser = browser;
       this.setState({ showLoading: false });
     });
-    // See https://github.com/igvteam/igv.js/issues/1344
-    // igv.oauth.setToken(getJwtToken, '*htsget*');
+    // Need to pin igv.js 2.7.4, see https://github.com/igvteam/igv.js/issues/1344
+    igv.oauth.setToken(getJwtToken, '*htsget*');
   };
 
   getBaseName = (key) => {
@@ -132,7 +132,6 @@ class IGV extends Component {
           id: id,
           name: baseName,
           removable: false,
-          oauthToken: getJwtToken,
         })
         .then((bamTrack) => {
           loadedTracks.push(bamTrack.name); // BAMTrack
