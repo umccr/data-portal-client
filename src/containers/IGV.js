@@ -25,7 +25,6 @@ import {
   withStyles,
 } from '@material-ui/core';
 import igv from 'igv';
-import { oauth as igvOAuth } from 'igv-utils';
 import { getJwtToken } from '../utils/signer';
 import config from '../config';
 import * as PropTypes from 'prop-types';
@@ -106,7 +105,6 @@ class IGV extends Component {
     });
     // See https://github.com/igvteam/igv.js/issues/1344
     // igv.oauth.setToken(getJwtToken, '*htsget*');
-    igvOAuth.setToken(getJwtToken, '*htsget*');
   };
 
   getBaseName = (key) => {
@@ -134,6 +132,7 @@ class IGV extends Component {
           id: id,
           name: baseName,
           removable: false,
+          oauthToken: getJwtToken,
         })
         .then((bamTrack) => {
           loadedTracks.push(bamTrack.name); // BAMTrack
