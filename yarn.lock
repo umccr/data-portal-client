@@ -7630,27 +7630,28 @@ ignore@^5.1.4:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.1.8.tgz#f150a8b50a34289b33e22f5889abd4d8016f0e57"
   integrity sha512-BMpfD7PpiETpBl/A6S498BaIJ6Y/ABT93ETbby2fP00v4EbvPBXWEoaR1UBPKs3iR53pJY7EtZk5KACI57i1Uw==
 
-"igv-ui@github:igvteam/igv-ui#23d667e6":
-  version "1.0.3"
-  resolved "https://codeload.github.com/igvteam/igv-ui/tar.gz/23d667e64b1207d762b583d4d0826cb0148b4d49"
+"igv-ui@git+https://github.com/igvteam/igv-ui.git#v1.1.7":
+  version "1.1.7"
+  resolved "git+https://github.com/igvteam/igv-ui.git#b7fddfda708d2339b3bba704f8e1aeccbcd695a4"
   dependencies:
-    igv-utils "github:igvteam/igv-utils#36c425bb"
+    igv-utils "github:igvteam/igv-utils#v1.2.8"
 
-"igv-utils@github:igvteam/igv-utils#0e7dbafb":
-  version "1.1.0"
-  resolved "https://codeload.github.com/igvteam/igv-utils/tar.gz/0e7dbafb3d0ce556596c2d8e6e78c9b15dc208b4"
+"igv-utils@git+https://github.com/igvteam/igv-utils.git#v1.2.8":
+  version "1.2.8"
+  resolved "git+https://github.com/igvteam/igv-utils.git#4443005457137b0d45d77165c2fc551265522490"
 
-"igv-utils@github:igvteam/igv-utils#36c425bb":
-  version "1.1.0"
-  resolved "https://codeload.github.com/igvteam/igv-utils/tar.gz/36c425bb3e02d5a0e821e39dd1cf510c550f29e5"
+"igv-utils@github:igvteam/igv-utils#v1.2.8":
+  version "1.2.8"
+  uid "4443005457137b0d45d77165c2fc551265522490"
+  resolved "https://codeload.github.com/igvteam/igv-utils/tar.gz/4443005457137b0d45d77165c2fc551265522490"
 
-igv@2.7.4:
-  version "2.7.4"
-  resolved "https://registry.yarnpkg.com/igv/-/igv-2.7.4.tgz#42e5b76f4accf2113999e343dc78816d15f6b069"
-  integrity sha512-ITTV7GTDPpTmxDpBfDACwarIHr6sDuXv9yTYaMgosdq3p2jEK7GzjxO5w2stUm4vxA+gSI/hoF6DFNzll1cClw==
+igv@2.8.5:
+  version "2.8.5"
+  resolved "https://registry.yarnpkg.com/igv/-/igv-2.8.5.tgz#1c043cfdf6b035a47eef8b1e9db92699b924e22e"
+  integrity sha512-klzcPRW+p4oHDef2y05nI2uluPrgG6ytg6cpx+xsTGBPUgIfRzaeBm2XBeaAWEyrfAxaLvwQ8LRsUFl1IbLWkg==
   dependencies:
-    igv-ui "github:igvteam/igv-ui#23d667e6"
-    igv-utils "github:igvteam/igv-utils#0e7dbafb"
+    igv-ui "git+https://github.com/igvteam/igv-ui.git#v1.1.7"
+    igv-utils "git+https://github.com/igvteam/igv-utils.git#v1.2.8"
 
 immer@8.0.1:
   version "8.0.1"
