@@ -9,7 +9,7 @@
     "aws-amplify-react": "^5.0.1",
     "classnames": "^2.3.1",
     "d3": "^3.5.17",
-    "d3-scale": "^3.3.0",
+    "d3-scale": "^4.0.0",
     "igv": "2.7.4",
     "material-ui-popup-state": "^1.8.3",
     "moment": "^2.29.1",
@@ -52,15 +52,15 @@
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/preset-env": "^7.14.4",
     "@babel/preset-react": "^7.13.13",
-    "@typescript-eslint/eslint-plugin": "^4.26.0",
-    "@typescript-eslint/parser": "^4.26.0",
+    "@typescript-eslint/eslint-plugin": "^4.26.1",
+    "@typescript-eslint/parser": "^4.26.1",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.27.0",
+    "eslint": "^7.28.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",
     "husky": "^6.0.0",
-    "prettier": "^2.3.0",
+    "prettier": "^2.3.1",
     "react-scripts": "^4.0.3",
     "typescript": "^4.3.2",
     "yarn": "^1.22.10"
@@ -71,6 +71,9 @@
     "hosted-git-info": "^4.0.2",
     "url-parse": "^1.5.0",
     "browserslist": "^4.16.5",
-    "ws": "^7.4.6"
+    "ws": "^7.4.6",
+    "css-what": "^5.0.1",
+    "normalize-url": "^6.0.1",
+    "glob-parent": "^6.0.0"
   }
 }
