@@ -103,8 +103,7 @@ class IGV extends Component {
       igv.browser = browser;
       this.setState({ showLoading: false });
     });
-    // Need to pin igv.js 2.7.4, see https://github.com/igvteam/igv.js/issues/1344
-    igv.oauth.setToken(getJwtToken, '*htsget*');
+    igv.setOauthToken(getJwtToken, '*htsget*');
   };
 
   getBaseName = (key) => {
