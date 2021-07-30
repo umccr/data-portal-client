@@ -174,7 +174,7 @@ class GDSActionMenuButton extends React.Component {
                 {...bindTrigger(popupState)}
                 color='primary'
                 size={dense ? 'small' : 'medium'}>
-                <MenuIcon fontSize={dense ? 'small' : 'default'} />
+                <MenuIcon fontSize={dense ? 'small' : 'medium'} />
               </IconButton>
               {this.renderMenu(id, volume_name, path, popupState)}
             </Fragment>

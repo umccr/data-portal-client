@@ -1,4 +1,4 @@
-import { fade } from '@material-ui/core/styles/colorManipulator';
+import { alpha } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core';
 import DefaultAppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -108,9 +108,9 @@ const styles = (theme) => ({
   search: {
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: fade(theme.palette.common.white, 0.15),
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
     '&:hover': {
-      backgroundColor: fade(theme.palette.common.white, 0.25),
+      backgroundColor: alpha(theme.palette.common.white, 0.25),
     },
     marginLeft: 0,
     marginRight: 20,
@@ -362,7 +362,7 @@ class AppBar extends Component {
           <Fragment>
             <Button
               color='inherit'
-              buttonRef={(node) => {
+              ref={(node) => {
                 this.anchorEl = node;
               }}
               aria-owns={userMenuOpen ? 'menu-list-grow' : undefined}

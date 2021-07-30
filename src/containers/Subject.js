@@ -384,8 +384,8 @@ class Subject extends Component {
     const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
 
     return (
-      <div className={'p-grid'}>
-        <div className={'p-col-12 p-lg-5'}>
+      <div className={'grid'}>
+        <div className={'col-12 lg:col-5'}>
           <Panel header={'Overview'}>{this.renderSubjectLandingOverview()}</Panel>
           <Panel header={'Tools'} toggleable={true} style={{ marginTop: '1em' }}>
             {this.renderSubjectToolPanel()}
@@ -401,7 +401,7 @@ class Subject extends Component {
             )}
           </Panel>
         </div>
-        <div className={'p-col-12 p-lg-7'}>
+        <div className={'col-12 lg:col-7'}>
           <Panel header={'Sample Info'} toggleable={true}>
             {this.renderSubjectSampleInfoView()}
           </Panel>
@@ -492,7 +492,7 @@ class Subject extends Component {
             <ListItemIcon>
               <img src={'/igv.png'} alt='igv.png' width='24px' height='24px' />
             </ListItemIcon>
-            <ListItemText primary='Open Subject Data in Online Integrative Genomics Viewer' />
+            <ListItemText primary='Open Subject Data in Online IGV' />
           </ListItem>
         </List>
       </Fragment>
@@ -759,8 +759,8 @@ class Subject extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handlePageChange}
-                  onChangeRowsPerPage={this.handleRowsPerPageChange}
+                  onPageChange={this.handlePageChange}
+                  onRowsPerPageChange={this.handleRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>
@@ -864,8 +864,8 @@ class Subject extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handleGDSPageChange}
-                  onChangeRowsPerPage={this.handleGDSRowsPerPageChange}
+                  onPageChange={this.handleGDSPageChange}
+                  onRowsPerPageChange={this.handleGDSRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>

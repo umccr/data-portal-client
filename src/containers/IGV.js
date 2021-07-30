@@ -354,7 +354,7 @@ class IGV extends Component {
               variant='filled'
               fullWidth
               multiline
-              rowsMax={8}
+              maxRows={8}
             />
           </DialogContent>
           <DialogActions>

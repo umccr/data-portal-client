@@ -25,9 +25,8 @@ yarn start
 You can start local htsget-refserver as follows:
 
 ```
-yawsso login --profile dev --this
-export AWS_PROFILE=dev
-docker-compose up -d
+aws sso login --profile dev && export AWS_PROFILE=dev && yawsso -p dev
+docker compose up -d
 curl -s http://localhost:3100/reads/service-info | jq
 ```
 

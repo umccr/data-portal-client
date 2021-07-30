@@ -221,8 +221,8 @@ class Home extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handlePageChange}
-                  onChangeRowsPerPage={this.handleRowsPerPageChange}
+                  onPageChange={this.handlePageChange}
+                  onRowsPerPageChange={this.handleRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>

@@ -452,8 +452,8 @@ class Run extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handleRunMetaPageChange}
-                  onChangeRowsPerPage={this.handleRunMetaRowsPerPageChange}
+                  onPageChange={this.handleRunMetaPageChange}
+                  onRowsPerPageChange={this.handleRunMetaRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>
@@ -680,8 +680,8 @@ class Run extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handlePageChange}
-                  onChangeRowsPerPage={this.handleRowsPerPageChange}
+                  onPageChange={this.handlePageChange}
+                  onRowsPerPageChange={this.handleRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>
@@ -777,8 +777,8 @@ class Run extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handleGDSPageChange}
-                  onChangeRowsPerPage={this.handleGDSRowsPerPageChange}
+                  onPageChange={this.handleGDSPageChange}
+                  onRowsPerPageChange={this.handleGDSRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>
