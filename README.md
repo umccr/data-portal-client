@@ -27,7 +27,7 @@ You can start local htsget-refserver as follows:
 ```
 aws sso login --profile dev && export AWS_PROFILE=dev && yawsso -p dev
 docker compose up -d
-curl -s http://localhost:3100/reads/service-info | jq
+curl -s "http://localhost:3100/reads/service-info" | jq
 ```
 
 See infrastructure FAQ for quick [htsget 101](https://github.com/umccr/infrastructure/tree/master/cdk/apps/htsget#faq) and internal [Wiki htsget user doc](https://github.com/umccr/wiki/tree/master/bioinformatics/htsget).
