@@ -264,26 +264,16 @@ class Run extends Component {
     handleStartRunMetaQuery(runMetaParams, this.state.runId);
   };
 
-  handleRowClick = (id) => {
-    return () => {
-      this.handleDialogOpen(id);
-    };
-  };
-
-  handleDialogOpen = (id) => {
+  handleDialogOpen = (data) => {
     const dialogOpened = true;
-    this.setState({ dialogOpened }, () => this.processRowDetails(id));
+    const rowData = data;
+    this.setState({ ...this.state, dialogOpened, rowData });
   };
 
   handleDialogClose = () => {
     const dialogOpened = false;
     const rowData = null;
     this.setState({ dialogOpened, rowData });
-  };
-
-  processRowDetails = async (id) => {
-    const rowData = await API.get('files', `/lims/${id}/`, {});
-    this.setState({ rowData });
   };
 
   handleChipClick = (selected) => {
@@ -418,7 +408,7 @@ class Run extends Component {
                   {columns.map((col) =>
                     col.key === 'info' ? (
                       <TableCell key={col.key}>
-                        <Button aria-label='info' onClick={this.handleRowClick(row.id)}>
+                        <Button aria-label='info' onClick={() => this.handleDialogOpen(row)}>
                           <InfoIcon color={'primary'} />
                         </Button>
                       </TableCell>
