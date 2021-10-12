@@ -349,9 +349,9 @@ class Run extends Component {
 
     const columns = [
       { key: 'info', sortable: false },
-      { key: 'illumina_id', sortable: true },
+      { key: 'instrument_run_id', sortable: true },
       { key: 'type', sortable: true },
-      { key: 'timestamp', sortable: true },
+      // { key: 'timestamp', sortable: true },
       { key: 'subject_id', sortable: true },
       { key: 'sample_id', sortable: true },
       { key: 'library_id', sortable: true },

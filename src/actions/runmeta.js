@@ -37,30 +37,43 @@ export const beforeRunMetaQuery = (queryParams) => {
 export const startRunMetaQuery = (queryParams, runId) => {
   return async (dispatch) => {
     dispatch(beforeRunMetaQuery(queryParams));
-
     try {
-      // Filter out null parameters
-      const paramKeys = Object.keys(queryParams).filter((k) => queryParams[k] !== null);
-
-      let paramsString = paramKeys.map((key) => `${key}=${queryParams[key]}`).join('&');
-
       // TODO improve when refactoring API call code
       // append paramsString for Django REST API style ordering parameter based on sortCol and sortAsc
-      if (paramKeys.includes('sortCol')) {
-        let ordering = queryParams['sortCol'];
-        if (!queryParams['sortAsc']) {
-          ordering = '-' + ordering;
-        }
-        paramsString += '&ordering=' + ordering;
+      let ordering = queryParams['sortCol'];
+      if (ordering && !queryParams['sortAsc']) {
+        ordering = '-' + ordering;
       }
 
       const extraParams = {
         queryStringParameters: {
-          run: `${runId}`,
+          ...queryParams,
+          ordering: ordering,
+          run: runId,
         },
       };
 
-      const data = await API.get('files', `/lims/?${paramsString}`, extraParams);
+      const data = await API.get('files', `/metadata/`, extraParams);
+
+      for (const row_data of data.results) {
+        const library_id = row_data.library_id;
+
+        // Specify search value
+        const APIConfig = {
+          queryStringParameters: {
+            library_id: library_id,
+          },
+        };
+        const libraryRun = await API.get('files', `/libraryrun/`, APIConfig);
+        const libraryRunResults = libraryRun.results;
+
+        // Search for instrument_run_id each row_data
+        if (libraryRunResults[0]) {
+          row_data['instrument_run_id'] = libraryRunResults[0].instrument_run_id;
+        } else {
+          row_data['instrument_run_id'] = 'NOT_FOUND';
+        }
+      }
 
       dispatch({
         type: RUN_META_QUERY_SUCCESS,
