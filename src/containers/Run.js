@@ -38,7 +38,7 @@ import history from '../history';
 import EnhancedTableHead from '../components/EnhancedTableHead';
 import HumanReadableFileSize from '../components/HumanReadableFileSize';
 import Button from '@material-ui/core/Button';
-import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
+import MetadataRowDetailsDialog from '../components/MetadataRowDetailsDialog';
 import Chip from '@material-ui/core/Chip';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import ActionMenuButton from '../components/ActionMenuButton';
@@ -333,7 +333,7 @@ class Run extends Component {
           </Panel>
         </Grid>
         <Grid item xs={12}>
-          <Panel header={'LIMS Metadata'} toggleable={true} collapsed>
+          <Panel header={'Metadata'} toggleable={true} collapsed>
             <TableContainer>{this.renderRunMetaDataView()}</TableContainer>
           </Panel>
         </Grid>
@@ -451,7 +451,7 @@ class Run extends Component {
           )}
         </Table>
 
-        <LimsRowDetailsDialog
+        <MetadataRowDetailsDialog
           dialogOpened={dialogOpened}
           rowData={rowData}
           onDialogClose={this.handleDialogClose}

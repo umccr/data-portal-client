@@ -36,7 +36,7 @@ import history from '../history';
 import EnhancedTableHead, { getDisplayTitle } from '../components/EnhancedTableHead';
 import HumanReadableFileSize from '../components/HumanReadableFileSize';
 import Button from '@material-ui/core/Button';
-import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
+import MetadataRowDetailsDialog from '../components/MetadataRowDetailsDialog';
 import Chip from '@material-ui/core/Chip';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import ActionMenuButton from '../components/ActionMenuButton';
@@ -580,7 +580,7 @@ class Subject extends Component {
                 ))}
             </TableBody>
           </Table>
-          <LimsRowDetailsDialog
+          <MetadataRowDetailsDialog
             dialogOpened={dialogOpened}
             rowData={rowData}
             onDialogClose={this.handleDialogClose}

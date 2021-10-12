@@ -9,7 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-class LimsRowDetailsDialog extends React.Component {
+class MetadataRowDetailsDialog extends React.Component {
   render() {
     const { dialogOpened, rowData } = this.props;
     return (
@@ -54,10 +54,10 @@ class LimsRowDetailsDialog extends React.Component {
   }
 }
 
-LimsRowDetailsDialog.propTypes = {
+MetadataRowDetailsDialog.propTypes = {
   dialogOpened: PropTypes.bool,
   rowData: PropTypes.object,
   onDialogClose: PropTypes.func,
 };
 
-export default LimsRowDetailsDialog;
+export default MetadataRowDetailsDialog;

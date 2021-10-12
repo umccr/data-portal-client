@@ -20,7 +20,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import Toolbar from '@material-ui/core/Toolbar';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
+import MetadataRowDetailsDialog from '../components/MetadataRowDetailsDialog';
 import { Link as RouterLink } from 'react-router-dom';
 import InfoIcon from '@material-ui/icons/Info';
 import Link from '@material-ui/core/Link';
@@ -221,7 +221,7 @@ class Home extends Component {
           )}
         </Table>
 
-        <LimsRowDetailsDialog
+        <MetadataRowDetailsDialog
           dialogOpened={dialogOpened}
           rowData={rowData}
           onDialogClose={this.handleDialogClose}
