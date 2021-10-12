@@ -12,7 +12,6 @@ import { TablePaginationActionsWrapped } from '../components/TablePagniationActi
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { clearErrorMessage, startRunningHomeQuery, updateHomeQueryPrams } from '../actions/home';
 import * as PropTypes from 'prop-types';
-import { API } from 'aws-amplify';
 import EnhancedTableHead from '../components/EnhancedTableHead';
 import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -105,21 +104,18 @@ class Home extends Component {
     this.setState({ dialogOpened, rowData });
   };
 
-  processRowDetails = async (id) => {
-    const rowData = await API.get('files', `/lims/${id}/`, {});
-    this.setState({ rowData });
-  };
-
   renderHomeView = () => {
     const { sortAsc, sortCol, search } = this.props.homeParams;
     const { loading, data } = this.props.homeResult;
     const { results, pagination } = data;
+    console.log(data);
     const { dialogOpened, rowData } = this.state;
+    console.log(rowData);
     const columns = [
       { key: 'info', sortable: false },
-      { key: 'illumina_id', sortable: true },
+      { key: 'instrument_run_id', sortable: true },
       { key: 'type', sortable: true },
-      { key: 'timestamp', sortable: true },
+      // { key: 'timestamp', sortable: true },
       { key: 'subject_id', sortable: true },
       { key: 'sample_id', sortable: true },
       { key: 'library_id', sortable: true },
@@ -180,7 +176,7 @@ class Home extends Component {
                           <InfoIcon color={'primary'} />
                         </Button>
                       </TableCell>
-                    ) : col.key === 'illumina_id' ? (
+                    ) : col.key === 'instrument_run_id' ? (
                       <TableCell key={col.key}>
                         <Link color='primary' component={RouterLink} to={'/runs/' + row[col.key]}>
                           {row[col.key]}
@@ -262,6 +258,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(updateHomeQueryPrams(params));
     },
     handleStartRunningHomeQuery: async (params) => {
+      console.log('theparams', params);
       dispatch(startRunningHomeQuery(params));
     },
     handleClearErrorMessage: () => {

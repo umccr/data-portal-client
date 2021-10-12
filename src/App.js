@@ -172,7 +172,7 @@ class App extends Component {
                 <ListItemIcon>
                   <HomeIcon />
                 </ListItemIcon>
-                <ListItemText primary='LIMS' />
+                <ListItemText primary='Metadata' />
               </ListItem>
               <ListItem button component={RouterLink} to='/igv'>
                 <ListItemIcon>

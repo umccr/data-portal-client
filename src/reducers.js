@@ -41,7 +41,7 @@ const defaultSearchParams = {
   query: '',
   sortCol: null,
   sortAsc: null,
-  page: null,
+  page: 1, // Django pagination starts at 1
   rowsPerPage: 20,
 };
 
@@ -54,7 +54,7 @@ const defaultSearchResult = {
 const defaultHomeParams = {
   sortCol: 'subject_id',
   sortAsc: false,
-  page: null,
+  page: 1, // Django pagination starts at 1
   rowsPerPage: 20,
   search: '',
 };
@@ -68,7 +68,7 @@ const defaultHomeResult = {
 const defaultSubjectParams = {
   sortCol: 'key',
   sortAsc: true,
-  page: null,
+  page: 1, // Django pagination starts at 1
   rowsPerPage: 20,
   search: '',
 };
@@ -82,7 +82,7 @@ const defaultSubjectResult = {
 const defaultSubjectGDSParams = {
   sortCol: 'path',
   sortAsc: true,
-  page: null,
+  page: 1, // Django pagination starts at 1
   rowsPerPage: 20,
   search: '',
 };
@@ -96,7 +96,7 @@ const defaultSubjectGDSResult = {
 export const defaultRunParams = {
   sortCol: 'key',
   sortAsc: true,
-  page: null,
+  page: 1, // Django pagination starts at 1
   rowsPerPage: 10,
   search: '.html$',
 };
@@ -110,7 +110,7 @@ const defaultRunResult = {
 export const defaultRunGDSParams = {
   sortCol: 'path',
   sortAsc: true,
-  page: null,
+  page: 1, // Django pagination starts at 1
   rowsPerPage: 10,
   search: '.html$',
 };
@@ -124,7 +124,7 @@ const defaultRunGDSResult = {
 export const defaultRunMetaParams = {
   sortCol: 'subject_id',
   sortAsc: false,
-  page: null,
+  page: 1, // Django pagination starts at 1
   rowsPerPage: 10,
   search: '',
 };
