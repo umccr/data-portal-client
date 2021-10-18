@@ -134,7 +134,6 @@ class Search extends Component {
     const filename = tokens[tokens.length - 1];
     const file = `s3://${bucket + '/' + key}`;
     const url = `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${filename}`;
-    console.log(url);
     Http.open('GET', url);
     Http.send();
   };

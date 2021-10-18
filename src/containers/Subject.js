@@ -87,6 +87,7 @@ const styles = (theme) => ({
 
 class Subject extends Component {
   state = {
+    s3Object: null,
     subject: null,
     subjectId: null,
     feature_content_url: null,
@@ -100,8 +101,35 @@ class Subject extends Component {
   async componentDidMount() {
     const { subjectId } = this.props.match.params;
     if (subjectId) {
-      const subject = await API.get('files', '/subjects/' + subjectId, {});
-      this.setState({ subject: subject, subjectId: subjectId });
+      const APIConfig = {
+        queryStringParameters: {
+          subject: subjectId,
+        },
+      };
+      const subject = await API.get('files', '/metadata/', APIConfig);
+
+      for (const row_data of subject.results) {
+        const library_id = row_data.library_id;
+
+        // Specify search value
+        const APIConfig = {
+          queryStringParameters: {
+            library_id: library_id,
+          },
+        };
+        const libraryRun = await API.get('files', `/libraryrun/`, APIConfig);
+        const libraryRunResults = libraryRun.results;
+
+        // Search for instrument_run_id each row_data
+        if (libraryRunResults[0]) {
+          row_data['instrument_run_id'] = libraryRunResults[0].instrument_run_id;
+        } else {
+          row_data['instrument_run_id'] = 'NOT_FOUND';
+        }
+      }
+
+      const s3Object = await API.get('files', '/subjects/' + subjectId, {});
+      this.setState({ subject: subject.results, subjectId: subjectId, s3Object: s3Object });
       const { handleStartRunningSubjectQuery } = this.props;
       await handleStartRunningSubjectQuery(this.getBaseParams(), subjectId);
       const { handleStartRunningSubjectGDSQuery } = this.props;
@@ -121,7 +149,7 @@ class Subject extends Component {
 
   reloadData = async (params = {}) => {
     const { handleStartRunningSubjectQuery } = this.props;
-    await handleStartRunningSubjectQuery(params, this.state.subject.id);
+    await handleStartRunningSubjectQuery(params, this.state.subjectId);
   };
 
   getBaseParams = () => {
@@ -166,14 +194,14 @@ class Subject extends Component {
 
   handleSearchClicked = async () => {
     const { handleStartRunningSubjectQuery, subjectParams } = this.props;
-    handleStartRunningSubjectQuery(subjectParams, this.state.subject.id);
+    handleStartRunningSubjectQuery(subjectParams, this.state.subjectId);
   };
 
   // ---
 
   reloadGDSData = async (params = {}) => {
     const { handleStartRunningSubjectGDSQuery } = this.props;
-    await handleStartRunningSubjectGDSQuery(params, this.state.subject.id);
+    await handleStartRunningSubjectGDSQuery(params, this.state.subjectId);
   };
 
   getGDSBaseParams = () => {
@@ -218,7 +246,7 @@ class Subject extends Component {
 
   handleGDSSearchClicked = async () => {
     const { handleStartRunningSubjectGDSQuery, subjectGDSParams } = this.props;
-    handleStartRunningSubjectGDSQuery(subjectGDSParams, this.state.subject.id);
+    handleStartRunningSubjectGDSQuery(subjectGDSParams, this.state.subjectId);
   };
 
   handleDialogOpen = (data) => {
@@ -298,7 +326,7 @@ class Subject extends Component {
   };
 
   renderClickableColumn = (data) => {
-    const { clickedLinks, subject } = this.state;
+    const { clickedLinks, subject, subjectId } = this.state;
     const { id, key } = data;
     const baseName = key.split('/')[key.split('/').length - 1];
 
@@ -315,7 +343,7 @@ class Subject extends Component {
 
     if (subject && (key.endsWith('bam') || key.endsWith('vcf.gz') || key.endsWith('vcf'))) {
       return (
-        <Link color={'primary'} component={RouterLink} to={'/igv/' + subject.id}>
+        <Link color={'primary'} component={RouterLink} to={'/igv/' + subjectId}>
           {baseName}
         </Link>
       );
@@ -350,7 +378,7 @@ class Subject extends Component {
   };
 
   renderSubjectLandingView = () => {
-    const { results } = this.state.subject;
+    const { results } = this.state.s3Object;
     const feature_content_url = this.state.feature_content_url;
 
     const wgs = results.filter((r) => r.key.includes('WGS/'));
@@ -432,17 +460,17 @@ class Subject extends Component {
   };
 
   renderSubjectLandingOverview = () => {
-    const { lims } = this.state.subject;
+    const metadata = this.state.subject;
     const columns = [
       { key: 'subject_id', sortable: true },
       { key: 'external_subject_id', sortable: true },
-      { key: 'illumina_id', sortable: true },
-      { key: 'run', sortable: true },
-      { key: 'timestamp', sortable: true },
+      { key: 'instrument_run_id', sortable: true },
+      // { key: 'run', sortable: true },
+      // { key: 'timestamp', sortable: true },
       { key: 'project_name', sortable: true },
       { key: 'project_owner', sortable: true },
     ];
-    const d = lims[0];
+    const d = metadata[0];
 
     return (
       <TableContainer>
@@ -453,7 +481,7 @@ class Subject extends Component {
                 columns.map((col) => (
                   <TableRow key={col.key} className={this.props.classes.tableRow}>
                     <TableCell>{getDisplayTitle(col.key)}</TableCell>
-                    {col.key === 'illumina_id' ? (
+                    {col.key === 'instrument_run_id' ? (
                       <TableCell>
                         <Link color='primary' component={RouterLink} to={'/runs/' + d[col.key]}>
                           {d[col.key]}
@@ -530,7 +558,8 @@ class Subject extends Component {
 
   renderSubjectSampleInfoView = () => {
     const { dialogOpened, rowData } = this.state;
-    const { id, lims } = this.state.subject;
+    const id = this.state.subjectId;
+    const metadata = this.state.subject;
     const columns = [
       { key: 'info', sortable: false },
       { key: 'type', sortable: true },
@@ -554,7 +583,7 @@ class Subject extends Component {
             </TableHead>
             <TableBody>
               {id != null &&
-                lims.map((row) => (
+                metadata.map((row) => (
                   <TableRow key={row.id} className={this.props.classes.tableRow}>
                     {columns.map((col) =>
                       col.key === 'info' ? (

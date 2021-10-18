@@ -108,9 +108,7 @@ class Home extends Component {
     const { sortAsc, sortCol, search } = this.props.homeParams;
     const { loading, data } = this.props.homeResult;
     const { results, pagination } = data;
-    console.log(data);
     const { dialogOpened, rowData } = this.state;
-    console.log(rowData);
     const columns = [
       { key: 'info', sortable: false },
       { key: 'instrument_run_id', sortable: true },
@@ -258,7 +256,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(updateHomeQueryPrams(params));
     },
     handleStartRunningHomeQuery: async (params) => {
-      console.log('theparams', params);
       dispatch(startRunningHomeQuery(params));
     },
     handleClearErrorMessage: () => {

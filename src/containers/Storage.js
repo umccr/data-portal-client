@@ -139,7 +139,6 @@ class Storage extends Component {
    * @param newProps
    */
   handleSelectedPathChange = (newProps) => {
-    console.log(newProps);
     this.setState(
       {
         ...this.state,
