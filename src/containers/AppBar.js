@@ -74,6 +74,14 @@ const querySyntax = [
     description: '(LIMS) SampleId includes',
   },
   {
+    syntax: 'source:[string]',
+    description: '(LIMS) source, e.g FFPE, tissue, blood...',
+  },
+  {
+    syntax: 'type:[string]',
+    description: '(LIMS) sequencing type, eg: WGS, WTS',
+  },
+  {
     syntax: 'case:[boolean]',
     description: 'Case sensitivity (for string comparisons, default to false). e.g. case:true',
   },
