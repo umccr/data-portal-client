@@ -49,7 +49,6 @@ import { TabPanel, TabView } from 'primereact/tabview';
 import { Panel } from 'primereact/panel';
 import Link from '@material-ui/core/Link';
 import Backdrop from '@material-ui/core/Backdrop';
-import Typography from '@material-ui/core/Typography';
 import config from '../config';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -221,6 +220,20 @@ class Subject extends Component {
     handleStartRunningSubjectGDSQuery(subjectGDSParams, this.state.subject.id);
   };
 
+  handleGDSChipClick = (selected) => {
+    return async () => {
+      await this.handleGDSChipFilter(selected);
+    };
+  };
+
+  handleGDSChipFilter = async (selected) => {
+    await this.reloadGDSData({
+      ...this.getGDSBaseParams(),
+      search: selected['keyword'],
+      page: 1,
+    });
+  };
+
   // ---
 
   handleRowClick = (id) => {
@@ -336,6 +349,8 @@ class Subject extends Component {
     return baseName;
   };
 
+  // ---
+
   renderSubjectView = () => {
     return (
       <Grid container spacing={3}>
@@ -352,7 +367,10 @@ class Subject extends Component {
                 </TableContainer>
               </TabPanel>
               <TabPanel header={'GDS'}>
-                <TableContainer>{this.renderSubjectGDSView()}</TableContainer>
+                <TableContainer>
+                  {this.renderChipFilterGDSView()}
+                  {this.renderSubjectGDSView()}
+                </TableContainer>
               </TabPanel>
             </TabView>
           </Panel>
@@ -360,6 +378,8 @@ class Subject extends Component {
       </Grid>
     );
   };
+
+  // ---
 
   renderSubjectLandingView = () => {
     const { results } = this.state.subject;
@@ -773,6 +793,90 @@ class Subject extends Component {
 
   // ---
 
+  renderChipFilterGDSView = () => {
+    const chipData = [
+      { key: 0, label: 'reset', keyword: '', color: 'primary' },
+      {
+        key: 1,
+        label: 'qc bam',
+        keyword: 'wgs qc .bam$',
+        color: 'default',
+      },
+      {
+        key: 2,
+        label: 'qc vcf',
+        keyword: 'wgs qc .vcf.gz$',
+        color: 'default',
+      },
+      {
+        key: 3,
+        label: 'qc report',
+        keyword: 'wgs qc multiqc .html$',
+        color: 'default',
+      },
+      {
+        key: 4,
+        label: 'wts bam',
+        keyword: 'wts .bam$',
+        color: 'default',
+      },
+      {
+        key: 5,
+        label: 'wts vcf',
+        keyword: 'wts .vcf.gz$',
+        color: 'default',
+      },
+      {
+        key: 6,
+        label: 'wts report',
+        keyword: 'wts multiqc .html$',
+        color: 'default',
+      },
+      {
+        key: 7,
+        label: 't/n bam',
+        keyword: 'tumor normal .bam$',
+        color: 'default',
+      },
+      {
+        key: 8,
+        label: 't/n vcf',
+        keyword: 'tumor normal .vcf.gz$',
+        color: 'default',
+      },
+      {
+        key: 9,
+        label: 't/n report',
+        keyword: 'tumor normal multiqc .html$',
+        color: 'default',
+      },
+      {
+        key: 10,
+        label: 'tso ctdna bam',
+        keyword: 'tso ctdna .bam$',
+        color: 'default',
+      },
+      { key: 11, label: 'tso ctdna vcf', keyword: 'tso ctdna .vcf.gz$', color: 'default' },
+    ];
+
+    return (
+      <div className={this.props.classes.root}>
+        {chipData.map((data) => {
+          return (
+            <Chip
+              key={data.key}
+              label={data.label}
+              onClick={this.handleGDSChipClick(data)}
+              className={this.props.classes.chip}
+              color={data.color}
+              icon={data.key === 0 ? <EmojiEmotionsIcon /> : undefined}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
   renderSubjectGDSView = () => {
     const { sortAsc, sortCol, search } = this.props.subjectGDSParams;
     const { loading, data } = this.props.subjectGDSResult;
@@ -787,14 +891,6 @@ class Subject extends Component {
 
     return (
       <Paper elevation={0}>
-        <Typography variant={'h6'} color={'secondary'}>
-          THIS IS BETA FEATURE. PLEASE ASK FOR PRODUCTION USE IF ANY.
-        </Typography>
-        <Typography variant={'subtitle2'}>
-          Data from Genomic Data Store (GDS) - Illumina Connected Analytics (ICA) Pipeline
-        </Typography>
-        <hr />
-
         <Toolbar>
           <Box width={1 / 3}>
             <TextField
@@ -875,6 +971,8 @@ class Subject extends Component {
       </Paper>
     );
   };
+
+  // ---
 
   render() {
     const { authUserInfo } = this.props;

@@ -79,6 +79,55 @@ class GDSActionMenuButton extends React.Component {
     this.setState({ openBackdrop: false });
   };
 
+  handleOpenIGVLink = (index, file, name) => {
+    const xhr = new XMLHttpRequest();
+    const idx = encodeURIComponent(index);
+    const enf = encodeURIComponent(file);
+    const url = `http://localhost:60151/load?index=${idx}&file=${enf}&name=${name}`;
+    xhr.open('GET', url, true);
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4 && xhr.status === 0) {
+        const dialogMessage =
+          'Cannot open automatically in IGV. Please make sure you have opened IGV app and try again. ' +
+          'Otherwise please click "Copy" button and open the URL in browser new tab.';
+        this.setState({ dialogMessage: dialogMessage });
+        this.setState({ open: true, url: url });
+      }
+    };
+    xhr.send();
+  };
+
+  handleGDSFileIGVOpening = async (volume_name, path, name, callback) => {
+    this.setState({ openBackdrop: true });
+    const gdsFile = this.getGDSPath(volume_name, path);
+    let gdsFileIdx = gdsFile + '.bai';
+    if (gdsFile.endsWith('vcf') || gdsFile.endsWith('vcf.gz')) {
+      gdsFileIdx = gdsFile + '.tbi';
+    }
+    try {
+      const { signed_urls } = await API.post('files', `/presign`, {
+        body: [gdsFile, gdsFileIdx],
+      });
+      let file;
+      let index;
+      for (let signed_url of signed_urls) {
+        const { volume, path, presigned_url } = signed_url;
+        const gdsPath = this.getGDSPath(volume, path);
+        if (gdsPath === gdsFile) {
+          file = presigned_url;
+        } else if (gdsPath === gdsFileIdx) {
+          index = presigned_url;
+        }
+      }
+      callback(index, file, name);
+    } catch (e) {
+      const { error } = e.response.data;
+      this.setState({ errorMessage: error });
+    } finally {
+      this.setState({ openBackdrop: false });
+    }
+  };
+
   handleGeneratePreSignedUrl = async (id) => {
     this.setState({ signing: true, open: true });
     const { error, signed_url } = await this.getPreSignedUrl(id);
@@ -114,9 +163,25 @@ class GDSActionMenuButton extends React.Component {
     return 'gds://' + volume_name + path;
   };
 
-  renderMenu = (id, volume_name, path, popupState) => {
+  renderMenu = (id, volume_name, path, name, popupState) => {
     return (
       <Menu {...bindMenu(popupState)}>
+        {(path.endsWith('bam') || path.endsWith('vcf') || path.endsWith('vcf.gz')) && (
+          <MenuItem onClick={popupState.close}>
+            <List
+              className={this.props.classes.root}
+              component={'div'}
+              onClick={() =>
+                this.handleGDSFileIGVOpening(volume_name, path, name, this.handleOpenIGVLink)
+              }>
+              <ListItemIcon>
+                <img src={'/igv.png'} alt='igv.png' width='24px' height='24px' />
+              </ListItemIcon>
+              <ListItemText>Open in IGV</ListItemText>
+            </List>
+          </MenuItem>
+        )}
+
         <MenuItem onClick={popupState.close}>
           <CopyToClipboard text={this.getGDSPath(volume_name, path)}>
             <List className={this.props.classes.root} component={'div'} onClick={this.onClick}>
@@ -161,7 +226,7 @@ class GDSActionMenuButton extends React.Component {
 
   render() {
     const { data, dense } = this.props;
-    const { id, volume_name, path } = data;
+    const { id, volume_name, path, name } = data;
     const { open, openBackdrop } = this.state;
     const dateExpires = new Date();
 
@@ -176,7 +241,7 @@ class GDSActionMenuButton extends React.Component {
                 size={dense ? 'small' : 'medium'}>
                 <MenuIcon fontSize={dense ? 'small' : 'medium'} />
               </IconButton>
-              {this.renderMenu(id, volume_name, path, popupState)}
+              {this.renderMenu(id, volume_name, path, name, popupState)}
             </Fragment>
           )}
         </PopupState>
