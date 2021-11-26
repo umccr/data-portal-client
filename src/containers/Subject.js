@@ -382,7 +382,7 @@ class Subject extends Component {
   // ---
 
   renderSubjectLandingView = () => {
-    const { results } = this.state.subject;
+    const { results, results_gds } = this.state.subject;
     const feature_content_url = this.state.feature_content_url;
 
     const wgs = results.filter((r) => r.key.includes('WGS/'));
@@ -402,6 +402,12 @@ class Subject extends Component {
     const wtsBams = wts.filter((r) => r.key.endsWith('bam'));
     const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
     const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
+
+    const tsoCtdna = results_gds.filter((r) => r.path.includes('tso_ctdna'));
+    const tsoCtdnaBams = tsoCtdna.filter((r) => r.path.endsWith('bam'));
+    const tsoCtdnaVcfs = tsoCtdna.filter(
+      (r) => r.path.endsWith('vcf') || r.path.endsWith('vcf.gz')
+    );
 
     return (
       <div className={'grid'}>
@@ -454,8 +460,16 @@ class Subject extends Component {
                   </Paper>
                 </TableContainer>
               </TabPanel>
-              <TabPanel header={'TSO500'} disabled={true} />
-              <TabPanel header={'ICA'} disabled={true} />
+              <TabPanel header={'TSO500'}>
+                <TableContainer>
+                  <Paper elevation={0}>
+                    <Table size={'small'} aria-label={'a dense table'}>
+                      {this.renderGDSResultTable('vcf', tsoCtdnaVcfs)}
+                      {this.renderGDSResultTable('bam', tsoCtdnaBams)}
+                    </Table>
+                  </Paper>
+                </TableContainer>
+              </TabPanel>
             </TabView>
           </Panel>
         </div>
@@ -792,6 +806,90 @@ class Subject extends Component {
   };
 
   // ---
+
+  getGDSPreSignedUrl = async (id) => {
+    return await API.get('files', `/gds/${id}/presign`, {});
+  };
+
+  handleGDSOpenInBrowser = async (id) => {
+    this.setState({ openBackdrop: true });
+    const { error, signed_url } = await this.getGDSPreSignedUrl(id);
+    if (error) {
+      this.setState({ errorMessage: error });
+    } else {
+      window.open(signed_url, '_blank');
+    }
+    this.setState({ openBackdrop: false });
+  };
+
+  renderClickableGDSColumn = (data) => {
+    const { clickedLinks } = this.state;
+    const { id, path } = data;
+    const baseName = path.split('/')[path.split('/').length - 1];
+
+    if (path.endsWith('html') || path.endsWith('png')) {
+      return (
+        <Link
+          className={this.props.classes.linkCursorPointer}
+          color={clickedLinks.includes(id) ? 'secondary' : 'primary'}
+          onClick={() => this.handleGDSOpenInBrowser(id)}>
+          {baseName}
+        </Link>
+      );
+    }
+
+    // TODO support bam/vcf opening from GDS in IGV.js -- https://github.com/umccr/data-portal-client/issues/82
+    // if (subject && (path.endsWith('bam') || path.endsWith('vcf.gz') || path.endsWith('vcf'))) {
+    //   return (
+    //     <Link color={'primary'} component={RouterLink} to={'/igv/' + subject.id}>
+    //       {baseName}
+    //     </Link>
+    //   );
+    // }
+
+    return baseName;
+  };
+
+  renderGDSResultTable = (title, data, label) => {
+    const columns = [
+      { key: 'path', sortable: true },
+      { key: 'actions', sortable: false },
+      { key: 'size_in_bytes', sortable: true },
+      { key: 'time_modified', sortable: true },
+    ];
+
+    return (
+      <Fragment>
+        <TableHead>
+          <TableRow>
+            <TableCell colSpan={columns.length + 1}>{title.toUpperCase()}</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow key={row.id} className={this.props.classes.tableRow}>
+              <TableCell>{label ? label : ' '}</TableCell>
+              {columns.map((col) => (
+                <TableCell key={col.key}>
+                  {col.key === 'actions' ? (
+                    <GDSActionMenuButton data={row} authUserInfo={this.props.authUserInfo} />
+                  ) : col.key === 'path' ? (
+                    this.renderClickableGDSColumn(row)
+                  ) : col.key === 'size_in_bytes' ? (
+                    <HumanReadableFileSize bytes={row[col.key]} />
+                  ) : col.key === 'time_modified' ? (
+                    <Moment local>{row[col.key]}</Moment>
+                  ) : (
+                    row[col.key]
+                  )}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Fragment>
+    );
+  };
 
   renderChipFilterGDSView = () => {
     const chipData = [
