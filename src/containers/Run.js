@@ -52,7 +52,6 @@ import Backdrop from '@material-ui/core/Backdrop';
 import { Panel } from 'primereact/panel';
 import TableContainer from '@material-ui/core/TableContainer';
 import { TabPanel, TabView } from 'primereact/tabview';
-import Typography from '@material-ui/core/Typography';
 
 const styles = (theme) => ({
   close: {
@@ -327,13 +326,6 @@ class Run extends Component {
                 </TableContainer>
               </TabPanel>
               <TabPanel header={'GDS'}>
-                <Typography variant={'h6'} color={'secondary'}>
-                  THIS IS BETA FEATURE. PLEASE ASK FOR PRODUCTION USE IF ANY.
-                </Typography>
-                <Typography variant={'subtitle2'}>
-                  Data from Genomic Data Store (GDS) - Illumina Connected Analytics (ICA) Pipeline
-                </Typography>
-                <hr />
                 <TableContainer>
                   {this.renderGDSChipFilterView()}
                   {this.renderRunGDSView()}
@@ -452,8 +444,8 @@ class Run extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handleRunMetaPageChange}
-                  onChangeRowsPerPage={this.handleRunMetaRowsPerPageChange}
+                  onPageChange={this.handleRunMetaPageChange}
+                  onRowsPerPageChange={this.handleRunMetaRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>
@@ -680,8 +672,8 @@ class Run extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handlePageChange}
-                  onChangeRowsPerPage={this.handleRowsPerPageChange}
+                  onPageChange={this.handlePageChange}
+                  onRowsPerPageChange={this.handleRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>
@@ -777,8 +769,8 @@ class Run extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handleGDSPageChange}
-                  onChangeRowsPerPage={this.handleGDSRowsPerPageChange}
+                  onPageChange={this.handleGDSPageChange}
+                  onRowsPerPageChange={this.handleGDSRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>

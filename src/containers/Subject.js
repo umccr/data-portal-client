@@ -49,7 +49,6 @@ import { TabPanel, TabView } from 'primereact/tabview';
 import { Panel } from 'primereact/panel';
 import Link from '@material-ui/core/Link';
 import Backdrop from '@material-ui/core/Backdrop';
-import Typography from '@material-ui/core/Typography';
 import config from '../config';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -221,6 +220,20 @@ class Subject extends Component {
     handleStartRunningSubjectGDSQuery(subjectGDSParams, this.state.subject.id);
   };
 
+  handleGDSChipClick = (selected) => {
+    return async () => {
+      await this.handleGDSChipFilter(selected);
+    };
+  };
+
+  handleGDSChipFilter = async (selected) => {
+    await this.reloadGDSData({
+      ...this.getGDSBaseParams(),
+      search: selected['keyword'],
+      page: 1,
+    });
+  };
+
   // ---
 
   handleRowClick = (id) => {
@@ -336,6 +349,8 @@ class Subject extends Component {
     return baseName;
   };
 
+  // ---
+
   renderSubjectView = () => {
     return (
       <Grid container spacing={3}>
@@ -352,7 +367,10 @@ class Subject extends Component {
                 </TableContainer>
               </TabPanel>
               <TabPanel header={'GDS'}>
-                <TableContainer>{this.renderSubjectGDSView()}</TableContainer>
+                <TableContainer>
+                  {this.renderChipFilterGDSView()}
+                  {this.renderSubjectGDSView()}
+                </TableContainer>
               </TabPanel>
             </TabView>
           </Panel>
@@ -361,8 +379,10 @@ class Subject extends Component {
     );
   };
 
+  // ---
+
   renderSubjectLandingView = () => {
-    const { results } = this.state.subject;
+    const { results, results_gds } = this.state.subject;
     const feature_content_url = this.state.feature_content_url;
 
     const wgs = results.filter((r) => r.key.includes('WGS/'));
@@ -383,9 +403,15 @@ class Subject extends Component {
     const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
     const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
 
+    const tsoCtdna = results_gds.filter((r) => r.path.includes('tso_ctdna'));
+    const tsoCtdnaBams = tsoCtdna.filter((r) => r.path.endsWith('bam'));
+    const tsoCtdnaVcfs = tsoCtdna.filter(
+      (r) => r.path.endsWith('vcf') || r.path.endsWith('vcf.gz')
+    );
+
     return (
-      <div className={'p-grid'}>
-        <div className={'p-col-12 p-lg-5'}>
+      <div className={'grid'}>
+        <div className={'col-12 lg:col-5'}>
           <Panel header={'Overview'}>{this.renderSubjectLandingOverview()}</Panel>
           <Panel header={'Tools'} toggleable={true} style={{ marginTop: '1em' }}>
             {this.renderSubjectToolPanel()}
@@ -401,7 +427,7 @@ class Subject extends Component {
             )}
           </Panel>
         </div>
-        <div className={'p-col-12 p-lg-7'}>
+        <div className={'col-12 lg:col-7'}>
           <Panel header={'Sample Info'} toggleable={true}>
             {this.renderSubjectSampleInfoView()}
           </Panel>
@@ -434,8 +460,16 @@ class Subject extends Component {
                   </Paper>
                 </TableContainer>
               </TabPanel>
-              <TabPanel header={'TSO500'} disabled={true} />
-              <TabPanel header={'ICA'} disabled={true} />
+              <TabPanel header={'TSO500'}>
+                <TableContainer>
+                  <Paper elevation={0}>
+                    <Table size={'small'} aria-label={'a dense table'}>
+                      {this.renderGDSResultTable('vcf', tsoCtdnaVcfs)}
+                      {this.renderGDSResultTable('bam', tsoCtdnaBams)}
+                    </Table>
+                  </Paper>
+                </TableContainer>
+              </TabPanel>
             </TabView>
           </Panel>
         </div>
@@ -492,7 +526,7 @@ class Subject extends Component {
             <ListItemIcon>
               <img src={'/igv.png'} alt='igv.png' width='24px' height='24px' />
             </ListItemIcon>
-            <ListItemText primary='Open Subject Data in Online Integrative Genomics Viewer' />
+            <ListItemText primary='Open Subject Data in Online IGV' />
           </ListItem>
         </List>
       </Fragment>
@@ -759,8 +793,8 @@ class Subject extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handlePageChange}
-                  onChangeRowsPerPage={this.handleRowsPerPageChange}
+                  onPageChange={this.handlePageChange}
+                  onRowsPerPageChange={this.handleRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>
@@ -772,6 +806,174 @@ class Subject extends Component {
   };
 
   // ---
+
+  getGDSPreSignedUrl = async (id) => {
+    return await API.get('files', `/gds/${id}/presign`, {});
+  };
+
+  handleGDSOpenInBrowser = async (id) => {
+    this.setState({ openBackdrop: true });
+    const { error, signed_url } = await this.getGDSPreSignedUrl(id);
+    if (error) {
+      this.setState({ errorMessage: error });
+    } else {
+      window.open(signed_url, '_blank');
+    }
+    this.setState({ openBackdrop: false });
+  };
+
+  renderClickableGDSColumn = (data) => {
+    const { clickedLinks } = this.state;
+    const { id, path } = data;
+    const baseName = path.split('/')[path.split('/').length - 1];
+
+    if (path.endsWith('html') || path.endsWith('png')) {
+      return (
+        <Link
+          className={this.props.classes.linkCursorPointer}
+          color={clickedLinks.includes(id) ? 'secondary' : 'primary'}
+          onClick={() => this.handleGDSOpenInBrowser(id)}>
+          {baseName}
+        </Link>
+      );
+    }
+
+    // TODO support bam/vcf opening from GDS in IGV.js -- https://github.com/umccr/data-portal-client/issues/82
+    // if (subject && (path.endsWith('bam') || path.endsWith('vcf.gz') || path.endsWith('vcf'))) {
+    //   return (
+    //     <Link color={'primary'} component={RouterLink} to={'/igv/' + subject.id}>
+    //       {baseName}
+    //     </Link>
+    //   );
+    // }
+
+    return baseName;
+  };
+
+  renderGDSResultTable = (title, data, label) => {
+    const columns = [
+      { key: 'path', sortable: true },
+      { key: 'actions', sortable: false },
+      { key: 'size_in_bytes', sortable: true },
+      { key: 'time_modified', sortable: true },
+    ];
+
+    return (
+      <Fragment>
+        <TableHead>
+          <TableRow>
+            <TableCell colSpan={columns.length + 1}>{title.toUpperCase()}</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow key={row.id} className={this.props.classes.tableRow}>
+              <TableCell>{label ? label : ' '}</TableCell>
+              {columns.map((col) => (
+                <TableCell key={col.key}>
+                  {col.key === 'actions' ? (
+                    <GDSActionMenuButton data={row} authUserInfo={this.props.authUserInfo} />
+                  ) : col.key === 'path' ? (
+                    this.renderClickableGDSColumn(row)
+                  ) : col.key === 'size_in_bytes' ? (
+                    <HumanReadableFileSize bytes={row[col.key]} />
+                  ) : col.key === 'time_modified' ? (
+                    <Moment local>{row[col.key]}</Moment>
+                  ) : (
+                    row[col.key]
+                  )}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Fragment>
+    );
+  };
+
+  renderChipFilterGDSView = () => {
+    const chipData = [
+      { key: 0, label: 'reset', keyword: '', color: 'primary' },
+      {
+        key: 1,
+        label: 'qc bam',
+        keyword: 'wgs qc .bam$',
+        color: 'default',
+      },
+      {
+        key: 2,
+        label: 'qc vcf',
+        keyword: 'wgs qc .vcf.gz$',
+        color: 'default',
+      },
+      {
+        key: 3,
+        label: 'qc report',
+        keyword: 'wgs qc multiqc .html$',
+        color: 'default',
+      },
+      {
+        key: 4,
+        label: 'wts bam',
+        keyword: 'wts .bam$',
+        color: 'default',
+      },
+      {
+        key: 5,
+        label: 'wts vcf',
+        keyword: 'wts .vcf.gz$',
+        color: 'default',
+      },
+      {
+        key: 6,
+        label: 'wts report',
+        keyword: 'wts multiqc .html$',
+        color: 'default',
+      },
+      {
+        key: 7,
+        label: 't/n bam',
+        keyword: 'tumor normal .bam$',
+        color: 'default',
+      },
+      {
+        key: 8,
+        label: 't/n vcf',
+        keyword: 'tumor normal .vcf.gz$',
+        color: 'default',
+      },
+      {
+        key: 9,
+        label: 't/n report',
+        keyword: 'tumor normal multiqc .html$',
+        color: 'default',
+      },
+      {
+        key: 10,
+        label: 'tso ctdna bam',
+        keyword: 'tso ctdna .bam$',
+        color: 'default',
+      },
+      { key: 11, label: 'tso ctdna vcf', keyword: 'tso ctdna .vcf.gz$', color: 'default' },
+    ];
+
+    return (
+      <div className={this.props.classes.root}>
+        {chipData.map((data) => {
+          return (
+            <Chip
+              key={data.key}
+              label={data.label}
+              onClick={this.handleGDSChipClick(data)}
+              className={this.props.classes.chip}
+              color={data.color}
+              icon={data.key === 0 ? <EmojiEmotionsIcon /> : undefined}
+            />
+          );
+        })}
+      </div>
+    );
+  };
 
   renderSubjectGDSView = () => {
     const { sortAsc, sortCol, search } = this.props.subjectGDSParams;
@@ -787,14 +989,6 @@ class Subject extends Component {
 
     return (
       <Paper elevation={0}>
-        <Typography variant={'h6'} color={'secondary'}>
-          THIS IS BETA FEATURE. PLEASE ASK FOR PRODUCTION USE IF ANY.
-        </Typography>
-        <Typography variant={'subtitle2'}>
-          Data from Genomic Data Store (GDS) - Illumina Connected Analytics (ICA) Pipeline
-        </Typography>
-        <hr />
-
         <Toolbar>
           <Box width={1 / 3}>
             <TextField
@@ -864,8 +1058,8 @@ class Subject extends Component {
                   SelectProps={{
                     native: true,
                   }}
-                  onChangePage={this.handleGDSPageChange}
-                  onChangeRowsPerPage={this.handleGDSRowsPerPageChange}
+                  onPageChange={this.handleGDSPageChange}
+                  onRowsPerPageChange={this.handleGDSRowsPerPageChange}
                   ActionsComponent={TablePaginationActionsWrapped}
                 />
               </TableRow>
@@ -875,6 +1069,8 @@ class Subject extends Component {
       </Paper>
     );
   };
+
+  // ---
 
   render() {
     const { authUserInfo } = this.props;

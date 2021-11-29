@@ -158,7 +158,7 @@ class App extends Component {
             item
             xs={12}
             direction='row'
-            justify='center'
+            justifyContent='center'
             alignItems='center'
             style={{ height: '100%' }}>
             <Typography variant='h6'>UMCCR Data Portal</Typography>

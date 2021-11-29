@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import reducer from './reducers';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { createTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 Amplify.configure({
   Auth: {
@@ -39,7 +39,7 @@ Amplify.configure({
 
 const store = createStore(reducer, applyMiddleware(thunk));
 
-const theme = createMuiTheme({
+const theme = createTheme({
   props: {
     MuiButton: {
       size: 'small',

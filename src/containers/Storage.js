@@ -339,7 +339,7 @@ class Storage extends Component {
               xs={12}
               direction='row'
               container
-              justify='space-between'
+              justifyContent='space-between'
               alignItems='center'>
               <Typography variant='h5' component='h2'>
                 {stat.value}
