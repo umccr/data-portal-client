@@ -10,5 +10,7 @@ services:
     volumes:
       - ./htsget-config-local.json:/htsget-config-local.json
       - ~/.aws:/root/.aws:ro
+      - ./vcfs:/vcfs:ro
+      - ./bams:/bams:ro
     environment:
       - AWS_PROFILE=dev
