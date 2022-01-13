@@ -18,16 +18,17 @@ import {
   MenuItem,
   Select,
   Slide,
+  SlideProps,
   Snackbar,
   TextField,
+  Theme,
   Toolbar,
   Typography,
   withStyles,
 } from '@material-ui/core';
-import igv from 'igv';
+import igv, { IGVBrowser, ITrack } from 'igv';
 import { getJwtToken } from '../utils/signer';
 import config from '../config';
-import * as PropTypes from 'prop-types';
 import { API } from 'aws-amplify';
 import Moment from 'react-moment';
 import HumanReadableFileSize from '../components/HumanReadableFileSize';
@@ -36,14 +37,12 @@ import AddIcon from '@material-ui/icons/Add';
 import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import HelpIcon from '@material-ui/icons/Help';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, RouteComponentProps } from 'react-router-dom';
 import Link from '@material-ui/core/Link';
 import genomes from '../utils/genomes';
+import URLParse from 'url-parse';
 
-const styles = (theme) => ({
-  appBar: {
-    position: 'relative',
-  },
+const styles = (theme: Theme) => ({
   title: {
     marginLeft: theme.spacing(2),
     flex: 1,
@@ -60,22 +59,46 @@ const styles = (theme) => ({
   },
 });
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />;
-});
+function TransitionSlideUp(props: SlideProps) {
+  return <Slide direction='up' {...props} />;
+}
 
-class IGV extends Component {
-  state = {
-    refGenome: 0,
+// we can optionally route to this page with a preset subjectId in the url
+type MatchParams = {
+  subjectId?: string;
+};
+type Props = RouteComponentProps<MatchParams> & {
+  classes: any;
+};
+type State = {
+  // the browser IGV instance, or null if we still have not finished loading it
+  browser: IGVBrowser | null;
+
+  // the string identifier of the reference genome being used... also tracks the state of the <select>
+  refGenome: string;
+
+  loadTrackDialogOpened: boolean;
+  addExtTrackDialogOpened: boolean;
+  helpDialogOpened: boolean;
+  subject: any;
+  subjectId: string | null;
+  loadedTrackNames: string[];
+  extTrackPath: string;
+  errorMessage: string | null;
+};
+
+class IGV extends Component<Props, State> {
+  state: State = {
+    browser: null,
+    refGenome: 'hg38',
     loadTrackDialogOpened: false,
     addExtTrackDialogOpened: false,
     helpDialogOpened: false,
     subject: null,
     subjectId: null,
-    loadedTracks: [],
+    loadedTrackNames: [],
     extTrackPath: '',
     errorMessage: null,
-    showLoading: false,
   };
 
   async componentDidMount() {
@@ -94,35 +117,100 @@ class IGV extends Component {
   }
 
   initIgv = () => {
-    this.setState({ showLoading: true });
+    this.setState({ browser: null });
     const igvDiv = document.getElementById('igvDiv');
     const options = {
-      reference: genomes[this.state.refGenome],
+      genomeList: genomes,
+      genome: this.state.refGenome,
     };
-    igv.createBrowser(igvDiv, options).then((browser) => {
-      igv.browser = browser;
-      this.setState({ showLoading: false });
+    igv.createBrowser(igvDiv, options).then((browser: IGVBrowser) => {
+      this.setState({ browser: browser });
     });
     igv.setOauthToken(getJwtToken, '*htsget*');
   };
 
-  getBaseName = (key) => {
+  getBaseName = (key: string) => {
     return key.split('/')[key.split('/').length - 1];
   };
 
-  loadTrackInIgvJs = async (data) => {
-    const { loadedTracks } = this.state;
-    const { bucket, key } = data;
-    const baseName = this.getBaseName(key);
-    const id = bucket + '/' + key;
+  deriveTrackName(url: URLParse<string>): string {
+    return url.pathname.substring(url.pathname.lastIndexOf('/') + 1);
+  }
 
-    if (loadedTracks.includes(baseName)) {
+  /**
+   * Load a htsget:// URL into IGV as a new track (either reads or variants)
+   *
+   * @param url the htsget URL
+   * @param includeOAuthBearer if true then the track will be configured to use oauth JWT
+   */
+  loadHtsgetTrackInIvgJs = (url: URLParse<string>, includeOAuthBearer: boolean): void => {
+    // some examples that can be used for testing
+    // htsget://localhost:3100/variants/local/SBJ00297.vcf.gz
+    // htsget://htsget.prod.umccr.org/umccr-primary-data-prod/CMitchell-PeterMacPath/SBJ01204/WGS/2021-12-07/umccrised/SBJ01204__SBJ01204_MDX210384_L2101572/small_variants/SBJ01204__SBJ01204_MDX210384_L2101572-somatic.vcf.gz
+    // htsget://htsget.dev.umccr.org/umccr-primary-data-dev/Tothill-Merkel/SBJ00297/WGS/2020-05-07/umccrised/SBJ00297__SBJ00297_PRJ200088_L2000137/small_variants/SBJ00297__SBJ00297_PRJ200088_L2000137-somatic-strelka2-PASS.vcf.gz
+    const { loadedTrackNames, browser } = this.state;
+
+    const name = this.deriveTrackName(url);
+
+    if (loadedTrackNames.includes(name)) {
       return;
     }
 
+    // the htsget url scheme is actually unofficial - IGV itself needs to be passed a Https endpoint from
+    // which it itself will run the htsget protocol
+    if (url.hostname == 'localhost') {
+      // a quick hack for local debugging... telling it when it looks like localhost htsget chances are we want to
+      // use http
+      url.set('protocol', 'http:');
+    } else {
+      url.set('protocol', 'https:');
+    }
+
+    const trackConfig: ITrack = {
+      sourceType: 'htsget',
+      url: url.toString(),
+      name: name,
+      // these are default viz params if the track is a VCF
+      squishedCallHeight: 1,
+      expandedCallHeight: 4,
+      displayMode: 'squished',
+      visibilityWindow: 1000,
+      // these are the default viz params if the track is a BAM
+      // none for the moment
+    };
+
+    if (includeOAuthBearer) {
+      // assign the *function* that returns tokens via Promises
+      trackConfig.oauthToken = getJwtToken;
+    }
+
+    browser?.loadTrack(trackConfig).then(() => {
+      loadedTrackNames.push(name);
+      this.setState({ loadedTrackNames: loadedTrackNames });
+    });
+  };
+
+  /**
+   * Load an s3:// URL into igv as a track, by converting to a htsget url through known formatting rules
+   * consistent with our htsget endpoints.
+   *
+   * @param data
+   */
+  loadS3HtsgetTrackInIgvJs = (data: { bucket: string; key: string }): void => {
+    const { loadedTrackNames, browser } = this.state;
+    const { bucket, key } = data;
+    const baseName = this.getBaseName(key);
+
+    if (loadedTrackNames.includes(baseName)) {
+      return;
+    }
+
+    // we have a umccr specific rule about how our htsget ids are constructed
+    const id = bucket + '/' + key;
+
     if (key.endsWith('bam')) {
-      igv.browser
-        .loadTrack({
+      browser
+        ?.loadTrack({
           type: 'alignment',
           format: 'bam',
           sourceType: 'htsget',
@@ -132,26 +220,25 @@ class IGV extends Component {
           name: baseName,
           removable: false,
         })
-        .then((bamTrack) => {
-          loadedTracks.push(bamTrack.name); // BAMTrack
-          this.setState({ loadedTracks: loadedTracks });
+        .then(() => {
+          loadedTrackNames.push(baseName);
+          this.setState({ loadedTrackNames: loadedTrackNames });
         });
     } else if (key.endsWith('vcf') || key.endsWith('vcf.gz')) {
-      // TODO
-      //  Is the variants endpoint of htsget protocol supported? NOooOo...
-      //  https://github.com/igvteam/igv.js/issues/1187
-
-      // igv.browser.loadTrack({
-      //   type: 'variant',
-      //   format: 'vcf',
-      //   sourceType: 'htsget',
-      //   url: config.htsget.URL,
-      //   endpoint: config.htsget.ENDPOINT_VARIANTS,
-      //   id: id,
-      //   name: baseName,
-      // });
-
-      this.setState({ errorMessage: 'Variant call track is not supported yet!' });
+      browser
+        ?.loadTrack({
+          type: 'variant',
+          format: 'vcf',
+          sourceType: 'htsget',
+          url: config.htsget.URL,
+          endpoint: config.htsget.ENDPOINT_VARIANTS,
+          id: id,
+          name: baseName,
+        })
+        .then(() => {
+          loadedTrackNames.push(baseName);
+          this.setState({ loadedTrackNames: loadedTrackNames });
+        });
     } else {
       this.setState({ errorMessage: 'Unsupported file type!' });
     }
@@ -159,29 +246,34 @@ class IGV extends Component {
 
   handleLoadAllTracks = () => {
     const { results } = this.state.subject;
-    results.map((row) => this.loadTrackInIgvJs(row));
+    results.map((row: any) => this.loadS3HtsgetTrackInIgvJs(row));
   };
 
   handleClearAllTracks = () => {
-    const { loadedTracks } = this.state;
-    loadedTracks.map((trackName) => igv.browser.removeTrackByName(trackName));
-    this.setState({ loadedTracks: [] });
+    const { loadedTrackNames, browser } = this.state;
+    if (browser) {
+      loadedTrackNames.map((trackName) => browser.removeTrackByName(trackName));
+      this.setState({ loadedTrackNames: [] });
+    }
   };
 
-  handlePathInputChange = (event) => {
+  handlePathInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
       extTrackPath: event.target.value,
     });
   };
 
-  handleRefGenomeChange = (event) => {
+  handleRefGenomeChange = (event: React.ChangeEvent<{ name?: string | undefined; value: any }>) => {
     event.preventDefault();
+    const { browser } = this.state;
     const refGenome = event.target.value;
     this.setState({ refGenome: refGenome });
-    igv.browser.loadGenome(genomes[refGenome]);
+    browser?.loadGenome({
+      genome: refGenome,
+    });
   };
 
-  handleAddExtTrackLoading = async (event) => {
+  handleAddExtTrackLoading = async (event: any) => {
     event.preventDefault();
     const { extTrackPath } = this.state;
 
@@ -190,7 +282,9 @@ class IGV extends Component {
       return;
     }
 
-    if (extTrackPath.startsWith('s3://')) {
+    const newUrl = new URLParse<string>(extTrackPath);
+
+    if (newUrl.protocol === 's3:') {
       const basePath = extTrackPath.split('s3://')[1];
       const bucket = basePath.split('/')[0];
       const key = basePath.replace(bucket + '/', '');
@@ -198,7 +292,11 @@ class IGV extends Component {
         bucket: bucket,
         key: key,
       };
-      await this.loadTrackInIgvJs(data);
+      // this just triggers the load in igv - it does not wait for it to complete
+      this.loadS3HtsgetTrackInIgvJs(data);
+    } else if (newUrl.protocol === 'htsget:') {
+      // this just triggers the load in igv - it does not wait for it to complete
+      this.loadHtsgetTrackInIvgJs(newUrl, true);
     } else {
       if (extTrackPath && extTrackPath.length !== 0) {
         this.setState({ errorMessage: 'Invalid path ' + extTrackPath });
@@ -228,13 +326,13 @@ class IGV extends Component {
     this.setState({ helpDialogOpened: false });
   };
 
-  renderRowItem = (row) => {
-    const { loadedTracks } = this.state;
+  renderRowItem = (row: any) => {
+    const { loadedTrackNames } = this.state;
     return (
-      <ListItem key={row.id} button onClick={() => this.loadTrackInIgvJs(row)}>
+      <ListItem key={row.id} button onClick={() => this.loadS3HtsgetTrackInIgvJs(row)}>
         <ListItemText
           primary={
-            loadedTracks.includes(this.getBaseName(row.key)) ? (
+            loadedTrackNames.includes(this.getBaseName(row.key)) ? (
               <Badge color='secondary' variant='dot'>
                 <Typography variant={'subtitle2'} color={'textPrimary'}>
                   {row.key}
@@ -265,8 +363,8 @@ class IGV extends Component {
     const { loadTrackDialogOpened, subject, subjectId } = this.state;
     const { results } = subject;
 
-    const wgs = results.filter((r) => r.key.includes('WGS/'));
-    const wts = results.filter((r) => r.key.includes('WTS/'));
+    const wgs = results.filter((r: any) => r.key.includes('WGS/'));
+    const wts = results.filter((r: any) => r.key.includes('WTS/'));
 
     return (
       <Dialog
@@ -275,7 +373,7 @@ class IGV extends Component {
         scroll={'paper'}
         maxWidth={'lg'}
         fullWidth
-        TransitionComponent={Transition}>
+        TransitionComponent={TransitionSlideUp}>
         <AppBar className={classes.appBar}>
           <Toolbar>
             <Typography variant='h6' className={classes.title}>
@@ -312,9 +410,9 @@ class IGV extends Component {
 
         <List>
           <ListSubheader>WGS</ListSubheader>
-          {wgs.map((row) => this.renderRowItem(row))}
+          {wgs.map((row: any) => this.renderRowItem(row))}
           <ListSubheader>WTS</ListSubheader>
-          {wts.map((row) => this.renderRowItem(row))}
+          {wts.map((row: any) => this.renderRowItem(row))}
         </List>
       </Dialog>
     );
@@ -333,7 +431,7 @@ class IGV extends Component {
         <form onSubmit={this.handleAddExtTrackLoading}>
           <DialogContent>
             <DialogContentText>
-              To add a track, please enter S3 path. Typically you get it by{' '}
+              To add a track, please enter S3 or HTSGET path. Typically you get it by{' '}
               <Typography component={'span'} color={'primary'} display={'inline'}>
                 Copy S3 Path
               </Typography>{' '}
@@ -385,7 +483,8 @@ class IGV extends Component {
             <li>Add track by using button denotes with + icon.</li>
             <li>+Load... button is only available if you have selected a particular subject.</li>
             <li>
-              +Add button can add any valid S3 path as a track regardless of subject selected.
+              +Add button can add any valid S3 (s3://) or HTSGET (htsget://) path as a track
+              regardless of subject selected.
             </li>
             <li>
               Select chromosome number or enter locus at IGV toolbar panel. e.g. <em>KRAS</em>
@@ -424,16 +523,16 @@ class IGV extends Component {
   };
 
   render() {
-    const { subject, subjectId, refGenome, showLoading } = this.state;
+    const { subject, subjectId, refGenome, browser } = this.state;
     return (
       <Fragment>
         <div>
           <FormControl className={this.props.classes.formControl}>
             <Select value={refGenome} variant='standard' onChange={this.handleRefGenomeChange}>
-              <MenuItem value={0}>hg38</MenuItem>
-              <MenuItem value={1}>hg38_1kg</MenuItem>
-              <MenuItem value={2}>hg19</MenuItem>
-              <MenuItem value={3}>hg18</MenuItem>
+              <MenuItem value={'hg38'}>hg38</MenuItem>
+              <MenuItem value={'hg38_1kg'}>hg38_1kg</MenuItem>
+              <MenuItem value={'hg19'}>hg19</MenuItem>
+              <MenuItem value={'hg18'}>hg18</MenuItem>
             </Select>
           </FormControl>
           <Button
@@ -485,7 +584,7 @@ class IGV extends Component {
             Help
           </Button>
         </div>
-        {showLoading && <LinearProgress color='secondary' />}
+        {!browser && <LinearProgress color='secondary' />}
         <div id='igvDiv' />
         {subject && this.renderLoadTrackDialog()}
         {this.renderAddExtTrackDialog()}
@@ -531,10 +630,5 @@ class IGV extends Component {
     );
   };
 }
-
-IGV.propTypes = {
-  classes: PropTypes.object.isRequired,
-  match: PropTypes.object,
-};
 
 export default withStyles(styles)(IGV);
