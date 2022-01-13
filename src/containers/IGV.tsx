@@ -156,9 +156,11 @@ class IGV extends Component<Props, State> {
       return;
     }
 
-    // the htsget url scheme is actually unofficial - IGV itself needs to be passed a Https endpoint from
+    // the htsget url scheme is actually unofficial
+    // https://github.com/samtools/hts-specs/issues/581
+    // IGV itself needs to be passed a Https endpoint from
     // which it itself will run the htsget protocol
-    if (url.hostname == 'localhost') {
+    if (url.hostname == 'localhost' || url.hostname == '127.0.0.1') {
       // a quick hack for local debugging... telling it when it looks like localhost htsget chances are we want to
       // use http
       url.set('protocol', 'http:');
