@@ -178,7 +178,13 @@ class App extends Component {
                 <ListItemIcon>
                   <img src={'/igv.png'} alt='igv.png' width='24px' height='24px' />
                 </ListItemIcon>
-                <ListItemText primary='Genomics Viewer' />
+                <ListItemText primary='Genomics Viewer (IGV)' />
+              </ListItem>
+              <ListItem button component={RouterLink} to='/jbrowse'>
+                <ListItemIcon>
+                  <img src={'/igv.png'} alt='igv.png' width='24px' height='24px' />
+                </ListItemIcon>
+                <ListItemText primary='Genomics Viewer (JBrowse)' />
               </ListItem>
               <ListItem button component={RouterLink} to='/search'>
                 <ListItemIcon>

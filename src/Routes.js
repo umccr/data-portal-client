@@ -10,6 +10,7 @@ import LandingPage from './containers/LandingPage';
 import Subject from './containers/Subject';
 import Run from './containers/Run';
 import IGV from './containers/IGV';
+import { JBrowse } from './containers/JBrowse';
 
 class Routes extends Component {
   render() {
@@ -33,6 +34,7 @@ class Routes extends Component {
             <Route path='/storage' component={Storage} />
             <Route path='/igv' exact component={IGV} />
             <Route path='/igv/:subjectId' exact component={IGV} />
+            <Route path='/jbrowse' exact component={JBrowse} />
           </Fragment>
         )}
       </Switch>
