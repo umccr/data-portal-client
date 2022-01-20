@@ -59,9 +59,21 @@ const styles = (theme: Theme) => ({
   },
 });
 
-function TransitionSlideUp(props: SlideProps) {
-  return <Slide direction='up' {...props} />;
-}
+// eslint-disable-next-line react/display-name
+const TransitionSlideUp = React.forwardRef((props: SlideProps, ref) => (
+  <Slide direction='up' {...props} ref={ref} />
+));
+
+// a typescript class for our Django DB/API S3 record model - this should possibly be defined centrally somewhere
+type S3Row = {
+  id: number;
+  bucket: string;
+  key: string;
+  size: number;
+  last_modified_date: string;
+  e_tag: string;
+  unique_hash: string;
+};
 
 // we can optionally route to this page with a preset subjectId in the url
 type MatchParams = {
@@ -80,8 +92,11 @@ type State = {
   loadTrackDialogOpened: boolean;
   addExtTrackDialogOpened: boolean;
   helpDialogOpened: boolean;
-  subject: any;
+
+  // if set, this is the set of S3 files associated with the given subject
   subjectId: string | null;
+  subjectS3Rows: S3Row[];
+
   loadedTrackNames: string[];
   extTrackPath: string;
   errorMessage: string | null;
@@ -94,8 +109,8 @@ class IGV extends Component<Props, State> {
     loadTrackDialogOpened: false,
     addExtTrackDialogOpened: false,
     helpDialogOpened: false,
-    subject: null,
     subjectId: null,
+    subjectS3Rows: [],
     loadedTrackNames: [],
     extTrackPath: '',
     errorMessage: null,
@@ -103,17 +118,43 @@ class IGV extends Component<Props, State> {
 
   async componentDidMount() {
     this.initIgv();
+
+    // if this page has a /:subjectId URL - then we preload all the IGV loadable files that might be of interest
+    // related to that subject id - and save into the react state
     const { subjectId } = this.props.match.params;
-    const searchQuery = encodeURIComponent('final .bam$');
+
     if (subjectId) {
+      const MAX_EXPECTED_FILES_FOR_SUBJECT = 100;
+
+      // the search is of a space separated regex/plain strings - with AND logic between them
+      // in this case, all interesting files have 'final' in the path... and are bams or vcfs
+      const searchQuery = encodeURIComponent('final (.vcf.gz|.bam)$');
+
+      // in the absence of client side paging support here - we set a larger rowsPerPage than the default
+      // and (sensibly) assume that no one individual is going to have a huge number of BAMS/VCFS
       const extraParams = {
         queryStringParameters: {
           subject: `${subjectId}`,
+          rowsPerPage: MAX_EXPECTED_FILES_FOR_SUBJECT,
         },
       };
-      const subject = await API.get('files', `/s3?search=${searchQuery}`, extraParams);
-      this.setState({ subject: subject, subjectId: subjectId });
+
+      const subjectSearch = await API.get('files', `/s3?search=${searchQuery}`, extraParams);
+
+      // if the page has a valid 'next' link then our assumption on page sizing was wrong - we abort by
+      // just not proceeding with the subject load
+      if (subjectSearch?.links?.next)
+        this.setState({
+          errorMessage: `More than ${MAX_EXPECTED_FILES_FOR_SUBJECT} files were associated with this subject - but we do not have client side paging here - so not proceeding with subject load`,
+        });
+      else {
+        this.setState({ subjectS3Rows: subjectSearch.results || [], subjectId: subjectId });
+      }
     }
+  }
+
+  async componentWillUnmount() {
+    if (this.state.browser) igv.removeBrowser(this.state.browser);
   }
 
   initIgv = () => {
@@ -187,8 +228,9 @@ class IGV extends Component<Props, State> {
     }
 
     browser?.loadTrack(trackConfig).then(() => {
-      loadedTrackNames.push(name);
-      this.setState({ loadedTrackNames: loadedTrackNames });
+      this.setState((prevState) => ({
+        loadedTrackNames: [...prevState.loadedTrackNames, name],
+      }));
     });
   };
 
@@ -196,11 +238,11 @@ class IGV extends Component<Props, State> {
    * Load an s3:// URL into igv as a track, by converting to a htsget url through known formatting rules
    * consistent with our htsget endpoints.
    *
-   * @param data
+   * @param row
    */
-  loadS3HtsgetTrackInIgvJs = (data: { bucket: string; key: string }): void => {
+  loadS3HtsgetTrackInIgvJs = (row: { bucket: string; key: string }): void => {
     const { loadedTrackNames, browser } = this.state;
-    const { bucket, key } = data;
+    const { bucket, key } = row;
     const baseName = this.getBaseName(key);
 
     if (loadedTrackNames.includes(baseName)) {
@@ -223,8 +265,9 @@ class IGV extends Component<Props, State> {
           removable: false,
         })
         .then(() => {
-          loadedTrackNames.push(baseName);
-          this.setState({ loadedTrackNames: loadedTrackNames });
+          this.setState((prevState) => ({
+            loadedTrackNames: [...prevState.loadedTrackNames, baseName],
+          }));
         });
     } else if (key.endsWith('vcf') || key.endsWith('vcf.gz')) {
       browser
@@ -238,8 +281,9 @@ class IGV extends Component<Props, State> {
           name: baseName,
         })
         .then(() => {
-          loadedTrackNames.push(baseName);
-          this.setState({ loadedTrackNames: loadedTrackNames });
+          this.setState((prevState) => ({
+            loadedTrackNames: [...prevState.loadedTrackNames, baseName],
+          }));
         });
     } else {
       this.setState({ errorMessage: 'Unsupported file type!' });
@@ -247,8 +291,7 @@ class IGV extends Component<Props, State> {
   };
 
   handleLoadAllTracks = () => {
-    const { results } = this.state.subject;
-    results.map((row: any) => this.loadS3HtsgetTrackInIgvJs(row));
+    this.state.subjectS3Rows.map((row) => this.loadS3HtsgetTrackInIgvJs(row));
   };
 
   handleClearAllTracks = () => {
@@ -328,7 +371,7 @@ class IGV extends Component<Props, State> {
     this.setState({ helpDialogOpened: false });
   };
 
-  renderRowItem = (row: any) => {
+  renderRowItem = (row: S3Row) => {
     const { loadedTrackNames } = this.state;
     return (
       <ListItem key={row.id} button onClick={() => this.loadS3HtsgetTrackInIgvJs(row)}>
@@ -362,11 +405,16 @@ class IGV extends Component<Props, State> {
 
   renderLoadTrackDialog = () => {
     const classes = this.props.classes;
-    const { loadTrackDialogOpened, subject, subjectId } = this.state;
-    const { results } = subject;
+    const { loadTrackDialogOpened, subjectS3Rows, subjectId } = this.state;
 
-    const wgs = results.filter((r: any) => r.key.includes('WGS/'));
-    const wts = results.filter((r: any) => r.key.includes('WTS/'));
+    const wgs = subjectS3Rows.filter((r: any) => r.key.includes('WGS/'));
+    const wts = subjectS3Rows.filter((r: any) => r.key.includes('WTS/'));
+
+    // TODO: what is the unique key component for identifying TSO?
+    // TODO: find a GDS mechanism to allow htsget to browse these, then enable this
+    // const tso500 = subjectS3Rows.filter((r: any) => r.key.includes('TSO/'));
+
+    const hasContent = wgs.length > 0 || wts.length > 0;
 
     return (
       <Dialog
@@ -379,7 +427,7 @@ class IGV extends Component<Props, State> {
         <AppBar className={classes.appBar}>
           <Toolbar>
             <Typography variant='h6' className={classes.title}>
-              {subjectId} - Select BAM
+              {subjectId} - Select BAM or VCF
             </Typography>
             <Button
               className={this.props.classes.menuButton}
@@ -410,12 +458,30 @@ class IGV extends Component<Props, State> {
           </Toolbar>
         </AppBar>
 
-        <List>
-          <ListSubheader>WGS</ListSubheader>
-          {wgs.map((row: any) => this.renderRowItem(row))}
-          <ListSubheader>WTS</ListSubheader>
-          {wts.map((row: any) => this.renderRowItem(row))}
-        </List>
+        {!hasContent && <p>No IGV loadable files were found associated with this subject</p>}
+
+        {hasContent && (
+          <List>
+            {wgs && wgs.length > 0 && (
+              <>
+                <ListSubheader>WGS</ListSubheader>
+                {wgs.map((row) => this.renderRowItem(row))}
+              </>
+            )}
+            {wts && wts.length > 0 && (
+              <>
+                <ListSubheader>WTS</ListSubheader>
+                {wts.map((row) => this.renderRowItem(row))}
+              </>
+            )}
+            {/*
+              tso500 && tso500.length > 0 && <>
+              <ListSubheader>TSO500</ListSubheader>
+              {tso500.map((row) => this.renderRowItem(row))}
+              </>
+            */}
+          </List>
+        )}
       </Dialog>
     );
   };
@@ -525,7 +591,7 @@ class IGV extends Component<Props, State> {
   };
 
   render() {
-    const { subject, subjectId, refGenome, browser } = this.state;
+    const { subjectS3Rows, subjectId, refGenome, browser } = this.state;
     return (
       <Fragment>
         <div>
@@ -539,13 +605,13 @@ class IGV extends Component<Props, State> {
           </FormControl>
           <Button
             component={RouterLink}
-            to={subject ? '/subjects/' + subjectId : '/'}
+            to={subjectS3Rows ? '/subjects/' + subjectId : '/'}
             className={this.props.classes.menuButton}
             variant={'outlined'}
             size={'medium'}
             color={'primary'}
             startIcon={<ExitToAppIcon />}>
-            {subject ? subjectId : 'Select Subject'}
+            {subjectS3Rows ? subjectId : 'Select Subject'}
           </Button>
           <Button
             className={this.props.classes.menuButton}
@@ -553,7 +619,7 @@ class IGV extends Component<Props, State> {
             size={'medium'}
             color={'primary'}
             startIcon={<AddIcon />}
-            disabled={subject === null}
+            disabled={subjectS3Rows === null}
             onClick={this.handleLoadTrackDialogOpen}>
             Load...
           </Button>
@@ -588,7 +654,7 @@ class IGV extends Component<Props, State> {
         </div>
         {!browser && <LinearProgress color='secondary' />}
         <div id='igvDiv' />
-        {subject && this.renderLoadTrackDialog()}
+        {subjectS3Rows && this.renderLoadTrackDialog()}
         {this.renderAddExtTrackDialog()}
         {this.renderHelpDialog()}
         {this.renderErrorMessage()}

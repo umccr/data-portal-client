@@ -12,6 +12,7 @@ declare module 'igv' {
 
     export function setOauthToken(any, any): void;
     export function createBrowser(any, any): Promise<IGVBrowser>;
+    export function removeBrowser(any): void;
 
     export interface IGVBrowser  {
         loadTrack(config: ITrack): Promise<any>;
