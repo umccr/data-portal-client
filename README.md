@@ -6,8 +6,8 @@ React frontend for [UMCCR](https://umccr.org) [Data Portal API](https://github.c
 
 #### TL;DR
 ```
-node --version
-v12.18.2
+node -v
+v14.19.0
 
 npm i -g yarn
 yarn install
