@@ -43,6 +43,9 @@ import genomes from '../utils/genomes';
 import URLParse from 'url-parse';
 
 const styles = (theme: Theme) => ({
+  appBar: {
+    position: 'relative' as 'relative',
+  },
   title: {
     marginLeft: theme.spacing(2),
     flex: 1,
@@ -124,32 +127,35 @@ class IGV extends Component<Props, State> {
     const { subjectId } = this.props.match.params;
 
     if (subjectId) {
-      const MAX_EXPECTED_FILES_FOR_SUBJECT = 100;
+      // const MAX_EXPECTED_FILES_FOR_SUBJECT = 100;
 
       // the search is of a space separated regex/plain strings - with AND logic between them
       // in this case, all interesting files have 'final' in the path... and are bams or vcfs
-      const searchQuery = encodeURIComponent('final (.vcf.gz|.bam)$');
+      // const searchQuery = encodeURIComponent('final (.vcf.gz|.bam)$');
 
       // in the absence of client side paging support here - we set a larger rowsPerPage than the default
       // and (sensibly) assume that no one individual is going to have a huge number of BAMS/VCFS
-      const extraParams = {
-        queryStringParameters: {
-          subject: `${subjectId}`,
-          rowsPerPage: MAX_EXPECTED_FILES_FOR_SUBJECT,
-        },
-      };
+      // const extraParams = {
+      //   queryStringParameters: {
+      //     subject: `${subjectId}`,
+      //     rowsPerPage: MAX_EXPECTED_FILES_FOR_SUBJECT,
+      //   },
+      // };
 
-      const subjectSearch = await API.get('files', `/s3?search=${searchQuery}`, extraParams);
+      // const subjectSearch = await API.get('files', `/s3?search=${searchQuery}`, extraParams);
 
       // if the page has a valid 'next' link then our assumption on page sizing was wrong - we abort by
       // just not proceeding with the subject load
-      if (subjectSearch?.links?.next)
-        this.setState({
-          errorMessage: `More than ${MAX_EXPECTED_FILES_FOR_SUBJECT} files were associated with this subject - but we do not have client side paging here - so not proceeding with subject load`,
-        });
-      else {
-        this.setState({ subjectS3Rows: subjectSearch.results || [], subjectId: subjectId });
-      }
+      // if (subjectSearch?.links?.next)
+      //   this.setState({
+      //     errorMessage: `More than ${MAX_EXPECTED_FILES_FOR_SUBJECT} files were associated with this subject - but we do not have client side paging here - so not proceeding with subject load`,
+      //   });
+      // else {
+      //   this.setState({ subjectS3Rows: subjectSearch.results || [], subjectId: subjectId });
+      // }
+
+      const subjectSearch = await API.get('files', `/subjects/${subjectId}`, '');
+      this.setState({ subjectS3Rows: subjectSearch.results || [], subjectId: subjectId });
     }
   }
 
@@ -218,6 +224,7 @@ class IGV extends Component<Props, State> {
       expandedCallHeight: 4,
       displayMode: 'squished',
       visibilityWindow: 1000,
+      removable: false,
       // these are the default viz params if the track is a BAM
       // none for the moment
     };
@@ -279,6 +286,8 @@ class IGV extends Component<Props, State> {
           endpoint: config.htsget.ENDPOINT_VARIANTS,
           id: id,
           name: baseName,
+          removable: false,
+          visibilityWindow: -1,
         })
         .then(() => {
           this.setState((prevState) => ({
@@ -403,12 +412,16 @@ class IGV extends Component<Props, State> {
     );
   };
 
+  filterExt = (key: string) => {
+    return key.endsWith('.bam') || key.endsWith('.vcf') || key.endsWith('.vcf.gz');
+  };
+
   renderLoadTrackDialog = () => {
     const classes = this.props.classes;
     const { loadTrackDialogOpened, subjectS3Rows, subjectId } = this.state;
 
-    const wgs = subjectS3Rows.filter((r: any) => r.key.includes('WGS/'));
-    const wts = subjectS3Rows.filter((r: any) => r.key.includes('WTS/'));
+    const wgs = subjectS3Rows.filter((r: any) => r.key.includes('WGS/') && this.filterExt(r.key));
+    const wts = subjectS3Rows.filter((r: any) => r.key.includes('WTS/') && this.filterExt(r.key));
 
     // TODO: what is the unique key component for identifying TSO?
     // TODO: find a GDS mechanism to allow htsget to browse these, then enable this
@@ -427,7 +440,7 @@ class IGV extends Component<Props, State> {
         <AppBar className={classes.appBar}>
           <Toolbar>
             <Typography variant='h6' className={classes.title}>
-              {subjectId} - Select BAM or VCF
+              {subjectId} - Select BAM and/or VCF
             </Typography>
             <Button
               className={this.props.classes.menuButton}
@@ -592,6 +605,7 @@ class IGV extends Component<Props, State> {
 
   render() {
     const { subjectS3Rows, subjectId, refGenome, browser } = this.state;
+    const hasContent = subjectS3Rows.length > 0;
     return (
       <Fragment>
         <div>
@@ -605,13 +619,13 @@ class IGV extends Component<Props, State> {
           </FormControl>
           <Button
             component={RouterLink}
-            to={subjectS3Rows ? '/subjects/' + subjectId : '/'}
+            to={subjectId ? '/subjects/' + subjectId : '/'}
             className={this.props.classes.menuButton}
             variant={'outlined'}
             size={'medium'}
             color={'primary'}
             startIcon={<ExitToAppIcon />}>
-            {subjectS3Rows ? subjectId : 'Select Subject'}
+            {subjectId ? subjectId : 'Select Subject'}
           </Button>
           <Button
             className={this.props.classes.menuButton}
@@ -619,7 +633,7 @@ class IGV extends Component<Props, State> {
             size={'medium'}
             color={'primary'}
             startIcon={<AddIcon />}
-            disabled={subjectS3Rows === null}
+            disabled={!hasContent}
             onClick={this.handleLoadTrackDialogOpen}>
             Load...
           </Button>
@@ -654,7 +668,7 @@ class IGV extends Component<Props, State> {
         </div>
         {!browser && <LinearProgress color='secondary' />}
         <div id='igvDiv' />
-        {subjectS3Rows && this.renderLoadTrackDialog()}
+        {hasContent && this.renderLoadTrackDialog()}
         {this.renderAddExtTrackDialog()}
         {this.renderHelpDialog()}
         {this.renderErrorMessage()}

@@ -318,7 +318,7 @@ class Run extends Component {
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Panel header={'Run Data'} toggleable={true}>
-            <TabView>
+            <TabView activeIndex={1}>
               <TabPanel header={'S3'}>
                 <TableContainer>
                   {this.renderChipFilterView()}
@@ -335,7 +335,7 @@ class Run extends Component {
           </Panel>
         </Grid>
         <Grid item xs={12}>
-          <Panel header={'LIMS Metadata'} toggleable={true} collapsed>
+          <Panel header={'LIMS Metadata'} toggleable={true}>
             <TableContainer>{this.renderRunMetaDataView()}</TableContainer>
           </Panel>
         </Grid>
