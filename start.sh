@@ -81,4 +81,5 @@ export REACT_APP_OAUTH_REDIRECT_IN_LOCAL=$oauth_redirect_in_local
 export REACT_APP_OAUTH_REDIRECT_OUT_LOCAL=$oauth_redirect_out_local
 env | grep REACT
 
-npx react-scripts start
+# See https://github.com/facebook/create-react-app/discussions/11767 for GENERATE_SOURCEMAP=false
+GENERATE_SOURCEMAP=false npx react-scripts start
