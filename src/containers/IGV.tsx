@@ -154,7 +154,7 @@ class IGV extends Component<Props, State> {
       //   this.setState({ subjectS3Rows: subjectSearch.results || [], subjectId: subjectId });
       // }
 
-      const subjectSearch = await API.get('files', `/subjects/${subjectId}`, '');
+      const subjectSearch = await API.get('files', `/subjects/${subjectId}`, {});
       this.setState({ subjectS3Rows: subjectSearch.results || [], subjectId: subjectId });
     }
   }
