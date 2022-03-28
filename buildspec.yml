@@ -3,10 +3,13 @@ phases:
   install:
     runtime-versions:
       nodejs: 14
+      python: 3.9
     commands:
+      - pip install detect-secrets pre-commit
       - yarn install
   build:
     commands:
+#      - yarn run precommit
       - |
         REACT_APP_STAGE=$STAGE \
         REACT_APP_REGION=$REGION \

@@ -43,9 +43,15 @@ See infrastructure FAQ for quick [htsget 101](https://github.com/umccr/infrastru
 - Recommend fixing/updating any package with _direct_ dependencies
 - If vulnerabilities found in transitive dependency, but it has yet to resolve, then list them in `package.json > resolutions` node as [Selective Dependency Resolutions condition explained here](https://classic.yarnpkg.com/en/docs/selective-version-resolutions/).
 
-#### Husky & Git
+#### Git Flow & Pre-commit Hook
 
-> NOTE: [husky](https://typicode.github.io/husky/) 🐕 will guard and enforce static code analysis such as `lint` and any security `audit` via pre-commit hook. You are encourage to fix those. If you wish to skip this for good reason, you can by-pass husky by using [`--no-verify`](https://github.com/typicode/husky/issues/124) flag in `git` command.
+> NOTE: We use [pre-commit](https://github.com/umccr/wiki/blob/master/computing/dev-environment/git-hooks.md). It will guard and enforce static code analysis such as `lint` and any security `audit` via pre-commit hook. You are encouraged to fix those. If you wish to skip this for good reason, you can by-pass [Git pre-commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) by using `git commit --no-verify` flag.
+
+```commandline
+git config --unset core.hooksPath
+pre-commit install
+pre-commit run --all-files
+```
 
 - The default branch is `dev`. Any merges are CI/CD to `DEV` account environment.
 - The `main` branch is production. Any merges are CI/CD to `PROD` account environment.
