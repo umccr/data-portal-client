@@ -42,7 +42,6 @@
     "test": "react-scripts test --env=jsdom --watchAll=false",
     "eject": "react-scripts eject",
     "lint": "eslint src",
-    "prepare": "pre-commit install",
     "precommit": "pre-commit run --all-files"
   },
   "eslintConfig": {

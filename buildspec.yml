@@ -3,9 +3,9 @@ phases:
   install:
     runtime-versions:
       nodejs: 14
-      python: 3.9
+#      python: 3.9
     commands:
-      - pip install detect-secrets pre-commit
+#      - pip install detect-secrets pre-commit
       - yarn install
   build:
     commands:
