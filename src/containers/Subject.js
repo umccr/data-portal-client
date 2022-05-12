@@ -54,6 +54,8 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import List from '@material-ui/core/List';
+import MenuBookIcon from '@material-ui/icons/MenuBook';
+import LaunchPadDialog from '../components/LaunchPadDialog';
 
 const styles = (theme) => ({
   close: {
@@ -92,6 +94,8 @@ class Subject extends Component {
     redirect: false,
     dialogOpened: false,
     rowData: null,
+    launchPadDialogOpened: false,
+    launchPadRowData: null,
     openBackdrop: false,
     clickedLinks: [],
   };
@@ -232,6 +236,61 @@ class Subject extends Component {
       search: selected['keyword'],
       page: 1,
     });
+  };
+
+  // ---
+
+  handleLaunchPadClick = () => {
+    return () => {
+      this.handleLaunchPadDialogOpen();
+    };
+  };
+
+  handleLaunchPadDialogOpen = () => {
+    const launchPadDialogOpened = true;
+    this.setState({ launchPadDialogOpened }, () => this.processLaunchPad());
+  };
+
+  handleLaunchPadDialogClose = () => {
+    const launchPadDialogOpened = false;
+    const launchPadRowData = null;
+    this.setState({ launchPadDialogOpened, launchPadRowData });
+  };
+
+  processLaunchPad = async () => {
+    const { subject } = this.state;
+
+    const gplReport = subject.results.filter(
+      (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
+    );
+
+    let launchPadRowData;
+    if (Array.isArray(gplReport) && gplReport.length) {
+      launchPadRowData = {
+        subject_id: subject.id,
+        ...gplReport[0],
+      };
+    } else {
+      try {
+        const init = {
+          headers: { 'Content-Type': 'application/json' },
+          body: {
+            subject_id: subject.id,
+          },
+        };
+        const data = await API.post('gpl', '', init);
+        launchPadRowData = {
+          subject_id: subject.id,
+          ...data,
+        };
+      } catch (e) {
+        launchPadRowData = {
+          subject_id: subject.id,
+          error: e.message,
+        };
+      }
+    }
+    this.setState({ launchPadRowData });
   };
 
   // ---
@@ -399,6 +458,9 @@ class Subject extends Component {
       (r) => r.key.includes('umccrised') && r.key.endsWith('cancer_report.html')
     );
     const coverage = wgs.filter((r) => r.key.includes('cacao') && r.key.endsWith('html'));
+    const gplReport = wgs.filter(
+      (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
+    );
     const wtsBams = wts.filter((r) => r.key.endsWith('bam'));
     const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
     const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
@@ -413,7 +475,7 @@ class Subject extends Component {
       <div className={'grid'}>
         <div className={'col-12 lg:col-5'}>
           <Panel header={'Overview'}>{this.renderSubjectLandingOverview()}</Panel>
-          <Panel header={'Tools'} toggleable={true} style={{ marginTop: '1em' }}>
+          <Panel header={'Actions'} toggleable={true} style={{ marginTop: '1em' }}>
             {this.renderSubjectToolPanel()}
           </Panel>
           <Panel header={'Feature'} toggleable={true} style={{ marginTop: '1em' }}>
@@ -440,6 +502,7 @@ class Subject extends Component {
                       {this.renderResultTable('cancer report', cancer)}
                       {this.renderResultTable('pcgr', pcgr)}
                       {this.renderResultTable('cpsr', cpsr)}
+                      {this.renderResultTable('gpl report', gplReport)}
                       {this.renderResultTable('qc report', multiqc)}
                       {this.renderResultTable('coverage report', coverage)}
                       {this.renderResultTable('vcf', vcfs)}
@@ -518,7 +581,7 @@ class Subject extends Component {
   };
 
   renderSubjectToolPanel = () => {
-    const { subjectId } = this.state;
+    const { subjectId, launchPadDialogOpened, launchPadRowData } = this.state;
     return (
       <Fragment>
         <List>
@@ -528,7 +591,18 @@ class Subject extends Component {
             </ListItemIcon>
             <ListItemText primary='Open Subject Data in Online IGV' />
           </ListItem>
+          <ListItem button onClick={this.handleLaunchPadClick()}>
+            <ListItemIcon>
+              <MenuBookIcon color={'primary'} />
+            </ListItemIcon>
+            <ListItemText primary={'Generate GRIDSS PURPLE LINX Report'} />
+          </ListItem>
         </List>
+        <LaunchPadDialog
+          dialogOpened={launchPadDialogOpened}
+          rowData={launchPadRowData}
+          onDialogClose={this.handleLaunchPadDialogClose}
+        />
       </Fragment>
     );
   };
@@ -579,12 +653,13 @@ class Subject extends Component {
     const { id, lims } = this.state.subject;
     const columns = [
       { key: 'info', sortable: false },
-      { key: 'type', sortable: true },
       { key: 'sample_id', sortable: true },
       { key: 'external_sample_id', sortable: true },
       { key: 'library_id', sortable: true },
+      { key: 'type', sortable: true },
       { key: 'phenotype', sortable: true },
       { key: 'assay', sortable: true },
+      { key: 'override_cycles', sortable: true },
     ];
 
     return (
@@ -690,6 +765,7 @@ class Subject extends Component {
         color: 'default',
       },
       { key: 11, label: 'rnasum report', keyword: 'RNAseq_report.html$', color: 'default' },
+      { key: 12, label: 'gpl report', keyword: 'gridss_purple_linx linx.html$', color: 'default' },
     ];
 
     return (
