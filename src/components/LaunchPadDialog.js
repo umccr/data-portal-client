@@ -8,6 +8,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import * as PropTypes from 'prop-types';
+import Typography from '@material-ui/core/Typography';
 
 class LaunchPadDialog extends React.Component {
   render() {
@@ -42,8 +43,24 @@ class LaunchPadDialog extends React.Component {
                   })
                   .map((k) => (
                     <TableRow key={k}>
-                      <TableCell>{k.toUpperCase()}</TableCell>
-                      <TableCell>{rowData[k]}</TableCell>
+                      <TableCell>
+                        <Typography
+                          style={k === 'error' ? { color: 'red' } : { color: 'default' }}
+                          variant='body2'
+                          display='block'
+                          gutterBottom>
+                          {k.toUpperCase()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          style={k === 'error' ? { color: 'red' } : { color: 'default' }}
+                          variant='body2'
+                          display='block'
+                          gutterBottom>
+                          {rowData[k]}
+                        </Typography>
+                      </TableCell>
                     </TableRow>
                   ))}
             </TableBody>

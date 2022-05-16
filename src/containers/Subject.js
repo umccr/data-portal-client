@@ -266,28 +266,91 @@ class Subject extends Component {
 
     let launchPadRowData;
     if (Array.isArray(gplReport) && gplReport.length) {
+      // found existing GPL report, just show it
       launchPadRowData = {
         subject_id: subject.id,
         ...gplReport[0],
       };
     } else {
-      try {
-        const init = {
-          headers: { 'Content-Type': 'application/json' },
-          body: {
+      // NOTE: a bit of quick & dirty crude logic implementation here
+      // don't expect this to be stay longer after GPL ported into ICA
+      // as this should better be part of ICA Pipeline Workflow Automation like everyone else
+      // The need of on-demand "LaunchPad" feature is different thing -- i.e. to be considered
+      // better in Portal v2 revamp from ground up! Or, elsewhere dashboard. We shall see...
+      let launchGpl = true;
+      const wgsBams = subject.results
+        .filter((r) => r.key.includes('WGS') && r.key.endsWith('.bam'))
+        .map((r) => r.id);
+
+      if (Array.isArray(wgsBams) && wgsBams.length) {
+        let id = wgsBams.sort((a, b) => b - a)[0]; // detect at least one wgs bam has already frozen
+        const data = await API.get('files', `/s3/${id}/status`, {});
+        const { head_object } = data;
+        const archived = head_object['StorageClass'] === 'DEEP_ARCHIVE';
+        if (archived) {
+          const restoreStatus = head_object['Restore'];
+          if (restoreStatus) {
+            const isOngoingRequest = restoreStatus.includes('true');
+            if (isOngoingRequest) {
+              // bam restore is still in-progress, don't launch
+              launchGpl = false;
+              launchPadRowData = {
+                subject_id: subject.id,
+                error: 'Subject WGS BAMs are restoring in progress',
+              };
+            } else {
+              const expiryChunk = restoreStatus.slice(25);
+              if (!isOngoingRequest && expiryChunk) {
+                const expiryDateStr = expiryChunk.split('=')[1];
+                const expiryDate = Date.parse(expiryDateStr);
+                const expired = expiryDate < Date.now();
+                if (expired) {
+                  // restored has expired, don't launch
+                  launchGpl = false;
+                  launchPadRowData = {
+                    subject_id: subject.id,
+                    error: 'Restoration have expired. Please restore both tumor and normal BAMs.',
+                  };
+                }
+              }
+            }
+          } else {
+            // deep archived and no restore status has happened yet, don't launch
+            launchGpl = false;
+            launchPadRowData = {
+              subject_id: subject.id,
+              error: 'Subject WGS BAMs are archived. Please restore both tumor and normal BAMs.',
+            };
+          }
+        }
+      } else {
+        // no wgs bams for the subject, don't launch
+        launchGpl = false;
+        launchPadRowData = {
+          subject_id: subject.id,
+          error: 'No WGS BAMs available for the Subject',
+        };
+      }
+
+      if (launchGpl) {
+        try {
+          const init = {
+            headers: { 'Content-Type': 'application/json' },
+            body: {
+              subject_id: subject.id,
+            },
+          };
+          const data = await API.post('gpl', '', init);
+          launchPadRowData = {
             subject_id: subject.id,
-          },
-        };
-        const data = await API.post('gpl', '', init);
-        launchPadRowData = {
-          subject_id: subject.id,
-          ...data,
-        };
-      } catch (e) {
-        launchPadRowData = {
-          subject_id: subject.id,
-          error: e.message,
-        };
+            ...data,
+          };
+        } catch (e) {
+          launchPadRowData = {
+            subject_id: subject.id,
+            error: e.message,
+          };
+        }
       }
     }
     this.setState({ launchPadRowData });
