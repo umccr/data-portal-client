@@ -56,6 +56,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import List from '@material-ui/core/List';
 import MenuBookIcon from '@material-ui/icons/MenuBook';
 import LaunchPadDialog from '../components/LaunchPadDialog';
+import PreviewActionButton from '../components/PreviewActionButton';
 
 const styles = (theme) => ({
   close: {
@@ -1121,6 +1122,7 @@ class Subject extends Component {
     const columns = [
       { key: 'volume_name', sortable: true },
       { key: 'path', sortable: true },
+      { key: 'preview', sortable: false },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true, label: 'size_in_bytes' },
       { key: 'time_modified', sortable: true },
@@ -1177,6 +1179,8 @@ class Subject extends Component {
                         <HumanReadableFileSize bytes={row[col.label]} />
                       ) : col.key === 'time_modified' ? (
                         <Moment local>{row[col.key]}</Moment>
+                      ) : col.key === 'preview' ? (
+                        <PreviewActionButton data={row} />
                       ) : (
                         row[col.key]
                       )}
