@@ -91,8 +91,7 @@ function DialogData({ data }: Props) {
     presignedUrlContent: '',
   });
 
-  // const fileType = data.name.split('.').pop();
-  let fileType = 'csv';
+  const fileType = data.name.split('.').pop();
 
   useEffect(() => {
     let componentUnmount = false;
@@ -132,6 +131,8 @@ function DialogData({ data }: Props) {
           <HTMLViewers fileContent={presignedUrlData.presignedUrlContent} />
         ) : fileType === 'csv' ? (
           <CSVViewers fileContent={presignedUrlData.presignedUrlContent} />
+        ) : fileType === 'tsv' ? (
+          <TSVViewers fileContent={presignedUrlData.presignedUrlContent} />
         ) : (
           <>{`Some Component`}</>
         )}
@@ -221,6 +222,66 @@ function CSVViewers({ fileContent }: CSVViewersProps) {
                 return (
                   <TableRow hover role='checkbox' tabIndex={-1} key={index}>
                     {row.split(',').map((value: string, index: number) => {
+                      return <TableCell key={index}>{value}</TableCell>;
+                    })}
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </div>
+  );
+}
+
+type TSVViewersProps = { fileContent: string };
+function TSVViewers({ fileContent }: TSVViewersProps) {
+  const [isFirstRowHeader, setIsFirstRowHeader] = useState<boolean>(true);
+
+  // Sanitize and split string
+  const sanitizeContent: string = fileContent.replaceAll('\r\n', '\n');
+  const allRows: string[] = sanitizeContent.split('\n').filter((element) => element);
+
+  const dataRows = allRows.slice(isFirstRowHeader ? 1 : 0);
+  const headerRow = isFirstRowHeader ? allRows[0] : null;
+
+  return (
+    <div style={{ width: '100%' }}>
+      <FormControlLabel
+        value='end'
+        control={
+          <Checkbox
+            color='primary'
+            size='small'
+            checked={isFirstRowHeader}
+            onChange={() => setIsFirstRowHeader((prev) => !prev)}
+          />
+        }
+        label='Header row'
+        labelPlacement='end'
+        style={{ marginBottom: '0.5rem' }}
+      />
+      <Paper elevation={3} style={{ width: '100%' }}>
+        <TableContainer style={{ maxHeight: '75vh' }}>
+          <Table stickyHeader aria-label='sticky table'>
+            <TableHead>
+              {headerRow ? (
+                <TableRow>
+                  {headerRow.split('\t').map((column: string) => (
+                    <TableCell key={column}>{column}</TableCell>
+                  ))}
+                </TableRow>
+              ) : (
+                <></>
+              )}
+            </TableHead>
+
+            <TableBody>
+              {dataRows.map((row: string, index: number) => {
+                return (
+                  <TableRow hover role='checkbox' tabIndex={-1} key={index}>
+                    {row.split('\t').map((value: string, index: number) => {
                       return <TableCell key={index}>{value}</TableCell>;
                     })}
                   </TableRow>
