@@ -14,7 +14,19 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { Typography } from '@material-ui/core';
+import Paper from '@material-ui/core/Paper';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
 
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 /**
@@ -79,7 +91,8 @@ function DialogData({ data }: Props) {
     presignedUrlContent: '',
   });
 
-  const fileType = data.name.split('.').pop();
+  // const fileType = data.name.split('.').pop();
+  let fileType = 'csv';
 
   useEffect(() => {
     let componentUnmount = false;
@@ -117,6 +130,8 @@ function DialogData({ data }: Props) {
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'html' ? (
           <HTMLViewers fileContent={presignedUrlData.presignedUrlContent} />
+        ) : fileType === 'csv' ? (
+          <CSVViewers fileContent={presignedUrlData.presignedUrlContent} />
         ) : (
           <>{`Some Component`}</>
         )}
@@ -132,8 +147,7 @@ async function getPreSignedUrl(id: string) {
   if (Object.keys(apiResponse).includes('error')) {
     throw Error('Unable to fetch get presigned url.');
   }
-
-  return await API.get('files', `/gds/${id}/presign`, {});
+  return apiResponse;
 }
 
 async function getPreSignedUrlBody(url: string) {
@@ -158,4 +172,64 @@ function ImageViewer({ presignedUrl }: ImageViewerProps) {
 type HTMLViewersProps = { fileContent: string };
 function HTMLViewers({ fileContent }: HTMLViewersProps) {
   return <iframe style={{ height: '80vh', width: '100%' }} srcDoc={fileContent} />;
+}
+
+type CSVViewersProps = { fileContent: string };
+function CSVViewers({ fileContent }: CSVViewersProps) {
+  const [isFirstRowHeader, setIsFirstRowHeader] = useState<boolean>(true);
+
+  // Sanitize and split string
+  const sanitizeContent: string = fileContent.replaceAll('\r\n', '\n');
+  const allRows: string[] = sanitizeContent.split('\n').filter((element) => element);
+
+  const dataRows = allRows.slice(isFirstRowHeader ? 1 : 0);
+  const headerRow = isFirstRowHeader ? allRows[0] : null;
+
+  return (
+    <div style={{ width: '100%' }}>
+      <FormControlLabel
+        value='end'
+        control={
+          <Checkbox
+            color='primary'
+            size='small'
+            checked={isFirstRowHeader}
+            onChange={() => setIsFirstRowHeader((prev) => !prev)}
+          />
+        }
+        label='Header row'
+        labelPlacement='end'
+        style={{ marginBottom: '0.5rem' }}
+      />
+      <Paper elevation={3} style={{ width: '100%' }}>
+        <TableContainer style={{ maxHeight: '75vh' }}>
+          <Table stickyHeader aria-label='sticky table'>
+            <TableHead>
+              {headerRow ? (
+                <TableRow>
+                  {headerRow.split(',').map((column: string) => (
+                    <TableCell key={column}>{column}</TableCell>
+                  ))}
+                </TableRow>
+              ) : (
+                <></>
+              )}
+            </TableHead>
+
+            <TableBody>
+              {dataRows.map((row: string, index: number) => {
+                return (
+                  <TableRow hover role='checkbox' tabIndex={-1} key={index}>
+                    {row.split(',').map((value: string, index: number) => {
+                      return <TableCell key={index}>{value}</TableCell>;
+                    })}
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </div>
+  );
 }
