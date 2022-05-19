@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { API } from 'aws-amplify';
 
 // Material- UI
+import AllOutIcon from '@material-ui/icons/AllOut';
 import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import IconButton from '@material-ui/core/IconButton';
@@ -20,7 +21,6 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormGroup from '@material-ui/core/FormGroup';
@@ -40,16 +40,52 @@ const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
  */
 type Props = { data: any };
 
+const useStylesButtonIcon = makeStyles({
+  typeWarning: {
+    position: 'relative',
+    '& p': {
+      display: 'none',
+      width: '100%',
+    },
+    '&:hover': {
+      '& p': {
+        backgroundColor: 'white',
+        border: '1px solid black',
+        position: 'absolute',
+        display: 'inline',
+        width: 'max-content',
+        top: '-2.2rem',
+        left: '-100%',
+        padding: '3px',
+      },
+    },
+  },
+});
+
 export default function PreviewActionButton({ data }: Props) {
-  const isPreviewSupported = isDataTypeSupported(data.name);
+  const iconClasses = useStylesButtonIcon();
+  const isDataTypeSupported = checkIsDataTypeSupoorted(data.name);
+  const isFileSizeSupported = checkIsFileSizeSupported(data.size_in_bytes);
 
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
-  if (!isPreviewSupported) {
+  if (!isDataTypeSupported) {
     return (
-      <IconButton disabled={true}>
-        <WarningIcon />
-      </IconButton>
+      <div className={iconClasses.typeWarning}>
+        <IconButton disabled={true}>
+          <WarningIcon />
+        </IconButton>
+        <p>Unsupported FileType</p>
+      </div>
+    );
+  } else if (!isFileSizeSupported) {
+    return (
+      <div className={iconClasses.typeWarning}>
+        <IconButton disabled={true}>
+          <AllOutIcon />
+        </IconButton>
+        <p>FileSize exceed 15MB</p>
+      </div>
     );
   } else {
     return (
@@ -71,7 +107,7 @@ export default function PreviewActionButton({ data }: Props) {
 }
 
 // Helper Function
-function isDataTypeSupported(name: string) {
+function checkIsDataTypeSupoorted(name: string): boolean {
   const dataTypeSupported = [
     ...IMAGE_FILETYPE_LIST,
     ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
@@ -86,6 +122,11 @@ function isDataTypeSupported(name: string) {
       return true;
     }
   }
+  return false;
+}
+function checkIsFileSizeSupported(size_in_bytes: number): boolean {
+  // Only support file less than 15MB
+  if (size_in_bytes < 15000000) return true;
   return false;
 }
 
@@ -270,7 +311,7 @@ function DelimiterSeperatedValuesViewer(props: DelimiterSeperatedValuesViewerPro
   );
 }
 
-const useStyles = makeStyles({
+const useStylesJSONViewers = makeStyles({
   root: {
     '& pre': {
       margin: 0,
@@ -281,7 +322,7 @@ const useStyles = makeStyles({
 type JSONViewerProps = { fileContent: string };
 function JSONViewer({ fileContent }: JSONViewerProps) {
   const JSONParse = JSON.parse(fileContent);
-  const classes = useStyles();
+  const classes = useStylesJSONViewers();
 
   const cssTheme = {
     main: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
