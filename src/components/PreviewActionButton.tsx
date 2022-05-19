@@ -33,6 +33,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import JSONPretty from 'react-json-pretty';
 
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
+const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
+const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
 /**
  * Preview Action Button
  */
@@ -70,7 +72,14 @@ export default function PreviewActionButton({ data }: Props) {
 
 // Helper Function
 function isDataTypeSupported(name: string) {
-  const dataTypeSupported = [...IMAGE_FILETYPE_LIST, 'html', 'tsv', 'csv', 'json', 'txt', 'yaml'];
+  const dataTypeSupported = [
+    ...IMAGE_FILETYPE_LIST,
+    ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
+    ...PLAIN_FILETYPE_LIST,
+    'html',
+    'json',
+    'yaml',
+  ];
 
   for (const dataType of dataTypeSupported) {
     if (name.endsWith(dataType)) {
@@ -95,7 +104,8 @@ function DialogData({ data }: Props) {
     presignedUrlContent: '',
   });
 
-  const fileType = data.name.split('.').pop();
+  // const fileType = data.name.split('.').pop();
+  let fileType = 'json';
 
   useEffect(() => {
     let componentUnmount = false;
@@ -126,7 +136,14 @@ function DialogData({ data }: Props) {
     <>
       {/* Dialog that opens the preview */}
       <DialogTitle>{data.name}</DialogTitle>
-      <DialogContent style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <DialogContent
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#525659',
+          overflow: 'hidden',
+        }}>
         {presignedUrlData.isLoading ? (
           <CircularProgress />
         ) : IMAGE_FILETYPE_LIST.includes(fileType) ? (
@@ -148,7 +165,7 @@ function DialogData({ data }: Props) {
         ) : fileType === 'yaml' ? (
           <YAMLViewer fileContent={presignedUrlData.presignedUrlContent} />
         ) : (
-          <>{`Some Component`}</>
+          <PlainTextViewer fileContent={presignedUrlData.presignedUrlContent} />
         )}
       </DialogContent>
     </>
@@ -267,12 +284,12 @@ function JSONViewer({ fileContent }: JSONViewerProps) {
   const classes = useStyles();
 
   const cssTheme = {
-    main: 'line-height:1.3;color:#8dc4e2;background:#272822;overflow:auto;',
-    error: 'line-height:1.3;color:#8dc4e2;background:#272822;overflow:auto;',
-    key: 'color:#8dc4e2;',
-    string: 'color:#bb846e;',
-    value: 'color:#b2caa5;',
-    boolean: 'color:#bb846e;',
+    main: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
+    error: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
+    key: 'color:#a21515;',
+    string: 'color:#0551a5;',
+    value: 'color:#0b8658;',
+    boolean: 'color:#0551a5;',
   };
 
   // Sanitize if JSON is
@@ -293,6 +310,7 @@ function JSONViewer({ fileContent }: JSONViewerProps) {
         data={JSONParse}
         theme={cssTheme}
         style={{
+          borderRadius: '5px',
           overflow: 'auto',
         }}
       />
@@ -302,5 +320,38 @@ function JSONViewer({ fileContent }: JSONViewerProps) {
 
 type YAMLViewerProps = { fileContent: string };
 function YAMLViewer({ fileContent }: YAMLViewerProps) {
-  return <pre style={{ border:"1px solid black", backgroundColor: 'white', padding:"1rem" }}>{fileContent}</pre>;
+  return (
+    <div style={{ maxHeight: '80vh', maxWidth: '100%', overflow: 'auto', margin: '1rem' }}>
+      <pre
+        style={{
+          display: 'inline-block',
+          borderRadius: '5px',
+          border: '1px solid black',
+          backgroundColor: 'white',
+          padding: '1rem',
+          margin: 0,
+        }}>
+        {fileContent}
+      </pre>
+    </div>
+  );
+}
+
+type PlainTextViewerProps = { fileContent: string };
+function PlainTextViewer({ fileContent }: PlainTextViewerProps) {
+  return (
+    <div style={{ maxHeight: '80vh', maxWidth: '100%', overflow: 'auto', margin: '1rem' }}>
+      <pre
+        style={{
+          display: 'inline-block',
+          borderRadius: '5px',
+          border: '1px solid black',
+          backgroundColor: 'white',
+          padding: '1rem',
+          margin: 0,
+        }}>
+        {fileContent}
+      </pre>
+    </div>
+  );
 }
