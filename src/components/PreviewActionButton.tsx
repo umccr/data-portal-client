@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, { useState, useEffect } from 'react';
 
 // AWS Amplify
@@ -10,10 +9,8 @@ import AllOutIcon from '@material-ui/icons/AllOut';
 import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import IconButton from '@material-ui/core/IconButton';
-import Dialog, { DialogProps } from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
+import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Paper from '@material-ui/core/Paper';
@@ -24,10 +21,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
-import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import { makeStyles } from '@material-ui/core/styles';
 
 // Other Dependencies
@@ -140,6 +134,7 @@ function checkIsFileSizeSupported(size_in_bytes: number): boolean {
  * Handle Preview Button when Open
  */
 interface PresignedUrlObject {
+  isError: boolean;
   isLoading: boolean;
   presignedUrlString: string;
   presignedUrlContent: string;
@@ -147,6 +142,7 @@ interface PresignedUrlObject {
 function DialogData({ data }: Props) {
   const [presignedUrlData, setPresignedUrlData] = useState<PresignedUrlObject>({
     isLoading: true,
+    isError: false,
     presignedUrlString: '',
     presignedUrlContent: '',
   });
@@ -158,20 +154,30 @@ function DialogData({ data }: Props) {
     let componentUnmount = false;
 
     const fetchPresignedUrl = async () => {
-      const presignedUrlString = await getPreSignedUrl(data.id);
+      try {
+        const presignedUrlString = await getPreSignedUrl(data.id);
 
-      // Skip stream data if an image file
-      let presignedUrlContent = '';
-      if (!IMAGE_FILETYPE_LIST.includes(fileType)) {
-        presignedUrlContent = await getPreSignedUrlBody(presignedUrlString);
+        // Skip stream data if an image file
+        let presignedUrlContent = '';
+        if (!IMAGE_FILETYPE_LIST.includes(fileType)) {
+          presignedUrlContent = await getPreSignedUrlBody(presignedUrlString);
+        }
+        if (componentUnmount) return;
+        setPresignedUrlData({
+          isError: false,
+          isLoading: false,
+          presignedUrlString: presignedUrlString,
+          presignedUrlContent: presignedUrlContent,
+        });
+      } catch {
+        if (componentUnmount) return;
+        setPresignedUrlData({
+          isError: true,
+          isLoading: false,
+          presignedUrlString: '',
+          presignedUrlContent: '',
+        });
       }
-
-      if (componentUnmount) return;
-      setPresignedUrlData({
-        isLoading: false,
-        presignedUrlString: presignedUrlString,
-        presignedUrlContent: presignedUrlContent,
-      });
     };
     fetchPresignedUrl();
 
@@ -193,6 +199,8 @@ function DialogData({ data }: Props) {
         }}>
         {presignedUrlData.isLoading ? (
           <CircularProgress />
+        ) : presignedUrlData.isError ? (
+          <WarningIcon />
         ) : IMAGE_FILETYPE_LIST.includes(fileType) ? (
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'html' ? (
@@ -327,7 +335,6 @@ const useStylesJSONViewers = makeStyles({
 
 type JSONViewerProps = { fileContent: string };
 function JSONViewer({ fileContent }: JSONViewerProps) {
-  const JSONParse = JSON.parse(fileContent);
   const classes = useStylesJSONViewers();
 
   const cssTheme = {
@@ -340,29 +347,31 @@ function JSONViewer({ fileContent }: JSONViewerProps) {
   };
 
   // Sanitize if JSON is
-  let JSONString: string = '';
   try {
-    const JSONParse = JSON.parse(fileContent);
-    JSONString = JSON.stringify(JSONParse, null, 2);
+    let JSONParse = JSON.parse(fileContent);
+    return (
+      <Paper
+        elevation={3}
+        className={classes.root}
+        style={{ maxWidth: '100%', maxHeight: '80vh', display: 'flex' }}>
+        <JSONPretty
+          id='json-pretty'
+          data={JSONParse}
+          theme={cssTheme}
+          style={{
+            borderRadius: '5px',
+            overflow: 'auto',
+          }}
+        />
+      </Paper>
+    );
   } catch (err) {
-    JSONString = fileContent;
+    return (
+      <div>
+        <p>ERROR</p>
+      </div>
+    );
   }
-  return (
-    <Paper
-      elevation={3}
-      className={classes.root}
-      style={{ maxWidth: '100%', maxHeight: '80vh', display: 'flex' }}>
-      <JSONPretty
-        id='json-pretty'
-        data={JSONParse}
-        theme={cssTheme}
-        style={{
-          borderRadius: '5px',
-          overflow: 'auto',
-        }}
-      />
-    </Paper>
-  );
 }
 
 type YAMLViewerProps = { fileContent: string };
