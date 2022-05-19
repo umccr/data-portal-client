@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { API } from 'aws-amplify';
 
 // Material- UI
+import CloseIcon from '@material-ui/icons/Close';
 import AllOutIcon from '@material-ui/icons/AllOut';
 import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -100,6 +101,11 @@ export default function PreviewActionButton({ data }: Props) {
           open={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}>
           <DialogData data={data} />
+          <IconButton
+            style={{ position: 'absolute', right: '0', top: '5px' }}
+            onClick={() => setIsPreviewOpen(false)}>
+            <CloseIcon />
+          </IconButton>
         </Dialog>
       </>
     );
