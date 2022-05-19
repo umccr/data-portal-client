@@ -128,11 +128,17 @@ function DialogData({ data }: Props) {
         ) : IMAGE_FILETYPE_LIST.includes(fileType) ? (
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'html' ? (
-          <HTMLViewers fileContent={presignedUrlData.presignedUrlContent} />
+          <HTMLViewer fileContent={presignedUrlData.presignedUrlContent} />
         ) : fileType === 'csv' ? (
-          <CSVViewers fileContent={presignedUrlData.presignedUrlContent} />
+          <DelimiterSeperatedValuesViewer
+            fileContent={presignedUrlData.presignedUrlContent}
+            delimiter=','
+          />
         ) : fileType === 'tsv' ? (
-          <TSVViewers fileContent={presignedUrlData.presignedUrlContent} />
+          <DelimiterSeperatedValuesViewer
+            fileContent={presignedUrlData.presignedUrlContent}
+            delimiter='\t'
+          />
         ) : (
           <>{`Some Component`}</>
         )}
@@ -143,6 +149,8 @@ function DialogData({ data }: Props) {
 
 // Helper function
 async function getPreSignedUrl(id: string) {
+  return 'https://umccr-temp-dev.s3.ap-southeast-2.amazonaws.com/william/test-head.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA4IXYHPYNGAMPUGH3%2F20220519%2Fap-southeast-2%2Fs3%2Faws4_request&X-Amz-Date=20220519T010754Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAgaDmFwLXNvdXRoZWFzdC0yIkgwRgIhAOYmByZSzrHjwPEBA1RBk8whXCcmfm05Me8AmijUlZ%2B1AiEAkzTbUCoapcP3tbFaY3yqnMiEL4DiGUNNFBoVu8aKYvsqoQMI4f%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgw4NDM0MDc5MTY1NzAiDFtMI%2F7IevQQnLESNSr1AnorHEMrHV9NIr4E%2FsX82gOZT9SS%2BZfvcXVrAavvNXpZ8Svr0c7krNUmmqcGoePOx%2FRVq0ixVAs2ipcPOpj01KAaoyHk0HfleFR%2Bjd1kv8gsIHKni7wK%2FL7lpsJa32JXCrTqsP%2FSGCQbRwOgt3vaV2w4nqocYDLgJkRRQxGjV1s3LANgEO0Kg51qXntua9GjTw3fTH5DV%2Fq0sCYzdsQOvNdJaKufP8Q2yYkwjE%2B%2BSYc38wIIXpQXhIa2xnQUwgVzl%2BvGA3Xe5mwTG6nqMg0aqrMZsFVyV5v%2Fy066GSpphKwm61S8yBusLbO1hkWyba99GaYjLt7bx66GVD1qGYBR59Z6D5H5K3iaOt1qLgaTy8D1JOPJMKBr%2B2EVbED0msx7KlEadIM5%2BvqRkl7wRAnCmh14upxGoctRzhHf0bi%2Beet7yH9Aq6%2FAWcqMulYHfzs2dPVuE292BKG6fxhSdCXPBIOfY13bJeZ6Yw%2FrlLIgdQTFDX%2B4kLoww4uWlAY6pQHOBU1PaXC7w%2Bq5%2BYn2D0rbZG7gX83i4q3oyv9lx3Fyrd2cwARgZHUOnJrjP%2FjFOAiffm0quBH4duHuNzRvCDJlgDfkzqaWSfOMn2mKE5Er0m2UCtzrzK30af%2B3Du01INuSAzhaLZ%2F9eoxPKBIcNObtEM5VkcLueBNw0b%2FJgaagVNZARovovI2Ts6sad3H%2FJI%2B85y0WOb14bCrTr2IxO0SFlMxTVFc%3D&X-Amz-Signature=46c035afff7a26eacd5780ec977037bd40da2fefad5d4c8150170a938b7418c6';
+  return 'https://umccr-temp-dev.s3.ap-southeast-2.amazonaws.com/william/test-head.tsv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA4IXYHPYNGAMPUGH3%2F20220519%2Fap-southeast-2%2Fs3%2Faws4_request&X-Amz-Date=20220519T005208Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAgaDmFwLXNvdXRoZWFzdC0yIkgwRgIhAOYmByZSzrHjwPEBA1RBk8whXCcmfm05Me8AmijUlZ%2B1AiEAkzTbUCoapcP3tbFaY3yqnMiEL4DiGUNNFBoVu8aKYvsqoQMI4f%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARADGgw4NDM0MDc5MTY1NzAiDFtMI%2F7IevQQnLESNSr1AnorHEMrHV9NIr4E%2FsX82gOZT9SS%2BZfvcXVrAavvNXpZ8Svr0c7krNUmmqcGoePOx%2FRVq0ixVAs2ipcPOpj01KAaoyHk0HfleFR%2Bjd1kv8gsIHKni7wK%2FL7lpsJa32JXCrTqsP%2FSGCQbRwOgt3vaV2w4nqocYDLgJkRRQxGjV1s3LANgEO0Kg51qXntua9GjTw3fTH5DV%2Fq0sCYzdsQOvNdJaKufP8Q2yYkwjE%2B%2BSYc38wIIXpQXhIa2xnQUwgVzl%2BvGA3Xe5mwTG6nqMg0aqrMZsFVyV5v%2Fy066GSpphKwm61S8yBusLbO1hkWyba99GaYjLt7bx66GVD1qGYBR59Z6D5H5K3iaOt1qLgaTy8D1JOPJMKBr%2B2EVbED0msx7KlEadIM5%2BvqRkl7wRAnCmh14upxGoctRzhHf0bi%2Beet7yH9Aq6%2FAWcqMulYHfzs2dPVuE292BKG6fxhSdCXPBIOfY13bJeZ6Yw%2FrlLIgdQTFDX%2B4kLoww4uWlAY6pQHOBU1PaXC7w%2Bq5%2BYn2D0rbZG7gX83i4q3oyv9lx3Fyrd2cwARgZHUOnJrjP%2FjFOAiffm0quBH4duHuNzRvCDJlgDfkzqaWSfOMn2mKE5Er0m2UCtzrzK30af%2B3Du01INuSAzhaLZ%2F9eoxPKBIcNObtEM5VkcLueBNw0b%2FJgaagVNZARovovI2Ts6sad3H%2FJI%2B85y0WOb14bCrTr2IxO0SFlMxTVFc%3D&X-Amz-Signature=fbc6f181b36f3d44b2d1e23528ee01cf3389f8b3f777fe6d6e95833f6ffe7fa2';
   const apiResponse = await API.get('files', `/gds/${id}/presign`, {});
 
   if (Object.keys(apiResponse).includes('error')) {
@@ -170,13 +178,17 @@ function ImageViewer({ presignedUrl }: ImageViewerProps) {
   return <img style={{ maxHeight: '100%', maxWidth: '100%' }} src={presignedUrl} />;
 }
 
-type HTMLViewersProps = { fileContent: string };
-function HTMLViewers({ fileContent }: HTMLViewersProps) {
+type HTMLViewerProps = { fileContent: string };
+function HTMLViewer({ fileContent }: HTMLViewerProps) {
   return <iframe style={{ height: '80vh', width: '100%' }} srcDoc={fileContent} />;
 }
 
-type CSVViewersProps = { fileContent: string };
-function CSVViewers({ fileContent }: CSVViewersProps) {
+type DelimiterSeperatedValuesViewerProps = {
+  fileContent: string;
+  delimiter: string;
+};
+function DelimiterSeperatedValuesViewer(props: DelimiterSeperatedValuesViewerProps) {
+  const { fileContent, delimiter } = props;
   const [isFirstRowHeader, setIsFirstRowHeader] = useState<boolean>(true);
 
   // Sanitize and split string
@@ -208,7 +220,7 @@ function CSVViewers({ fileContent }: CSVViewersProps) {
             <TableHead>
               {headerRow ? (
                 <TableRow>
-                  {headerRow.split(',').map((column: string) => (
+                  {headerRow.split(delimiter).map((column: string) => (
                     <TableCell key={column}>{column}</TableCell>
                   ))}
                 </TableRow>
@@ -221,67 +233,7 @@ function CSVViewers({ fileContent }: CSVViewersProps) {
               {dataRows.map((row: string, index: number) => {
                 return (
                   <TableRow hover role='checkbox' tabIndex={-1} key={index}>
-                    {row.split(',').map((value: string, index: number) => {
-                      return <TableCell key={index}>{value}</TableCell>;
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </div>
-  );
-}
-
-type TSVViewersProps = { fileContent: string };
-function TSVViewers({ fileContent }: TSVViewersProps) {
-  const [isFirstRowHeader, setIsFirstRowHeader] = useState<boolean>(true);
-
-  // Sanitize and split string
-  const sanitizeContent: string = fileContent.replaceAll('\r\n', '\n');
-  const allRows: string[] = sanitizeContent.split('\n').filter((element) => element);
-
-  const dataRows = allRows.slice(isFirstRowHeader ? 1 : 0);
-  const headerRow = isFirstRowHeader ? allRows[0] : null;
-
-  return (
-    <div style={{ width: '100%' }}>
-      <FormControlLabel
-        value='end'
-        control={
-          <Checkbox
-            color='primary'
-            size='small'
-            checked={isFirstRowHeader}
-            onChange={() => setIsFirstRowHeader((prev) => !prev)}
-          />
-        }
-        label='Header row'
-        labelPlacement='end'
-        style={{ marginBottom: '0.5rem' }}
-      />
-      <Paper elevation={3} style={{ width: '100%' }}>
-        <TableContainer style={{ maxHeight: '75vh' }}>
-          <Table stickyHeader aria-label='sticky table'>
-            <TableHead>
-              {headerRow ? (
-                <TableRow>
-                  {headerRow.split('\t').map((column: string) => (
-                    <TableCell key={column}>{column}</TableCell>
-                  ))}
-                </TableRow>
-              ) : (
-                <></>
-              )}
-            </TableHead>
-
-            <TableBody>
-              {dataRows.map((row: string, index: number) => {
-                return (
-                  <TableRow hover role='checkbox' tabIndex={-1} key={index}>
-                    {row.split('\t').map((value: string, index: number) => {
+                    {row.split(delimiter).map((value: string, index: number) => {
                       return <TableCell key={index}>{value}</TableCell>;
                     })}
                   </TableRow>
