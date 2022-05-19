@@ -95,8 +95,7 @@ function DialogData({ data }: Props) {
     presignedUrlContent: '',
   });
 
-  // const fileType = data.name.split('.').pop();
-  let fileType = 'json';
+  const fileType = data.name.split('.').pop();
 
   useEffect(() => {
     let componentUnmount = false;
@@ -146,6 +145,8 @@ function DialogData({ data }: Props) {
           />
         ) : fileType === 'json' ? (
           <JSONViewer fileContent={presignedUrlData.presignedUrlContent} />
+        ) : fileType === 'yaml' ? (
+          <YAMLViewer fileContent={presignedUrlData.presignedUrlContent} />
         ) : (
           <>{`Some Component`}</>
         )}
@@ -297,4 +298,9 @@ function JSONViewer({ fileContent }: JSONViewerProps) {
       />
     </Paper>
   );
+}
+
+type YAMLViewerProps = { fileContent: string };
+function YAMLViewer({ fileContent }: YAMLViewerProps) {
+  return <pre style={{ border:"1px solid black", backgroundColor: 'white', padding:"1rem" }}>{fileContent}</pre>;
 }
