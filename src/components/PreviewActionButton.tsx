@@ -30,11 +30,11 @@ import JSONPretty from 'react-json-pretty';
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
 const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
+const OTHER_FILETYPE_LIST: string[] = ['html', 'json', 'yaml'];
+
 /**
  * Preview Action Button
  */
-type Props = { data: any };
-
 const useStylesButtonIcon = makeStyles({
   typeWarning: {
     position: 'relative',
@@ -56,11 +56,17 @@ const useStylesButtonIcon = makeStyles({
     },
   },
 });
-
-export default function PreviewActionButton({ data }: Props) {
+type PreviewActionButtonProps = {
+  type: string;
+  data: any;
+};
+export default function PreviewActionButton({ type, data }: PreviewActionButtonProps) {
   const iconClasses = useStylesButtonIcon();
-  const isDataTypeSupported = checkIsDataTypeSupoorted(data.name);
-  const isFileSizeSupported = checkIsFileSizeSupported(data.size_in_bytes);
+
+  const fileName = type == 'gds' ? data.name : data.key;
+  const fileSize = type == 'gds' ? data.size_in_bytes : data.size;
+  const isDataTypeSupported = checkIsDataTypeSupoorted(fileName);
+  const isFileSizeSupported = checkIsFileSizeSupported(fileSize);
 
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
@@ -70,6 +76,8 @@ export default function PreviewActionButton({ data }: Props) {
         <IconButton disabled={true}>
           <WarningIcon />
         </IconButton>
+
+        {/* Text will show on hover defined on div class */}
         <p>Unsupported FileType</p>
       </div>
     );
@@ -79,6 +87,8 @@ export default function PreviewActionButton({ data }: Props) {
         <IconButton disabled={true}>
           <AllOutIcon />
         </IconButton>
+
+        {/* Text will show on hover defined on div class */}
         <p>FileSize exceed 15MB</p>
       </div>
     );
@@ -94,7 +104,7 @@ export default function PreviewActionButton({ data }: Props) {
           fullWidth={true}
           open={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}>
-          <DialogData data={data} />
+          <DialogData type={type} data={data} />
           <IconButton
             style={{ position: 'absolute', right: '0', top: '5px' }}
             onClick={() => setIsPreviewOpen(false)}>
@@ -112,9 +122,7 @@ function checkIsDataTypeSupoorted(name: string): boolean {
     ...IMAGE_FILETYPE_LIST,
     ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
     ...PLAIN_FILETYPE_LIST,
-    'html',
-    'json',
-    'yaml',
+    ...OTHER_FILETYPE_LIST,
   ];
 
   for (const dataType of dataTypeSupported) {
@@ -139,7 +147,11 @@ interface PresignedUrlObject {
   presignedUrlString: string;
   presignedUrlContent: string;
 }
-function DialogData({ data }: Props) {
+type DialogDataProps = {
+  type: string;
+  data: any;
+};
+function DialogData({ type, data }: DialogDataProps) {
   const [presignedUrlData, setPresignedUrlData] = useState<PresignedUrlObject>({
     isLoading: true,
     isError: false,
@@ -147,15 +159,15 @@ function DialogData({ data }: Props) {
     presignedUrlContent: '',
   });
 
-  // const fileType = data.name.split('.').pop();
-  let fileType = 'json';
+  const fileName = type == 'gds' ? data.name : data.key;
+  const fileType = fileName.split('.').pop();
 
   useEffect(() => {
     let componentUnmount = false;
 
     const fetchPresignedUrl = async () => {
       try {
-        const presignedUrlString = await getPreSignedUrl(data.id);
+        const presignedUrlString = await getPreSignedUrl(type, data.id);
 
         // Skip stream data if an image file
         let presignedUrlContent = '';
@@ -184,11 +196,11 @@ function DialogData({ data }: Props) {
     return () => {
       componentUnmount = true;
     };
-  }, [data.id]);
+  }, [data.id, type]);
   return (
     <>
       {/* Dialog that opens the preview */}
-      <DialogTitle>{data.name}</DialogTitle>
+      <DialogTitle style={{ minHeight: '4rem' }}>{fileName}</DialogTitle>
       <DialogContent
         style={{
           display: 'flex',
@@ -198,9 +210,11 @@ function DialogData({ data }: Props) {
           overflow: 'hidden',
         }}>
         {presignedUrlData.isLoading ? (
-          <CircularProgress />
+          <div style={{ minHeight: '30vh' }}>
+            <CircularProgress />
+          </div>
         ) : presignedUrlData.isError ? (
-          <WarningIcon />
+          <WarningIcon fontSize='large' style={{ minHeight: '30vh' }} />
         ) : IMAGE_FILETYPE_LIST.includes(fileType) ? (
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'html' ? (
@@ -228,13 +242,13 @@ function DialogData({ data }: Props) {
 }
 
 // Helper function
-async function getPreSignedUrl(id: string) {
-  const apiResponse = await API.get('files', `/gds/${id}/presign`, {});
+async function getPreSignedUrl(type: string, id: string) {
+  const { error, signed_url } = await API.get('files', `/${type}/${id}/presign`, {});
 
-  if (Object.keys(apiResponse).includes('error')) {
+  if (error) {
     throw Error('Unable to fetch get presigned url.');
   }
-  return apiResponse;
+  return signed_url;
 }
 
 async function getPreSignedUrlBody(url: string) {

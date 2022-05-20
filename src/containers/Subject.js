@@ -674,6 +674,7 @@ class Subject extends Component {
   renderResultTable = (title, data, label) => {
     const columns = [
       { key: 'key', sortable: true },
+      { key: 'preview', sortable: true },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
       { key: 'last_modified_date', sortable: true },
@@ -700,6 +701,8 @@ class Subject extends Component {
                     <HumanReadableFileSize bytes={row[col.key]} />
                   ) : col.key === 'last_modified_date' ? (
                     <Moment local>{row[col.key]}</Moment>
+                  ) : col.key === 'preview' ? (
+                    <PreviewActionButton type='s3' data={row} />
                   ) : (
                     row[col.key]
                   )}
@@ -857,6 +860,7 @@ class Subject extends Component {
     const columns = [
       { key: 'bucket', sortable: true },
       { key: 'key', sortable: true },
+      { key: 'preview', sortable: false },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
       { key: 'last_modified_date', sortable: true },
@@ -913,6 +917,8 @@ class Subject extends Component {
                         <HumanReadableFileSize bytes={row[col.key]} />
                       ) : col.key === 'last_modified_date' ? (
                         <Moment local>{row[col.key]}</Moment>
+                      ) : col.key === 'preview' ? (
+                        <PreviewActionButton type='s3' data={row} />
                       ) : (
                         row[col.key]
                       )}
@@ -1180,7 +1186,7 @@ class Subject extends Component {
                       ) : col.key === 'time_modified' ? (
                         <Moment local>{row[col.key]}</Moment>
                       ) : col.key === 'preview' ? (
-                        <PreviewActionButton data={row} />
+                        <PreviewActionButton type='gds' data={row} />
                       ) : (
                         row[col.key]
                       )}
