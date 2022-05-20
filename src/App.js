@@ -208,7 +208,7 @@ class App extends Component {
           authUserInfo={authUserInfo}
           handleLogOutClicked={this.handleLogOutClicked}
           handleDrawerToggle={this.handleDrawerToggle}
-          handleSignIn={this.props.OAuthSignIn}
+          handleSignIn={() => Auth.federatedSignIn({ provider: 'Google' })}
           handleSignOut={this.handleSignOut}
           title={
             <Switch>
@@ -260,7 +260,7 @@ class App extends Component {
   }
 
   renderLanding() {
-    return <LandingPage handleSignIn={this.props.OAuthSignIn} />;
+    return <LandingPage handleSignIn={() => Auth.federatedSignIn({ provider: 'Google' })} />;
   }
 
   render() {
