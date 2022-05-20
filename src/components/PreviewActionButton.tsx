@@ -267,12 +267,22 @@ async function getPreSignedUrlBody(url: string) {
  */
 type ImageViewerProps = { presignedUrl: string };
 function ImageViewer({ presignedUrl }: ImageViewerProps) {
-  return <img style={{ maxHeight: '100%', maxWidth: '100%' }} src={presignedUrl} />;
+  return (
+    <img
+      style={{ maxHeight: '100%', maxWidth: '100%', backgroundColor: 'white' }}
+      src={presignedUrl}
+    />
+  );
 }
 
 type HTMLViewerProps = { fileContent: string };
 function HTMLViewer({ fileContent }: HTMLViewerProps) {
-  return <iframe style={{ height: '80vh', width: '100%' }} srcDoc={fileContent} />;
+  return (
+    <iframe
+      style={{ height: '80vh', width: '100%', backgroundColor: 'white' }}
+      srcDoc={fileContent}
+    />
+  );
 }
 
 type DelimiterSeperatedValuesViewerProps = {
@@ -291,7 +301,7 @@ function DelimiterSeperatedValuesViewer(props: DelimiterSeperatedValuesViewerPro
   const headerRow = isFirstRowHeader ? allRows[0] : null;
 
   return (
-    <div style={{ width: '100%' }}>
+    <Paper style={{ width: '100%', background: 'white', padding: '1rem' }}>
       <FormControlLabel
         value='end'
         control={
@@ -335,7 +345,7 @@ function DelimiterSeperatedValuesViewer(props: DelimiterSeperatedValuesViewerPro
           </Table>
         </TableContainer>
       </Paper>
-    </div>
+    </Paper>
   );
 }
 
