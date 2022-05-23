@@ -56,6 +56,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import List from '@material-ui/core/List';
 import MenuBookIcon from '@material-ui/icons/MenuBook';
 import LaunchPadDialog from '../components/LaunchPadDialog';
+import PreviewActionButton from '../components/PreviewActionButton';
 
 const styles = (theme) => ({
   close: {
@@ -673,6 +674,7 @@ class Subject extends Component {
   renderResultTable = (title, data, label) => {
     const columns = [
       { key: 'key', sortable: true },
+      { key: 'preview', sortable: true },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
       { key: 'last_modified_date', sortable: true },
@@ -699,6 +701,8 @@ class Subject extends Component {
                     <HumanReadableFileSize bytes={row[col.key]} />
                   ) : col.key === 'last_modified_date' ? (
                     <Moment local>{row[col.key]}</Moment>
+                  ) : col.key === 'preview' ? (
+                    <PreviewActionButton type='s3' data={row} />
                   ) : (
                     row[col.key]
                   )}
@@ -856,6 +860,7 @@ class Subject extends Component {
     const columns = [
       { key: 'bucket', sortable: true },
       { key: 'key', sortable: true },
+      { key: 'preview', sortable: false },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
       { key: 'last_modified_date', sortable: true },
@@ -912,6 +917,8 @@ class Subject extends Component {
                         <HumanReadableFileSize bytes={row[col.key]} />
                       ) : col.key === 'last_modified_date' ? (
                         <Moment local>{row[col.key]}</Moment>
+                      ) : col.key === 'preview' ? (
+                        <PreviewActionButton type='s3' data={row} />
                       ) : (
                         row[col.key]
                       )}
@@ -1121,6 +1128,7 @@ class Subject extends Component {
     const columns = [
       { key: 'volume_name', sortable: true },
       { key: 'path', sortable: true },
+      { key: 'preview', sortable: false },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true, label: 'size_in_bytes' },
       { key: 'time_modified', sortable: true },
@@ -1177,6 +1185,8 @@ class Subject extends Component {
                         <HumanReadableFileSize bytes={row[col.label]} />
                       ) : col.key === 'time_modified' ? (
                         <Moment local>{row[col.key]}</Moment>
+                      ) : col.key === 'preview' ? (
+                        <PreviewActionButton type='gds' data={row} />
                       ) : (
                         row[col.key]
                       )}
