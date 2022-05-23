@@ -28,6 +28,12 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 import './primeod.css';
 import LandingPage from './containers/LandingPage';
+import AssessmentIcon from '@material-ui/icons/Assessment';
+import PolicyIcon from '@material-ui/icons/Policy';
+import LaunchIcon from '@material-ui/icons/Launch';
+
+const isProd = process.env.REACT_APP_STAGE === 'prod' ? true : false;
+const umccrDomain = isProd ? '.umccr.org' : '.dev.umccr.org';
 
 const drawerWidth = 240;
 
@@ -191,6 +197,30 @@ class App extends Component {
                   <StorageIcon />
                 </ListItemIcon>
                 <ListItemText primary='Storage Stat' />
+              </ListItem>
+              <ListItem
+                button
+                onClick={() => window.open(`https://status.data${umccrDomain}`, '_blank')}>
+                <ListItemIcon>
+                  <AssessmentIcon />
+                </ListItemIcon>
+                <ListItemText primary='Status Page' />
+                <ListItemIcon>
+                  <LaunchIcon style={{ fontSize: '1rem' }} />
+                </ListItemIcon>
+              </ListItem>
+              <ListItem
+                button
+                onClick={() =>
+                  window.open(`https://sscheck${umccrDomain}/sample-sheet-checker`, '_blank')
+                }>
+                <ListItemIcon>
+                  <PolicyIcon />
+                </ListItemIcon>
+                <ListItemText primary='Sample Sheet Check' />
+                <ListItemIcon>
+                  <LaunchIcon style={{ fontSize: '1rem' }} />
+                </ListItemIcon>
               </ListItem>
             </Fragment>
           )}
