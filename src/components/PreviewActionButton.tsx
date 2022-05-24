@@ -224,6 +224,7 @@ function DialogData({ type, data }: DialogDataProps) {
           alignItems: 'center',
           backgroundColor: '#525659',
           overflow: 'hidden',
+          padding: '1px 0 0 0',
         }}>
         {presignedUrlData.isLoading ? (
           <div
@@ -240,7 +241,7 @@ function DialogData({ type, data }: DialogDataProps) {
         ) : IMAGE_FILETYPE_LIST.includes(fileType) ? (
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
         ) : HTML_FILETYPE_LIST.includes(fileType) ? (
-          <HTMLViewer preSignedUrl={presignedUrlData.presignedUrlString} />
+          <HTMLViewer presignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'csv' ? (
           <DelimiterSeperatedValuesViewer
             fileContent={presignedUrlData.presignedUrlContent}
@@ -301,12 +302,12 @@ function ImageViewer({ presignedUrl }: ImageViewerProps) {
   );
 }
 
-type HTMLViewerProps = { preSignedUrl: string };
-function HTMLViewer({ preSignedUrl }: HTMLViewerProps) {
+type HTMLViewerProps = { presignedUrl: string };
+function HTMLViewer({ presignedUrl }: HTMLViewerProps) {
   return (
     <iframe
       style={{ height: '80vh', width: '100%', backgroundColor: 'white' }}
-      src={preSignedUrl}
+      src={presignedUrl}
     />
   );
 }
