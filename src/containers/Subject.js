@@ -97,6 +97,7 @@ class Subject extends Component {
     rowData: null,
     launchPadDialogOpened: false,
     launchPadRowData: null,
+    launchPadDialogConfirmed: false,
     openBackdrop: false,
     clickedLinks: [],
   };
@@ -255,7 +256,37 @@ class Subject extends Component {
   handleLaunchPadDialogClose = () => {
     const launchPadDialogOpened = false;
     const launchPadRowData = null;
-    this.setState({ launchPadDialogOpened, launchPadRowData });
+    const launchPadDialogConfirmed = false;
+    this.setState({ launchPadDialogOpened, launchPadRowData, launchPadDialogConfirmed });
+  };
+
+  handleLaunchPadDialogConfirmClicked = async () => {
+    const { subject } = this.state;
+
+    let launchPadDialogConfirmed = false;
+    let launchPadRowData = null;
+    this.setState({ launchPadRowData, launchPadDialogConfirmed });
+
+    try {
+      const init = {
+        headers: { 'Content-Type': 'application/json' },
+        body: {
+          subject_id: subject.id,
+        },
+      };
+      const data = await API.post('gpl', '', init);
+      launchPadRowData = {
+        subject_id: subject.id,
+        ...data,
+      };
+    } catch (e) {
+      launchPadRowData = {
+        subject_id: subject.id,
+        error: e.message,
+      };
+    }
+
+    this.setState({ launchPadRowData, launchPadDialogConfirmed });
   };
 
   processLaunchPad = async () => {
@@ -265,6 +296,7 @@ class Subject extends Component {
       (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
     );
 
+    let launchPadDialogConfirmed = false;
     let launchPadRowData;
     if (Array.isArray(gplReport) && gplReport.length) {
       // found existing GPL report, just show it
@@ -334,27 +366,14 @@ class Subject extends Component {
       }
 
       if (launchGpl) {
-        try {
-          const init = {
-            headers: { 'Content-Type': 'application/json' },
-            body: {
-              subject_id: subject.id,
-            },
-          };
-          const data = await API.post('gpl', '', init);
-          launchPadRowData = {
-            subject_id: subject.id,
-            ...data,
-          };
-        } catch (e) {
-          launchPadRowData = {
-            subject_id: subject.id,
-            error: e.message,
-          };
-        }
+        launchPadRowData = {
+          subject_id: subject.id,
+          message: 'Confirm launching GPL Report batch job?',
+        };
+        launchPadDialogConfirmed = true;
       }
     }
-    this.setState({ launchPadRowData });
+    this.setState({ launchPadRowData, launchPadDialogConfirmed });
   };
 
   // ---
@@ -645,7 +664,8 @@ class Subject extends Component {
   };
 
   renderSubjectToolPanel = () => {
-    const { subjectId, launchPadDialogOpened, launchPadRowData } = this.state;
+    const { subjectId, launchPadDialogOpened, launchPadRowData, launchPadDialogConfirmed } =
+      this.state;
     return (
       <Fragment>
         <List>
@@ -666,6 +686,8 @@ class Subject extends Component {
           dialogOpened={launchPadDialogOpened}
           rowData={launchPadRowData}
           onDialogClose={this.handleLaunchPadDialogClose}
+          confirmed={launchPadDialogConfirmed}
+          onLaunchPadDialogConfirm={this.handleLaunchPadDialogConfirmClicked}
         />
       </Fragment>
     );
