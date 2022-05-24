@@ -28,9 +28,14 @@ import { Typography } from '@material-ui/core';
 import JSONPretty from 'react-json-pretty';
 
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
-const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
-const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
-const OTHER_FILETYPE_LIST: string[] = ['html', 'json', 'yaml'];
+
+/**
+ * For Temporary only support Image filetype
+ * TODO: Uncomment the following constants below
+ */
+// const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
+// const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
+// const OTHER_FILETYPE_LIST: string[] = ['html', 'json', 'yaml'];
 
 /**
  * Preview Action Button
@@ -77,9 +82,15 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
 function checkIsDataTypeSupoorted(name: string): boolean {
   const dataTypeSupported = [
     ...IMAGE_FILETYPE_LIST,
-    ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
-    ...PLAIN_FILETYPE_LIST,
-    ...OTHER_FILETYPE_LIST,
+
+    /**
+     * For Temporary only support Image filetype
+     * TODO: Uncomment the following constants below
+     */
+
+    // ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
+    // ...PLAIN_FILETYPE_LIST,
+    // ...OTHER_FILETYPE_LIST,
   ];
 
   for (const dataType of dataTypeSupported) {
