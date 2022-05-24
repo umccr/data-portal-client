@@ -5,6 +5,7 @@ import { API } from 'aws-amplify';
 
 // Material- UI
 import CloseIcon from '@material-ui/icons/Close';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import IconButton from '@material-ui/core/IconButton';
@@ -28,23 +29,46 @@ import { Typography } from '@material-ui/core';
 import JSONPretty from 'react-json-pretty';
 
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
-
+const HTML_FILETYPE_LIST: string[] = ['html'];
 /**
- * For Temporary only support Image filetype
+ * For Temporary only support Image filetype due to cors-origin policy
  * TODO: Uncomment the following constants below
  */
-// const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
-// const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
-// const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
+const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
+const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
+const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
 
 /**
  * Preview Action Button
  */
+const useStylesButtonIcon = makeStyles({
+  typeWarning: {
+    position: 'relative',
+    '& p': {
+      display: 'none',
+      width: '100%',
+    },
+    '&:hover': {
+      '& p': {
+        backgroundColor: 'white',
+        border: '1px solid black',
+        position: 'absolute',
+        display: 'inline',
+        width: 'max-content',
+        top: '-2.2rem',
+        left: '-100%',
+        padding: '3px',
+      },
+    },
+  },
+});
 type PreviewActionButtonProps = {
   type: string;
   data: any;
 };
 export default function PreviewActionButton({ type, data }: PreviewActionButtonProps) {
+  const iconClasses = useStylesButtonIcon();
+
   const fileName = type == 'gds' ? data.name : data.key;
   const fileSize = type == 'gds' ? data.size_in_bytes : data.size;
   const isDataTypeSupported = checkIsDataTypeSupoorted(fileName);
@@ -52,8 +76,28 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
 
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
-  if (!isDataTypeSupported || !isFileSizeSupported) {
-    return <div />;
+  if (!isDataTypeSupported) {
+    return (
+      <div className={iconClasses.typeWarning}>
+        <IconButton disabled={true}>
+          <VisibilityOffIcon />
+        </IconButton>
+
+        {/* Text will show on hover defined on div class */}
+        <p>Unsupported FileType</p>
+      </div>
+    );
+  } else if (!isFileSizeSupported) {
+    return (
+      <div className={iconClasses.typeWarning}>
+        <IconButton disabled={true}>
+          <VisibilityOffIcon />
+        </IconButton>
+
+        {/* Text will show on hover defined on div class */}
+        <p>FileSize exceed 20MB</p>
+      </div>
+    );
   } else {
     return (
       <>
@@ -82,15 +126,14 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
 function checkIsDataTypeSupoorted(name: string): boolean {
   const dataTypeSupported = [
     ...IMAGE_FILETYPE_LIST,
-
+    ...HTML_FILETYPE_LIST,
     /**
-     * For Temporary only support Image filetype
+     * For Temporary only support Image filetype due to cors-origin policy
      * TODO: Uncomment the following constants below
      */
-
-    // ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
-    // ...PLAIN_FILETYPE_LIST,
-    // ...OTHER_FILETYPE_LIST,
+    ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
+    ...PLAIN_FILETYPE_LIST,
+    ...OTHER_FILETYPE_LIST,
   ];
 
   for (const dataType of dataTypeSupported) {
@@ -101,8 +144,8 @@ function checkIsDataTypeSupoorted(name: string): boolean {
   return false;
 }
 function checkIsFileSizeSupported(size_in_bytes: number): boolean {
-  // Only support file less than 15MB
-  if (size_in_bytes < 15000000) return true;
+  // Only support file less than 20MB
+  if (size_in_bytes < 20000000) return true;
   return false;
 }
 
@@ -137,9 +180,10 @@ function DialogData({ type, data }: DialogDataProps) {
       try {
         const presignedUrlString = await getPreSignedUrl(type, data.id);
 
-        // Skip stream data if an image file
+        // Skip streaming data if an image and HTML file
+        // NOTE: <img> and <html> tag will src to the presignedUrl data
         let presignedUrlContent = '';
-        if (!IMAGE_FILETYPE_LIST.includes(fileType)) {
+        if (!IMAGE_FILETYPE_LIST.includes(fileType) && !HTML_FILETYPE_LIST.includes(fileType)) {
           presignedUrlContent = await getPreSignedUrlBody(presignedUrlString);
         }
         if (componentUnmount) return;
@@ -195,6 +239,8 @@ function DialogData({ type, data }: DialogDataProps) {
           <WarningIcon fontSize='large' style={{ minHeight: '30vh' }} />
         ) : IMAGE_FILETYPE_LIST.includes(fileType) ? (
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
+        ) : HTML_FILETYPE_LIST.includes(fileType) ? (
+          <HTMLViewer preSignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'csv' ? (
           <DelimiterSeperatedValuesViewer
             fileContent={presignedUrlData.presignedUrlContent}
@@ -252,6 +298,16 @@ function ImageViewer({ presignedUrl }: ImageViewerProps) {
         src={presignedUrl}
       />
     </div>
+  );
+}
+
+type HTMLViewerProps = { preSignedUrl: string };
+function HTMLViewer({ preSignedUrl }: HTMLViewerProps) {
+  return (
+    <iframe
+      style={{ height: '80vh', width: '100%', backgroundColor: 'white' }}
+      src={preSignedUrl}
+    />
   );
 }
 
