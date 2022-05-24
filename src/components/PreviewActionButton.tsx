@@ -34,9 +34,9 @@ const HTML_FILETYPE_LIST: string[] = ['html'];
  * For Temporary only support Image filetype due to cors-origin policy
  * TODO: Uncomment the following constants below
  */
-const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
-const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
-const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
+// const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
+// const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
+// const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
 
 /**
  * Preview Action Button
@@ -131,9 +131,9 @@ function checkIsDataTypeSupoorted(name: string): boolean {
      * For Temporary only support Image filetype due to cors-origin policy
      * TODO: Uncomment the following constants below
      */
-    ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
-    ...PLAIN_FILETYPE_LIST,
-    ...OTHER_FILETYPE_LIST,
+    // ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
+    // ...PLAIN_FILETYPE_LIST,
+    // ...OTHER_FILETYPE_LIST,
   ];
 
   for (const dataType of dataTypeSupported) {
