@@ -5,7 +5,6 @@ import { API } from 'aws-amplify';
 
 // Material- UI
 import CloseIcon from '@material-ui/icons/Close';
-import AllOutIcon from '@material-ui/icons/AllOut';
 import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import IconButton from '@material-ui/core/IconButton';
@@ -36,34 +35,11 @@ const OTHER_FILETYPE_LIST: string[] = ['html', 'json', 'yaml'];
 /**
  * Preview Action Button
  */
-const useStylesButtonIcon = makeStyles({
-  typeWarning: {
-    position: 'relative',
-    '& p': {
-      display: 'none',
-      width: '100%',
-    },
-    '&:hover': {
-      '& p': {
-        backgroundColor: 'white',
-        border: '1px solid black',
-        position: 'absolute',
-        display: 'inline',
-        width: 'max-content',
-        top: '-2.2rem',
-        left: '-100%',
-        padding: '3px',
-      },
-    },
-  },
-});
 type PreviewActionButtonProps = {
   type: string;
   data: any;
 };
 export default function PreviewActionButton({ type, data }: PreviewActionButtonProps) {
-  const iconClasses = useStylesButtonIcon();
-
   const fileName = type == 'gds' ? data.name : data.key;
   const fileSize = type == 'gds' ? data.size_in_bytes : data.size;
   const isDataTypeSupported = checkIsDataTypeSupoorted(fileName);
@@ -71,28 +47,8 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
 
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
-  if (!isDataTypeSupported) {
-    return (
-      <div className={iconClasses.typeWarning}>
-        <IconButton disabled={true}>
-          <WarningIcon />
-        </IconButton>
-
-        {/* Text will show on hover defined on div class */}
-        <p>Unsupported FileType</p>
-      </div>
-    );
-  } else if (!isFileSizeSupported) {
-    return (
-      <div className={iconClasses.typeWarning}>
-        <IconButton disabled={true}>
-          <AllOutIcon />
-        </IconButton>
-
-        {/* Text will show on hover defined on div class */}
-        <p>FileSize exceed 15MB</p>
-      </div>
-    );
+  if (!isDataTypeSupported || !isFileSizeSupported) {
+    return <div />;
   } else {
     return (
       <>
@@ -215,7 +171,13 @@ function DialogData({ type, data }: DialogDataProps) {
           overflow: 'hidden',
         }}>
         {presignedUrlData.isLoading ? (
-          <div style={{ minHeight: '30vh' }}>
+          <div
+            style={{
+              minHeight: '30vh',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
             <CircularProgress />
           </div>
         ) : presignedUrlData.isError ? (
