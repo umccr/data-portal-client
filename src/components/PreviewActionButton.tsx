@@ -35,7 +35,7 @@ const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
  */
 // const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
 // const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
-// const OTHER_FILETYPE_LIST: string[] = ['html', 'json', 'yaml'];
+// const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
 
 /**
  * Preview Action Button
@@ -139,7 +139,7 @@ function DialogData({ type, data }: DialogDataProps) {
 
         // Skip stream data if an image file
         let presignedUrlContent = '';
-        if (!IMAGE_FILETYPE_LIST.includes(fileType) && 'html' != fileType) {
+        if (!IMAGE_FILETYPE_LIST.includes(fileType)) {
           presignedUrlContent = await getPreSignedUrlBody(presignedUrlString);
         }
         if (componentUnmount) return;
@@ -195,8 +195,6 @@ function DialogData({ type, data }: DialogDataProps) {
           <WarningIcon fontSize='large' style={{ minHeight: '30vh' }} />
         ) : IMAGE_FILETYPE_LIST.includes(fileType) ? (
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
-        ) : fileType === 'html' ? (
-          <HTMLViewer preSignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'csv' ? (
           <DelimiterSeperatedValuesViewer
             fileContent={presignedUrlData.presignedUrlContent}
@@ -254,16 +252,6 @@ function ImageViewer({ presignedUrl }: ImageViewerProps) {
         src={presignedUrl}
       />
     </div>
-  );
-}
-
-type HTMLViewerProps = { preSignedUrl: string };
-function HTMLViewer({ preSignedUrl }: HTMLViewerProps) {
-  return (
-    <iframe
-      style={{ height: '80vh', width: '100%', backgroundColor: 'white' }}
-      src={preSignedUrl}
-    />
   );
 }
 
