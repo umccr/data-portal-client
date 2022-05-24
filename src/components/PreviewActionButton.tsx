@@ -23,6 +23,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { makeStyles } from '@material-ui/core/styles';
+import { Typography } from '@material-ui/core';
 
 // Other Dependencies
 import JSONPretty from 'react-json-pretty';
@@ -171,7 +172,7 @@ function DialogData({ type, data }: DialogDataProps) {
 
         // Skip stream data if an image file
         let presignedUrlContent = '';
-        if (!IMAGE_FILETYPE_LIST.includes(fileType)) {
+        if (!IMAGE_FILETYPE_LIST.includes(fileType) && 'html' != fileType) {
           presignedUrlContent = await getPreSignedUrlBody(presignedUrlString);
         }
         if (componentUnmount) return;
@@ -200,7 +201,11 @@ function DialogData({ type, data }: DialogDataProps) {
   return (
     <>
       {/* Dialog that opens the preview */}
-      <DialogTitle style={{ minHeight: '4rem' }}>{fileName}</DialogTitle>
+      <DialogTitle style={{ minHeight: '4rem' }}>
+        <Typography variant='h6' noWrap>
+          {fileName}
+        </Typography>
+      </DialogTitle>
       <DialogContent
         style={{
           display: 'flex',
@@ -218,7 +223,7 @@ function DialogData({ type, data }: DialogDataProps) {
         ) : IMAGE_FILETYPE_LIST.includes(fileType) ? (
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'html' ? (
-          <HTMLViewer fileContent={presignedUrlData.presignedUrlContent} />
+          <HTMLViewer preSignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'csv' ? (
           <DelimiterSeperatedValuesViewer
             fileContent={presignedUrlData.presignedUrlContent}
@@ -268,19 +273,23 @@ async function getPreSignedUrlBody(url: string) {
 type ImageViewerProps = { presignedUrl: string };
 function ImageViewer({ presignedUrl }: ImageViewerProps) {
   return (
-    <img
-      style={{ maxHeight: '100%', maxWidth: '100%', backgroundColor: 'white' }}
-      src={presignedUrl}
-    />
+    <div
+      style={{ height: '80vh', maxWidth: '100%' }}
+      onClick={() => window.open(presignedUrl, '_blank')}>
+      <img
+        style={{ maxHeight: '100%', maxWidth: '100%', backgroundColor: 'white' }}
+        src={presignedUrl}
+      />
+    </div>
   );
 }
 
-type HTMLViewerProps = { fileContent: string };
-function HTMLViewer({ fileContent }: HTMLViewerProps) {
+type HTMLViewerProps = { preSignedUrl: string };
+function HTMLViewer({ preSignedUrl }: HTMLViewerProps) {
   return (
     <iframe
       style={{ height: '80vh', width: '100%', backgroundColor: 'white' }}
-      srcDoc={fileContent}
+      src={preSignedUrl}
     />
   );
 }
