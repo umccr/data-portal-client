@@ -5,7 +5,7 @@ import { API } from 'aws-amplify';
 
 // Material- UI
 import CloseIcon from '@material-ui/icons/Close';
-import AllOutIcon from '@material-ui/icons/AllOut';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import IconButton from '@material-ui/core/IconButton';
@@ -23,14 +23,20 @@ import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { makeStyles } from '@material-ui/core/styles';
+import { Typography } from '@material-ui/core';
 
 // Other Dependencies
 import JSONPretty from 'react-json-pretty';
 
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
-const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
-const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
-const OTHER_FILETYPE_LIST: string[] = ['html', 'json', 'yaml'];
+const HTML_FILETYPE_LIST: string[] = ['html'];
+/**
+ * For Temporary only support Image filetype due to cors-origin policy
+ * TODO: Uncomment the following constants below
+ */
+// const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
+// const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
+// const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
 
 /**
  * Preview Action Button
@@ -74,7 +80,7 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
     return (
       <div className={iconClasses.typeWarning}>
         <IconButton disabled={true}>
-          <WarningIcon />
+          <VisibilityOffIcon />
         </IconButton>
 
         {/* Text will show on hover defined on div class */}
@@ -85,11 +91,11 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
     return (
       <div className={iconClasses.typeWarning}>
         <IconButton disabled={true}>
-          <AllOutIcon />
+          <VisibilityOffIcon />
         </IconButton>
 
         {/* Text will show on hover defined on div class */}
-        <p>FileSize exceed 15MB</p>
+        <p>FileSize exceed 20MB</p>
       </div>
     );
   } else {
@@ -120,9 +126,14 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
 function checkIsDataTypeSupoorted(name: string): boolean {
   const dataTypeSupported = [
     ...IMAGE_FILETYPE_LIST,
-    ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
-    ...PLAIN_FILETYPE_LIST,
-    ...OTHER_FILETYPE_LIST,
+    ...HTML_FILETYPE_LIST,
+    /**
+     * For Temporary only support Image filetype due to cors-origin policy
+     * TODO: Uncomment the following constants below
+     */
+    // ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
+    // ...PLAIN_FILETYPE_LIST,
+    // ...OTHER_FILETYPE_LIST,
   ];
 
   for (const dataType of dataTypeSupported) {
@@ -133,8 +144,8 @@ function checkIsDataTypeSupoorted(name: string): boolean {
   return false;
 }
 function checkIsFileSizeSupported(size_in_bytes: number): boolean {
-  // Only support file less than 15MB
-  if (size_in_bytes < 15000000) return true;
+  // Only support file less than 20MB
+  if (size_in_bytes < 20000000) return true;
   return false;
 }
 
@@ -169,9 +180,10 @@ function DialogData({ type, data }: DialogDataProps) {
       try {
         const presignedUrlString = await getPreSignedUrl(type, data.id);
 
-        // Skip stream data if an image file
+        // Skip streaming data if an image and HTML file
+        // NOTE: <img> and <html> tag will src to the presignedUrl data
         let presignedUrlContent = '';
-        if (!IMAGE_FILETYPE_LIST.includes(fileType)) {
+        if (!IMAGE_FILETYPE_LIST.includes(fileType) && !HTML_FILETYPE_LIST.includes(fileType)) {
           presignedUrlContent = await getPreSignedUrlBody(presignedUrlString);
         }
         if (componentUnmount) return;
@@ -200,7 +212,11 @@ function DialogData({ type, data }: DialogDataProps) {
   return (
     <>
       {/* Dialog that opens the preview */}
-      <DialogTitle style={{ minHeight: '4rem' }}>{fileName}</DialogTitle>
+      <DialogTitle style={{ minHeight: '4rem' }}>
+        <Typography variant='h6' noWrap>
+          {fileName}
+        </Typography>
+      </DialogTitle>
       <DialogContent
         style={{
           display: 'flex',
@@ -208,17 +224,24 @@ function DialogData({ type, data }: DialogDataProps) {
           alignItems: 'center',
           backgroundColor: '#525659',
           overflow: 'hidden',
+          padding: '1px 0 0 0',
         }}>
         {presignedUrlData.isLoading ? (
-          <div style={{ minHeight: '30vh' }}>
+          <div
+            style={{
+              minHeight: '30vh',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
             <CircularProgress />
           </div>
         ) : presignedUrlData.isError ? (
           <WarningIcon fontSize='large' style={{ minHeight: '30vh' }} />
         ) : IMAGE_FILETYPE_LIST.includes(fileType) ? (
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
-        ) : fileType === 'html' ? (
-          <HTMLViewer fileContent={presignedUrlData.presignedUrlContent} />
+        ) : HTML_FILETYPE_LIST.includes(fileType) ? (
+          <HTMLViewer presignedUrl={presignedUrlData.presignedUrlString} />
         ) : fileType === 'csv' ? (
           <DelimiterSeperatedValuesViewer
             fileContent={presignedUrlData.presignedUrlContent}
@@ -268,19 +291,23 @@ async function getPreSignedUrlBody(url: string) {
 type ImageViewerProps = { presignedUrl: string };
 function ImageViewer({ presignedUrl }: ImageViewerProps) {
   return (
-    <img
-      style={{ maxHeight: '100%', maxWidth: '100%', backgroundColor: 'white' }}
-      src={presignedUrl}
-    />
+    <div
+      style={{ height: '80vh', maxWidth: '100%' }}
+      onClick={() => window.open(presignedUrl, '_blank')}>
+      <img
+        style={{ maxHeight: '100%', maxWidth: '100%', backgroundColor: 'white' }}
+        src={presignedUrl}
+      />
+    </div>
   );
 }
 
-type HTMLViewerProps = { fileContent: string };
-function HTMLViewer({ fileContent }: HTMLViewerProps) {
+type HTMLViewerProps = { presignedUrl: string };
+function HTMLViewer({ presignedUrl }: HTMLViewerProps) {
   return (
     <iframe
       style={{ height: '80vh', width: '100%', backgroundColor: 'white' }}
-      srcDoc={fileContent}
+      src={presignedUrl}
     />
   );
 }
