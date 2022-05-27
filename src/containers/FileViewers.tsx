@@ -14,7 +14,7 @@ import {
   Select,
   ImageListItemBar,
 } from '@material-ui/core';
-import { grey } from '@material-ui/core/colors';
+import { blueGrey, grey } from '@material-ui/core/colors';
 
 // MUI - Icons
 import ChevronLeft from '@material-ui/icons/ChevronLeft';
@@ -98,7 +98,7 @@ function FileViewers() {
         queryStringParameters: {
           subject: `${subjectId}`,
           search: pipelineSelection.regexKey,
-          rowsPerPage: 10,
+          rowsPerPage: 25,
           ordering: 'key',
         },
       };
@@ -255,8 +255,26 @@ function FileViewers() {
               justifyContent='flex-start'
               alignItems='stretch'
               style={{ height: '100%' }}>
-              <Grid item xs={4} style={{ overflow: 'auto', height: '100%' }}>
-                <Grid container direction='column'>
+              <Grid item xs={4} style={{ overflow: 'auto', height: '100%', position: 'relative' }}>
+                <Grid container direction='column' style={{}}>
+                  <Grid
+                    item
+                    container
+                    alignItems='center'
+                    style={{
+                      padding: '0',
+                      minHeight: '48px',
+                      backgroundColor: blueGrey[50],
+                      position: 'sticky',
+                      zIndex: '1',
+                      top: 0,
+                      borderBottom: 'solid 1px black',
+                      paddingLeft: '1rem',
+                    }}>
+                    <Typography variant='h6' style={{}}>
+                      Filename
+                    </Typography>
+                  </Grid>
                   {apiResults.items.map((item, index) => {
                     let filename = item.key.split('/').pop();
                     const isSelected = selectedPreview && selectedPreview.id === item.id;
