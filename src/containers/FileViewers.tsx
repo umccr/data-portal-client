@@ -12,16 +12,21 @@ import {
   MenuItem,
   FormControl,
   Select,
+  ImageListItemBar,
 } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 
 // MUI - Icons
 import ChevronLeft from '@material-ui/icons/ChevronLeft';
 import WarningIcon from '@material-ui/icons/Warning';
+import InfoIcon from '@material-ui/icons/Info';
 
 // Other libraries
 import { useParams, Link } from 'react-router-dom';
 import { API } from 'aws-amplify';
+
+// Import dialog details
+import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 
 type pipelineOptionType = {
   name: string;
@@ -75,6 +80,9 @@ function FileViewers() {
   if (selectedPreview == null && apiResults.items.length !== 0) {
     setSelectedPreview(apiResults.items[0]);
   }
+
+  // Dialog to see more details
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     let componentUnmount = false;
@@ -291,22 +299,48 @@ function FileViewers() {
               </Grid>
               <Grid
                 item
+                container
                 xs={8}
                 style={{
                   borderLeft: `1pt solid ${grey[300]}`,
                   height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
+                  position: 'relative',
+                  backgroundColor: `${grey[500]}`,
+                }}
+                direction='column'
+                justifyContent='center'
+                alignItems='center'>
                 {selectedPreview == null ? (
                   <CircularProgress />
                 ) : (
-                  <img
-                    style={{ maxHeight: '100%', maxWidth: '100%', backgroundColor: 'white' }}
-                    onClick={() => window.open(selectedPreview.presignedUrl, '_blank')}
-                    src={selectedPreview.presignedUrl}
-                  />
+                  <Grid item style={{ maxHeight: '100%', position: 'unset', padding: '1rem' }}>
+                    <div style={{ height: '48px' }}>
+                      <LimsRowDetailsDialog
+                        dialogOpened={isDialogOpen}
+                        rowData={selectedPreview}
+                        onDialogClose={() => setIsDialogOpen(false)}
+                      />
+                      <ImageListItemBar
+                        position='top'
+                        title={selectedPreview.key}
+                        actionIcon={
+                          <IconButton onClick={() => setIsDialogOpen(true)}>
+                            <InfoIcon />
+                          </IconButton>
+                        }
+                      />
+                    </div>
+                    <img
+                      style={{
+                        maxHeight: 'calc(100% - 48px)',
+                        maxWidth: '100%',
+                        backgroundColor: 'white',
+                        padding: '1px',
+                      }}
+                      onClick={() => window.open(selectedPreview.presigned_url, '_blank')}
+                      src={selectedPreview.presigned_url}
+                    />
+                  </Grid>
                 )}
               </Grid>
             </Grid>
@@ -320,8 +354,8 @@ function FileViewers() {
 async function getPresignedUrlForEveryItem(apiResponse: any) {
   for (const item of apiResponse.results) {
     const id = item.id;
-    const presignedUrl = await getPreSignedUrl(id);
-    item['presignedUrl'] = presignedUrl;
+    const presigned_url = await getPreSignedUrl(id);
+    item['presigned_url'] = presigned_url;
   }
 }
 
