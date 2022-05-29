@@ -10,7 +10,7 @@ import LandingPage from './containers/LandingPage';
 import Subject from './containers/Subject';
 import Run from './containers/Run';
 import IGV from './containers/IGV';
-import FilesViewers from './containers/FileViewers';
+import FilesViewers from './containers/FileViewer';
 
 class Routes extends Component {
   render() {

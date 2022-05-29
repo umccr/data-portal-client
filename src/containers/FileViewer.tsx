@@ -40,7 +40,7 @@ const GPL_PIPELINE_OPTIONS: pipelineOptionType[] = [
 ];
 
 const UMCCRISED_PIPELINE_OPTIONS: pipelineOptionType[] = [
-  { name: 'UMCCRISED - all', regexKey: 'umccrised/(.*)(.png$)' },
+  { name: 'UMCCRISE - all', regexKey: 'umccrised/(.*)(.png$)' },
 ];
 const DEFAULT_PIPELINE_OPTIONS: pipelineOptionType = { name: 'All', regexKey: '(.*)(.png$)' };
 
@@ -50,7 +50,7 @@ const PIPELINE_OPTIONS_LIST: pipelineOptionType[] = [
   ...UMCCRISED_PIPELINE_OPTIONS,
 ];
 
-function FileViewers() {
+function FileViewer() {
   // Parse subjectId from url
   const { subjectId } = useParams<{ subjectId: string }>();
 
@@ -386,4 +386,4 @@ async function getPreSignedUrl(id: string) {
   return signed_url;
 }
 
-export default FileViewers;
+export default FileViewer;

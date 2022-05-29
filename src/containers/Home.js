@@ -123,7 +123,7 @@ class Home extends Component {
     const { dialogOpened, rowData } = this.state;
     const columns = [
       { key: 'info', sortable: false },
-      { key: 'files_viewer', sortable: false },
+      { key: 'file_viewer', sortable: false },
       { key: 'illumina_id', sortable: true },
       { key: 'type', sortable: true },
       { key: 'timestamp', sortable: true },
@@ -204,11 +204,11 @@ class Home extends Component {
                           </Link>
                         )}
                       </TableCell>
-                    ) : col.key === 'files_viewer' ? (
+                    ) : col.key === 'file_viewer' ? (
                       <TableCell key={col.key}>
                         <IconButton
                           component={RouterLink}
-                          aria-label='files_viewer'
+                          aria-label='file_viewer'
                           to={`/files/${row.subject_id}`}>
                           <ImageIcon color={'action'} />
                         </IconButton>
