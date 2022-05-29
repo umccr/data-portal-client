@@ -25,7 +25,7 @@ import LimsRowDetailsDialog from '../components/LimsRowDetailsDialog';
 import { Link as RouterLink } from 'react-router-dom';
 import InfoIcon from '@material-ui/icons/Info';
 import Link from '@material-ui/core/Link';
-import ImageIcon from '@material-ui/icons/Image';
+import ImageSearchIcon from '@material-ui/icons/ImageSearch';
 
 const styles = (theme) => ({
   close: {
@@ -207,10 +207,11 @@ class Home extends Component {
                     ) : col.key === 'file_viewer' ? (
                       <TableCell key={col.key}>
                         <IconButton
+                          disabled={row.subject_id ? false : true}
                           component={RouterLink}
                           aria-label='file_viewer'
                           to={`/files/${row.subject_id}`}>
-                          <ImageIcon color={'action'} />
+                          <ImageSearchIcon color={row.subject_id ? 'action' : 'disabled'} />
                         </IconButton>
                       </TableCell>
                     ) : (
