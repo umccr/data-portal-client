@@ -144,8 +144,8 @@ function checkIsDataTypeSupoorted(name: string): boolean {
   return false;
 }
 function checkIsFileSizeSupported(size_in_bytes: number): boolean {
-  // Only support file less than 20MB
-  if (size_in_bytes < 20000000) return true;
+  // Only support file less than 60MB
+  if (size_in_bytes < 60000000) return true;
   return false;
 }
 
@@ -292,7 +292,13 @@ type ImageViewerProps = { presignedUrl: string };
 function ImageViewer({ presignedUrl }: ImageViewerProps) {
   return (
     <div
-      style={{ height: '80vh', maxWidth: '100%' }}
+      style={{
+        height: '80vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
       onClick={() => window.open(presignedUrl, '_blank')}>
       <img
         style={{ maxHeight: '100%', maxWidth: '100%', backgroundColor: 'white' }}
