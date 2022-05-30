@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // MUI - Components
 import {
@@ -50,6 +50,17 @@ const PIPELINE_OPTIONS_LIST: pipelineOptionType[] = [
   ...UMCCRISED_PIPELINE_OPTIONS,
 ];
 
+interface ItemResultProps {
+  bucket: string;
+  e_tag: string;
+  id: number;
+  key: string;
+  last_modified_date: string;
+  size: number;
+  unique_hash: string;
+  presigned_url: string | undefined;
+}
+
 function FileViewer() {
   // Parse subjectId from url
   const { subjectId } = useParams<{ subjectId: string }>();
@@ -66,7 +77,7 @@ function FileViewer() {
     isLoading: boolean;
     isError: boolean;
     nextPageLink: string | null;
-    items: any[];
+    items: ItemResultProps[];
   };
   const [apiResults, setApiResults] = useState<apiDataResultType>({
     isLoading: true,
@@ -74,15 +85,16 @@ function FileViewer() {
     nextPageLink: null,
     items: [],
   });
+  const handleChangeResult = useCallback((props: any) => {
+    setApiResults(props);
+  }, []);
+
   const [queryNextUrlString, setQueryNextUrlString] = useState<string | null>(null);
 
   const [selectedPreview, setSelectedPreview] = useState<any>(null);
   if (selectedPreview == null && apiResults.items.length !== 0) {
     setSelectedPreview(apiResults.items[0]);
   }
-
-  // Dialog to see more details
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     let componentUnmount = false;
@@ -104,7 +116,6 @@ function FileViewer() {
       };
       try {
         const apiResponse = await API.get('files', '/s3', apiConfig);
-        await getPresignedUrlForEveryItem(apiResponse);
         setApiResults({
           isLoading: false,
           isError: false,
@@ -141,7 +152,6 @@ function FileViewer() {
       try {
         const queryString = queryNextUrlString.split('?').pop();
         const apiResponse = await API.get('files', `/s3?${queryString}`, {});
-        await getPresignedUrlForEveryItem(apiResponse);
         if (componentUnmount) return;
         setApiResults((prev) => ({
           nextPageLink: apiResponse.links.next,
@@ -331,34 +341,10 @@ function FileViewer() {
                 {selectedPreview == null ? (
                   <CircularProgress />
                 ) : (
-                  <Grid item style={{ maxHeight: '100%', position: 'unset', padding: '1rem' }}>
-                    <div style={{ height: '48px' }}>
-                      <LimsRowDetailsDialog
-                        dialogOpened={isDialogOpen}
-                        rowData={selectedPreview}
-                        onDialogClose={() => setIsDialogOpen(false)}
-                      />
-                      <ImageListItemBar
-                        position='top'
-                        title={selectedPreview.key}
-                        actionIcon={
-                          <IconButton onClick={() => setIsDialogOpen(true)}>
-                            <InfoIcon />
-                          </IconButton>
-                        }
-                      />
-                    </div>
-                    <img
-                      style={{
-                        maxHeight: 'calc(100% - 48px)',
-                        maxWidth: '100%',
-                        backgroundColor: 'white',
-                        padding: '1px',
-                      }}
-                      onClick={() => window.open(selectedPreview.presigned_url, '_blank')}
-                      src={selectedPreview.presigned_url}
-                    />
-                  </Grid>
+                  <FetchAndShowFile
+                    selectedPreview={selectedPreview}
+                    handleChangeResult={handleChangeResult}
+                  />
                 )}
               </Grid>
             </Grid>
@@ -369,15 +355,83 @@ function FileViewer() {
   );
 }
 
-async function getPresignedUrlForEveryItem(apiResponse: any) {
-  for (const item of apiResponse.results) {
-    const id = item.id;
-    const presigned_url = await getPreSignedUrl(id);
-    item['presigned_url'] = presigned_url;
-  }
+interface FetchAndShowFileProps {
+  selectedPreview: ItemResultProps;
+  handleChangeResult: Function;
 }
 
-async function getPreSignedUrl(id: string) {
+function FetchAndShowFile(props: FetchAndShowFileProps) {
+  const { selectedPreview, handleChangeResult } = props;
+
+  // Dialog to see more details
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    let componentUnmount = false;
+
+    const fetchPresignedUrl = async () => {
+      const id = selectedPreview.id;
+      const presigned_url = await getPreSignedUrl(id);
+
+      handleChangeResult((prev: any) => {
+        const newState = { ...prev };
+
+        for (const item of newState.items) {
+          if (item.id === selectedPreview.id) {
+            item['presigned_url'] = presigned_url;
+          }
+        }
+        return newState;
+      });
+      if (componentUnmount) return;
+    };
+    if (!selectedPreview.presigned_url) {
+      fetchPresignedUrl();
+    }
+    return () => {
+      componentUnmount = true;
+    };
+  }, [selectedPreview]);
+
+  return (
+    <>
+      {!selectedPreview.presigned_url ? (
+        <CircularProgress />
+      ) : (
+        <Grid item style={{ maxHeight: '100%', position: 'unset', padding: '1rem' }}>
+          <div style={{ height: '48px' }}>
+            <LimsRowDetailsDialog
+              dialogOpened={isDialogOpen}
+              rowData={selectedPreview}
+              onDialogClose={() => setIsDialogOpen(false)}
+            />
+            <ImageListItemBar
+              position='top'
+              title={selectedPreview.key}
+              actionIcon={
+                <IconButton onClick={() => setIsDialogOpen(true)}>
+                  <InfoIcon />
+                </IconButton>
+              }
+            />
+          </div>
+          <img
+            style={{
+              maxHeight: 'calc(100% - 48px)',
+              maxWidth: '100%',
+              backgroundColor: 'white',
+              padding: '1px',
+            }}
+            onClick={() => window.open(selectedPreview.presigned_url, '_blank')}
+            src={selectedPreview.presigned_url}
+          />
+        </Grid>
+      )}
+    </>
+  );
+}
+
+async function getPreSignedUrl(id: number) {
   const { error, signed_url } = await API.get('files', `/s3/${id}/presign`, {});
 
   if (error) {
