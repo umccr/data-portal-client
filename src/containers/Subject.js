@@ -57,6 +57,7 @@ import List from '@material-ui/core/List';
 import MenuBookIcon from '@material-ui/icons/MenuBook';
 import LaunchPadDialog from '../components/LaunchPadDialog';
 import PreviewActionButton from '../components/PreviewActionButton';
+import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
 
 const styles = (theme) => ({
   close: {
@@ -680,6 +681,12 @@ class Subject extends Component {
               <MenuBookIcon color={'primary'} />
             </ListItemIcon>
             <ListItemText primary={'Generate GRIDSS PURPLE LINX Report'} />
+          </ListItem>
+          <ListItem button component={RouterLink} to={'/files/' + subjectId}>
+            <ListItemIcon>
+              <PhotoLibraryIcon color={'action'} />
+            </ListItemIcon>
+            <ListItemText primary='View Analysis Output Images' />
           </ListItem>
         </List>
         <LaunchPadDialog
