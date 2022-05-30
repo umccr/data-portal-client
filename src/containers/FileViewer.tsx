@@ -476,7 +476,7 @@ function FetchAndShowFile(props: FetchAndShowFileProps) {
               onClick={() => window.open(selectedPreview.presigned_url, '_blank')}>
               <VisibilityOffIcon color='disabled' />
               <Typography>
-                FileSize exceed 20MB. Click here to open in a new tab.{' '}
+                FileSize exceed 60MB. Click here to open in a new tab.{' '}
                 <LaunchIcon fontSize='small' />
               </Typography>
             </div>
