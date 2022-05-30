@@ -14,6 +14,7 @@ import {
   Select,
   ImageListItemBar,
 } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { blueGrey, grey } from '@material-ui/core/colors';
 
 // MUI - Icons
@@ -34,19 +35,31 @@ type pipelineOptionType = {
 };
 
 const GPL_PIPELINE_OPTIONS: pipelineOptionType[] = [
-  { name: 'GPL - all', regexKey: 'gridss_purple_linx/(.*)(.png$)' },
-  { name: 'GPL - purple', regexKey: 'gridss_purple_linx/purple/(.*)(.png$)' },
-  { name: 'GPL - linx', regexKey: 'gridss_purple_linx/linx/(.*)(.png$)' },
+  { name: 'GPL - all', regexKey: 'gridss_purple_linx/(.*)(.png|.html)$' },
+  { name: 'GPL - purple', regexKey: 'gridss_purple_linx/purple/(.*)(.png|.html)$' },
+  { name: 'GPL - linx', regexKey: 'gridss_purple_linx/linx/(.*)(.png|.html)$' },
+];
+const WTS_PIPELINE_OPTIONS: pipelineOptionType[] = [
+  { name: 'WTS - all', regexKey: 'WTS/(.*)(.png|.html)$' },
+  { name: 'WTS - RNAsum', regexKey: 'WTS/(.*)RNAsum/(.*)(.png|.html)$' },
+];
+const WGS_PIPELINE_OPTIONS: pipelineOptionType[] = [
+  { name: 'WGS - all', regexKey: 'WGS/(.*)(.png|.html)$' },
 ];
 
 const UMCCRISED_PIPELINE_OPTIONS: pipelineOptionType[] = [
-  { name: 'UMCCRISE - all', regexKey: 'umccrised/(.*)(.png$)' },
+  { name: 'UMCCRISE - all', regexKey: 'umccrised/(.*)(.png|.html)$' },
 ];
-const DEFAULT_PIPELINE_OPTIONS: pipelineOptionType = { name: 'All', regexKey: '(.*)(.png$)' };
+const DEFAULT_PIPELINE_OPTIONS: pipelineOptionType = {
+  name: 'All',
+  regexKey: '(.*)(.png|.html)$',
+};
 
 const PIPELINE_OPTIONS_LIST: pipelineOptionType[] = [
   DEFAULT_PIPELINE_OPTIONS,
   ...GPL_PIPELINE_OPTIONS,
+  ...WTS_PIPELINE_OPTIONS,
+  ...WGS_PIPELINE_OPTIONS,
   ...UMCCRISED_PIPELINE_OPTIONS,
 ];
 
@@ -61,7 +74,16 @@ interface ItemResultProps {
   presigned_url: string | undefined;
 }
 
+const useStylesFileViewer = makeStyles({
+  buttonHover: {
+    '&:hover': {
+      backgroundColor: grey[100],
+    },
+  },
+});
 function FileViewer() {
+  const classes = useStylesFileViewer();
+
   // Parse subjectId from url
   const { subjectId } = useParams<{ subjectId: string }>();
 
@@ -90,6 +112,7 @@ function FileViewer() {
   }, []);
 
   const [queryNextUrlString, setQueryNextUrlString] = useState<string | null>(null);
+  const [isNextQueryLoading, setIsNextQueryLoading] = useState<boolean>(false);
 
   const [selectedPreview, setSelectedPreview] = useState<any>(null);
   if (selectedPreview == null && apiResults.items.length !== 0) {
@@ -145,10 +168,7 @@ function FileViewer() {
   useEffect(() => {
     let componentUnmount = false;
     const fetchData = async (queryNextUrlString: string) => {
-      setApiResults((prev) => ({
-        ...prev,
-        isLoading: true,
-      }));
+      setIsNextQueryLoading(true);
       try {
         const queryString = queryNextUrlString.split('?').pop();
         const apiResponse = await API.get('files', `/s3?${queryString}`, {});
@@ -159,6 +179,7 @@ function FileViewer() {
           isLoading: false,
           isError: false,
         }));
+        setIsNextQueryLoading(false);
       } catch {
         if (componentUnmount) return;
         setApiResults((prev) => ({
@@ -166,6 +187,7 @@ function FileViewer() {
           isLoading: false,
           isError: true,
         }));
+        setIsNextQueryLoading(false);
       }
     };
     if (queryNextUrlString != null && queryNextUrlString !== '') {
@@ -203,7 +225,7 @@ function FileViewer() {
           </Grid>
           <Grid item>
             <Typography variant='h6'>
-              {subjectId} - Image Analysis Output: {pipelineSelection.name}
+              {subjectId} - File Analysis Output (PNG and HTML): {pipelineSelection.name}
             </Typography>
           </Grid>
         </Grid>
@@ -291,6 +313,7 @@ function FileViewer() {
                     return (
                       <Grid item key={index} style={{ padding: '0' }}>
                         <ButtonBase
+                          className={classes.buttonHover}
                           style={{
                             width: '100%',
                             height: '100%',
@@ -308,6 +331,19 @@ function FileViewer() {
                   })}
                   {apiResults.nextPageLink == null ? (
                     <></>
+                  ) : isNextQueryLoading == true ? (
+                    <Grid item style={{ padding: '0' }}>
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          justifyContent: 'center',
+                          display: 'flex',
+                          padding: '0.5rem',
+                        }}>
+                        <CircularProgress />
+                      </div>
+                    </Grid>
                   ) : (
                     <Grid item style={{ padding: '0' }}>
                       <ButtonBase
@@ -426,16 +462,33 @@ function FetchAndShowFile(props: FetchAndShowFileProps) {
               }
             />
           </div>
-          <img
-            style={{
-              maxHeight: 'calc(100% - 48px)',
-              maxWidth: '100%',
-              backgroundColor: 'white',
-              padding: '1px',
-            }}
-            onClick={() => window.open(selectedPreview.presigned_url, '_blank')}
-            src={selectedPreview.presigned_url}
-          />
+          {/* Show in PNG or HTML */}
+          {selectedPreview.key.endsWith('.html') ? (
+            <iframe
+              src={selectedPreview.presigned_url}
+              style={{
+                height: 'calc(100% - 48px)',
+                maxWidth: '100%',
+                backgroundColor: 'white',
+                padding: '1px',
+                position: 'absolute',
+                top: '48px',
+                left: 0,
+                width: '100%',
+              }}
+            />
+          ) : (
+            <img
+              style={{
+                maxHeight: 'calc(100% - 48px)',
+                maxWidth: '100%',
+                backgroundColor: 'white',
+                padding: '1px',
+              }}
+              onClick={() => window.open(selectedPreview.presigned_url, '_blank')}
+              src={selectedPreview.presigned_url}
+            />
+          )}
         </Grid>
       )}
     </>
