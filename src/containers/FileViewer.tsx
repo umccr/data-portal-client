@@ -227,7 +227,7 @@ function FileViewer() {
           </Grid>
           <Grid item>
             <Typography variant='h6'>
-              {subjectId} - File Analysis Output (PNG and HTML): {pipelineSelection.name}
+              {subjectId} - Analysis Output: {pipelineSelection.name}
             </Typography>
           </Grid>
         </Grid>

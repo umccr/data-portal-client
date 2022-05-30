@@ -686,7 +686,7 @@ class Subject extends Component {
             <ListItemIcon>
               <PhotoLibraryIcon color={'action'} />
             </ListItemIcon>
-            <ListItemText primary='View Analysis Output (PNG and HTML)' />
+            <ListItemText primary='View Analysis Output' />
           </ListItem>
         </List>
         <LaunchPadDialog
