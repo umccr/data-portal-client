@@ -292,7 +292,13 @@ type ImageViewerProps = { presignedUrl: string };
 function ImageViewer({ presignedUrl }: ImageViewerProps) {
   return (
     <div
-      style={{ height: '80vh', maxWidth: '100%' }}
+      style={{
+        height: '80vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
       onClick={() => window.open(presignedUrl, '_blank')}>
       <img
         style={{ maxHeight: '100%', maxWidth: '100%', backgroundColor: 'white' }}
