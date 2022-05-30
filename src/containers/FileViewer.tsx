@@ -18,9 +18,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import { blueGrey, grey } from '@material-ui/core/colors';
 
 // MUI - Icons
+import LaunchIcon from '@material-ui/icons/Launch';
 import ChevronLeft from '@material-ui/icons/ChevronLeft';
 import WarningIcon from '@material-ui/icons/Warning';
 import InfoIcon from '@material-ui/icons/Info';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
 // Other libraries
 import { useParams, Link } from 'react-router-dom';
@@ -462,8 +464,24 @@ function FetchAndShowFile(props: FetchAndShowFileProps) {
               }
             />
           </div>
-          {/* Show in PNG or HTML */}
-          {selectedPreview.key.endsWith('.html') ? (
+          {/* Limit 60MB filesize */}
+          {selectedPreview.size > 60000000 ? (
+            <div
+              style={{
+                flexDirection: 'column',
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+              }}
+              onClick={() => window.open(selectedPreview.presigned_url, '_blank')}>
+              <VisibilityOffIcon color='disabled' />
+              <Typography>
+                FileSize exceed 20MB. Click here to open in a new tab.{' '}
+                <LaunchIcon fontSize='small' />
+              </Typography>
+            </div>
+          ) : // Show in PNG or HTML
+          selectedPreview.key.endsWith('.html') ? (
             <iframe
               src={selectedPreview.presigned_url}
               style={{
