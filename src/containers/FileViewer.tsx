@@ -366,24 +366,33 @@ function FetchAndShowFile(props: FetchAndShowFileProps) {
   // Dialog to see more details
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // IsError Component
+  const [isError, setIsError] = useState(false);
+
   useEffect(() => {
     let componentUnmount = false;
 
     const fetchPresignedUrl = async () => {
       const id = selectedPreview.id;
-      const presigned_url = await getPreSignedUrl(id);
+      try {
+        const presigned_url = await getPreSignedUrl(id);
 
-      handleChangeResult((prev: any) => {
-        const newState = { ...prev };
+        if (componentUnmount) return;
+        handleChangeResult((prev: any) => {
+          const newState = { ...prev };
 
-        for (const item of newState.items) {
-          if (item.id === selectedPreview.id) {
-            item['presigned_url'] = presigned_url;
+          for (const item of newState.items) {
+            if (item.id === selectedPreview.id) {
+              item['presigned_url'] = presigned_url;
+            }
           }
-        }
-        return newState;
-      });
-      if (componentUnmount) return;
+          return newState;
+        });
+      } catch (e) {
+        if (componentUnmount) return;
+        setIsError(true);
+        return;
+      }
     };
     if (!selectedPreview.presigned_url) {
       fetchPresignedUrl();
@@ -395,7 +404,9 @@ function FetchAndShowFile(props: FetchAndShowFileProps) {
 
   return (
     <>
-      {!selectedPreview.presigned_url ? (
+      {isError ? (
+        <WarningIcon />
+      ) : !selectedPreview.presigned_url ? (
         <CircularProgress />
       ) : (
         <Grid item style={{ maxHeight: '100%', position: 'unset', padding: '1rem' }}>
