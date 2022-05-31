@@ -52,6 +52,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import { Panel } from 'primereact/panel';
 import TableContainer from '@material-ui/core/TableContainer';
 import { TabPanel, TabView } from 'primereact/tabview';
+import PreviewActionButton from '../components/PreviewActionButton';
 
 const styles = (theme) => ({
   close: {
@@ -594,6 +595,7 @@ class Run extends Component {
     const columns = [
       { key: 'bucket', sortable: true },
       { key: 'key', sortable: true },
+      { key: 'preview', sortable: false },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
       { key: 'last_modified_date', sortable: true },
@@ -652,6 +654,8 @@ class Run extends Component {
                         <HumanReadableFileSize bytes={row[col.key]} />
                       ) : col.key === 'last_modified_date' ? (
                         <Moment local>{row[col.key]}</Moment>
+                      ) : col.key === 'preview' ? (
+                        <PreviewActionButton type='s3' data={row} />
                       ) : (
                         row[col.key]
                       )}
@@ -691,6 +695,7 @@ class Run extends Component {
     const columns = [
       { key: 'volume_name', sortable: true },
       { key: 'path', sortable: true },
+      { key: 'preview', sortable: false },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true, label: 'size_in_bytes' },
       { key: 'time_modified', sortable: true },
@@ -749,6 +754,8 @@ class Run extends Component {
                         <HumanReadableFileSize bytes={row[col.label]} />
                       ) : col.key === 'time_modified' ? (
                         <Moment local>{row[col.key]}</Moment>
+                      ) : col.key === 'preview' ? (
+                        <PreviewActionButton type='gds' data={row} />
                       ) : (
                         row[col.key]
                       )}

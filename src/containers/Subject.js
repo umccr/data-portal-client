@@ -57,7 +57,7 @@ import List from '@material-ui/core/List';
 import MenuBookIcon from '@material-ui/icons/MenuBook';
 import LaunchPadDialog from '../components/LaunchPadDialog';
 import PreviewActionButton from '../components/PreviewActionButton';
-import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
+import ImageSearchIcon from '@material-ui/icons/ImageSearch';
 
 const styles = (theme) => ({
   close: {
@@ -362,7 +362,7 @@ class Subject extends Component {
         launchGpl = false;
         launchPadRowData = {
           subject_id: subject.id,
-          error: 'No WGS BAMs available for the Subject',
+          error: 'No WGS (bcbio) BAMs are available for the Subject',
         };
       }
 
@@ -502,7 +502,7 @@ class Subject extends Component {
         </Grid>
         <Grid item xs={12}>
           <Panel header={'Subject Data'} toggleable={true}>
-            <TabView>
+            <TabView activeIndex={1}>
               <TabPanel header={'S3'}>
                 <TableContainer>
                   {this.renderChipFilterView()}
@@ -528,6 +528,8 @@ class Subject extends Component {
     const { results, results_gds } = this.state.subject;
     const feature_content_url = this.state.feature_content_url;
 
+    // S3 bcbio
+
     const wgs = results.filter((r) => r.key.includes('WGS/'));
     const wts = results.filter((r) => r.key.includes('WTS/'));
     const bams = wgs.filter((r) => r.key.endsWith('bam'));
@@ -549,10 +551,50 @@ class Subject extends Component {
     const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
     const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
 
-    const tsoCtdna = results_gds.filter((r) => r.path.includes('tso_ctdna'));
-    const tsoCtdnaBams = tsoCtdna.filter((r) => r.path.endsWith('bam'));
-    const tsoCtdnaVcfs = tsoCtdna.filter(
-      (r) => r.path.endsWith('vcf') || r.path.endsWith('vcf.gz')
+    // gds ICA
+
+    const wgsBams = results_gds.filter(
+      (r) => r.path.includes('wgs_tumor_normal') && r.path.endsWith('bam')
+    );
+    const wgsVcfs = results_gds.filter(
+      (r) => r.path.includes('umccrise') && (r.path.endsWith('vcf.gz') || r.path.endsWith('.maf'))
+    );
+    const wgsCircos = results_gds.filter(
+      (r) => r.path.includes('umccrise') && r.path.endsWith('png')
+    );
+    const wgsPcgr = results_gds.filter(
+      (r) => r.path.includes('umccrise') && r.path.endsWith('pcgr.html')
+    );
+    const wgsCpsr = results_gds.filter(
+      (r) => r.path.includes('umccrise') && r.path.endsWith('cpsr.html')
+    );
+    const wgsMultiqc = results_gds.filter(
+      (r) => r.path.includes('umccrise') && r.path.endsWith('multiqc_report.html')
+    );
+    const wgsCancer = results_gds.filter(
+      (r) => r.path.includes('umccrise') && r.path.endsWith('cancer_report.html')
+    );
+    const wgsCoverage = results_gds.filter(
+      (r) => r.path.includes('cacao') && r.path.endsWith('html')
+    );
+
+    const wgsGpl = results_gds.filter(
+      (r) => r.path.includes('gridss_purple_linx') && r.path.endsWith('linx.html')
+    );
+
+    const wtsBamsIca = results_gds.filter(
+      (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('bam')
+    );
+    const wtsMultiqc = results_gds.filter(
+      (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('multiqc.html')
+    );
+    const wtsRnasum = results_gds.filter((r) => r.path.endsWith('RNAseq_report.html'));
+
+    const tsoCtdnaBams = results_gds.filter(
+      (r) => r.path.includes('tso_ctdna') && r.path.endsWith('bam')
+    );
+    const tsoCtdnaVcfs = results_gds.filter(
+      (r) => r.path.includes('tso_ctdna') && (r.path.endsWith('vcf') || r.path.endsWith('vcf.gz'))
     );
 
     return (
@@ -583,6 +625,44 @@ class Subject extends Component {
                 <TableContainer>
                   <Paper elevation={0}>
                     <Table size={'small'} aria-label={'a dense table'}>
+                      {this.renderGDSResultTable('cancer report', wgsCancer)}
+                      {this.renderGDSResultTable('pcgr', wgsPcgr)}
+                      {this.renderGDSResultTable('cpsr', wgsCpsr)}
+                      {this.renderGDSResultTable('gpl report', wgsGpl)}
+                      {this.renderGDSResultTable('qc report', wgsMultiqc)}
+                      {this.renderGDSResultTable('coverage report', wgsCoverage)}
+                      {this.renderGDSResultTable('vcf', wgsVcfs)}
+                      {this.renderGDSResultTable('bam', wgsBams)}
+                      {this.renderGDSResultTable('circos plot', wgsCircos)}
+                    </Table>
+                  </Paper>
+                </TableContainer>
+              </TabPanel>
+              <TabPanel header='WTS'>
+                <TableContainer>
+                  <Paper elevation={0}>
+                    <Table size={'small'} aria-label={'a dense table'}>
+                      {this.renderGDSResultTable('rnasum report', wtsRnasum)}
+                      {this.renderGDSResultTable('qc report', wtsMultiqc)}
+                      {this.renderGDSResultTable('bam', wtsBamsIca)}
+                    </Table>
+                  </Paper>
+                </TableContainer>
+              </TabPanel>
+              <TabPanel header={'TSO500'}>
+                <TableContainer>
+                  <Paper elevation={0}>
+                    <Table size={'small'} aria-label={'a dense table'}>
+                      {this.renderGDSResultTable('vcf', tsoCtdnaVcfs)}
+                      {this.renderGDSResultTable('bam', tsoCtdnaBams)}
+                    </Table>
+                  </Paper>
+                </TableContainer>
+              </TabPanel>
+              <TabPanel header='WGS (bcbio)'>
+                <TableContainer>
+                  <Paper elevation={0}>
+                    <Table size={'small'} aria-label={'a dense table'}>
                       {this.renderResultTable('cancer report', cancer)}
                       {this.renderResultTable('pcgr', pcgr)}
                       {this.renderResultTable('cpsr', cpsr)}
@@ -596,23 +676,13 @@ class Subject extends Component {
                   </Paper>
                 </TableContainer>
               </TabPanel>
-              <TabPanel header='WTS'>
+              <TabPanel header='WTS (bcbio)'>
                 <TableContainer>
                   <Paper elevation={0}>
                     <Table size={'small'} aria-label={'a dense table'}>
                       {this.renderResultTable('rnasum report', rnasum)}
                       {this.renderResultTable('qc report', wtsQc)}
                       {this.renderResultTable('bam', wtsBams)}
-                    </Table>
-                  </Paper>
-                </TableContainer>
-              </TabPanel>
-              <TabPanel header={'TSO500'}>
-                <TableContainer>
-                  <Paper elevation={0}>
-                    <Table size={'small'} aria-label={'a dense table'}>
-                      {this.renderGDSResultTable('vcf', tsoCtdnaVcfs)}
-                      {this.renderGDSResultTable('bam', tsoCtdnaBams)}
                     </Table>
                   </Paper>
                 </TableContainer>
@@ -674,19 +744,19 @@ class Subject extends Component {
             <ListItemIcon>
               <img src={'/igv.png'} alt='igv.png' width='24px' height='24px' />
             </ListItemIcon>
-            <ListItemText primary='Open Subject Data in Online IGV' />
+            <ListItemText primary='Open Subject Data in Genomics Viewer' />
+          </ListItem>
+          <ListItem button component={RouterLink} to={'/files/' + subjectId}>
+            <ListItemIcon>
+              <ImageSearchIcon color={'primary'} />
+            </ListItemIcon>
+            <ListItemText primary='Open Analysis Results in File Viewer' />
           </ListItem>
           <ListItem button onClick={this.handleLaunchPadClick()}>
             <ListItemIcon>
               <MenuBookIcon color={'primary'} />
             </ListItemIcon>
             <ListItemText primary={'Generate GRIDSS PURPLE LINX Report'} />
-          </ListItem>
-          <ListItem button component={RouterLink} to={'/files/' + subjectId}>
-            <ListItemIcon>
-              <PhotoLibraryIcon color={'action'} />
-            </ListItemIcon>
-            <ListItemText primary='View Analysis Output' />
           </ListItem>
         </List>
         <LaunchPadDialog
@@ -703,7 +773,7 @@ class Subject extends Component {
   renderResultTable = (title, data, label) => {
     const columns = [
       { key: 'key', sortable: true },
-      { key: 'preview', sortable: true },
+      { key: 'preview', sortable: false },
       { key: 'actions', sortable: false },
       { key: 'size', sortable: true },
       { key: 'last_modified_date', sortable: true },
@@ -1028,6 +1098,7 @@ class Subject extends Component {
   renderGDSResultTable = (title, data, label) => {
     const columns = [
       { key: 'path', sortable: true },
+      { key: 'preview', sortable: false },
       { key: 'actions', sortable: false },
       { key: 'size_in_bytes', sortable: true },
       { key: 'time_modified', sortable: true },
@@ -1054,6 +1125,8 @@ class Subject extends Component {
                     <HumanReadableFileSize bytes={row[col.key]} />
                   ) : col.key === 'time_modified' ? (
                     <Moment local>{row[col.key]}</Moment>
+                  ) : col.key === 'preview' ? (
+                    <PreviewActionButton type='gds' data={row} />
                   ) : (
                     row[col.key]
                   )}
@@ -1071,65 +1144,71 @@ class Subject extends Component {
       { key: 0, label: 'reset', keyword: '', color: 'primary' },
       {
         key: 1,
+        label: 'cancer report tables',
+        keyword: 'umccrise cancer_report_tables .tsv.gz$',
+        color: 'default',
+      },
+      {
+        key: 2,
         label: 'qc bam',
         keyword: 'wgs qc .bam$',
         color: 'default',
       },
       {
-        key: 2,
+        key: 3,
         label: 'qc vcf',
         keyword: 'wgs qc .vcf.gz$',
         color: 'default',
       },
       {
-        key: 3,
+        key: 4,
         label: 'qc report',
         keyword: 'wgs qc multiqc .html$',
         color: 'default',
       },
       {
-        key: 4,
+        key: 5,
         label: 'wts bam',
         keyword: 'wts .bam$',
         color: 'default',
       },
       {
-        key: 5,
+        key: 6,
         label: 'wts vcf',
         keyword: 'wts .vcf.gz$',
         color: 'default',
       },
       {
-        key: 6,
+        key: 7,
         label: 'wts report',
         keyword: 'wts multiqc .html$',
         color: 'default',
       },
       {
-        key: 7,
+        key: 8,
         label: 't/n bam',
         keyword: 'tumor normal .bam$',
         color: 'default',
       },
       {
-        key: 8,
+        key: 9,
         label: 't/n vcf',
         keyword: 'tumor normal .vcf.gz$',
         color: 'default',
       },
       {
-        key: 9,
+        key: 10,
         label: 't/n report',
         keyword: 'tumor normal multiqc .html$',
         color: 'default',
       },
       {
-        key: 10,
+        key: 11,
         label: 'tso ctdna bam',
         keyword: 'tso ctdna .bam$',
         color: 'default',
       },
-      { key: 11, label: 'tso ctdna vcf', keyword: 'tso ctdna .vcf.gz$', color: 'default' },
+      { key: 12, label: 'tso ctdna vcf', keyword: 'tso ctdna .vcf.gz$', color: 'default' },
     ];
 
     return (
