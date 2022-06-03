@@ -27,3 +27,5 @@ yarn-error.log*
 local_ignore/
 .eslintcache
 /.idea/
+bams/
+vcfs/
