@@ -95,7 +95,7 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
         </IconButton>
 
         {/* Text will show on hover defined on div class */}
-        <p>FileSize exceed 20MB</p>
+        <p>FileSize exceed 60MB</p>
       </div>
     );
   } else {
