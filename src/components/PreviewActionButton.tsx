@@ -1,3 +1,5 @@
+// TODO implement v2 version of this component here
+
 import React, { useState, useEffect } from 'react';
 
 // AWS Amplify

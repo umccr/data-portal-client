@@ -4,7 +4,7 @@
 #
 # Sourcing this script will perform:
 #   1. get required config values from SSM Parameter Store
-#   2. export them as REACT_x environment variables
+#   2. export them as VITE_x environment variables
 #   3. start local development node server
 #
 # REQUIRED CLI:
@@ -42,16 +42,16 @@ command -v jq >/dev/null 2>&1 || {
 }
 
 if [ -n "$1" ] && [ "$1" = "unset" ]; then
-  unset REACT_APP_API_URL
-  unset REACT_APP_STAGE
-  unset REACT_APP_REGION
-  unset REACT_APP_COG_USER_POOL_ID
-  unset REACT_APP_COG_IDENTITY_POOL_ID
-  unset REACT_APP_COG_APP_CLIENT_ID_LOCAL
-  unset REACT_APP_OAUTH_DOMAIN
-  unset REACT_APP_OAUTH_REDIRECT_IN_LOCAL
-  unset REACT_APP_OAUTH_REDIRECT_OUT_LOCAL
-  echo "UNSET REACT ENV VAR"
+  unset VITE_API_URL
+  unset VITE_STAGE
+  unset VITE_REGION
+  unset VITE_COG_USER_POOL_ID
+  unset VITE_COG_IDENTITY_POOL_ID
+  unset VITE_COG_APP_CLIENT_ID_LOCAL
+  unset VITE_OAUTH_DOMAIN
+  unset VITE_OAUTH_REDIRECT_IN_LOCAL
+  unset VITE_OAUTH_REDIRECT_OUT_LOCAL
+  echo "UNSET VITE ENV VAR"
   return 0
 fi
 
@@ -73,20 +73,19 @@ gpl_submit_job=$(aws ssm get-parameter --name '/gpl/submit_job_lambda_fn_url' --
 gpl_submit_job_manual=$(aws ssm get-parameter --name '/gpl/submit_job_manual_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
 gpl_create_linx_plot=$(aws ssm get-parameter --name '/gpl/create_linx_plot_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
 
-export REACT_APP_API_URL=$api_url
-export REACT_APP_HTSGET_URL=$htsget_url
-export REACT_APP_GPL_SUBMIT_JOB=$gpl_submit_job
-export REACT_APP_GPL_SUBMIT_JOB_MANUAL=$gpl_submit_job_manual
-export REACT_APP_GPL_CREATE_LINX_PLOT=$gpl_create_linx_plot
-export REACT_APP_STAGE=localhost
-export REACT_APP_REGION=ap-southeast-2
-export REACT_APP_COG_USER_POOL_ID=$cog_user_pool_id
-export REACT_APP_COG_IDENTITY_POOL_ID=$cog_identity_pool_id
-export REACT_APP_COG_APP_CLIENT_ID_LOCAL=$cog_app_client_id_local
-export REACT_APP_OAUTH_DOMAIN=$oauth_domain
-export REACT_APP_OAUTH_REDIRECT_IN_LOCAL=$oauth_redirect_in_local
-export REACT_APP_OAUTH_REDIRECT_OUT_LOCAL=$oauth_redirect_out_local
-env | grep REACT
+export VITE_API_URL=$api_url
+export VITE_HTSGET_URL=$htsget_url
+export VITE_GPL_SUBMIT_JOB=$gpl_submit_job
+export VITE_GPL_SUBMIT_JOB_MANUAL=$gpl_submit_job_manual
+export VITE_GPL_CREATE_LINX_PLOT=$gpl_create_linx_plot
+export VITE_STAGE=localhost
+export VITE_REGION=ap-southeast-2
+export VITE_COG_USER_POOL_ID=$cog_user_pool_id
+export VITE_COG_IDENTITY_POOL_ID=$cog_identity_pool_id
+export VITE_COG_APP_CLIENT_ID_LOCAL=$cog_app_client_id_local
+export VITE_OAUTH_DOMAIN=$oauth_domain
+export VITE_OAUTH_REDIRECT_IN_LOCAL=$oauth_redirect_in_local
+export VITE_OAUTH_REDIRECT_OUT_LOCAL=$oauth_redirect_out_local
+env | grep VITE
 
-# See https://github.com/facebook/create-react-app/discussions/11767 for GENERATE_SOURCEMAP=false
-GENERATE_SOURCEMAP=false npx react-scripts start
+npx vite

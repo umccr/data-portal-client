@@ -19,13 +19,14 @@ repos:
       - id: no-commit-to-branch
         args: [ --branch, main, --branch, master, --pattern, release/.* ]
 
-  - repo: local
-    hooks:
-      - id: yarn-lint
-        name: yarn lint
-        entry: npx yarn lint
-        language: system
-        pass_filenames: false
+# TODO re-enable when v2 reach to lint-able state
+#  - repo: local
+#    hooks:
+#      - id: yarn-lint
+#        name: yarn lint
+#        entry: npx yarn lint
+#        language: system
+#        pass_filenames: false
 
   - repo: local
     hooks:
