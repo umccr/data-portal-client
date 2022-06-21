@@ -51,7 +51,7 @@ import { TabPanel, TabView } from 'primereact/tabview';
 import { Panel } from 'primereact/panel';
 import Link from '@material-ui/core/Link';
 import Backdrop from '@material-ui/core/Backdrop';
-import config from '../config';
+import config from '../../config';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';

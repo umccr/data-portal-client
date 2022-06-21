@@ -11,7 +11,7 @@ import Paper from '@material-ui/core/Paper';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableFooter from '@material-ui/core/TableFooter';
-import { TablePaginationActionsWrapped } from '../components/TablePagniationActionsWrapped';
+import { TablePaginationActionsWrapped } from '../components/archive/TablePagniationActionsWrapped';
 import EnhancedTableHead from '../components/EnhancedTableHead';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Snackbar from '@material-ui/core/Snackbar';
