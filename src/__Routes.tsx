@@ -1,4 +1,6 @@
-// TODO implement v2 version of this controller route here
+// FIXME this file is to be deleted at some point
+//  place holder here for v2 impl reference
+
 
 import React, { Component, Fragment } from 'react';
 import { Route, Switch } from 'react-router-dom';
