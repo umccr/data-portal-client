@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './index.css';
+import './main.css';
 import config from './config';
 import { Amplify } from '@aws-amplify/core';
 import { Auth } from '@aws-amplify/auth';

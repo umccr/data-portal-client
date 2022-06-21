@@ -1,6 +1,7 @@
 import { BrowserRouter } from 'react-router-dom';
 
 import Routes from './Routes';
+import UserProvider from './providers/UserProvider';
 
 // CSS Import
 import './App.css';
@@ -12,7 +13,9 @@ import 'primeflex/primeflex.min.css';
 function App() {
   return (
     <BrowserRouter>
-      <Routes />
+      <UserProvider>
+        <Routes />
+      </UserProvider>
     </BrowserRouter>
   );
 }
