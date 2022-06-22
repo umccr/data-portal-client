@@ -17,7 +17,7 @@ const UserContext = createContext<UserContextType>({ isAuth: false, user: {} });
 type Props = { children: React.ReactNode };
 function UserProvider(props: Props): React.ReactElement {
   const [user, setUser] = useState(useContext(UserContext));
-  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
+  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(true);
 
   // Authenticating function and update states
   useEffect(() => {
@@ -54,3 +54,8 @@ function UserProvider(props: Props): React.ReactElement {
 }
 
 export default UserProvider;
+
+// Export to be imported elsewhere
+export function useUserContext() {
+  return useContext(UserContext);
+}

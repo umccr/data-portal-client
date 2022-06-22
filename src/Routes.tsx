@@ -1,5 +1,9 @@
 import React from 'react';
 import { Routes as RouterRoutes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useUserContext } from './providers/UserProvider';
+
+// Pages
+import SignInPage from './pages/SignInPage';
 
 function Routes() {
   return (
@@ -8,7 +12,7 @@ function Routes() {
         <Route index element={<h1>HomePage</h1>} />
         <Route path='*' element={<h1>NotFoundPage</h1>}></Route>
       </Route>
-      <Route path='/signIn' element={<h1>SignInPage</h1>}></Route>
+      <Route path='/signIn' element={<SignInPage />}></Route>
     </RouterRoutes>
   );
 }
@@ -16,7 +20,7 @@ function Routes() {
 export default Routes;
 
 function ProtectedRoute() {
-  const isUserSignedIn = true; // Placeholder (Will use auth context API to identify)
+  const isUserSignedIn = useUserContext().isAuth;
 
   // If signedIn, render the rest of children (Outlet), else redirect to `/signIn` page
   return <>{isUserSignedIn ? <Outlet /> : <Navigate replace to='signIn' />}</>;
