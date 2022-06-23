@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Auth, CognitoHostedUIIdentityProvider } from '@aws-amplify/auth';
 import { Navigate } from 'react-router-dom';
 import { useUserContext } from '../providers/UserProvider';
-import { Container, Col, Row, Hidden } from 'react-grid-system';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 
 const ImageCSS = {
-  backgroundImage: 'url(https://source.unsplash.com/user/umccr/likes)',
+  backgroundImage:
+    'linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)), url(https://source.unsplash.com/user/umccr/likes)',
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
   backgroundPosition: 'center',
@@ -27,23 +27,19 @@ function Copyright() {
 function SignInContainer() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const loggingIn = async () => {
+  const loggingIn = () => {
     setIsLoading(true);
-    await Auth.federatedSignIn({ provider: CognitoHostedUIIdentityProvider.Google });
-    setIsLoading(false);
+
+    // Auth.federatedSignIn will redirect out from page (Not expecting to setIsLoading(false))
+    Auth.federatedSignIn({ provider: CognitoHostedUIIdentityProvider.Google });
   };
 
   const header = (
-    <Container>
-      <Row justify='center'>
-        <img
-          src='../../public/uomlogo.png'
-          style={{ width: '20%', height: 'auto' }}
-          alt='uomlogo.png'
-        />
-      </Row>
-    </Container>
+    <div className='flex justify-content-center align-items-center' style={{ padding: '20px' }}>
+      <img src='/uomlogo.png' style={{ width: '20%', height: 'auto' }} alt='uomlogo.png' />
+    </div>
   );
+
   const footer = (
     <span>
       <Button
@@ -59,11 +55,10 @@ function SignInContainer() {
   );
 
   return (
-    <div
-      style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div className='flex justify-content-center align-items-center' style={{ height: '100%' }}>
       <Card
         title='UMCCR Data Portal'
-        style={{ width: '25em', boxShadow: 'none' }}
+        style={{ width: '25em', boxShadow: 'none', backgroundColor: 'white', padding: '20px' }}
         header={header}
         footer={footer}>
         <p className='m-0' style={{ lineHeight: '1.5' }}>
@@ -78,21 +73,28 @@ function SignInContainer() {
 
 function SignInPage() {
   // Already signedIn, redirect to HomePage
-  if (!useUserContext().isAuth) {
+  if (useUserContext().isAuth) {
     return <Navigate replace to='/' />;
   }
 
   return (
-    <Container fluid style={{ height: '100%' }}>
-      <Row style={{ height: '100%', alignItems: 'center' }} direction='row'>
-        <Hidden xs>
-          <Col sm={4} md={8} style={{ ...ImageCSS, alignItems: 'center', height: '100%' }} />
-        </Hidden>
-        <Col xs={12} sm={8} md={4} style={{ alignItems: 'center', height: '100%' }}>
-          <SignInContainer />
-        </Col>
-      </Row>
-    </Container>
+    <div className='relative overflow-hidden' style={{ height: '100%', width: '100%' }}>
+      <div
+        className='absolute'
+        style={{
+          backgroundColor: 'grey',
+          height: '100%',
+          width: '100%',
+          zIndex: -1,
+          ...ImageCSS,
+        }}
+      />
+      <div
+        className='z-1 flex justify-content-center align-items-center'
+        style={{ height: '100%' }}>
+        <SignInContainer />
+      </div>
+    </div>
   );
 }
 
