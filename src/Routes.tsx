@@ -1,9 +1,10 @@
 import React from 'react';
 import { Routes as RouterRoutes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Auth } from '@aws-amplify/auth';
 import { useUserContext } from './providers/UserProvider';
-import { Auth, CognitoHostedUIIdentityProvider } from '@aws-amplify/auth';
 // Pages
 import SignInPage from './pages/SignInPage';
+import MenuBar from './layouts/MenuBar';
 
 function Routes() {
   return (
@@ -20,8 +21,17 @@ function Routes() {
 export default Routes;
 
 function ProtectedRoute() {
+  // If not signedIn redirect to `/signIn` page
   const isUserSignedIn = useUserContext().isAuth;
+  if (!isUserSignedIn) {
+    return <Navigate replace to='signIn' />;
+  }
 
-  // If signedIn, render the rest of children (Outlet), else redirect to `/signIn` page
-  return <>{isUserSignedIn ? <Outlet /> : <Navigate replace to='signIn' />}</>;
+  // Add layout componet for SignedIn page
+  return (
+    <>
+      <MenuBar />
+      <Outlet />
+    </>
+  );
 }
