@@ -1,10 +1,9 @@
 import React from 'react';
 import { Routes as RouterRoutes, Route, Navigate, Outlet } from 'react-router-dom';
-import { Auth } from '@aws-amplify/auth';
 import { useUserContext } from './providers/UserProvider';
 // Pages
 import SignInPage from './pages/SignInPage';
-import MenuBar from './layouts/menuBar/MenuBar';
+import MenuBar from './layouts/MenuBar';
 
 function Routes() {
   return (

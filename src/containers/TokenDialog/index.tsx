@@ -10,7 +10,7 @@ import moment from 'moment';
 
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
 
-import './tokendialog.css';
+import './index.css';
 
 type Props = {
   isOpen: boolean;

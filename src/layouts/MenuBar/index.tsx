@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Auth } from '@aws-amplify/auth';
 import { Menubar } from 'primereact/menubar';
 import { Menu } from 'primereact/menu';
@@ -6,7 +6,7 @@ import { Button } from 'primereact/button';
 import { useNavigate } from 'react-router-dom';
 
 import { useUserContext } from '../../providers/UserProvider';
-import TokenDialog from '../../containers/TokenDialog/TokenDialog';
+import TokenDialog from '../../containers/TokenDialog';
 
 import './menubar.css';
 
