@@ -1,0 +1,28 @@
+.p-menuitem-link:focus {
+  box-shadow: none !important;
+}
+
+@media only screen and (min-width: 960px) {
+  .p-menubar .p-menubar-root-list>.p-menuitem>.p-menuitem-link .p-menuitem-text {
+    color: whitesmoke !important;
+  }
+
+  .p-menubar .p-menubar-root-list>.p-menuitem>.p-menuitem-link:not(.p-disabled):hover {
+    background-color: var(--blue-900) !important;
+  }
+
+}
+
+@media only screen and (max-width: 960px) {
+  i.pi {
+    color: white;
+  }
+
+  .p-menubar .p-menubar-button {
+    border-radius: 0.25rem !important;
+  }
+
+  .p-menubar .p-menubar-button:hover {
+    background-color: transparent !important;
+  }
+}

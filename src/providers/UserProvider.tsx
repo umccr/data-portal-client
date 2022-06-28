@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Auth } from '@aws-amplify/auth';
+import { Auth, CognitoUser } from '@aws-amplify/auth';
 import CircularLoaderWithText from '../components/CircularLoaderWithText';
 
 /**
@@ -7,7 +7,8 @@ import CircularLoaderWithText from '../components/CircularLoaderWithText';
  */
 type UserContextType = {
   isAuth: boolean;
-  user: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  user: CognitoUser | any;
 };
 const UserContext = createContext<UserContextType>({ isAuth: false, user: {} });
 
