@@ -3,25 +3,12 @@ import { Auth } from '@aws-amplify/auth';
 import { Menubar } from 'primereact/menubar';
 import { Menu } from 'primereact/menu';
 import { Button } from 'primereact/button';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import { useUserContext } from '../providers/UserProvider';
-import TokenDialog from '../containers/TokenDialog/TokenDialog';
-const DataPortalLogo = () => {
-  const navigate = useNavigate();
+import { useUserContext } from '../../providers/UserProvider';
+import TokenDialog from '../../containers/TokenDialog/TokenDialog';
 
-  return (
-    <div className='flex align-items-center surface-border w-full'>
-      <Button
-        className='text-xl text-color font-semibold p-button-secondary p-button-text shadow-none'
-        label='UMCCR Data Portal'
-        onClick={() => {
-          navigate('/');
-        }}
-      />
-    </div>
-  );
-};
+import './menubar.css';
 
 const AccountMenu = () => {
   // User Information
@@ -54,7 +41,7 @@ const AccountMenu = () => {
       <TokenDialog isOpen={isTokenDialogOpen} handleIsOpen={handleIsTokenDialogChange} />
       <Menu model={accountMenuItems} popup ref={accountMenuRef} id='accountMenuPopup' />
       <Button
-        className='p-button-secondary p-button-text shadow-none'
+        className='p-button-secondary p-button-text shadow-none text-white'
         label={userInformation.attributes.email}
         onClick={(event) => handleAccountMenuClick(event)}
       />
@@ -65,6 +52,14 @@ const AccountMenu = () => {
 function MenuBar() {
   const navigate = useNavigate();
   const items = [
+    {
+      label: 'UMCCR Data Portal',
+      command: () => {
+        navigate('/');
+      },
+      className:
+        'text-xl text-black-alpha-90 font-semibold p-button-secondary p-button-text shadow-none',
+    },
     {
       label: 'Subjects',
       command: () => {
@@ -84,19 +79,19 @@ function MenuBar() {
       },
     },
     {
-      label: 'S3',
+      label: 'Search',
       command: () => {
-        navigate('/s3');
-      },
-    },
-    {
-      label: 'GDS',
-      command: () => {
-        navigate('/gds');
+        navigate('/search');
       },
     },
   ];
-  return <Menubar className='p-2' start={<DataPortalLogo />} model={items} end={<AccountMenu />} />;
+  return (
+    <Menubar
+      className='p-2 border-noround border-none bg-blue-800'
+      model={items}
+      end={<AccountMenu />}
+    />
+  );
 }
 
 export default MenuBar;
