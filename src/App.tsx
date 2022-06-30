@@ -2,6 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import Routes from './Routes';
 import UserProvider from './providers/UserProvider';
+import ToastProvider from './providers/ToastProvider';
 
 // CSS Import
 import 'primereact/resources/themes/tailwind-light/theme.css';
@@ -13,9 +14,11 @@ import './app.css';
 function App() {
   return (
     <BrowserRouter>
-      <UserProvider>
-        <Routes />
-      </UserProvider>
+      <ToastProvider>
+        <UserProvider>
+          <Routes />
+        </UserProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

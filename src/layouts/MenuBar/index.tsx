@@ -6,9 +6,9 @@ import { Button } from 'primereact/button';
 import { useNavigate } from 'react-router-dom';
 
 import { useUserContext } from '../../providers/UserProvider';
-import TokenDialog from '../../containers/TokenDialog';
+import TokenDialog from '../../containers/utils/TokenDialog';
 
-import './menubar.css';
+import './index.css';
 
 const AccountMenu = () => {
   // User Information

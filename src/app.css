@@ -1,3 +1,7 @@
 button {
   box-shadow: none !important;
 }
+
+body {
+  background-color: rgb(231, 235, 240);
+}

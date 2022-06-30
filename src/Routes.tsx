@@ -4,12 +4,21 @@ import { useUserContext } from './providers/UserProvider';
 // Pages
 import SignInPage from './pages/SignInPage';
 import MenuBar from './layouts/MenuBar';
+import SubjectPage from './pages/subjects/SubjectPage';
 
 function Routes() {
   return (
     <RouterRoutes>
       <Route path='/' element={<ProtectedRoute />}>
+        {/* NoPath redirects to HomePage */}
         <Route index element={<h1>HomePage</h1>} />
+
+        {/* Subjects routing */}
+        <Route path='/subject'>
+          <Route index element={<SubjectPage />} />
+        </Route>
+
+        {/* Non matching page redirect to NotFound */}
         <Route path='*' element={<h1>NotFoundPage</h1>}></Route>
       </Route>
       <Route path='/signIn' element={<SignInPage />}></Route>
