@@ -1,6 +1,6 @@
 import { BrowserRouter } from 'react-router-dom';
 
-import Routes from './Routes';
+import Routes from './routes';
 import UserProvider from './providers/UserProvider';
 import ToastProvider from './providers/ToastProvider';
 
