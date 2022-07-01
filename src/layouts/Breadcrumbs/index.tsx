@@ -42,7 +42,7 @@ function Breadcrumbs() {
   };
   breadcrumbItems.unshift(breadcrumbItem);
 
-  return <BreadCrumb style={{ backgroundColor: 'none' }} id='breadcrumb' model={breadcrumbItems} />;
+  return <BreadCrumb style={{ background: 'none' }} id='breadcrumb' model={breadcrumbItems} />;
 }
 
 export default Breadcrumbs;

@@ -3,7 +3,7 @@ import React from 'react';
 import { Routes as RouterRoutes, Route, Outlet } from 'react-router-dom';
 import Breadcrumbs from '../../layouts/Breadcrumbs';
 import SubjectPage from '../../pages/subjects/SubjectPage';
-// import SideBar from '../../layouts/SideBar';
+import SideBar from '../../layouts/SideBar';
 function SubjectRoutes() {
   return (
     <RouterRoutes>
@@ -18,11 +18,15 @@ function SubjectRoutes() {
 export default SubjectRoutes;
 
 function SubjectPageLayout() {
-  // return <SideBar />;
   return (
-    <>
-      <Breadcrumbs />
-      <Outlet />
-    </>
+    <SideBar
+      sideBarElement={<div>HELLO</div>}
+      mainPageElement={
+        <>
+          <Breadcrumbs />
+          <Outlet />
+        </>
+      }
+    />
   );
 }
