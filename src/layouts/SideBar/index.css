@@ -1,3 +1,7 @@
+.layout-wrapper {
+  position: absolute;
+  top: 3rem;
+}
 .layout-wrapper.layout-static .layout-main-container {
   margin-left: 300px;
 }

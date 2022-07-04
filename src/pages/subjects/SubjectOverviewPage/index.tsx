@@ -17,16 +17,23 @@ function SubjectOverviewPage() {
     <div>
       <div className=''>
         <Panel
-          className='min-w-max max-w-max xl:w-5 m-3 inline-block vertical-align-top'
-          header='Overview'>
+          className='mt-3 mr-3 inline-block vertical-align-top'
+          header='Overview'
+          style={{ minWidth: '750px' }}>
           <SubjectOverviewTable subjectId={subjectId} />
         </Panel>
         <Panel
-          className='max-w-full m-3 inline-block vertical-align-top'
-          header='Sample Information'>
+          className='mt-3 mr-3 inline-block vertical-align-top'
+          header='Sample Information'
+          style={{ minWidth: '750px' }}
+          toggleable>
           <SampleInformationTable subjectId={subjectId} />
         </Panel>
-        <Panel className='max-w-full m-3 inline-block vertical-align-top' header='Analysis Result'>
+        <Panel
+          className='mt-3 mr-3 inline-block vertical-align-top'
+          header='Analysis Result'
+          style={{ minWidth: '750px' }}
+          toggleable>
           <div>Analysis Result</div>
         </Panel>
       </div>

@@ -8,6 +8,7 @@ import DataTableWrapper from '../../../components/DataTableWrapper';
 import { useToastContext } from '../../../providers/ToastProvider';
 import { showDisplayText } from '../../../utils/util';
 import JSONToTable from '../../../components/JSONToTable';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 
 const COLUMN_TO_DISPLAY = [
   'sample_id',
@@ -125,11 +126,15 @@ function SampleInformationTable(props: Props) {
         onHide={handleDialogClose}>
         <JSONToTable objData={moreInformationDialog} />
       </Dialog>
-      <DataTableWrapper
-        isLoading={isLoading}
-        columns={columnList}
-        dataTableValue={subjectLimsList}
-      />
+      {isLoading ? (
+        <CircularLoaderWithText />
+      ) : (
+        <DataTableWrapper
+          isLoading={isLoading}
+          columns={columnList}
+          dataTableValue={subjectLimsList}
+        />
+      )}
     </>
   );
 }
