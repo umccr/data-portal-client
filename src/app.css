@@ -5,3 +5,7 @@ button {
 body {
   background-color: rgb(231, 235, 240);
 }
+
+.p-listbox-item:focus {
+  box-shadow: none !important;
+}

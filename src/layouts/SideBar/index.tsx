@@ -19,18 +19,27 @@ function SideBar({ sideBarElement, mainPageElement }: sideBarProps) {
   return (
     <div className={wrapperClassString}>
       <div className='layout-sidebar'>
-        <Button
-          onClick={handleIsDrawerOpenChange}
-          icon={openCloseIcon}
-          className='top-0 right-0 p-button-rounded p-button-secondary p-button-text absolute'
-          aria-label='Cancel'
-        />
-
-        {sideBarElement}
+        {isDrawerOpen ? (
+          <>
+            <Button
+              onClick={handleIsDrawerOpenChange}
+              icon={openCloseIcon}
+              className='p-button-rounded p-button-secondary p-button-text absolute'
+              style={{ top: '1rem', right: '1rem' }}
+              aria-label='Cancel'
+            />
+            {sideBarElement}
+          </>
+        ) : (
+          <Button
+            onClick={handleIsDrawerOpenChange}
+            icon={openCloseIcon}
+            className='top-0 right-0 p-button-rounded p-button-secondary p-button-text absolute'
+            aria-label='Cancel'
+          />
+        )}
       </div>
       <div className='layout-main-container'>{mainPageElement}</div>
-      {/* <Breadcrumbs />
-      <Outlet /> */}
     </div>
   );
 }

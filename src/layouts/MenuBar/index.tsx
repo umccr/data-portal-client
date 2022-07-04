@@ -87,8 +87,7 @@ function MenuBar() {
   ];
   return (
     <Menubar
-      className='p-2 border-noround border-none bg-blue-800'
-      className='p-0 border-noround border-none bg-blue-800'
+      className='p-0 border-noround border-none bg-blue-800 h-3rem'
       model={items}
       end={<AccountMenu />}
     />
