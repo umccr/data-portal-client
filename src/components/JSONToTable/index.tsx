@@ -2,7 +2,7 @@ import React from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-type ObjectType = { [key: string]: (string | number) | (string | number)[] };
+type ObjectType = { [key: string]: (string | number | null) | (string | number)[] };
 
 type Props = {
   objData: ObjectType;

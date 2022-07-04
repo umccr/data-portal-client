@@ -1,3 +1,3 @@
 export function showDisplayText(text: string) {
-  return text.replace('-', ' ');
+  return text.replaceAll('-', ' ').replaceAll('_', ' ');
 }
