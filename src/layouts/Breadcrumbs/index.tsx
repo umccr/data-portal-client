@@ -39,7 +39,7 @@ function Breadcrumbs() {
     command: () => {
       navigate(currentPath);
     },
-    className: 'capitalize font-medium',
+    className: 'uppercase font-medium',
   };
   breadcrumbItems.unshift(breadcrumbItem);
 

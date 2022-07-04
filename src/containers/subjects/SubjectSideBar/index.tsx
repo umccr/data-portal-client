@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ListBox, ListBoxChangeParams } from 'primereact/listbox';
 
 const sidebarMapping = [
-  { postfixPath: 'summary', label: 'Summary' },
+  { postfixPath: 'overview', label: 'Overview' },
   { postfixPath: 'subject-data', label: 'Subject Data' },
   { postfixPath: 'igv', label: 'IGV' },
   { postfixPath: 'file-viewer', label: 'File Viewer' },
@@ -17,7 +17,7 @@ function SubjectSideBar() {
   const handleOnChangeListPage = (e: ListBoxChangeParams) => {
     const sidebarObject = e.value; // Possibility of null when clicked the current page
     if (sidebarObject) {
-      navigate(`${sidebarObject.postfixPath}/`);
+      navigate(`${sidebarObject.postfixPath}`);
     }
   };
 
