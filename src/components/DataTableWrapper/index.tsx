@@ -56,9 +56,8 @@ function DataTableWrapper(props: DataTableWrapperProps) {
       rowHover
       size='small'
       responsiveLayout='scroll'
+      className='ui-datatable-hor-scroll'
       emptyMessage='No Data found!'
-      scrollable
-      scrollHeight='100%'
       {...additionalDataTableProps}>
       {columns.map((columpProperties, i) => {
         return <Column key={i} {...columpProperties} />;
@@ -72,14 +71,19 @@ export default DataTableWrapper;
 /***********************************
  * Helper function / constant
  ***********************************/
+
 /**
- * Export init constant for easy accesse
+ * Export init constant for easy access
  */
 export const paginationPropsInitValue: PaginationProps = {
   firstIndexNumberAppearOnCurrentTable: 0,
   currentNumberOfRows: 10,
   totalNumberOfItems: 0, // Must set to 0, or will cause unwanted pagination clicks
 };
+
+/****************************************************
+ * Django Helper function
+ ****************************************************/
 
 /**
  * Django to Data Table Pagination Props Conversion
@@ -101,3 +105,17 @@ export function djangoToTablePaginationFormat(prop: djangoPaginationFormat): Pag
     totalNumberOfItems: count,
   };
 }
+/**
+ * Create Django Query param based on Table pagination Event
+ */
+
+export const convertPaginationEventToDjangoQueryParams = (event: { [key: string]: number }) => {
+  const newNumberOfRows = event.rows;
+  const newNumberOfFirstIndex = event.first;
+  const newCurrentPageNumber = Math.ceil(newNumberOfFirstIndex / newNumberOfRows) + 1;
+
+  return {
+    rowsPerPage: newNumberOfRows,
+    page: newCurrentPageNumber,
+  };
+};

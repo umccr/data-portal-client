@@ -1,4 +1,5 @@
 .layout-wrapper {
+  width: 100%;
   position: absolute;
   top: 3rem;
 }

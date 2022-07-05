@@ -1,79 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from 'primereact/button';
 import { useNavigate, Link } from 'react-router-dom';
 import API from '@aws-amplify/api';
+import { useQuery } from 'react-query';
 
 import DataTableWrapper, {
   PaginationProps,
   paginationPropsInitValue,
   djangoToTablePaginationFormat,
+  convertPaginationEventToDjangoQueryParams,
 } from '../../../components/DataTableWrapper';
 import { useToastContext } from '../../../providers/ToastProvider';
 import './index.css';
+
+const fetchS3SubjectList = async (params: { [key: string]: string | number }) => {
+  const APIConfig = {
+    queryStringParameters: {
+      ...params,
+    },
+  };
+  return await API.get('portal', '/subjects/', APIConfig);
+};
 
 function SubjectListTable() {
   const toast = useToastContext();
   const navigate = useNavigate();
 
   // Pagination Properties
-  const [paginationProps, setPaginationProps] = useState<PaginationProps>(paginationPropsInitValue);
-
-  // API properties
-  const [apiQueryParameter, setApiQueryParameter] = useState<{ [key: string]: string | number }>({
-    rowsPerPage: paginationProps.currentNumberOfRows,
-  });
+  let paginationProps: PaginationProps = paginationPropsInitValue;
   const handleTablePaginationPropChange = (event: { [key: string]: number }) => {
-    const newNumberOfRows = event.rows;
-    const newNumberOfFirstIndex = event.first;
-    const newCurrentPageNumber = Math.ceil(newNumberOfFirstIndex / newNumberOfRows) + 1;
+    const paginationProps = convertPaginationEventToDjangoQueryParams(event);
 
     const mergedObj = {
       ...apiQueryParameter,
-      rowsPerPage: newNumberOfRows,
-      page: newCurrentPageNumber,
+      ...paginationProps,
     };
     setApiQueryParameter(mergedObj);
   };
 
-  // API Calling
+  // API properties
   type subjectObjectList = { subject: string };
-  const [subjectList, setSubjectList] = useState<subjectObjectList[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  let subjectList: subjectObjectList[] = [];
+  const [apiQueryParameter, setApiQueryParameter] = useState<{ [key: string]: string | number }>({
+    rowsPerPage: paginationProps.currentNumberOfRows,
+  });
 
-  useEffect(() => {
-    let isComponentUnmount = false;
-    setIsLoading(true);
-    const fetchData = async () => {
-      setIsLoading(true);
+  const { isFetching, isLoading, isError, data } = useQuery(
+    ['getSubjectList', apiQueryParameter],
+    () => fetchS3SubjectList(apiQueryParameter)
+  );
 
-      const APIConfig = {
-        queryStringParameters: {
-          ...apiQueryParameter,
-        },
-      };
-      try {
-        const subjectApiResponse = await API.get('portal', '/subjects/', APIConfig);
+  if (data && !isFetching && !isLoading) {
+    subjectList = convertListOfSubjectToSubjectObject(data.results);
+    paginationProps = djangoToTablePaginationFormat(data.pagination);
+  }
 
-        if (isComponentUnmount) return;
-
-        setPaginationProps(djangoToTablePaginationFormat(subjectApiResponse.pagination));
-        setSubjectList(convertListOfSubjectToSubjectObject(subjectApiResponse.results));
-      } catch (err) {
-        toast?.show({
-          severity: 'error',
-          summary: 'Something went wrong!',
-          detail: 'Unable to fetch data from Portal API',
-          life: 3000,
-        });
-      }
-      setIsLoading(false);
-    };
-    fetchData();
-
-    return () => {
-      isComponentUnmount = true;
-    };
-  }, [apiQueryParameter]);
+  if (isError) {
+    toast?.show({
+      severity: 'error',
+      summary: 'Something went wrong!',
+      detail: 'Unable to fetch data from Portal API',
+      life: 3000,
+    });
+  }
 
   // Column Templates
   const SubjectTemplate = (rowData: subjectObjectList) => {
@@ -150,7 +139,7 @@ function SubjectListTable() {
 
   return (
     <DataTableWrapper
-      isLoading={isLoading}
+      isLoading={isLoading || isFetching}
       columns={columnsList}
       dataTableValue={subjectList}
       paginationProps={paginationProps}

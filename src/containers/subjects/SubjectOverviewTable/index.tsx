@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import API from '@aws-amplify/api';
+import { useQuery } from 'react-query';
 
 // Custom component
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
@@ -16,45 +17,43 @@ const OVERVIEW_COLUMN = [
   'timestamp',
 ];
 
+const fetchSubjectOverview = async (subjectId: string) => {
+  return await API.get('portal', `/subjects/${subjectId}/`, {});
+};
+
 type JsonOfArrayType = { [key: string]: (string | number)[] };
 type Props = { subjectId: string };
 
 function SubjectOverviewTable(props: Props) {
   const { subjectId } = props;
-  const [subjectOverview, setSubjectOverview] = useState<JsonOfArrayType>({});
+  let subjectOverview: JsonOfArrayType = {};
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const toast = useToastContext();
 
-  useEffect(() => {
-    let isComponentUnmount = false;
-    setIsLoading(true);
-    const fetchData = async () => {
-      setIsLoading(true);
+  const { isFetching, isLoading, isError, data } = useQuery('fetchSubjectInformation', () =>
+    fetchSubjectOverview(subjectId)
+  );
 
-      try {
-        const subjectApiResponse = await API.get('portal', `/subjects/${subjectId}/`, {});
-        const summarizeLims = convertArrayOfJsonToJsonOfArray(subjectApiResponse.lims);
-        if (isComponentUnmount) return;
-        setSubjectOverview(summarizeLims);
-      } catch (err) {
-        toast?.show({
-          severity: 'error',
-          summary: 'Something went wrong!',
-          detail: 'Unable to fetch data from Portal API',
-          life: 3000,
-        });
-      }
-      setIsLoading(false);
-    };
-    fetchData();
+  if (isLoading || isFetching) {
+    return <CircularLoaderWithText />;
+  }
 
-    return () => {
-      isComponentUnmount = true;
-    };
-  }, []);
+  if (isError) {
+    toast?.show({
+      severity: 'error',
+      summary: 'Something went wrong!',
+      detail: 'Unable to fetch data from Portal API',
+      life: 3000,
+    });
+  }
+  if (data && !isFetching && !isLoading) {
+    subjectOverview = convertArrayOfJsonToJsonOfArray(data.lims);
+  }
+
   return (
-    <div>{isLoading ? <CircularLoaderWithText /> : <JSONToTable objData={subjectOverview} />}</div>
+    <div>
+      <JSONToTable objData={subjectOverview} />
+    </div>
   );
 }
 

@@ -9,6 +9,7 @@ import SideBar from '../../layouts/SideBar';
 import SubjectSideBar from '../../containers/subjects/SubjectSideBar';
 import SubjectTablePage from '../../pages/subjects/SubjectTablePage';
 import SubjectOverviewPage from '../../pages/subjects/SubjectOverviewPage';
+import SubjectDataPage from '../../pages/subjects/SubjectDataPage';
 
 function SubjectRoutes() {
   return (
@@ -18,7 +19,7 @@ function SubjectRoutes() {
         <Route path=':subjectId' element={<SubjectPageLayout />}>
           <Route index element={<Navigate to='overview' />} />
           <Route path='overview' element={<SubjectOverviewPage />} />
-          <Route path='subject-data' element={<div>Subject Data</div>} />
+          <Route path='subject-data' element={<SubjectDataPage />} />
           <Route path='igv' element={<div>igv</div>} />
           <Route path='file-viewer' element={<div>File Viewer</div>} />
           <Route path='launch-pad' element={<div>launch</div>} />

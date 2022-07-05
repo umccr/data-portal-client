@@ -1,4 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 import Routes from './routes';
 import UserProvider from './providers/UserProvider';
@@ -11,14 +12,24 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.min.css';
 import './app.css';
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <UserProvider>
-          <Routes />
-        </UserProvider>
-      </ToastProvider>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <UserProvider>
+            <Routes />
+          </UserProvider>
+        </ToastProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   );
 }

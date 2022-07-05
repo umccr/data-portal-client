@@ -7,3 +7,10 @@
 button {
   border: none !important;
 }
+
+.ui-datatable-hor-scroll .ui-datatable-tablewrapper,
+.scrolling-div .ui-datatable-tablewrapper {
+  overflow: auto;
+  width: 100%;
+  padding-bottom: 5px;
+}

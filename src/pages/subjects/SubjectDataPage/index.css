@@ -1,0 +1,8 @@
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link{
+  border-color: var(--blue-700) !important;
+  color: var(--blue-700) !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus{
+  box-shadow: none!important;
+}

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import API from '@aws-amplify/api';
+import { useQuery } from 'react-query';
 import { ColumnProps } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
@@ -20,14 +21,16 @@ const COLUMN_TO_DISPLAY = [
   'override_cycles',
 ];
 
-type ObjectStringValType = { [key: string]: string | number | null };
+const fetchSubjectInformation = async (subjectId: string) => {
+  return await API.get('portal', `/subjects/${subjectId}/`, {});
+};
 
+type ObjectStringValType = { [key: string]: string | number | null };
 type Props = { subjectId: string };
 
 function SampleInformationTable(props: Props) {
   const { subjectId } = props;
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [subjectLimsList, setSubjectLimsList] = useState<ObjectStringValType[]>([]);
+  let subjectLimsList: ObjectStringValType[] = [];
   const toast = useToastContext();
 
   // Dialog properties
@@ -42,33 +45,22 @@ function SampleInformationTable(props: Props) {
     setIsDialogOpen(false);
   };
 
-  // API Call
-  useEffect(() => {
-    let isComponentUnmount = false;
-    setIsLoading(true);
-    const fetchData = async () => {
-      setIsLoading(true);
+  const { isFetching, isLoading, isError, data } = useQuery('fetchSubjectInformation', () =>
+    fetchSubjectInformation(subjectId)
+  );
 
-      try {
-        const subjectApiResponse = await API.get('portal', `/subjects/${subjectId}/`, {});
-        if (isComponentUnmount) return;
-        setSubjectLimsList(subjectApiResponse.lims);
-      } catch (err) {
-        toast?.show({
-          severity: 'error',
-          summary: 'Something went wrong!',
-          detail: 'Unable to fetch data from Portal API',
-          life: 3000,
-        });
-      }
-      setIsLoading(false);
-    };
-    fetchData();
+  if (isError) {
+    toast?.show({
+      severity: 'error',
+      summary: 'Something went wrong!',
+      detail: 'Unable to fetch data from Portal API',
+      life: 3000,
+    });
+  }
 
-    return () => {
-      isComponentUnmount = true;
-    };
-  }, []);
+  if (data && !isFetching && !isLoading) {
+    subjectLimsList = data.lims;
+  }
 
   /**
    * TABLE COLUMN PROPERTIES
