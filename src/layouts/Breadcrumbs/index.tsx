@@ -45,7 +45,7 @@ function Breadcrumbs() {
 
   return (
     <BreadCrumb
-      className='py-1 px-0'
+      className='py-1 px-0 mb-3'
       style={{ background: 'none' }}
       id='breadcrumb'
       model={breadcrumbItems}

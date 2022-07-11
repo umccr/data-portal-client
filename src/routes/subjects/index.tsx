@@ -10,6 +10,8 @@ import SubjectSideBar from '../../containers/subjects/SubjectSideBar';
 import SubjectTablePage from '../../pages/subjects/SubjectTablePage';
 import SubjectOverviewPage from '../../pages/subjects/SubjectOverviewPage';
 import SubjectDataPage from '../../pages/subjects/SubjectDataPage';
+import SubjectIGVPage from '../../pages/subjects/SubjectIGVPage';
+import SubjectFileViewerPage from '../../pages/subjects/SubjectFileViewerPage';
 
 function SubjectRoutes() {
   return (
@@ -20,8 +22,8 @@ function SubjectRoutes() {
           <Route index element={<Navigate to='overview' />} />
           <Route path='overview' element={<SubjectOverviewPage />} />
           <Route path='subject-data' element={<SubjectDataPage />} />
-          <Route path='igv' element={<div>igv</div>} />
-          <Route path='file-viewer' element={<div>File Viewer</div>} />
+          <Route path='igv' element={<SubjectIGVPage />} />
+          <Route path='file-viewer' element={<SubjectFileViewerPage />} />
           <Route path='launch-pad' element={<div>launch</div>} />
         </Route>
       </Route>

@@ -13,7 +13,7 @@ function SubjectDataPage() {
   }
 
   return (
-    <div className='mt-3 w-auto' style={{ minWidth: '80%' }}>
+    <div className='mb-3 w-auto' style={{ minWidth: '80%' }}>
       <TabView renderActiveOnly>
         <TabPanel header='S3'>
           <S3SubjectDataTable subjectId={subjectId} />
