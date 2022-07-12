@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 // Subject custom component
 import SubjectOverviewTable from '../../../containers/subjects/SubjectOverviewTable';
 import SampleInformationTable from '../../../containers/subjects/SampleInformationTable';
+import AnalysisResultsTable from '../../../containers/subjects/AnalysisResultTable';
 
 function SubjectOverviewPage() {
   const { subjectId } = useParams();
@@ -16,25 +17,20 @@ function SubjectOverviewPage() {
   return (
     <div>
       <div className=''>
-        <Panel
-          className='mb-3 mr-3 inline-block vertical-align-top w-12'
-          header='Overview'
-          style={{ maxWidth: '750px' }}>
+        <Panel className='mb-3 mr-3 inline-block vertical-align-top w-12' header='Overview'>
           <SubjectOverviewTable subjectId={subjectId} />
         </Panel>
         <Panel
           className='mb-3 mr-3 inline-block vertical-align-top w-12'
           header='Sample Information'
-          style={{ maxWidth: '750px' }}
           toggleable>
           <SampleInformationTable subjectId={subjectId} />
         </Panel>
         <Panel
           className='mb-3 mr-3 inline-block vertical-align-top w-12'
           header='Analysis Result'
-          style={{ maxWidth: '750px' }}
           toggleable>
-          <div>Analysis Result</div>
+          <AnalysisResultsTable subjectId={subjectId} />
         </Panel>
       </div>
     </div>

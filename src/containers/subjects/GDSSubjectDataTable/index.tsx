@@ -13,6 +13,7 @@ import DataTableWrapper, {
   convertPaginationEventToDjangoQueryParams,
 } from '../../../components/DataTableWrapper';
 import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
+import FilePreviewButton from '../../../components/FilePreviewButton';
 
 const fetchGDSSubjectData = async (
   subjectId: string,
@@ -81,7 +82,7 @@ function GDSSubjectDataTable(props: Props) {
   const column_to_display: string[] = [
     'volume_name',
     'path',
-    // 'preview', TODO
+    'preview',
     // 'action', TODO
     'size_in_bytes',
     'last_modified_date',
@@ -104,21 +105,35 @@ function GDSSubjectDataTable(props: Props) {
       className: 'text-left white-space-nowrap',
     };
 
+    if (column == 'preview') {
+      newColToShow = {
+        ...newColToShow,
+        header: (
+          <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
+            {showDisplayText(column)}
+          </p>
+        ),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        body: (rowData: any): React.ReactNode => {
+          const filename = rowData.path.split('/').pop();
+
+          return (
+            <FilePreviewButton
+              filename={filename}
+              type='gds'
+              id={rowData.id}
+              presignedUrl={rowData.presigned_url}
+              handleUpdateData={(url: string) => {
+                rowData.presigned_url = url;
+              }}
+            />
+          );
+        },
+      };
+    }
     // Some custom column to be added here
     // TODO: below
-    // if (column == 'preview') {
-    //   newColToShow = {
-    //     ...newColToShow,
-    //     header: (
-    //       <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
-    //         {showDisplayText('column')}
-    //       </p>
-    //     ),
-    //     body: (rowData: ObjectStringValType): React.ReactNode => {
-    //       return textBodyTemplate('rowData[column]');
-    //     },
-    //   };
-    // } else if (column == 'action') {
+    // else if (column == 'action') {
     //   newColToShow = {
     //     field: column,
     //     alignHeader: 'left' as const,
@@ -133,7 +148,7 @@ function GDSSubjectDataTable(props: Props) {
     //     className: 'text-left white-space-nowrap',
     //   };
     // } else
-    if (column == 'size_in_bytes') {
+    else if (column == 'size_in_bytes') {
       newColToShow = {
         ...newColToShow,
         body: (rowData: ObjectStringValType): React.ReactNode => {

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-import { useQuery } from 'react-query';
 import API from '@aws-amplify/api';
 import { Card } from 'primereact/card';
 import { Dropdown } from 'primereact/dropdown';

@@ -13,6 +13,7 @@ import DataTableWrapper, {
   convertPaginationEventToDjangoQueryParams,
 } from '../../../components/DataTableWrapper';
 import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
+import FilePreviewButton from '../../../components/FilePreviewButton';
 
 const fetchS3SubjectData = async (
   subjectId: string,
@@ -81,7 +82,7 @@ function S3SubjectDataTable(props: Props) {
   const column_to_display: string[] = [
     'bucket',
     'key',
-    // 'preview', TODO
+    'preview',
     // 'action', TODO
     'size',
     'last_modified_date',
@@ -103,21 +104,34 @@ function S3SubjectDataTable(props: Props) {
       },
       className: 'text-left white-space-nowrap',
     };
+    if (column == 'preview') {
+      newColToShow = {
+        ...newColToShow,
+        header: (
+          <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
+            {showDisplayText(column)}
+          </p>
+        ),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        body: (rowData: any): React.ReactNode => {
+          const filename = rowData.key.split('/').pop();
 
+          return (
+            <FilePreviewButton
+              filename={filename}
+              type='s3'
+              id={rowData.id}
+              presignedUrl={rowData.presigned_url}
+              handleUpdateData={(url: string) => {
+                rowData.presigned_url = url;
+              }}
+            />
+          );
+        },
+      };
+    }
     // Some custom column to be added here
     // TODO: below
-    // if (column == 'preview') {
-    //   newColToShow = {
-    //     ...newColToShow,
-    //     header: (
-    //       <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
-    //         {showDisplayText('column')}
-    //       </p>
-    //     ),
-    //     body: (rowData: ObjectStringValType): React.ReactNode => {
-    //       return textBodyTemplate('rowData[column]');
-    //     },
-    //   };
     // } else if (column == 'action') {
     //   newColToShow = {
     //     field: column,
@@ -133,7 +147,7 @@ function S3SubjectDataTable(props: Props) {
     //     className: 'text-left white-space-nowrap',
     //   };
     // } else
-    if (column == 'size') {
+    else if (column == 'size') {
       newColToShow = {
         ...newColToShow,
         body: (rowData: ObjectStringValType): React.ReactNode => {
