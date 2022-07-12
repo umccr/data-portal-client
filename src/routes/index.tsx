@@ -14,7 +14,7 @@ function Routes() {
         <Route index element={<h1>HomePage</h1>} />
 
         {/* Subjects routing */}
-        <Route path='/subject/*' element={<SubjectRoutes />} />
+        <Route path='/subjects/*' element={<SubjectRoutes />} />
 
         {/* Non matching page redirect to NotFound */}
         <Route path='*' element={<h1>NotFoundPage</h1>}></Route>

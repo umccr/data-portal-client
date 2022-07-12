@@ -63,7 +63,7 @@ function MenuBar() {
     {
       label: 'Subjects',
       command: () => {
-        navigate('/subject');
+        navigate('/subjects');
       },
     },
     {
