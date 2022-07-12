@@ -118,7 +118,7 @@ function SampleInformationTable(props: Props) {
         onHide={handleDialogClose}>
         <JSONToTable objData={moreInformationDialog} />
       </Dialog>
-      {isLoading ? (
+      {isLoading || isFetching ? (
         <CircularLoaderWithText />
       ) : (
         <DataTableWrapper
