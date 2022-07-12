@@ -37,7 +37,9 @@ function ProtectedRoute() {
   return (
     <>
       <MenuBar />
-      <Outlet />
+      <div style={{ top: '3rem', position:'relative'}}>
+        <Outlet />
+      </div>
     </>
   );
 }

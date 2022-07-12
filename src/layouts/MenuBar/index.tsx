@@ -87,7 +87,7 @@ function MenuBar() {
   ];
   return (
     <Menubar
-      className='p-0 w-full border-noround border-none bg-blue-800 h-3rem'
+      className='fixed p-0 w-full border-noround border-none bg-blue-800 h-3rem top-0'
       style={{ zIndex: 2 }}
       model={items}
       end={<AccountMenu />}
