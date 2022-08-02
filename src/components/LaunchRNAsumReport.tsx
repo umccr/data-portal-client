@@ -104,7 +104,7 @@ function LaunchRNAsumReport(props: Props) {
   const { subject_id, isOpen, handleIsOpenState } = props;
   const [datasetSelected, setDatasetSelected] = useState();
   const [isRNAsumTableOpen, setIsRNAsumTableOpen] = useState(false);
-  console.log('RENDERING');
+
   const [triggerStatus, setTriggerStatus] = useState({
     isError: false,
     isLoading: false,
@@ -112,12 +112,12 @@ function LaunchRNAsumReport(props: Props) {
   });
 
   const handleCloseDialog = () => {
+    handleIsOpenState(false);
     setTriggerStatus({
       isError: false,
       isLoading: false,
       isSuccess: false,
     });
-    handleIsOpenState(false);
   };
 
   const handleRNAsumTrigger = async () => {

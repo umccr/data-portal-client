@@ -103,7 +103,7 @@ class Subject extends Component {
     launchPadDialogConfirmed: false,
     openBackdrop: false,
     clickedLinks: [],
-    isRNAsumDialogOpen: true,
+    isRNAsumDialogOpen: false,
   };
 
   async componentDidMount() {
@@ -784,7 +784,7 @@ class Subject extends Component {
             <ListItemIcon>
               <AssessmentIcon color={'primary'} />
             </ListItemIcon>
-            <ListItemText primary={'Generate RNAsum Launch'} />
+            <ListItemText primary={'Generate RNAsum Report'} />
           </ListItem>
         </List>
         <LaunchPadDialog
