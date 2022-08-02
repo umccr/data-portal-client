@@ -1,6 +1,6 @@
 /**
  * Defining DATASET option available for RNAsum
- *  Ref: https://github.com/umccr/RNAsum/blob/master/TCGA_projects_summary.md#pan-cancer-dataset
+ * Ref: https://github.com/umccr/RNAsum/blob/master/TCGA_projects_summary.md
  */
 export const PRIMARY_DATASETS_OPTION = [
   {
@@ -243,9 +243,8 @@ export const EXTENDED_DATASETS_OPTION = [
 
 export const PAN_CANCER_DATASETS_OPTION = [
   {
-    no: '1',
     project: 'PANCAN',
-    name: 'Samples from all [33 cancer types](#primary-datasets), 10 samples from each',
+    name: 'Samples from all 33 cancer types, 10 samples from each',
     tissue_code: '1 and 3 (LAML samples only)',
     samples_no: '330',
   },
