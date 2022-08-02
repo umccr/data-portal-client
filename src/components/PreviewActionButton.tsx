@@ -14,29 +14,16 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Paper from '@material-ui/core/Paper';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography } from '@material-ui/core';
 
 // Other Dependencies
 import JSONPretty from 'react-json-pretty';
 
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 const HTML_FILETYPE_LIST: string[] = ['html'];
-/**
- * For Temporary only support Image filetype due to cors-origin policy
- * TODO: Uncomment the following constants below
- */
-// const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
-// const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
-// const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
+const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
+const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
+const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
 
 /**
  * Preview Action Button
@@ -127,13 +114,9 @@ function checkIsDataTypeSupoorted(name: string): boolean {
   const dataTypeSupported = [
     ...IMAGE_FILETYPE_LIST,
     ...HTML_FILETYPE_LIST,
-    /**
-     * For Temporary only support Image filetype due to cors-origin policy
-     * TODO: Uncomment the following constants below
-     */
-    // ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
-    // ...PLAIN_FILETYPE_LIST,
-    // ...OTHER_FILETYPE_LIST,
+    ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
+    ...PLAIN_FILETYPE_LIST,
+    ...OTHER_FILETYPE_LIST,
   ];
 
   for (const dataType of dataTypeSupported) {
@@ -212,11 +195,7 @@ function DialogData({ type, data }: DialogDataProps) {
   return (
     <>
       {/* Dialog that opens the preview */}
-      <DialogTitle style={{ minHeight: '4rem' }}>
-        <Typography variant='h6' noWrap>
-          {fileName}
-        </Typography>
-      </DialogTitle>
+      <DialogTitle style={{ minHeight: '4rem', whiteSpace: 'nowrap' }}>{fileName}</DialogTitle>
       <DialogContent
         style={{
           display: 'flex',
@@ -242,16 +221,6 @@ function DialogData({ type, data }: DialogDataProps) {
           <ImageViewer presignedUrl={presignedUrlData.presignedUrlString} />
         ) : HTML_FILETYPE_LIST.includes(fileType) ? (
           <HTMLViewer presignedUrl={presignedUrlData.presignedUrlString} />
-        ) : fileType === 'csv' ? (
-          <DelimiterSeperatedValuesViewer
-            fileContent={presignedUrlData.presignedUrlContent}
-            delimiter=','
-          />
-        ) : fileType === 'tsv' ? (
-          <DelimiterSeperatedValuesViewer
-            fileContent={presignedUrlData.presignedUrlContent}
-            delimiter='\t'
-          />
         ) : fileType === 'json' ? (
           <JSONViewer fileContent={presignedUrlData.presignedUrlContent} />
         ) : fileType === 'yaml' ? (
@@ -318,70 +287,6 @@ function HTMLViewer({ presignedUrl }: HTMLViewerProps) {
   );
 }
 
-type DelimiterSeperatedValuesViewerProps = {
-  fileContent: string;
-  delimiter: string;
-};
-function DelimiterSeperatedValuesViewer(props: DelimiterSeperatedValuesViewerProps) {
-  const { fileContent, delimiter } = props;
-  const [isFirstRowHeader, setIsFirstRowHeader] = useState<boolean>(true);
-
-  // Sanitize and split string
-  const sanitizeContent: string = fileContent.replaceAll('\r\n', '\n');
-  const allRows: string[] = sanitizeContent.split('\n').filter((element) => element);
-
-  const dataRows = allRows.slice(isFirstRowHeader ? 1 : 0);
-  const headerRow = isFirstRowHeader ? allRows[0] : null;
-
-  return (
-    <Paper style={{ width: '100%', background: 'white', padding: '1rem' }}>
-      <FormControlLabel
-        value='end'
-        control={
-          <Checkbox
-            color='primary'
-            size='small'
-            checked={isFirstRowHeader}
-            onChange={() => setIsFirstRowHeader((prev) => !prev)}
-          />
-        }
-        label='Header row'
-        labelPlacement='end'
-        style={{ marginBottom: '0.5rem' }}
-      />
-      <Paper elevation={3} style={{ width: '100%' }}>
-        <TableContainer style={{ maxHeight: '75vh' }}>
-          <Table stickyHeader aria-label='sticky table'>
-            <TableHead>
-              {headerRow ? (
-                <TableRow>
-                  {headerRow.split(delimiter).map((column: string) => (
-                    <TableCell key={column}>{column}</TableCell>
-                  ))}
-                </TableRow>
-              ) : (
-                <></>
-              )}
-            </TableHead>
-
-            <TableBody>
-              {dataRows.map((row: string, index: number) => {
-                return (
-                  <TableRow hover role='checkbox' tabIndex={-1} key={index}>
-                    {row.split(delimiter).map((value: string, index: number) => {
-                      return <TableCell key={index}>{value}</TableCell>;
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </Paper>
-  );
-}
-
 const useStylesJSONViewers = makeStyles({
   root: {
     '& pre': {
@@ -418,6 +323,7 @@ function JSONViewer({ fileContent }: JSONViewerProps) {
           style={{
             borderRadius: '5px',
             overflow: 'auto',
+            minWidth: '75vw',
           }}
         />
       </Paper>
@@ -437,6 +343,7 @@ function YAMLViewer({ fileContent }: YAMLViewerProps) {
     <div style={{ maxHeight: '80vh', maxWidth: '100%', overflow: 'auto', margin: '1rem' }}>
       <pre
         style={{
+          minWidth: '75vw',
           display: 'inline-block',
           borderRadius: '5px',
           border: '1px solid black',
@@ -456,6 +363,7 @@ function PlainTextViewer({ fileContent }: PlainTextViewerProps) {
     <div style={{ maxHeight: '80vh', maxWidth: '100%', overflow: 'auto', margin: '1rem' }}>
       <pre
         style={{
+          minWidth: '75vw',
           display: 'inline-block',
           borderRadius: '5px',
           border: '1px solid black',
