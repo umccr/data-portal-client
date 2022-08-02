@@ -15,9 +15,15 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { grey } from '@material-ui/core/colors';
+import Snackbar from '@material-ui/core/Snackbar';
 
 // Other Dependencies
 import JSONPretty from 'react-json-pretty';
+
+// Others
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 const HTML_FILETYPE_LIST: string[] = ['html'];
@@ -146,6 +152,7 @@ type DialogDataProps = {
   data: any;
 };
 function DialogData({ type, data }: DialogDataProps) {
+  const [isDataCopied, setIsDataCopied] = useState<boolean>(false);
   const [presignedUrlData, setPresignedUrlData] = useState<PresignedUrlObject>({
     isLoading: true,
     isError: false,
@@ -227,6 +234,33 @@ function DialogData({ type, data }: DialogDataProps) {
           <YAMLViewer fileContent={presignedUrlData.presignedUrlContent} />
         ) : (
           <PlainTextViewer fileContent={presignedUrlData.presignedUrlContent} />
+        )}
+        {presignedUrlData.presignedUrlContent ? (
+          <>
+            <CopyToClipboard
+              text={presignedUrlData.presignedUrlContent}
+              onCopy={() => setIsDataCopied(true)}>
+              <IconButton
+                color='primary'
+                aria-label='Copy content data'
+                style={{
+                  backgroundColor: grey[300],
+                  position: 'absolute',
+                  right: 0,
+                  bottom: '0.5rem',
+                }}>
+                <FileCopyIcon color='action' />
+              </IconButton>
+            </CopyToClipboard>
+            <Snackbar
+              autoHideDuration={3000}
+              open={isDataCopied}
+              onClose={() => setIsDataCopied(false)}
+              message='Data copied to clipboard!'
+            />
+          </>
+        ) : (
+          <></>
         )}
       </DialogContent>
     </>
