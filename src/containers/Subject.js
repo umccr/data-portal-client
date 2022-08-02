@@ -58,6 +58,8 @@ import MenuBookIcon from '@material-ui/icons/MenuBook';
 import LaunchPadDialog from '../components/LaunchPadDialog';
 import PreviewActionButton from '../components/PreviewActionButton';
 import ImageSearchIcon from '@material-ui/icons/ImageSearch';
+import LaunchRNAsumReport from '../components/LaunchRNAsumReport';
+import AssessmentIcon from '@material-ui/icons/Assessment';
 
 const styles = (theme) => ({
   close: {
@@ -101,6 +103,7 @@ class Subject extends Component {
     launchPadDialogConfirmed: false,
     openBackdrop: false,
     clickedLinks: [],
+    isRNAsumDialogOpen: true,
   };
 
   async componentDidMount() {
@@ -734,9 +737,27 @@ class Subject extends Component {
     );
   };
 
+  /***************************************************
+   * RNAsum report related functions
+   *
+   ***************************************************/
+
+  handleRNAsumDialogOpen = (isOpen) => {
+    const isRNAsumDialogOpen = isOpen;
+    this.setState({ isRNAsumDialogOpen });
+  };
+
+  /***************************************************/
+
   renderSubjectToolPanel = () => {
-    const { subjectId, launchPadDialogOpened, launchPadRowData, launchPadDialogConfirmed } =
-      this.state;
+    const {
+      subjectId,
+      launchPadDialogOpened,
+      launchPadRowData,
+      launchPadDialogConfirmed,
+      isRNAsumDialogOpen,
+    } = this.state;
+
     return (
       <Fragment>
         <List>
@@ -758,6 +779,13 @@ class Subject extends Component {
             </ListItemIcon>
             <ListItemText primary={'Generate GRIDSS PURPLE LINX Report'} />
           </ListItem>
+          {/* Button for RNAsum report */}
+          <ListItem button onClick={() => this.handleRNAsumDialogOpen(true)}>
+            <ListItemIcon>
+              <AssessmentIcon color={'primary'} />
+            </ListItemIcon>
+            <ListItemText primary={'Generate RNAsum Launch'} />
+          </ListItem>
         </List>
         <LaunchPadDialog
           dialogOpened={launchPadDialogOpened}
@@ -765,6 +793,11 @@ class Subject extends Component {
           onDialogClose={this.handleLaunchPadDialogClose}
           confirmed={launchPadDialogConfirmed}
           onLaunchPadDialogConfirm={this.handleLaunchPadDialogConfirmClicked}
+        />
+        <LaunchRNAsumReport
+          subject_id={subjectId}
+          isOpen={isRNAsumDialogOpen}
+          handleIsOpenState={this.handleRNAsumDialogOpen}
         />
       </Fragment>
     );
