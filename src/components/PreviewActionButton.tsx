@@ -69,6 +69,11 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
 
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
+  const fileExt = fileName.split('.').pop();
+
+  const isCorsOriginBlock =
+    type == 's3' && !IMAGE_FILETYPE_LIST.includes(fileExt) && !HTML_FILETYPE_LIST.includes(fileExt);
+
   if (!isDataTypeSupported) {
     return (
       <div className={iconClasses.typeWarning}>
@@ -89,6 +94,17 @@ export default function PreviewActionButton({ type, data }: PreviewActionButtonP
 
         {/* Text will show on hover defined on div class */}
         <p>FileSize exceed 60MB</p>
+      </div>
+    );
+  } else if (isCorsOriginBlock) {
+    return (
+      <div className={iconClasses.typeWarning}>
+        <IconButton disabled={true}>
+          <VisibilityOffIcon />
+        </IconButton>
+
+        {/* Text will show on hover defined on div class */}
+        <p>{`Unable to preview '${fileExt}' from S3`}</p>
       </div>
     );
   } else {
