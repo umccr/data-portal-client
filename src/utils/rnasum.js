@@ -205,35 +205,30 @@ export const PRIMARY_DATASETS_OPTION = [
 
 export const EXTENDED_DATASETS_OPTION = [
   {
-    no: '1',
     project: 'LUAD-LCNEC',
     name: 'Lung Adenocarcinoma dataset including large-cell neuroendocrine carcinoma (LCNEC, n=14)',
     tissue_code: '1',
     samples_no: '314',
   },
   {
-    no: '2',
     project: 'BLCA-NET',
     name: 'Bladder Urothelial Carcinoma dataset including neuroendocrine tumours (NETs, n=2)',
     tissue_code: '1',
     samples_no: '248',
   },
   {
-    no: '3',
     project: 'PAAD-IPMN',
     name: 'Pancreatic Adenocarcinoma dataset including intraductal papillary mucinous neoplasm (IPMNs, n=2)',
     tissue_code: '1',
     samples_no: '152',
   },
   {
-    no: '4',
     project: 'PAAD-NET',
     name: 'Pancreatic Adenocarcinoma dataset including neuroendocrine tumours (NETs, n=8)',
     tissue_code: '1',
     samples_no: '158',
   },
   {
-    no: '5',
     project: 'PAAD-ACC',
     name: 'Pancreatic Adenocarcinoma dataset including acinar cell carcinoma (ACCs, n=1)',
     tissue_code: '1',

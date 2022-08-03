@@ -46,7 +46,6 @@ interface Column {
   align?: 'right';
 }
 const RNASUM_TABLE_COLUMN: Column[] = [
-  { id: 'no', label: 'No' },
   { id: 'project', label: 'Project' },
   {
     id: 'tissue_code',
@@ -171,7 +170,7 @@ function LaunchRNAsumReport(props: Props) {
       });
     }
   };
-  console.log(rnasumInputData);
+
   return (
     <Dialog
       open={isOpen}
@@ -226,7 +225,7 @@ function LaunchRNAsumReport(props: Props) {
                         </Typography>
                       </TableCell>
                     </TableRow>
-                    {rnasumInputData.wtsBamsIca.length < 1 ||
+                    {rnasumInputData.wtsBamsIca.length != 1 ||
                     rnasumInputData.wgsCancer.length < 1 ? (
                       <TableRow>
                         <TableCell>
@@ -235,9 +234,11 @@ function LaunchRNAsumReport(props: Props) {
                         <TableCell>
                           <Typography color='error' align='right'>
                             {rnasumInputData.wtsBamsIca.length < 1
-                              ? `No WTS bam file found in GDS`
+                              ? `No transcriptome workflow output found for the Subject`
+                              : rnasumInputData.wtsBamsIca.length > 1
+                              ? `Multiple transcriptome workflow output found for the Subject`
                               : rnasumInputData.wgsCancer.length < 1
-                              ? `No WGS bam file found in GDS`
+                              ? `No umccrise workflow output found for the Subject`
                               : `ERROR`}
                           </Typography>
                         </TableCell>
@@ -320,7 +321,7 @@ function LaunchRNAsumReport(props: Props) {
                               Generate
                             </Button>
                           </TableCell>
-                        </TableRow>{' '}
+                        </TableRow>
                       </>
                     )}
                   </TableBody>
