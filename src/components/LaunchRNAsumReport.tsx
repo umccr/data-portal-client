@@ -39,8 +39,6 @@ const ALL_DATASETS_OPTION = [
   ...PAN_CANCER_DATASETS_OPTION,
 ];
 
-// eslint-disable-next-line no-unused-vars
-type Props = { subject_id: string; isOpen: boolean; handleIsOpenState: (val: boolean) => void };
 interface Column {
   id: string;
   label: string;
@@ -100,11 +98,31 @@ const RNAsumTable = () => {
   );
 };
 
+function groupSubjectData(subject: any) {
+  // This is only what is needed for RNAsum report
+  return {
+    wtsBamsIca: subject.results_gds.filter(
+      (r: any) => r.path.includes('wts_tumor_only') && r.path.endsWith('bam')
+    ),
+    wgsCancer: subject.results_gds.filter(
+      (r: any) => r.path.includes('umccrise') && r.path.endsWith('cancer_report.html')
+    ),
+  };
+}
+
+type Props = {
+  subject_id: string;
+  subject: any;
+  isOpen: boolean;
+  // eslint-disable-next-line no-unused-vars
+  handleIsOpenState: (val: boolean) => void;
+};
 function LaunchRNAsumReport(props: Props) {
-  const { subject_id, isOpen, handleIsOpenState } = props;
+  const { subject, subject_id, isOpen, handleIsOpenState } = props;
   const [datasetSelected, setDatasetSelected] = useState();
   const [isRNAsumTableOpen, setIsRNAsumTableOpen] = useState(false);
 
+  const rnasumInputData = groupSubjectData(subject);
   const [triggerStatus, setTriggerStatus] = useState({
     isError: false,
     isLoading: false,
@@ -153,10 +171,14 @@ function LaunchRNAsumReport(props: Props) {
       });
     }
   };
-
+  console.log(rnasumInputData);
   return (
-    <Dialog open={isOpen} onClose={() => handleCloseDialog()} scroll={'paper'} maxWidth={'lg'}>
-      <Container style={{ minWidth: '70vw' }}>
+    <Dialog
+      open={isOpen}
+      onClose={() => handleCloseDialog()}
+      maxWidth={'lg'}
+      PaperProps={{ style: { overflow: 'unset', minWidth: '70vw' } }}>
+      <Container>
         <DialogTitle>{`RNAsum Report`}</DialogTitle>
         <DialogContent style={{ overflow: 'unset' }}>
           <Grid
@@ -195,7 +217,7 @@ function LaunchRNAsumReport(props: Props) {
                     <TableRow>
                       <TableCell>
                         <Typography variant='body2' display='block' gutterBottom>
-                          Subject Id
+                          SUBJECT_ID
                         </Typography>
                       </TableCell>
                       <TableCell align='right'>
@@ -204,71 +226,103 @@ function LaunchRNAsumReport(props: Props) {
                         </Typography>
                       </TableCell>
                     </TableRow>
-
-                    <TableRow>
-                      <TableCell>
-                        <Typography variant='body2' display='block' gutterBottom>
-                          Primary Dataset Project
-                        </Typography>
-                      </TableCell>
-                      <TableCell align='right'>
-                        <NativeSelect
-                          value={datasetSelected}
-                          onChange={(event: any) => setDatasetSelected(event.target.value)}
-                          inputProps={{
-                            name: 'age',
-                            id: 'age-native-label-placeholder',
-                          }}>
-                          <option value={undefined}></option>
-
-                          {ALL_DATASETS_OPTION.map((col: any, index: number) => {
-                            const label = col.project;
-                            return (
-                              <option key={index} value={label}>
-                                {label}
-                              </option>
-                            );
-                          })}
-                        </NativeSelect>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell style={{ borderBottom: 0 }} colSpan={2}>
-                        <Grid
-                          container
-                          direction='row'
-                          justifyContent='space-between'
-                          alignItems='center'>
-                          <Grid item>
+                    {rnasumInputData.wtsBamsIca.length < 1 ||
+                    rnasumInputData.wgsCancer.length < 1 ? (
+                      <TableRow>
+                        <TableCell>
+                          <Typography color='error'>ERROR</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography color='error' align='right'>
+                            {rnasumInputData.wtsBamsIca.length < 1
+                              ? `No WTS bam file found in GDS`
+                              : rnasumInputData.wgsCancer.length < 1
+                              ? `No WGS bam file found in GDS`
+                              : `ERROR`}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : rnasumInputData.wgsCancer.length < 1 ? (
+                      <TableRow>
+                        <TableCell>
+                          <Typography color='error' align='justify'></Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      <>
+                        <TableRow>
+                          <TableCell>
                             <Typography variant='body2' display='block' gutterBottom>
-                              Show RNAsum Table
+                              Dataset Project
                             </Typography>
-                          </Grid>
-                          <Grid item>
-                            <Switch
-                              checked={isRNAsumTableOpen}
-                              onChange={() => setIsRNAsumTableOpen((prev: any) => !prev)}
+                          </TableCell>
+                          <TableCell align='right'>
+                            <NativeSelect
+                              value={datasetSelected}
+                              onChange={(event: any) => setDatasetSelected(event.target.value)}
+                              inputProps={{
+                                name: 'age',
+                                id: 'age-native-label-placeholder',
+                              }}>
+                              <option value={undefined}></option>
+
+                              {ALL_DATASETS_OPTION.map((col: any, index: number) => {
+                                const label = col.project;
+                                return (
+                                  <option key={index} value={label}>
+                                    {label}
+                                  </option>
+                                );
+                              })}
+                            </NativeSelect>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell style={{ borderBottom: 0 }} colSpan={2}>
+                            <>
+                              <Grid
+                                container
+                                direction='row'
+                                justifyContent='space-between'
+                                alignItems='center'>
+                                <Grid item>
+                                  <Typography variant='body2' display='block' gutterBottom>
+                                    Show RNAsum Table
+                                  </Typography>
+                                </Grid>
+                                <Grid item>
+                                  <Switch
+                                    checked={isRNAsumTableOpen}
+                                    onChange={() => setIsRNAsumTableOpen((prev: any) => !prev)}
+                                    color='primary'
+                                    name='checked'
+                                    inputProps={{ 'aria-label': 'primary checkbox' }}
+                                  />
+                                </Grid>
+                              </Grid>
+                              {isRNAsumTableOpen ? <RNAsumTable /> : <></>}
+                            </>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell align='right' style={{ borderBottom: 0 }} colSpan={2}>
+                            {/* Triggering button */}
+                            <Button
+                              disabled={
+                                !datasetSelected ||
+                                triggerStatus.isLoading ||
+                                rnasumInputData.wgsCancer.length < 1 ||
+                                rnasumInputData.wtsBamsIca.length < 1
+                              }
+                              variant='contained'
                               color='primary'
-                              name='checked'
-                              inputProps={{ 'aria-label': 'primary checkbox' }}
-                            />
-                          </Grid>
-                        </Grid>
-                        {isRNAsumTableOpen ? <RNAsumTable /> : <></>}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell align='right' style={{ borderBottom: 0 }} colSpan={2}>
-                        {/* Triggering button */}
-                        <Button
-                          disabled={!datasetSelected || triggerStatus.isLoading}
-                          variant='contained'
-                          color='primary'
-                          onClick={handleRNAsumTrigger}>
-                          Generate
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                              onClick={handleRNAsumTrigger}>
+                              Generate
+                            </Button>
+                          </TableCell>
+                        </TableRow>{' '}
+                      </>
+                    )}
                   </TableBody>
                 </Table>
               </Grid>

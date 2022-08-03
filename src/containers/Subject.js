@@ -295,7 +295,6 @@ class Subject extends Component {
 
   processLaunchPad = async () => {
     const { subject } = this.state;
-
     const gplReport = subject.results.filter(
       (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
     );
@@ -751,13 +750,13 @@ class Subject extends Component {
 
   renderSubjectToolPanel = () => {
     const {
+      subject,
       subjectId,
       launchPadDialogOpened,
       launchPadRowData,
       launchPadDialogConfirmed,
       isRNAsumDialogOpen,
     } = this.state;
-
     return (
       <Fragment>
         <List>
@@ -795,6 +794,7 @@ class Subject extends Component {
           onLaunchPadDialogConfirm={this.handleLaunchPadDialogConfirmClicked}
         />
         <LaunchRNAsumReport
+          subject={subject}
           subject_id={subjectId}
           isOpen={isRNAsumDialogOpen}
           handleIsOpenState={this.handleRNAsumDialogOpen}
@@ -901,6 +901,7 @@ class Subject extends Component {
             </TableBody>
           </Table>
           <LimsRowDetailsDialog
+            subject={this.state.subject}
             dialogOpened={dialogOpened}
             rowData={rowData}
             onDialogClose={this.handleDialogClose}
