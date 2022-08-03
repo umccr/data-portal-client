@@ -22,9 +22,6 @@ import Snackbar from '@material-ui/core/Snackbar';
 // Other Dependencies
 import JSONPretty from 'react-json-pretty';
 
-// Others
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 const HTML_FILETYPE_LIST: string[] = ['html'];
 const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
@@ -176,7 +173,7 @@ function DialogData({ type, data }: DialogDataProps) {
     presignedUrlContent: '',
   });
 
-  const fileName = type == 'gds' ? data.name : data.key;
+  const fileName = type == 'gds' ? data.name : data.key.split('/').pop();
   const fileType = fileName.split('.').pop();
 
   useEffect(() => {
@@ -215,10 +212,19 @@ function DialogData({ type, data }: DialogDataProps) {
       componentUnmount = true;
     };
   }, [data.id, type]);
+
   return (
     <>
       {/* Dialog that opens the preview */}
-      <DialogTitle style={{ minHeight: '4rem', whiteSpace: 'nowrap' }}>{fileName}</DialogTitle>
+      <DialogTitle
+        style={{
+          minHeight: '4rem',
+          whiteSpace: 'nowrap',
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+        }}>
+        {fileName}
+      </DialogTitle>
       <DialogContent
         style={{
           display: 'flex',
@@ -253,21 +259,21 @@ function DialogData({ type, data }: DialogDataProps) {
         )}
         {presignedUrlData.presignedUrlContent ? (
           <>
-            <CopyToClipboard
-              text={presignedUrlData.presignedUrlContent}
-              onCopy={() => setIsDataCopied(true)}>
-              <IconButton
-                color='primary'
-                aria-label='Copy content data'
-                style={{
-                  backgroundColor: grey[300],
-                  position: 'absolute',
-                  right: 0,
-                  bottom: '0.5rem',
-                }}>
-                <FileCopyIcon color='action' />
-              </IconButton>
-            </CopyToClipboard>
+            <IconButton
+              onClick={() => {
+                navigator.clipboard.writeText(presignedUrlData.presignedUrlContent);
+                setIsDataCopied(true);
+              }}
+              color='primary'
+              aria-label='Copy content data'
+              style={{
+                backgroundColor: grey[300],
+                position: 'absolute',
+                right: 0,
+                bottom: '0.5rem',
+              }}>
+              <FileCopyIcon color='action' />
+            </IconButton>
             <Snackbar
               autoHideDuration={3000}
               open={isDataCopied}
