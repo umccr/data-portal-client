@@ -176,7 +176,7 @@ function LaunchRNAsumReport(props: Props) {
       open={isOpen}
       onClose={() => handleCloseDialog()}
       maxWidth={'lg'}
-      PaperProps={{ style: { overflow: 'unset', minWidth: '70vw' } }}>
+      PaperProps={{ style: { overflow: 'unset' } }}>
       <Container>
         <DialogTitle>{`RNAsum Report`}</DialogTitle>
         <DialogContent style={{ overflow: 'unset' }}>
