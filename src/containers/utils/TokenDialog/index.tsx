@@ -112,7 +112,7 @@ function TokenDialog(props: Props) {
               <Column headerStyle={{ display: 'none' }} field='key' body={keyTemplate} />
               <Column headerStyle={{ display: 'none' }} field='value' />
             </DataTable>
-            <div style={{ padding: '1rem 1.5rem' }}>
+            <div style={{ padding: '1rem 0rem' }}>
               <Button
                 label='Copy'
                 icon='pi pi-copy'

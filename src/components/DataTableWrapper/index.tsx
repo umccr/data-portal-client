@@ -58,6 +58,8 @@ function DataTableWrapper(props: DataTableWrapperProps) {
       responsiveLayout='scroll'
       className='ui-datatable-hor-scroll'
       emptyMessage='No Data found!'
+      resizableColumns
+      columnResizeMode='fit'
       {...additionalDataTableProps}>
       {columns.map((columpProperties, i) => {
         return <Column key={i} {...columpProperties} />;

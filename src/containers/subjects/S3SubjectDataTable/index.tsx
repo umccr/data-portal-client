@@ -14,6 +14,7 @@ import DataTableWrapper, {
 } from '../../../components/DataTableWrapper';
 import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
+import DataActionButton from '../../../components/DataActionButton';
 
 const fetchS3SubjectData = async (
   subjectId: string,
@@ -28,7 +29,7 @@ const fetchS3SubjectData = async (
   return await API.get('portal', `/s3/`, APIConfig);
 };
 
-type ObjectStringValType = { [key: string]: string | number | null };
+type ObjectStringValType = { id: number } & { [key: string]: string };
 type Props = { subjectId: string };
 
 function S3SubjectDataTable(props: Props) {
@@ -83,7 +84,7 @@ function S3SubjectDataTable(props: Props) {
     'bucket',
     'key',
     'preview',
-    // 'action', TODO
+    'action',
     'size',
     'last_modified_date',
   ];
@@ -91,6 +92,7 @@ function S3SubjectDataTable(props: Props) {
 
   // Creating column properties based on field to display
   for (const column of column_to_display) {
+    // Column template
     let newColToShow = {
       field: column,
       alignHeader: 'left' as const,
@@ -104,14 +106,12 @@ function S3SubjectDataTable(props: Props) {
       },
       className: 'text-left white-space-nowrap',
     };
+
+    // Customize column from the template column above
     if (column == 'preview') {
       newColToShow = {
         ...newColToShow,
-        header: (
-          <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
-            {showDisplayText(column)}
-          </p>
-        ),
+        className: 'text-center white-space-nowrap',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         body: (rowData: any): React.ReactNode => {
           const filename = rowData.key.split('/').pop();
@@ -129,25 +129,15 @@ function S3SubjectDataTable(props: Props) {
           );
         },
       };
-    }
-    // Some custom column to be added here
-    // TODO: below
-    // } else if (column == 'action') {
-    //   newColToShow = {
-    //     field: column,
-    //     alignHeader: 'left' as const,
-    //     header: (
-    //       <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
-    //         {showDisplayText('column')}
-    //       </p>
-    //     ),
-    //     body: (rowData: ObjectStringValType): React.ReactNode => {
-    //       return textBodyTemplate('rowData[column]');
-    //     },
-    //     className: 'text-left white-space-nowrap',
-    //   };
-    // } else
-    else if (column == 'size') {
+    } else if (column == 'action') {
+      newColToShow = {
+        ...newColToShow,
+        body: (rowData: ObjectStringValType): React.ReactNode => {
+          return <DataActionButton id={rowData.id} type='s3' pathOrKey={rowData.key} />;
+        },
+        className: 'text-center white-space-nowrap',
+      };
+    } else if (column == 'size') {
       newColToShow = {
         ...newColToShow,
         body: (rowData: ObjectStringValType): React.ReactNode => {

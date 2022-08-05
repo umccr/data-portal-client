@@ -1,15 +1,14 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import moment from 'moment';
 import API from '@aws-amplify/api';
 import { useQuery } from 'react-query';
-import { useToastContext } from '../../../providers/ToastProvider';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { getStringReadableBytes } from '../../../utils/util';
-import { Menu } from 'primereact/menu';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
+import DataActionButton from '../../../components/DataActionButton';
 
 // Creating Table
 type AnalysisResultGDSTableProps = {
@@ -26,65 +25,11 @@ const filenameTemplate = (rowData: Record<string, any>) => {
 };
 
 const actionGDSTemplate = (rowData: Record<string, any>) => {
-  const menu = useRef<Menu>(null);
-  const toast = useToastContext();
-
-  const items = [
-    {
-      label: 'Copy GDS path',
-      icon: 'pi pi-copy',
-      command: () => {
-        navigator.clipboard.writeText(rowData.path);
-        toast?.show({
-          severity: 'success',
-          summary: 'GDS path has been copied',
-          life: 3000,
-        });
-      },
-    },
-  ];
-  return (
-    <>
-      <Menu model={items} popup ref={menu} id='popup_menu' />
-      <div
-        className='cursor-pointer pi pi-bars'
-        onClick={(event) => {
-          if (menu.current) menu.current.toggle(event);
-        }}
-      />
-    </>
-  );
+  return <DataActionButton type='gds' pathOrKey={rowData.path} id={rowData.id} />;
 };
 
 const actionS3Template = (rowData: Record<string, any>) => {
-  const menu = useRef<Menu>(null);
-  const toast = useToastContext();
-
-  const items = [
-    {
-      label: 'Copy S3 key',
-      icon: 'pi pi-copy',
-      command: () => {
-        navigator.clipboard.writeText(rowData.key);
-        toast?.show({
-          severity: 'success',
-          summary: 'GDS path has been copied',
-          life: 3000,
-        });
-      },
-    },
-  ];
-  return (
-    <>
-      <Menu model={items} popup ref={menu} id='popup_menu' />
-      <div
-        className='cursor-pointer pi pi-bars'
-        onClick={(event) => {
-          if (menu.current) menu.current.toggle(event);
-        }}
-      />
-    </>
-  );
+  return <DataActionButton type='s3' pathOrKey={rowData.key} id={rowData.id} />;
 };
 const fileSizeTemplate = (rowData: Record<string, any>) => {
   const readableSize = getStringReadableBytes(rowData.size_in_bytes);
