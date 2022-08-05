@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Auth, CognitoUser } from '@aws-amplify/auth';
-import CircularLoaderWithText from '../components/CircularLoaderWithText';
+import CircularLoaderWithText from '../../components/CircularLoaderWithText';
 
 /**
  * Create UserContext

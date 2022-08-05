@@ -6,9 +6,9 @@ import { Button } from 'primereact/button';
 import { useNavigate } from 'react-router-dom';
 
 import { useUserContext } from '../../providers/UserProvider';
-import TokenDialog from '../../containers/TokenDialog';
+import TokenDialog from '../../containers/utils/TokenDialog';
 
-import './menubar.css';
+import './index.css';
 
 const AccountMenu = () => {
   // User Information
@@ -63,7 +63,7 @@ function MenuBar() {
     {
       label: 'Subjects',
       command: () => {
-        navigate('/subject');
+        navigate('/subjects');
       },
     },
     {
@@ -87,7 +87,8 @@ function MenuBar() {
   ];
   return (
     <Menubar
-      className='p-2 border-noround border-none bg-blue-800'
+      className='fixed p-0 w-full border-noround border-none bg-blue-800 h-3rem top-0'
+      style={{ zIndex: 2 }}
       model={items}
       end={<AccountMenu />}
     />

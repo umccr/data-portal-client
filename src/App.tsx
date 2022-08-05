@@ -1,7 +1,9 @@
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-import Routes from './Routes';
+import Routes from './routes';
 import UserProvider from './providers/UserProvider';
+import ToastProvider from './providers/ToastProvider';
 
 // CSS Import
 import 'primereact/resources/themes/tailwind-light/theme.css';
@@ -10,12 +12,24 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.min.css';
 import './app.css';
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 function App() {
   return (
     <BrowserRouter>
-      <UserProvider>
-        <Routes />
-      </UserProvider>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <UserProvider>
+            <Routes />
+          </UserProvider>
+        </ToastProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   );
 }

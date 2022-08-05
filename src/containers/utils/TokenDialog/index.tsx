@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Dialog } from 'primereact/dialog';
-import { useUserContext } from '../../providers/UserProvider';
+import { useUserContext } from '../../../providers/UserProvider';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -8,7 +8,7 @@ import { Toast } from 'primereact/toast';
 
 import moment from 'moment';
 
-import CircularLoaderWithText from '../../components/CircularLoaderWithText';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 
 import './index.css';
 
@@ -52,6 +52,7 @@ function TokenDialog(props: Props) {
       // Refresh token to get new JWT
       // Ref (UseCase 32): https://www.npmjs.com/package/amazon-cognito-identity-js
       const refreshToken = currentSession.getRefreshToken();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cognitoUser.refreshSession(refreshToken, (err: any, session: any) => {
         if (err) {
           console.log('Something went wrong');
@@ -111,7 +112,7 @@ function TokenDialog(props: Props) {
               <Column headerStyle={{ display: 'none' }} field='key' body={keyTemplate} />
               <Column headerStyle={{ display: 'none' }} field='value' />
             </DataTable>
-            <div style={{ padding: '1rem 1.5rem' }}>
+            <div style={{ padding: '1rem 0rem' }}>
               <Button
                 label='Copy'
                 icon='pi pi-copy'

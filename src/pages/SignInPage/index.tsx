@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Auth, CognitoHostedUIIdentityProvider } from '@aws-amplify/auth';
 import { Navigate } from 'react-router-dom';
-import { useUserContext } from '../providers/UserProvider';
+import { useUserContext } from '../../providers/UserProvider';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 
