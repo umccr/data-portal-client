@@ -3,6 +3,7 @@ import { Routes as RouterRoutes, Route, Navigate, Outlet } from 'react-router-do
 import { useUserContext } from '../providers/UserProvider';
 // Pages
 import SignInPage from '../pages/SignInPage';
+import HomePage from '../pages/Home';
 import MenuBar from '../layouts/MenuBar';
 import SubjectRoutes from './subjects';
 
@@ -11,7 +12,7 @@ function Routes() {
     <RouterRoutes>
       <Route path='/' element={<ProtectedRoute />}>
         {/* NoPath redirects to HomePage */}
-        <Route index element={<h1>HomePage</h1>} />
+        <Route index element={<HomePage />} />
 
         {/* Subjects routing */}
         <Route path='/subjects/*' element={<SubjectRoutes />} />
@@ -37,7 +38,7 @@ function ProtectedRoute() {
   return (
     <>
       <MenuBar />
-      <div style={{ top: '3rem', position:'relative'}}>
+      <div style={{ top: '3rem', position: 'relative' }}>
         <Outlet />
       </div>
     </>
