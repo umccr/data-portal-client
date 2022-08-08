@@ -295,8 +295,8 @@ class Subject extends Component {
 
   processLaunchPad = async () => {
     const { subject } = this.state;
-    const gplReport = subject.results.filter(
-      (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
+    const gplReport = subject.results_gds.filter(
+      (r) => r.path.includes('gridss_purple_linx') && r.path.endsWith('linx.html')
     );
 
     let launchPadDialogConfirmed = false;
@@ -314,57 +314,16 @@ class Subject extends Component {
       // The need of on-demand "LaunchPad" feature is different thing -- i.e. to be considered
       // better in Portal v2 revamp from ground up! Or, elsewhere dashboard. We shall see...
       let launchGpl = true;
-      const wgsBams = subject.results
-        .filter((r) => r.key.includes('WGS') && r.key.endsWith('.bam'))
+      const wgsBams = subject.results_gds
+        .filter((r) => r.path.includes('wgs_tumor_normal') && r.path.endsWith('.bam'))
         .map((r) => r.id);
 
-      if (Array.isArray(wgsBams) && wgsBams.length) {
-        let id = wgsBams.sort((a, b) => b - a)[0]; // detect at least one wgs bam has already frozen
-        const data = await API.get('files', `/s3/${id}/status`, {});
-        const { head_object } = data;
-        const archived = head_object['StorageClass'] === 'DEEP_ARCHIVE';
-        if (archived) {
-          const restoreStatus = head_object['Restore'];
-          if (restoreStatus) {
-            const isOngoingRequest = restoreStatus.includes('true');
-            if (isOngoingRequest) {
-              // bam restore is still in-progress, don't launch
-              launchGpl = false;
-              launchPadRowData = {
-                subject_id: subject.id,
-                error: 'Subject WGS BAMs are restoring in progress',
-              };
-            } else {
-              const expiryChunk = restoreStatus.slice(25);
-              if (!isOngoingRequest && expiryChunk) {
-                const expiryDateStr = expiryChunk.split('=')[1];
-                const expiryDate = Date.parse(expiryDateStr);
-                const expired = expiryDate < Date.now();
-                if (expired) {
-                  // restored has expired, don't launch
-                  launchGpl = false;
-                  launchPadRowData = {
-                    subject_id: subject.id,
-                    error: 'Restoration have expired. Please restore both tumor and normal BAMs.',
-                  };
-                }
-              }
-            }
-          } else {
-            // deep archived and no restore status has happened yet, don't launch
-            launchGpl = false;
-            launchPadRowData = {
-              subject_id: subject.id,
-              error: 'Subject WGS BAMs are archived. Please restore both tumor and normal BAMs.',
-            };
-          }
-        }
-      } else {
-        // no wgs bams for the subject, don't launch
+      // ensure we have required input BAM files
+      if (!Array.isArray(wgsBams) || !wgsBams.length) {
         launchGpl = false;
         launchPadRowData = {
           subject_id: subject.id,
-          error: 'No WGS (bcbio) BAMs are available for the Subject',
+          error: 'No WGS BAMs are available for the Subject',
         };
       }
 
