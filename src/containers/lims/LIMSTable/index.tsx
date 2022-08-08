@@ -19,18 +19,16 @@ import DataTableWrapper, {
   convertDjangoSortParamToDataTableProp,
 } from '../../../components/DataTableWrapper';
 
-import './index.css';
-
-const fetchMetadataList = async (params: { [key: string]: string | number }) => {
+const fetchLIMSList = async (params: { [key: string]: string | number }) => {
   const APIConfig = {
     queryStringParameters: {
       ...params,
     },
   };
-  return await API.get('portal', `/metadata/`, APIConfig);
+  return await API.get('portal', `/lims/`, APIConfig);
 };
 
-function MetadataTable() {
+function LIMSTable() {
   const toast = useToastContext();
 
   // Pagination Properties
@@ -56,10 +54,10 @@ function MetadataTable() {
 
   // Data states
   type ObjKeyType = { [key: string]: string | number };
-  let metadataDataList: ObjKeyType[] = [];
+  let limsDataList: ObjKeyType[] = [];
   const { isFetching, isLoading, isError, data } = useQuery(
-    ['getMetadataList', apiQueryParameter],
-    () => fetchMetadataList(apiQueryParameter)
+    ['getLIMSList', apiQueryParameter],
+    () => fetchLIMSList(apiQueryParameter)
   );
 
   if (isError) {
@@ -72,7 +70,7 @@ function MetadataTable() {
   }
 
   if (data && !isFetching && !isLoading) {
-    metadataDataList = data.results;
+    limsDataList = data.results;
     paginationProps = djangoToTablePaginationFormat(data.pagination);
   }
   /**
@@ -82,12 +80,14 @@ function MetadataTable() {
     return <div>{text}</div>;
   };
   const column_to_display: string[] = [
+    'illumina_id',
+    'type',
+    'timestamp',
     'subject_id',
     'sample_id',
     'library_id',
     'external_subject_id',
     'external_sample_id',
-    'type',
     'phenotype',
     'project_name',
   ];
@@ -131,7 +131,7 @@ function MetadataTable() {
 
   return (
     <Card className='p-0'>
-      <div className='font-bold text-2xl pb-3'>Metadata Table</div>
+      <div className='font-bold text-2xl pb-3'>LIMS Table</div>
 
       <DataTableWrapper
         overrideDataTableProps={{
@@ -142,7 +142,7 @@ function MetadataTable() {
         onSort={handleTableSortPropChange}
         isLoading={isFetching}
         columns={columnList}
-        dataTableValue={metadataDataList}
+        dataTableValue={limsDataList}
         paginationProps={paginationProps}
         handlePaginationPropsChange={handleTablePaginationPropChange}
       />
@@ -150,4 +150,4 @@ function MetadataTable() {
   );
 }
 
-export default MetadataTable;
+export default LIMSTable;

@@ -7,7 +7,8 @@ import SubjectRoutes from './subjects';
 
 // Pages
 import SignInPage from '../pages/SignInPage';
-import MetadataPage from '../pages/metadata';
+import MetadataPage from '../pages/Metadata';
+import LIMSPage from '../pages/LIMS';
 
 // Other Components
 import MenuBar from '../layouts/MenuBar';
@@ -21,6 +22,7 @@ function Routes() {
 
         <Route path='/signIn' element={<SignInPage />} />
         <Route path='/metadata' element={<MetadataPage />} />
+        <Route path='/lims' element={<LIMSPage />} />
 
         {/* Complicated routing or more than one routing will be split into their own component. */}
         <Route path='/subjects/*' element={<SubjectRoutes />} />
