@@ -1,10 +1,17 @@
 import React from 'react';
 import { Routes as RouterRoutes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useUserContext } from '../providers/UserProvider';
+
+// Routing components
+import SubjectRoutes from './subjects';
+
 // Pages
 import SignInPage from '../pages/SignInPage';
+import MetadataPage from '../pages/Metadata';
+import LIMSPage from '../pages/LIMS';
+
+// Other Components
 import MenuBar from '../layouts/MenuBar';
-import SubjectRoutes from './subjects';
 
 function Routes() {
   return (
@@ -13,7 +20,11 @@ function Routes() {
         {/* NoPath redirects to HomePage */}
         <Route index element={<h1>HomePage</h1>} />
 
-        {/* Subjects routing */}
+        <Route path='/signIn' element={<SignInPage />} />
+        <Route path='/metadata' element={<MetadataPage />} />
+        <Route path='/lims' element={<LIMSPage />} />
+
+        {/* Complicated routing or more than one routing will be split into their own component. */}
         <Route path='/subjects/*' element={<SubjectRoutes />} />
 
         {/* Non matching page redirect to NotFound */}
@@ -37,7 +48,7 @@ function ProtectedRoute() {
   return (
     <>
       <MenuBar />
-      <div style={{ top: '3rem', position:'relative'}}>
+      <div style={{ top: '3rem', position: 'relative' }}>
         <Outlet />
       </div>
     </>

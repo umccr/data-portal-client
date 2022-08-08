@@ -1,6 +1,16 @@
-import React from 'react';
-import { DataTable, DataTableProps } from 'primereact/datatable';
+import React, { useState } from 'react';
+import {
+  DataTable,
+  DataTableProps,
+  DataTablePFSEvent,
+  DataTableSortOrderType,
+} from 'primereact/datatable';
 import { Column, ColumnProps } from 'primereact/column';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+
+import JSONToTable from '../JSONToTable';
+import { showDisplayText } from '../../utils/util';
 import './index.css';
 
 /**
@@ -19,6 +29,9 @@ type DataTableWrapperProps = {
   overrideDataTableProps?: DataTableProps;
   paginationProps?: PaginationProps;
   handlePaginationPropsChange?: (event: { [key: string]: number }) => void;
+  sortField?: string;
+  sortOrder?: DataTableSortOrderType;
+  onSort?: (event: DataTablePFSEvent) => void;
 };
 
 function DataTableWrapper(props: DataTableWrapperProps) {
@@ -29,6 +42,9 @@ function DataTableWrapper(props: DataTableWrapperProps) {
     overrideDataTableProps,
     paginationProps,
     handlePaginationPropsChange,
+    sortField,
+    sortOrder,
+    onSort,
   } = props;
 
   const additionalDataTableProps = { ...overrideDataTableProps };
@@ -49,6 +65,14 @@ function DataTableWrapper(props: DataTableWrapperProps) {
     additionalDataTableProps['currentPageReportTemplate'] =
       'Showing {first} to {last} of {totalRecords} entries';
   }
+
+  // Table sorting mechanism if defined on the table wrap
+  if (sortField && sortOrder && onSort) {
+    additionalDataTableProps['sortField'] = sortField;
+    additionalDataTableProps['sortOrder'] = sortOrder;
+    additionalDataTableProps['onSort'] = onSort;
+  }
+
   return (
     <DataTable
       value={dataTableValue}
@@ -69,6 +93,52 @@ function DataTableWrapper(props: DataTableWrapperProps) {
 }
 
 export default DataTableWrapper;
+
+/***********************************
+ * Dialog Info Component in a DataTable Column Props Component
+ ***********************************/
+
+export const InfoDialogColumnProps: ColumnProps = {
+  alignHeader: 'center' as const,
+  header: (
+    <p className='capitalize text-center font-bold text-color white-space-nowrap'>
+      {showDisplayText('info')}
+    </p>
+  ),
+  className: 'text-center justify-content-center',
+  body: (rowData: any) => {
+    // Dialog properties
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+    const [moreInformationDialog, setMoreInformationDialog] = useState<any>({});
+    const handleDialogOpen = (rowData: any) => {
+      setMoreInformationDialog(rowData);
+      setIsDialogOpen(true);
+    };
+    const handleDialogClose = () => {
+      setMoreInformationDialog({});
+      setIsDialogOpen(false);
+    };
+    return (
+      <div>
+        <Dialog
+          className='max-w-full'
+          header={moreInformationDialog.library_id}
+          visible={isDialogOpen}
+          draggable={false}
+          resizable={false}
+          onHide={handleDialogClose}>
+          <JSONToTable objData={moreInformationDialog} />
+        </Dialog>
+        <Button
+          icon='pi pi-info-circle'
+          className='p-0 p-button-rounded p-button-secondary p-button-outlined text-center'
+          aria-label='info'
+          onClick={() => handleDialogOpen(rowData)}
+        />
+      </div>
+    );
+  },
+};
 
 /***********************************
  * Helper function / constant
@@ -121,3 +191,30 @@ export const convertPaginationEventToDjangoQueryParams = (event: { [key: string]
     page: newCurrentPageNumber,
   };
 };
+
+/**
+ * Django to Data Table Sorting Props
+ */
+export type djangoSortingFormat = {
+  sortOrder: DataTableSortOrderType;
+  sortField: string;
+};
+export function convertDjangoStateToDjangoQuery(state: djangoSortingFormat) {
+  const ordering = state.sortOrder == -1 ? '-' : '';
+  return {
+    ordering: `${ordering}${state.sortField}`,
+  };
+}
+type queryParamDjango = { ordering?: string } & Record<string, string | number>;
+export function convertDjangoSortParamToDataTableProp(
+  queryParam: queryParamDjango
+): Record<string, any> {
+  const ordering = queryParam.ordering ?? '-id';
+  const sortOrder = ordering.startsWith('-') ? -1 : 1;
+  const sortField = ordering.split('-').pop();
+
+  return {
+    sortOrder: sortOrder,
+    sortField: sortField,
+  };
+}
