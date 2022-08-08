@@ -1,5 +1,10 @@
 import React from 'react';
-import { DataTable, DataTableProps } from 'primereact/datatable';
+import {
+  DataTable,
+  DataTableProps,
+  DataTablePFSEvent,
+  DataTableSortOrderType,
+} from 'primereact/datatable';
 import { Column, ColumnProps } from 'primereact/column';
 import './index.css';
 
@@ -19,6 +24,9 @@ type DataTableWrapperProps = {
   overrideDataTableProps?: DataTableProps;
   paginationProps?: PaginationProps;
   handlePaginationPropsChange?: (event: { [key: string]: number }) => void;
+  sortField?: string;
+  sortOrder?: DataTableSortOrderType;
+  onSort?: (event: DataTablePFSEvent) => void;
 };
 
 function DataTableWrapper(props: DataTableWrapperProps) {
@@ -29,6 +37,9 @@ function DataTableWrapper(props: DataTableWrapperProps) {
     overrideDataTableProps,
     paginationProps,
     handlePaginationPropsChange,
+    sortField,
+    sortOrder,
+    onSort,
   } = props;
 
   const additionalDataTableProps = { ...overrideDataTableProps };
@@ -49,6 +60,14 @@ function DataTableWrapper(props: DataTableWrapperProps) {
     additionalDataTableProps['currentPageReportTemplate'] =
       'Showing {first} to {last} of {totalRecords} entries';
   }
+
+  // Table sorting mechanism if defined on the table wrap
+  if (sortField && sortOrder && onSort) {
+    additionalDataTableProps['sortField'] = sortField;
+    additionalDataTableProps['sortOrder'] = sortOrder;
+    additionalDataTableProps['onSort'] = onSort;
+  }
+
   return (
     <DataTable
       value={dataTableValue}
@@ -107,6 +126,32 @@ export function djangoToTablePaginationFormat(prop: djangoPaginationFormat): Pag
     totalNumberOfItems: count,
   };
 }
+
+/**
+ * Django to Data Table Sorting Props
+ */
+export type djangoSortingFormat = {
+  sortOrder: DataTableSortOrderType;
+  sortField: string;
+};
+export function convertDjangoStateToDjangoQuery(state: djangoSortingFormat) {
+  const ordering = state.sortOrder == -1 ? '-' : '';
+  return {
+    ordering: `${ordering}${state.sortField}`,
+  };
+}
+export function tableSortingToStateUpdate(
+  prop: DataTablePFSEvent,
+  handleSortingPropsChange: (val: any) => void
+): void {
+  const { sortField, sortOrder } = prop;
+  handleSortingPropsChange((prev: any) => ({
+    ...prev,
+    sortField: sortField,
+    sortOrder: sortOrder,
+  }));
+}
+
 /**
  * Create Django Query param based on Table pagination Event
  */
