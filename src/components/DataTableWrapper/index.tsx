@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   DataTable,
   DataTableProps,
@@ -6,6 +6,11 @@ import {
   DataTableSortOrderType,
 } from 'primereact/datatable';
 import { Column, ColumnProps } from 'primereact/column';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+
+import JSONToTable from '../JSONToTable';
+import { showDisplayText } from '../../utils/util';
 import './index.css';
 
 /**
@@ -90,6 +95,52 @@ function DataTableWrapper(props: DataTableWrapperProps) {
 export default DataTableWrapper;
 
 /***********************************
+ * Dialog Info Component in a DataTable Column Props Component
+ ***********************************/
+
+export const InfoDialogColumnProps: ColumnProps = {
+  alignHeader: 'center' as const,
+  header: (
+    <p className='capitalize text-center font-bold text-color white-space-nowrap'>
+      {showDisplayText('info')}
+    </p>
+  ),
+  className: 'text-center justify-content-center',
+  body: (rowData: any) => {
+    // Dialog properties
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+    const [moreInformationDialog, setMoreInformationDialog] = useState<any>({});
+    const handleDialogOpen = (rowData: any) => {
+      setMoreInformationDialog(rowData);
+      setIsDialogOpen(true);
+    };
+    const handleDialogClose = () => {
+      setMoreInformationDialog({});
+      setIsDialogOpen(false);
+    };
+    return (
+      <div>
+        <Dialog
+          className='max-w-full'
+          header={moreInformationDialog.library_id}
+          visible={isDialogOpen}
+          draggable={false}
+          resizable={false}
+          onHide={handleDialogClose}>
+          <JSONToTable objData={moreInformationDialog} />
+        </Dialog>
+        <Button
+          icon='pi pi-info-circle'
+          className='p-0 p-button-rounded p-button-secondary p-button-outlined text-center'
+          aria-label='info'
+          onClick={() => handleDialogOpen(rowData)}
+        />
+      </div>
+    );
+  },
+};
+
+/***********************************
  * Helper function / constant
  ***********************************/
 
@@ -126,32 +177,6 @@ export function djangoToTablePaginationFormat(prop: djangoPaginationFormat): Pag
     totalNumberOfItems: count,
   };
 }
-
-/**
- * Django to Data Table Sorting Props
- */
-export type djangoSortingFormat = {
-  sortOrder: DataTableSortOrderType;
-  sortField: string;
-};
-export function convertDjangoStateToDjangoQuery(state: djangoSortingFormat) {
-  const ordering = state.sortOrder == -1 ? '-' : '';
-  return {
-    ordering: `${ordering}${state.sortField}`,
-  };
-}
-export function tableSortingToStateUpdate(
-  prop: DataTablePFSEvent,
-  handleSortingPropsChange: (val: any) => void
-): void {
-  const { sortField, sortOrder } = prop;
-  handleSortingPropsChange((prev: any) => ({
-    ...prev,
-    sortField: sortField,
-    sortOrder: sortOrder,
-  }));
-}
-
 /**
  * Create Django Query param based on Table pagination Event
  */
@@ -166,3 +191,30 @@ export const convertPaginationEventToDjangoQueryParams = (event: { [key: string]
     page: newCurrentPageNumber,
   };
 };
+
+/**
+ * Django to Data Table Sorting Props
+ */
+export type djangoSortingFormat = {
+  sortOrder: DataTableSortOrderType;
+  sortField: string;
+};
+export function convertDjangoStateToDjangoQuery(state: djangoSortingFormat) {
+  const ordering = state.sortOrder == -1 ? '-' : '';
+  return {
+    ordering: `${ordering}${state.sortField}`,
+  };
+}
+type queryParamDjango = { ordering?: string } & Record<string, string | number>;
+export function convertDjangoSortParamToDataTableProp(
+  queryParam: queryParamDjango
+): Record<string, any> {
+  const ordering = queryParam.ordering ?? '-id';
+  const sortOrder = ordering.startsWith('-') ? -1 : 1;
+  const sortField = ordering.split('-').pop();
+
+  return {
+    sortOrder: sortOrder,
+    sortField: sortField,
+  };
+}
