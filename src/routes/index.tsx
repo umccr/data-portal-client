@@ -25,6 +25,10 @@ function Routes() {
         <Route path='/metadata' element={<MetadataPage />} />
         <Route path='/lims' element={<LIMSPage />} />
 
+        <Route path='/signIn' element={<SignInPage />} />
+        <Route path='/metadata' element={<MetadataPage />} />
+        <Route path='/lims' element={<LIMSPage />} />
+
         {/* Complicated routing or more than one routing will be split into their own component. */}
         <Route path='/subjects/*' element={<SubjectRoutes />} />
 
