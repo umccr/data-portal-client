@@ -31,9 +31,13 @@ const actionGDSTemplate = (rowData: Record<string, any>) => {
 const actionS3Template = (rowData: Record<string, any>) => {
   return <DataActionButton type='s3' pathOrKey={rowData.key} id={rowData.id} />;
 };
-const fileSizeTemplate = (rowData: Record<string, any>) => {
+const fileSizeGDSTemplate = (rowData: Record<string, any>) => {
   const readableSize = getStringReadableBytes(rowData.size_in_bytes);
-  return <div className='white-space-nowrap'>{readableSize}</div>;
+  return <div className='white-space-nowrap overflow-visible'>{readableSize}</div>;
+};
+const fileSizeS3Template = (rowData: Record<string, any>) => {
+  const readableSize = getStringReadableBytes(rowData.size);
+  return <div className='white-space-nowrap overflow-visible'>{readableSize}</div>;
 };
 const timeModifiedTemplate = (rowData: Record<string, any>) => {
   const readableTimeStamp = moment(rowData.last_modified_date).local().format('LLL');
@@ -42,6 +46,7 @@ const timeModifiedTemplate = (rowData: Record<string, any>) => {
 
 const previewGDSTemplate = (rowData: Record<string, any>) => {
   const filename = rowData.path.split('/').pop();
+  const fileSizeInBytes = rowData.size_in_bytes;
 
   const cachePresignedUrl = (url: string) => {
     rowData['presigned_url'] = url;
@@ -51,6 +56,7 @@ const previewGDSTemplate = (rowData: Record<string, any>) => {
     <FilePreviewButton
       id={rowData.id}
       filename={filename}
+      fileSizeInBytes={fileSizeInBytes}
       type='gds'
       handleUpdateData={cachePresignedUrl}
     />
@@ -59,6 +65,7 @@ const previewGDSTemplate = (rowData: Record<string, any>) => {
 
 const previewS3Template = (rowData: Record<string, any>) => {
   const filename = rowData.key.split('/').pop();
+  const fileSizeInBytes = rowData.size;
 
   const cachePresignedUrl = (url: string) => {
     rowData['presigned_url'] = url;
@@ -66,6 +73,7 @@ const previewS3Template = (rowData: Record<string, any>) => {
 
   return (
     <FilePreviewButton
+      fileSizeInBytes={fileSizeInBytes}
       id={rowData.id}
       filename={filename}
       type='s3'
@@ -87,7 +95,7 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
         <Column body={previewGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={actionGDSTemplate} headerStyle={{ display: 'none' }} />
-        <Column body={fileSizeTemplate} headerStyle={{ display: 'none' }} />
+        <Column body={fileSizeGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={timeModifiedTemplate} headerStyle={{ display: 'none' }} />
       </DataTable>
     </div>
@@ -108,7 +116,7 @@ function AnalysisResultS3Table(prop: AnalysisResultGDSTableProps) {
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
         <Column body={previewS3Template} headerStyle={{ display: 'none' }} />
         <Column body={actionS3Template} headerStyle={{ display: 'none' }} />
-        <Column body={fileSizeTemplate} headerStyle={{ display: 'none' }} />
+        <Column body={fileSizeS3Template} headerStyle={{ display: 'none' }} />
         <Column body={timeModifiedTemplate} headerStyle={{ display: 'none' }} />
       </DataTable>
     </div>

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import API from '@aws-amplify/api';
 import { ColumnProps } from 'primereact/column';
+
+import DataActionButton from '../../../components/DataActionButton';
 import moment from 'moment';
 
 // Custom component
@@ -28,7 +30,7 @@ const fetchGDSSubjectData = async (
   return await API.get('portal', `/gds/`, APIConfig);
 };
 
-type ObjectStringValType = { [key: string]: string | number | null };
+type ObjectStringValType = { id: number } & { [key: string]: string };
 type Props = { subjectId: string };
 
 function GDSSubjectDataTable(props: Props) {
@@ -83,7 +85,7 @@ function GDSSubjectDataTable(props: Props) {
     'volume_name',
     'path',
     'preview',
-    // 'action', TODO
+    'action',
     'size_in_bytes',
     'last_modified_date',
   ];
@@ -109,17 +111,19 @@ function GDSSubjectDataTable(props: Props) {
       newColToShow = {
         ...newColToShow,
         header: (
-          <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
+          <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap overflow-visible'>
             {showDisplayText(column)}
           </p>
         ),
+        className: 'text-center white-space-nowrap overflow-visible',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         body: (rowData: any): React.ReactNode => {
           const filename = rowData.path.split('/').pop();
-
+          const fileSizeInBytes = rowData.size_in_bytes;
           return (
             <FilePreviewButton
               filename={filename}
+              fileSizeInBytes={fileSizeInBytes}
               type='gds'
               id={rowData.id}
               presignedUrl={rowData.presigned_url}
@@ -130,25 +134,15 @@ function GDSSubjectDataTable(props: Props) {
           );
         },
       };
-    }
-    // Some custom column to be added here
-    // TODO: below
-    // else if (column == 'action') {
-    //   newColToShow = {
-    //     field: column,
-    //     alignHeader: 'left' as const,
-    //     header: (
-    //       <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
-    //         {showDisplayText('column')}
-    //       </p>
-    //     ),
-    //     body: (rowData: ObjectStringValType): React.ReactNode => {
-    //       return textBodyTemplate('rowData[column]');
-    //     },
-    //     className: 'text-left white-space-nowrap',
-    //   };
-    // } else
-    else if (column == 'size_in_bytes') {
+    } else if (column == 'action') {
+      newColToShow = {
+        ...newColToShow,
+        body: (rowData: ObjectStringValType): React.ReactNode => {
+          return <DataActionButton id={rowData.id} type='gds' pathOrKey={rowData.key} />;
+        },
+        className: 'text-center white-space-nowrap overflow-visible',
+      };
+    } else if (column == 'size_in_bytes') {
       newColToShow = {
         ...newColToShow,
         body: (rowData: ObjectStringValType): React.ReactNode => {
