@@ -7,6 +7,7 @@ import SubjectRoutes from './subjects';
 
 // Pages
 import SignInPage from '../pages/SignInPage';
+import HomePage from '../pages/Home';
 import MetadataPage from '../pages/Metadata';
 import LIMSPage from '../pages/LIMS';
 
@@ -18,7 +19,11 @@ function Routes() {
     <RouterRoutes>
       <Route path='/' element={<ProtectedRoute />}>
         {/* NoPath redirects to HomePage */}
-        <Route index element={<h1>HomePage</h1>} />
+        <Route index element={<HomePage />} />
+
+        <Route path='/signIn' element={<SignInPage />} />
+        <Route path='/metadata' element={<MetadataPage />} />
+        <Route path='/lims' element={<LIMSPage />} />
 
         <Route path='/signIn' element={<SignInPage />} />
         <Route path='/metadata' element={<MetadataPage />} />
