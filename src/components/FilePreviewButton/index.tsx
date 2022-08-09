@@ -1,21 +1,64 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog } from 'primereact/dialog';
 import CircularLoaderWithText from '../CircularLoaderWithText';
-import ViewPresignedUrl, { DATA_TYPE_SUPPORTED } from '../ViewPresignedUrl';
+import ViewPresignedUrl, {
+  DATA_TYPE_SUPPORTED,
+  HTML_FILETYPE_LIST,
+  IMAGE_FILETYPE_LIST,
+} from '../ViewPresignedUrl';
 import { getGDSPreSignedUrl, getS3PreSignedUrl } from '../../utils/api';
 
 type FilePreviewButtonProps = {
   filename: string;
   type: 's3' | 'gds';
   id: number;
+  fileSizeInBytes: number;
   presignedUrl?: string;
   handleUpdateData?: (presignedUrl: string) => void;
 };
 
 export default function FilePreviewButton(props: FilePreviewButtonProps) {
+  const { type, fileSizeInBytes } = props;
+
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
   const filetype = props.filename.split('.').pop();
+
+  if (!filetype) {
+    return <div className='pi pi-eye-slash text-400' />;
+  }
+
+  // Unable to fetch from s3 due to cors-origin policy
+  const isCorsOriginBlock =
+    type == 's3' &&
+    !IMAGE_FILETYPE_LIST.includes(filetype) &&
+    !HTML_FILETYPE_LIST.includes(filetype);
+
+  const isFileSizeAcceptable = fileSizeInBytes > 60000000;
+  const isDataTypeSupported = !DATA_TYPE_SUPPORTED.includes(filetype);
+
+  if (isCorsOriginBlock) {
+    return (
+      <div>
+        <div className='pi pi-eye-slash text-400' />
+      </div>
+    );
+  }
+  if (isFileSizeAcceptable) {
+    return (
+      <div>
+        <div className='pi pi-eye-slash text-400' />
+      </div>
+    );
+  }
+
+  if (isDataTypeSupported) {
+    return (
+      <div>
+        <div className='pi pi-eye-slash text-400' />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -25,11 +68,7 @@ export default function FilePreviewButton(props: FilePreviewButtonProps) {
         <></>
       )}
 
-      {filetype && DATA_TYPE_SUPPORTED.includes(filetype) ? (
-        <div className='cursor-pointer pi pi-eye' onClick={() => setIsDialogOpen(true)} />
-      ) : (
-        <div className='pi pi-eye-slash text-400' />
-      )}
+      <div className='cursor-pointer pi pi-eye' onClick={() => setIsDialogOpen(true)} />
     </>
   );
 }
@@ -81,7 +120,7 @@ function FilePreviewDialog(props: FilePreviewDialogProps) {
       contentStyle={{ minHeight: '5rem', maxHeight: '75vh' }}
       contentClassName='relative p-0 surface-400 flex align-items-center justify-content-center'>
       {localPresignedUrl ? (
-        <div style={{ height: '75vh' }}>
+        <div style={{ height: '75vh', width: '100%' }}>
           <ViewPresignedUrl presingedUrl={localPresignedUrl} />
         </div>
       ) : isLoading ? (

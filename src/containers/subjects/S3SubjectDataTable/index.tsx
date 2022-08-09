@@ -111,13 +111,14 @@ function S3SubjectDataTable(props: Props) {
     if (column == 'preview') {
       newColToShow = {
         ...newColToShow,
-        className: 'text-center white-space-nowrap',
+        className: 'text-center white-space-nowrap overflow-visible',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         body: (rowData: any): React.ReactNode => {
           const filename = rowData.key.split('/').pop();
-
+          const fileSizeInBytes = rowData.size;
           return (
             <FilePreviewButton
+              fileSizeInBytes={fileSizeInBytes}
               filename={filename}
               type='s3'
               id={rowData.id}
