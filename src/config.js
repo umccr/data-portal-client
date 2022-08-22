@@ -39,7 +39,7 @@ const config = {
   gpl: {
     URL: process.env.REACT_APP_GPL_SUBMIT_JOB,
     MANUAL: process.env.REACT_APP_GPL_SUBMIT_JOB_MANUAL,
-    CREATE_LINX_PLOT: process.env.REACT_APP_GPL_CREATE_LINX_PLOT,
+    // CREATE_LINX_PLOT: process.env.REACT_APP_GPL_CREATE_LINX_PLOT,
     REGION: REGION,
     SERVICE: 'lambda',
   },
