@@ -1197,11 +1197,12 @@ class Subject extends Component {
       },
       {
         key: 11,
-        label: 'tso ctdna bam',
+        label: 'tso bam',
         keyword: 'tso ctdna .bam$',
         color: 'default',
       },
-      { key: 12, label: 'tso ctdna vcf', keyword: 'tso ctdna .vcf.gz$', color: 'default' },
+      { key: 12, label: 'tso vcf', keyword: 'tso ctdna .vcf.gz$', color: 'default' },
+      { key: 13, label: 'tso tsv', keyword: 'tso ctdna .tsv$', color: 'default' },
     ];
 
     return (
