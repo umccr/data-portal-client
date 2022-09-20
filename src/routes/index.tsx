@@ -27,13 +27,11 @@ function Routes() {
     return (
       <RouterRoutes>
         <Route path='/' element={<SignedInLayout />}>
-          {/* NoPath redirects to HomePage */}
           <Route index element={<HomePage />} />
-
           <Route path='/metadata' element={<MetadataPage />} />
           <Route path='/lims' element={<LIMSPage />} />
 
-          {/* Complicated routing or more than one routing will be split into their own component. */}
+          {/* More than one routing for the same prefix will be split into their own component. */}
           <Route path='/subjects/*' element={<SubjectRoutes />} />
 
           {/* Non matching page redirect to NotFound */}
