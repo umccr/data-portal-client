@@ -21,6 +21,7 @@ function Routes() {
     return (
       <RouterRoutes>
         <Route path='/signIn' element={<SignInPage />} />
+        <Route path='*' element={<Navigate replace to='signIn' />} />
       </RouterRoutes>
     );
   } else {
@@ -37,7 +38,7 @@ function Routes() {
           {/* Non matching page redirect to NotFound */}
           <Route path='*' element={<h1>NotFoundPage</h1>}></Route>
         </Route>
-        <Route path='/signIn' element={<SignInPage />}></Route>
+        <Route path='/signIn' element={<Navigate replace to='/' />}></Route>
       </RouterRoutes>
     );
   }
