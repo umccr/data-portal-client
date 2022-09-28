@@ -102,7 +102,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
           dataset: projectSelected,
         },
       };
-      await API.post('rnasum', '', init);
+      await API.post('portal', '/manops/rnasum', init);
       toast?.show({
         severity: 'success',
         summary: 'RNASum report has been triggered.',
