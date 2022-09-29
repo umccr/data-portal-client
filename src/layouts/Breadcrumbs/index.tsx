@@ -22,9 +22,6 @@ function Breadcrumbs() {
     const breadcrumbItem = {
       label: showDisplayText(currentPath.substring(lastSlashIndex + 1)),
       url: currentPath,
-      command: () => {
-        navigate(currentPath);
-      },
       className: 'capitalize font-medium',
     };
     breadcrumbItems.unshift(breadcrumbItem);
@@ -36,9 +33,6 @@ function Breadcrumbs() {
   const breadcrumbItem = {
     label: showDisplayText(currentPath.substring(lastSlashIndex + 1)),
     url: currentPath,
-    command: () => {
-      navigate(currentPath);
-    },
     className: 'uppercase font-medium',
   };
   breadcrumbItems.unshift(breadcrumbItem);
