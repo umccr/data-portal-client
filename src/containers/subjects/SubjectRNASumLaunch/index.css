@@ -1,0 +1,6 @@
+.p-inputswitch.p-inputswitch-checked .p-inputswitch-slider{
+  background: var(--blue-800) !important
+}
+.p-inputswitch.p-focus .p-inputswitch-slider{
+  box-shadow: none !important
+}

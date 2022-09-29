@@ -82,7 +82,7 @@ function SampleInformationTable(props: Props) {
         <div>
           <Button
             icon='pi pi-info-circle'
-            className='p-0 p-button-rounded p-button-secondary p-button-outlined text-center'
+            className='p-0 p-button-rounded p-button-secondary p-button-outlined text-center border-none'
             aria-label='info'
             onClick={() => handleDialogOpen(rowData)}
           />
