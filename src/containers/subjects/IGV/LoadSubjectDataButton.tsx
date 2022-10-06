@@ -135,6 +135,18 @@ export default memo(LoadSubjectDataButton);
  * Helper function
  */
 
+const isIgvReadableFile = (filename: string): boolean => {
+  if (
+    filename.endsWith('bam') ||
+    filename.endsWith('vcf') ||
+    filename.endsWith('vcf.gz') ||
+    filename.endsWith('cram')
+  ) {
+    return true;
+  }
+  return false;
+};
+
 // S3 select table
 type S3SelectTableProps = {
   title: string;
@@ -161,6 +173,7 @@ const S3SelectTable = ({
       value={currentS3RowData}
       selection={currentS3Selection}
       onSelectionChange={(e) => handleSelectionChange(e.value)}
+      isDataSelectable={(e) => isIgvReadableFile(e.data.key)}
       header={<div>{title}</div>}>
       <Column selectionMode='multiple' headerStyle={{ width: '3em' }} />
       <Column field='key' header='Key'></Column>
@@ -197,10 +210,12 @@ const GDSSelectTable = ({
       value={currentGDSRowData}
       selection={currentGDSSelection}
       onSelectionChange={(e) => handleSelectionChange(e.value)}
+      isDataSelectable={(e) => isIgvReadableFile(e.data.name)}
       header={<div>{title}</div>}>
       <Column selectionMode='multiple' headerStyle={{ width: '3em' }} />
       <Column field='path' header='Path'></Column>
-      <Column field='size_in_bytes' header='Size' body={sizeBody}></Column>
+      <Column field='volume_name' header='Volume'></Column>
+      <Column field='size_in_bytes' header='Size' body={sizeBody} />
       <Column field='time_modified' header='Date Modified' body={dateBody} />
     </DataTable>
   );

@@ -14,7 +14,9 @@ import {
   convertS3RowToHtsgetIgvTrack,
   removeIgvLoadTrackFromName,
   addIgvLoadTrackFromITrackList,
+  RequiredS3RowType,
 } from './utils';
+import LoadCustomTrackDataButton from './LoadCustomTrackDataButton';
 
 const toolbarGenomeList = [
   { label: 'hg38', value: 'hg38' },
@@ -49,19 +51,6 @@ function IGV({ subjectId }: Props) {
     gdsRowList: [],
   });
 
-  const handleRemoveAllTrackData = () => {
-    if (!igvBrowser) return;
-
-    const removalTrackNameList: string[] = createRemovalIgvTrackNameList(igvSubjectTrackData, {
-      s3RowList: [],
-      gdsRowList: [],
-    });
-    removeIgvLoadTrackFromName({
-      trackNameList: removalTrackNameList,
-      igvBrowser: igvBrowser,
-    });
-  };
-
   const handleIgvTrackDataChange = useCallback(
     async (newChange: LoadSubjectDataType) => {
       if (!igvBrowser) return;
@@ -86,6 +75,41 @@ function IGV({ subjectId }: Props) {
     [igvBrowser, igvSubjectTrackData]
   );
 
+  // Custom State and Handler
+  const [customTrackDataNameList, setCustomTrackDataNameList] = useState<string[]>([]);
+  const handleCustomIgvS3TrackDataChange = useCallback(
+    async (s3Row: RequiredS3RowType) => {
+      if (!igvBrowser) return;
+
+      const newCustomLoadTrack = convertS3RowToHtsgetIgvTrack(s3Row);
+      await addIgvLoadTrackFromITrackList({
+        iTrackList: [newCustomLoadTrack],
+        igvBrowser: igvBrowser,
+      });
+      const basename = getBaseNameFromKey(s3Row.key);
+      setCustomTrackDataNameList((prev) => [...prev, basename]);
+    },
+    [igvBrowser]
+  );
+
+  // Handle remove IGV trackdata
+  const handleRemoveAllTrackData = () => {
+    if (!igvBrowser) return;
+
+    let removalTrackNameList: string[] = createRemovalIgvTrackNameList(igvSubjectTrackData, {
+      s3RowList: [],
+      gdsRowList: [],
+    });
+
+    if (customTrackDataNameList.length) {
+      removalTrackNameList = [...removalTrackNameList, ...customTrackDataNameList];
+    }
+    removeIgvLoadTrackFromName({
+      trackNameList: removalTrackNameList,
+      igvBrowser: igvBrowser,
+    });
+  };
+
   const leftToolbarContents = (
     <>
       <Dropdown
@@ -103,7 +127,7 @@ function IGV({ subjectId }: Props) {
         subjectId={subjectId}
         handleIgvTrackDataChange={handleIgvTrackDataChange}
       />
-      {/* <Button className='m-1 bg-blue-800 border-blue-800' label='CUSTOM' icon='pi pi-plus' /> */}
+      <LoadCustomTrackDataButton handleAddCustomLoadTrack={handleCustomIgvS3TrackDataChange} />
       <Button
         onClick={handleRemoveAllTrackData}
         className='m-1 p-button-outlined p-button-secondary'
@@ -124,7 +148,7 @@ function IGV({ subjectId }: Props) {
 
   return (
     <>
-      <div className='bg-white' style={{ minWidth: '750px' }}>
+      <div className='bg-white'>
         <Toolbar left={leftToolbarContents} right={rightContents} className='p-2' />
 
         {igv.isLoading && (

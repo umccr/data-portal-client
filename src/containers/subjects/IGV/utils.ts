@@ -1,5 +1,5 @@
 import config from '../../../config';
-import { S3Row, GDSRow, getBaseNameFromKey, constructGDSUrl } from '../../../API/subject';
+import { getBaseNameFromKey, constructGDSUrl } from '../../../API/subject';
 import igv, { IGVBrowser, ITrack } from 'igv';
 import API from '@aws-amplify/api';
 import genomes from './genomes';
@@ -20,7 +20,11 @@ export const initIgv = async (refGenome: string) => {
   return igvBrowser;
 };
 
-export const convertS3RowToHtsgetIgvTrack = (s3row: S3Row): ITrack => {
+export type RequiredS3RowType = {
+  key: string;
+  bucket: string;
+} & Record<string, string | number>;
+export const convertS3RowToHtsgetIgvTrack = (s3row: RequiredS3RowType): ITrack => {
   const { key, bucket } = s3row;
   const baseName = getBaseNameFromKey(key);
 
@@ -55,7 +59,13 @@ export const convertS3RowToHtsgetIgvTrack = (s3row: S3Row): ITrack => {
   }
 };
 
-export const convertGdsRowToIgvTrack = async (gdsRow: GDSRow): Promise<igv.ITrack | undefined> => {
+export type RequiredGDSRowType = {
+  volume_name: string;
+  path: string;
+} & Record<string, string | number | boolean | null>;
+export const convertGdsRowToIgvTrack = async (
+  gdsRow: RequiredGDSRowType
+): Promise<igv.ITrack | undefined> => {
   const { volume_name, path } = gdsRow;
   // Find gds index path
   let idxFilePath: string;
@@ -76,8 +86,6 @@ export const convertGdsRowToIgvTrack = async (gdsRow: GDSRow): Promise<igv.ITrac
   const { signed_urls } = await API.post('files', `/presign`, {
     body: [fileGdsUrl, idxFileGdsUrl],
   });
-
-  // const { signed_urls } = TEMP;
 
   // Find which presign is which
   let filePresignUrl = '';

@@ -11,7 +11,7 @@ function SubjectIGVPage() {
   }
 
   return (
-    <div>
+    <div style={{ minWidth: '750px' }}>
       <Card>
         <IGV subjectId={subjectId} />
       </Card>
