@@ -16,6 +16,7 @@ import {
   addIgvLoadTrackFromITrackList,
   RequiredS3RowType,
 } from './utils';
+import { useUserContext } from '../../../providers/UserProvider';
 import LoadCustomTrackDataButton from './LoadCustomTrackDataButton';
 
 const toolbarGenomeList = [
@@ -32,8 +33,18 @@ export type LoadSubjectDataType = {
 
 type Props = { subjectId: string };
 function IGV({ subjectId }: Props) {
+  const cognitoUser = useUserContext().user;
+
   // IGV init
-  const igv = useQuery(['initIGV', subjectId], () => initIgv(refGenome), {});
+  const igv = useQuery(
+    ['initIGV', subjectId],
+    () =>
+      initIgv({
+        initRefGenome: refGenome,
+        oAuthToken: cognitoUser.getSignInUserSession().getIdToken().getJwtToken(),
+      }),
+    {}
+  );
   const igvBrowser = igv.data;
 
   // RefGenome seting for IGV

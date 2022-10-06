@@ -8,15 +8,17 @@ import genomes from './genomes';
  * IGV OPERATIONS
  */
 
-export const initIgv = async (refGenome: string) => {
+export const initIgv = async (props: { initRefGenome: string; oAuthToken: string }) => {
+  const { initRefGenome, oAuthToken } = props;
+
   igv.removeAllBrowsers();
   const igvDiv = document.getElementById('igv-div');
   const options = {
     genomeList: genomes,
-    genome: refGenome,
+    genome: initRefGenome,
   };
   const igvBrowser: IGVBrowser = await igv.createBrowser(igvDiv, options);
-
+  igv.setOauthToken(oAuthToken, '*htsget*');
   return igvBrowser;
 };
 
