@@ -16,7 +16,10 @@ function LoadCustomTrackDataButton({ handleAddCustomLoadTrack }: Props) {
     bucket: 'production',
     key: '',
   });
-
+  const handleOpenCustomTrackButton = () => {
+    setInputState((prev) => ({ ...prev, key: '' }));
+    setIsAddCustomTrackDialogOpen((prev) => !prev);
+  };
   const addNewTrackData = () => {
     handleAddCustomLoadTrack(inputState);
     setIsAddCustomTrackDialogOpen((prev) => !prev);
@@ -82,7 +85,7 @@ function LoadCustomTrackDataButton({ handleAddCustomLoadTrack }: Props) {
       </Dialog>
 
       <Button
-        onClick={() => setIsAddCustomTrackDialogOpen((prev) => !prev)}
+        onClick={handleOpenCustomTrackButton}
         className='m-1 bg-blue-800 border-blue-800'
         label='CUSTOM'
         icon='pi pi-plus'

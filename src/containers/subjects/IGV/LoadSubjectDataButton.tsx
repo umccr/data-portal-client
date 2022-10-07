@@ -78,9 +78,12 @@ function LoadSubjectDataButton({
   };
 
   const RenderDialogContent = ({ data }: any) => {
+    const igvGdsData = data.results_gds.filter((r: GDSRow) => isIgvReadableFile(r.path));
+    const igvS3Data = data.results.filter((r: S3Row) => isIgvReadableFile(r.key));
+
     const tableToDisplay = [
-      { title: 'GDS', source: 'gds', data: data.results_gds },
-      { title: 'S3', source: 's3', data: data.results },
+      { title: 'GDS', source: 'gds', data: igvGdsData },
+      { title: 'S3', source: 's3', data: igvS3Data },
     ];
     return (
       <>

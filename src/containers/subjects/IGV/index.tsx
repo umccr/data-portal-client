@@ -93,10 +93,13 @@ function IGV({ subjectId }: Props) {
       if (!igvBrowser) return;
 
       const newCustomLoadTrack = convertS3RowToHtsgetIgvTrack(s3Row);
-      await addIgvLoadTrackFromITrackList({
-        iTrackList: [newCustomLoadTrack],
-        igvBrowser: igvBrowser,
-      });
+      if (newCustomLoadTrack) {
+        await addIgvLoadTrackFromITrackList({
+          iTrackList: [newCustomLoadTrack],
+          igvBrowser: igvBrowser,
+        });
+      }
+
       const basename = getBaseNameFromKey(s3Row.key);
       setCustomTrackDataNameList((prev) => [...prev, basename]);
     },
@@ -154,7 +157,13 @@ function IGV({ subjectId }: Props) {
   );
 
   const rightContents = (
-    <>{/* <Button label='Open in IGV Desktop' className='p-button-secondary p-button-text' /> */}</>
+    <>
+      {/* <Button
+        onClick={() => console.log('opening local IGV')}
+        label='Open in IGV Desktop'
+        className='p-button-secondary p-button-text'
+      /> */}
+    </>
   );
 
   return (
@@ -241,8 +250,10 @@ const createNewIgvTrackList = async (
     arrayA: newTrackData.s3RowList,
     arrayB: oldTrackData.s3RowList,
   }) as unknown as S3Row[];
-  for (const s3Row of newS3ObjectList)
-    newIgvLoadTrackList.push(convertS3RowToHtsgetIgvTrack(s3Row));
+  for (const s3Row of newS3ObjectList) {
+    const newS3Itrack = convertS3RowToHtsgetIgvTrack(s3Row);
+    if (newS3Itrack != null) newIgvLoadTrackList.push(newS3Itrack);
+  }
 
   // Find new IGV Track Data for S3
   const newGdsObjectList = diffArrayAlphaAndArrayBetaOnObjData({
