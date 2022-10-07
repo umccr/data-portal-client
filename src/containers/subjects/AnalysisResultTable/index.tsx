@@ -1,7 +1,6 @@
 import React from 'react';
 import moment from 'moment';
 import API from '@aws-amplify/api';
-import { useQuery } from 'react-query';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -9,6 +8,7 @@ import { getStringReadableBytes } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import DataActionButton from '../../../components/DataActionButton';
+import { usePortalSubjectAPI } from '../../../api/subject';
 
 // Creating Table
 type AnalysisResultGDSTableProps = {
@@ -123,17 +123,10 @@ function AnalysisResultS3Table(prop: AnalysisResultGDSTableProps) {
   );
 }
 
-// API Functions
-async function fetchSubjectData(subjectId: string) {
-  return await API.get('portal', `/subjects/${subjectId}`, {});
-}
-
 type Props = { subjectId: string };
 
 function AnalysisResultsPanel({ subjectId }: Props) {
-  const { isFetching, isLoading, data } = useQuery('getSubjectData', () =>
-    fetchSubjectData(subjectId)
-  );
+  const { isFetching, isLoading, data } = usePortalSubjectAPI(subjectId);
 
   if (isLoading || isFetching) {
     return <CircularLoaderWithText />;

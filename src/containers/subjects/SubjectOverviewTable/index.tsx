@@ -6,6 +6,7 @@ import { useQuery } from 'react-query';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
 import JSONToTable from '../../../components/JSONToTable';
+import { usePortalSubjectAPI } from '../../../api/subject';
 
 const OVERVIEW_COLUMN = [
   'subject_id',
@@ -17,10 +18,6 @@ const OVERVIEW_COLUMN = [
   'timestamp',
 ];
 
-const fetchSubjectOverview = async (subjectId: string) => {
-  return await API.get('portal', `/subjects/${subjectId}/`, {});
-};
-
 type JsonOfArrayType = { [key: string]: (string | number)[] };
 type Props = { subjectId: string };
 
@@ -30,11 +27,9 @@ function SubjectOverviewTable(props: Props) {
 
   const toast = useToastContext();
 
-  const { isFetching, isLoading, isError, data } = useQuery('fetchSubjectInformation', () =>
-    fetchSubjectOverview(subjectId)
-  );
+  const { isLoading, isError, data } = usePortalSubjectAPI(subjectId);
 
-  if (isLoading || isFetching) {
+  if (isLoading) {
     return <CircularLoaderWithText />;
   }
 
@@ -46,7 +41,7 @@ function SubjectOverviewTable(props: Props) {
       life: 3000,
     });
   }
-  if (data && !isFetching && !isLoading) {
+  if (data && !isLoading) {
     subjectOverview = convertArrayOfJsonToJsonOfArray(data.lims);
   }
 

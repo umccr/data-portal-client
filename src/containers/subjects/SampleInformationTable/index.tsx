@@ -10,6 +10,7 @@ import { useToastContext } from '../../../providers/ToastProvider';
 import { showDisplayText } from '../../../utils/util';
 import JSONToTable from '../../../components/JSONToTable';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
+import { usePortalSubjectAPI } from '../../../api/subject';
 
 const COLUMN_TO_DISPLAY = [
   'sample_id',
@@ -20,10 +21,6 @@ const COLUMN_TO_DISPLAY = [
   'assay',
   'override_cycles',
 ];
-
-const fetchSubjectInformation = async (subjectId: string) => {
-  return await API.get('portal', `/subjects/${subjectId}/`, {});
-};
 
 type ObjectStringValType = { [key: string]: string | number | null };
 type Props = { subjectId: string };
@@ -45,9 +42,8 @@ function SampleInformationTable(props: Props) {
     setIsDialogOpen(false);
   };
 
-  const { isFetching, isLoading, isError, data } = useQuery('fetchSubjectInformation', () =>
-    fetchSubjectInformation(subjectId)
-  );
+  const he = usePortalSubjectAPI(subjectId);
+  const { isLoading, isError, data } = he;
 
   if (isError) {
     toast?.show({
@@ -58,7 +54,7 @@ function SampleInformationTable(props: Props) {
     });
   }
 
-  if (data && !isFetching && !isLoading) {
+  if (data && !isLoading) {
     subjectLimsList = data.lims;
   }
 
@@ -118,7 +114,7 @@ function SampleInformationTable(props: Props) {
         onHide={handleDialogClose}>
         <JSONToTable objData={moreInformationDialog} />
       </Dialog>
-      {isLoading || isFetching ? (
+      {isLoading ? (
         <CircularLoaderWithText />
       ) : (
         <DataTableWrapper
