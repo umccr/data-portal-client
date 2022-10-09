@@ -15,19 +15,7 @@ import DataTableWrapper, {
 import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import DataActionButton from '../../../components/DataActionButton';
-
-const fetchS3SubjectData = async (
-  subjectId: string,
-  params: { [key: string]: string | number }
-) => {
-  const APIConfig = {
-    queryStringParameters: {
-      subject: subjectId,
-      ...params,
-    },
-  };
-  return await API.get('portal', `/s3/`, APIConfig);
-};
+import { usePortalS3API } from '../../../api/s3';
 
 type ObjectStringValType = { id: number } & { [key: string]: string };
 type Props = { subjectId: string };
@@ -55,10 +43,12 @@ function S3SubjectDataTable(props: Props) {
   type ObjKeyType = { [key: string]: string | number };
   let subjectDataList: ObjKeyType[] = [];
 
-  const { isFetching, isLoading, isError, data } = useQuery(
-    ['getS3SubjectData', apiQueryParameter],
-    () => fetchS3SubjectData(subjectId, apiQueryParameter)
-  );
+  const { isFetching, isLoading, isError, data } = usePortalS3API({
+    queryStringParameters: {
+      subject: subjectId,
+      ...apiQueryParameter,
+    },
+  });
 
   if (isError) {
     toast?.show({
