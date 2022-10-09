@@ -5,17 +5,12 @@ import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
 import API from '@aws-amplify/api';
 import { Link } from 'react-router-dom';
-
-const fetchLimsList = async () => {
-  return await API.get('portal', '/lims/', {});
-};
+import { usePortalLimsAPI } from '../../../api/lims';
 
 function LimsHomeCard() {
   const toast = useToastContext();
 
-  const { isFetching, isLoading, isError, data } = useQuery(['getLimsList', {}], () =>
-    fetchLimsList()
-  );
+  const { isFetching, isLoading, isError, data } = usePortalLimsAPI({});
 
   if (isError) {
     toast?.show({

@@ -15,8 +15,9 @@ import './app.css';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      refetchOnMount: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      refetchOnReconnect: false,
     },
   },
 });

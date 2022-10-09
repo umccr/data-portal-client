@@ -32,12 +32,10 @@ export type SubjectApiRes = {
 export function usePortalSubjectAPI(subjectId: string) {
   return useQuery(
     ['portal-subject', subjectId],
-    async () =>
-      await API.get('portal', `/subjects/${subjectId}`, {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-      })
+    async () => await API.get('portal', `/subjects/${subjectId}`, {}),
+    {
+      staleTime: Infinity,
+    }
   );
 }
 
