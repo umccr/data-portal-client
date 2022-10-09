@@ -8,7 +8,7 @@ import { getStringReadableBytes } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import DataActionButton from '../../../components/DataActionButton';
-import { usePortalSubjectAPI } from '../../../api/subject';
+import { usePortalSubjectDataAPI } from '../../../api/subject';
 
 // Creating Table
 type AnalysisResultGDSTableProps = {
@@ -126,7 +126,7 @@ function AnalysisResultS3Table(prop: AnalysisResultGDSTableProps) {
 type Props = { subjectId: string };
 
 function AnalysisResultsPanel({ subjectId }: Props) {
-  const { isFetching, isLoading, data } = usePortalSubjectAPI(subjectId);
+  const { isFetching, isLoading, data } = usePortalSubjectDataAPI(subjectId);
 
   if (isLoading || isFetching) {
     return <CircularLoaderWithText />;

@@ -10,7 +10,7 @@ import { useToastContext } from '../../../providers/ToastProvider';
 import { showDisplayText } from '../../../utils/util';
 import JSONToTable from '../../../components/JSONToTable';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
-import { usePortalSubjectAPI } from '../../../api/subject';
+import { usePortalSubjectDataAPI } from '../../../api/subject';
 
 const COLUMN_TO_DISPLAY = [
   'sample_id',
@@ -42,7 +42,7 @@ function SampleInformationTable(props: Props) {
     setIsDialogOpen(false);
   };
 
-  const he = usePortalSubjectAPI(subjectId);
+  const he = usePortalSubjectDataAPI(subjectId);
   const { isLoading, isError, data } = he;
 
   if (isError) {

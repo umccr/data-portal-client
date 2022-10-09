@@ -14,7 +14,7 @@ import {
   PAN_CANCER_DATASETS_OPTION,
 } from './utils';
 import { useToastContext } from '../../../providers/ToastProvider';
-import { SubjectApiRes, usePortalSubjectAPI, GDSRow } from '../../../api/subject';
+import { SubjectApiRes, usePortalSubjectDataAPI, GDSRow } from '../../../api/subject';
 
 const ALL_DATASETS_OPTION = [
   ...PRIMARY_DATASETS_OPTION,
@@ -75,7 +75,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
   ];
 
   // Eligibility of RNASum trigger check
-  const subjectData = usePortalSubjectAPI(subjectId);
+  const subjectData = usePortalSubjectDataAPI(subjectId);
   const resultsGds: SubjectApiRes = subjectData.data;
   const rnaSumCheckQuery = useQuery(
     ['rnasumCheck', subjectId],

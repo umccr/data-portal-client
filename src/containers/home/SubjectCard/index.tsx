@@ -5,17 +5,12 @@ import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
 import API from '@aws-amplify/api';
 import { Link } from 'react-router-dom';
-
-const fetchSubjectList = async () => {
-  return await API.get('portal', '/subjects/', {});
-};
+import { usePortalSubjectAPI } from '../../../api/subject';
 
 function SubjectHomeCard() {
   const toast = useToastContext();
 
-  const { isFetching, isLoading, isError, data } = useQuery(['getSubjectList', {}], () =>
-    fetchSubjectList()
-  );
+  const { isFetching, isLoading, isError, data } = usePortalSubjectAPI({});
 
   if (isError) {
     toast?.show({

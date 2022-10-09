@@ -4,7 +4,7 @@ import API from '@aws-amplify/api';
 import { Button } from 'primereact/button';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import JSONToTable from '../../../components/JSONToTable';
-import { S3Row, SubjectApiRes, usePortalSubjectAPI } from '../../../api/subject';
+import { S3Row, SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
 
 type Props = { subjectId: string };
 function SubjectGPLLaunch({ subjectId }: Props) {
@@ -33,7 +33,7 @@ function SubjectGPLLaunch({ subjectId }: Props) {
   }
 
   // Eligibility of GPL trigger check
-  const subjectApiQuery = usePortalSubjectAPI(subjectId);
+  const subjectApiQuery = usePortalSubjectDataAPI(subjectId);
   const subjectApiData: SubjectApiRes = subjectApiQuery.data;
   const gplLaunchCheckQuery = useQuery(['checkGPLTriggerAllow', subjectId], () =>
     checkGPLTriggerAllow(subjectApiData.results)

@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from 'primereact/button';
 import { useNavigate, Link } from 'react-router-dom';
-import API from '@aws-amplify/api';
-import { useQuery } from 'react-query';
 
 import DataTableWrapper, {
   PaginationProps,
@@ -11,16 +9,9 @@ import DataTableWrapper, {
   convertPaginationEventToDjangoQueryParams,
 } from '../../../components/DataTableWrapper';
 import { useToastContext } from '../../../providers/ToastProvider';
-import './index.css';
+import { usePortalSubjectAPI } from '../../../api/subject';
 
-const fetchS3SubjectList = async (params: { [key: string]: string | number }) => {
-  const APIConfig = {
-    queryStringParameters: {
-      ...params,
-    },
-  };
-  return await API.get('portal', '/subjects/', APIConfig);
-};
+import './index.css';
 
 function SubjectListTable() {
   const toast = useToastContext();
@@ -45,10 +36,11 @@ function SubjectListTable() {
     rowsPerPage: paginationProps.currentNumberOfRows,
   });
 
-  const { isFetching, isLoading, isError, data } = useQuery(
-    ['getSubjectList', apiQueryParameter],
-    () => fetchS3SubjectList(apiQueryParameter)
-  );
+  const { isFetching, isLoading, isError, data } = usePortalSubjectAPI({
+    queryStringParameters: {
+      ...apiQueryParameter,
+    },
+  });
 
   if (data && !isFetching && !isLoading) {
     subjectList = convertListOfSubjectToSubjectObject(data.results);

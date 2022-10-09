@@ -4,17 +4,12 @@ import { useQuery } from 'react-query';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
 import API from '@aws-amplify/api';
-
-const fetchSequenceList = async () => {
-  return await API.get('portal', '/sequence/', {});
-};
+import { usePortalSequenceAPI } from '../../../api/sequence';
 
 function SequenceHomeCard() {
   const toast = useToastContext();
 
-  const { isFetching, isLoading, isError, data } = useQuery(['getSequenceList', {}], () =>
-    fetchSequenceList()
-  );
+  const { isFetching, isLoading, isError, data } = usePortalSequenceAPI({});
 
   if (isError) {
     toast?.show({

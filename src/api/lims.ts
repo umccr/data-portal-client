@@ -3,7 +3,7 @@ import { useQuery } from 'react-query';
 import { DjangoRestApiResponse } from './utils';
 
 /**
- * Portal `/lims/{subjectId}` api
+ * Portal `/lims/` api
  */
 
 export type LimsRow = {
@@ -22,7 +22,7 @@ export type LimsRow = {
   phenotype: string;
 } & Record<string, string>;
 
-export type LimsApiRes = DjangoRestApiResponse & LimsRow;
+export type LimsApiRes = DjangoRestApiResponse & { results: LimsRow[] };
 
 export function usePortalLimsAPI(apiConfig: Record<string, any>) {
   return useQuery(

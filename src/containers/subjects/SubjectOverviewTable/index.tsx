@@ -6,7 +6,7 @@ import { useQuery } from 'react-query';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
 import JSONToTable from '../../../components/JSONToTable';
-import { usePortalSubjectAPI } from '../../../api/subject';
+import { usePortalSubjectDataAPI } from '../../../api/subject';
 
 const OVERVIEW_COLUMN = [
   'subject_id',
@@ -27,7 +27,7 @@ function SubjectOverviewTable(props: Props) {
 
   const toast = useToastContext();
 
-  const { isLoading, isError, data } = usePortalSubjectAPI(subjectId);
+  const { isLoading, isError, data } = usePortalSubjectDataAPI(subjectId);
 
   if (isLoading) {
     return <CircularLoaderWithText />;
