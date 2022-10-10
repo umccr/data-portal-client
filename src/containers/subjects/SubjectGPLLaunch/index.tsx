@@ -4,7 +4,8 @@ import API from '@aws-amplify/api';
 import { Button } from 'primereact/button';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import JSONToTable from '../../../components/JSONToTable';
-import { S3Row, SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
+import { SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
+import { S3Row } from '../../../api/s3';
 
 type Props = { subjectId: string };
 function SubjectGPLLaunch({ subjectId }: Props) {

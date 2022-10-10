@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
-import API from '@aws-amplify/api';
 import { ColumnProps } from 'primereact/column';
-
-import DataActionButton from '../../../components/DataActionButton';
 import moment from 'moment';
 
 // Custom component
+import DataActionButton from '../../../components/DataActionButton';
 import { useToastContext } from '../../../providers/ToastProvider';
 import DataTableWrapper, {
   PaginationProps,

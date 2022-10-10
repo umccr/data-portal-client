@@ -1,19 +1,9 @@
 import API from '@aws-amplify/api';
 import { useQuery } from 'react-query';
-
+import { S3Row } from './s3';
 /**
  * Portal `/subject/{subjectId}` api
  */
-
-export type S3Row = {
-  id: number;
-  bucket: string;
-  key: string;
-  size: number;
-  last_modified_date: string;
-  e_tag: string;
-  unique_hash: string;
-};
 
 export type GDSRow = {
   id: number;

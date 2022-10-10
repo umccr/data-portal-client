@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
-import API from '@aws-amplify/api';
 import { ColumnProps } from 'primereact/column';
 import moment from 'moment';
 
