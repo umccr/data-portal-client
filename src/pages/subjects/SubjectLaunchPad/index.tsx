@@ -32,7 +32,7 @@ function SubjectLaunchPad() {
           ) : (
             <></>
           )}
-          <div className='pt-2'>
+          <div className='pt-2 pr-5'>
             {/* What to trigger? */}
             {selectedKey == 'gpl' ? (
               <SubjectGPLLaunch />
