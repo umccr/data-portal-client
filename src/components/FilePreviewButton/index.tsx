@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import CircularLoaderWithText from '../CircularLoaderWithText';
 import ViewPresignedUrl, {
@@ -6,15 +6,14 @@ import ViewPresignedUrl, {
   HTML_FILETYPE_LIST,
   IMAGE_FILETYPE_LIST,
 } from '../ViewPresignedUrl';
-import { getGDSPreSignedUrl, getS3PreSignedUrl } from '../../utils/api';
+import { usePortalGDSPresignAPI } from '../../api/gds';
+import { usePortalS3PresignAPI } from '../../api/s3';
 
 type FilePreviewButtonProps = {
   filename: string;
   type: 's3' | 'gds';
   id: number;
   fileSizeInBytes: number;
-  presignedUrl?: string;
-  handleUpdateData?: (presignedUrl: string) => void;
 };
 
 export default function FilePreviewButton(props: FilePreviewButtonProps) {
@@ -77,37 +76,14 @@ type FilePreviewDialogProps = FilePreviewButtonProps & {
   handleDialogClose: () => void;
 };
 function FilePreviewDialog(props: FilePreviewDialogProps) {
-  const { filename, id, type, presignedUrl, handleUpdateData, handleDialogClose } = props;
+  const { filename, id, type, handleDialogClose } = props;
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [localPresignedUrl, setLocalPresignedUrl] = useState<string | undefined>(presignedUrl);
-  useEffect(() => {
-    let componentUnmount = false;
-    const fetchPresignedUrl = async () => {
-      setIsLoading(true);
-      let presignedUrl;
-      try {
-        if (type == 'gds') {
-          presignedUrl = await getGDSPreSignedUrl(id);
-        } else {
-          presignedUrl = await getS3PreSignedUrl(id);
-        }
-      } catch (error) {
-        setIsError(true);
-      }
-
-      if (componentUnmount) return;
-      if (handleUpdateData) handleUpdateData(presignedUrl);
-      setLocalPresignedUrl(presignedUrl);
-      setIsLoading(false);
-    };
-
-    if (!presignedUrl) fetchPresignedUrl();
-    return () => {
-      componentUnmount = true;
-    };
-  }, []);
+  let portalPresignedUrlRes;
+  if (type == 'gds') {
+    portalPresignedUrlRes = usePortalGDSPresignAPI(id);
+  } else {
+    portalPresignedUrlRes = usePortalS3PresignAPI(id);
+  }
 
   return (
     <Dialog
@@ -119,13 +95,13 @@ function FilePreviewDialog(props: FilePreviewDialogProps) {
       onHide={handleDialogClose}
       contentStyle={{ minHeight: '5rem', maxHeight: '75vh' }}
       contentClassName='relative p-0 surface-400 flex align-items-center justify-content-center'>
-      {localPresignedUrl ? (
+      {portalPresignedUrlRes.data ? (
         <div style={{ height: '75vh', width: '100%' }}>
-          <ViewPresignedUrl presingedUrl={localPresignedUrl} />
+          <ViewPresignedUrl presingedUrl={portalPresignedUrlRes.data.signed_url} />
         </div>
-      ) : isLoading ? (
+      ) : portalPresignedUrlRes.isLoading ? (
         <CircularLoaderWithText />
-      ) : isError ? (
+      ) : portalPresignedUrlRes.isError ? (
         <div className='pi pi-exclamation-triangle text-xl' />
       ) : (
         <div className='pi pi-exclamation-triangle text-xl' />

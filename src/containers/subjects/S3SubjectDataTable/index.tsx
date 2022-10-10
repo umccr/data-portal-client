@@ -110,10 +110,6 @@ function S3SubjectDataTable(props: Props) {
               filename={filename}
               type='s3'
               id={rowData.id}
-              presignedUrl={rowData.presigned_url}
-              handleUpdateData={(url: string) => {
-                rowData.presigned_url = url;
-              }}
             />
           );
         },

@@ -14,3 +14,18 @@ export function usePortalGDSAPI(apiConfig: Record<string, any>) {
     }
   );
 }
+
+export type PresignApiData = {
+  signed_url: string;
+  error?: string;
+} & Record<string, any>;
+export function usePortalGDSPresignAPI(gdsId?: string | number) {
+  return useQuery(
+    ['portal-gds-presign', gdsId],
+    async () => await API.get('portal', `/gds/${gdsId}/presign`, {}),
+    {
+      staleTime: 60 * 60 * 1000, // 1hour,
+      enabled: !!gdsId,
+    }
+  );
+}

@@ -113,10 +113,6 @@ function GDSSubjectDataTable(props: Props) {
               fileSizeInBytes={fileSizeInBytes}
               type='gds'
               id={rowData.id}
-              presignedUrl={rowData.presigned_url}
-              handleUpdateData={(url: string) => {
-                rowData.presigned_url = url;
-              }}
             />
           );
         },

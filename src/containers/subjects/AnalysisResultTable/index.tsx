@@ -48,17 +48,12 @@ const previewGDSTemplate = (rowData: Record<string, any>) => {
   const filename = rowData.path.split('/').pop();
   const fileSizeInBytes = rowData.size_in_bytes;
 
-  const cachePresignedUrl = (url: string) => {
-    rowData['presigned_url'] = url;
-  };
-
   return (
     <FilePreviewButton
       id={rowData.id}
       filename={filename}
       fileSizeInBytes={fileSizeInBytes}
       type='gds'
-      handleUpdateData={cachePresignedUrl}
     />
   );
 };
@@ -67,17 +62,12 @@ const previewS3Template = (rowData: Record<string, any>) => {
   const filename = rowData.key.split('/').pop();
   const fileSizeInBytes = rowData.size;
 
-  const cachePresignedUrl = (url: string) => {
-    rowData['presigned_url'] = url;
-  };
-
   return (
     <FilePreviewButton
       fileSizeInBytes={fileSizeInBytes}
       id={rowData.id}
       filename={filename}
       type='s3'
-      handleUpdateData={cachePresignedUrl}
     />
   );
 };
