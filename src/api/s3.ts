@@ -41,3 +41,11 @@ export function usePortalS3PresignAPI(s3Id?: string | number) {
     }
   );
 }
+
+export async function getS3PreSignedUrl(id: number) {
+  const { error, signed_url } = await API.get('portal', `/s3/${id}/presign`, {});
+  if (error) {
+    throw Error('Unable to fetch get presigned url.');
+  }
+  return signed_url;
+}
