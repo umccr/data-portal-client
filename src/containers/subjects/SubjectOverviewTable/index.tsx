@@ -1,6 +1,4 @@
 import React from 'react';
-import API from '@aws-amplify/api';
-import { useQuery } from 'react-query';
 
 // Custom component
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';

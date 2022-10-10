@@ -37,8 +37,12 @@ function SubjectGPLLaunch({ subjectId }: Props) {
   const subjectApiQuery = usePortalSubjectDataAPI(subjectId);
   const subjectApiData: SubjectApiRes = subjectApiQuery.data;
 
-  const gplLaunchCheckQuery = useQuery(['checkGPLTriggerAllow', subjectId], () =>
-    checkGPLTriggerAllow(subjectApiData.results)
+  const gplLaunchCheckQuery = useQuery(
+    ['checkGPLTriggerAllow', subjectId],
+    async () => await checkGPLTriggerAllow(subjectApiData.results),
+    {
+      enabled: !!subjectApiData,
+    }
   );
   const gplLaunchCheckData: GplLaunchCheckType | undefined = gplLaunchCheckQuery.data;
 
@@ -153,7 +157,6 @@ async function checkGPLTriggerAllow(s3Results: S3Row[]): Promise<GplLaunchCheckT
   const id = wgsBams.sort((a, b) => b - a)[0]; // detect at least one wgs bam has already frozen
 
   const s3IdStatus = await getS3Status(id);
-
   if (s3IdStatus == S3StatusData.ERROR) {
     gplCheck.isGplLaunchAllowed = false;
     gplCheck.message = 'An error has occured on checking S3 Data.';

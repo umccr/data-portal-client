@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import API from '@aws-amplify/api';
-import { useQuery } from 'react-query';
 import { ColumnProps } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';

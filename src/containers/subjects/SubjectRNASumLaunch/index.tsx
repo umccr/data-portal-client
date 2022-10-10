@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
 import API from '@aws-amplify/api';
+import { useQuery } from 'react-query';
 import { Button } from 'primereact/button';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { Dropdown } from 'primereact/dropdown';
 import DataTableWrapper from '../../../components/DataTableWrapper';
-
 import { InputSwitch } from 'primereact/inputswitch';
 import './index.css';
 import {
