@@ -5,7 +5,7 @@ import { Button } from 'primereact/button';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import JSONToTable from '../../../components/JSONToTable';
 import { SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
-import { S3Row } from '../../../api/s3';
+import { getS3Status, S3Row, S3StatusData } from '../../../api/s3';
 
 type Props = { subjectId: string };
 function SubjectGPLLaunch({ subjectId }: Props) {
@@ -36,6 +36,7 @@ function SubjectGPLLaunch({ subjectId }: Props) {
   // Eligibility of GPL trigger check
   const subjectApiQuery = usePortalSubjectDataAPI(subjectId);
   const subjectApiData: SubjectApiRes = subjectApiQuery.data;
+
   const gplLaunchCheckQuery = useQuery(['checkGPLTriggerAllow', subjectId], () =>
     checkGPLTriggerAllow(subjectApiData.results)
   );
@@ -150,40 +151,35 @@ async function checkGPLTriggerAllow(s3Results: S3Row[]): Promise<GplLaunchCheckT
   }
 
   const id = wgsBams.sort((a, b) => b - a)[0]; // detect at least one wgs bam has already frozen
-  const data = await API.get('portal', `/s3/${id}/status`, {});
-  const { head_object } = data;
-  const archived = head_object['StorageClass'] === 'DEEP_ARCHIVE';
 
-  if (archived) {
-    const restoreStatus = head_object['Restore'];
-    if (restoreStatus) {
-      const isOngoingRequest = restoreStatus.includes('true');
-      if (isOngoingRequest) {
-        // bam restore is still in-progress, don't launch
-        gplCheck.isGplLaunchAllowed = false;
-        gplCheck.message = 'Subject WGS BAMs are restoring in progress';
-        return gplCheck;
-      } else {
-        const expiryChunk = restoreStatus.slice(25);
-        if (!isOngoingRequest && expiryChunk) {
-          const expiryDateStr = expiryChunk.split('=')[1];
-          const expiryDate = Date.parse(expiryDateStr);
-          const expired = expiryDate < Date.now();
-          if (expired) {
-            gplCheck.isGplLaunchAllowed = false;
-            gplCheck.message =
-              'Restoration have expired. Please restore both tumor and normal BAMs.';
-            return gplCheck;
-          }
-        }
-      }
-    } else {
-      // deep archived and no restore status has happened yet, don't launch
-      gplCheck.isGplLaunchAllowed = false;
-      gplCheck.message =
-        'Subject WGS BAMs are archived. Please restore both tumor and normal BAMs.';
-      return gplCheck;
-    }
+  const s3IdStatus = await getS3Status(id);
+
+  if (s3IdStatus == S3StatusData.ERROR) {
+    gplCheck.isGplLaunchAllowed = false;
+    gplCheck.message = 'An error has occured on checking S3 Data.';
+    return gplCheck;
+  }
+
+  if (s3IdStatus == S3StatusData.ARCHIVED) {
+    gplCheck.isGplLaunchAllowed = false;
+    gplCheck.message = 'Subject WGS BAMs are archived. Please restore both tumor and normal BAMs.';
+    return gplCheck;
+  }
+
+  if (s3IdStatus == S3StatusData.RESTORING) {
+    gplCheck.isGplLaunchAllowed = false;
+    gplCheck.message = 'Subject WGS BAMs are restoring in progress.';
+    return gplCheck;
+  }
+
+  if (s3IdStatus == S3StatusData.EXPIRED) {
+    gplCheck.isGplLaunchAllowed = false;
+    gplCheck.message = 'Restoration have expired. Please restore both tumor and normal BAMs.';
+    return gplCheck;
+  }
+
+  if (s3IdStatus == S3StatusData.AVAILABLE) {
+    return gplCheck;
   }
 
   return gplCheck;
