@@ -15,6 +15,7 @@ import DataTableWrapper, {
 import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import DataActionButton from '../../../components/DataActionButton';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 
 const fetchS3SubjectData = async (
   subjectId: string,
@@ -164,13 +165,20 @@ function S3SubjectDataTable(props: Props) {
   }
 
   return (
-    <DataTableWrapper
-      isLoading={isFetching}
-      columns={columnList}
-      dataTableValue={subjectDataList}
-      paginationProps={paginationProps}
-      handlePaginationPropsChange={handleTablePaginationPropChange}
-    />
+    <>
+      <div className={isFetching || isLoading ? '' : 'hidden'}>
+        <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
+      </div>
+      <div className={isFetching || isLoading ? 'hidden' : ''}>
+        <DataTableWrapper
+          isLoading={isFetching}
+          columns={columnList}
+          dataTableValue={subjectDataList}
+          paginationProps={paginationProps}
+          handlePaginationPropsChange={handleTablePaginationPropChange}
+        />
+      </div>
+    </>
   );
 }
 
