@@ -5,6 +5,14 @@ import { useQuery } from 'react-query';
  * Portal `/gds/` api
  */
 
+export type GDSRow = {
+  id: number;
+  path: string;
+  time_modified: string;
+  size_in_bytes: number;
+  volume_name: string;
+} & Record<string, string | number | boolean | null>;
+
 export function usePortalGDSAPI(apiConfig: Record<string, any>) {
   return useQuery(
     ['portal-gds', apiConfig],
@@ -37,3 +45,15 @@ export async function getGDSPreSignedUrl(id: number) {
   }
   return signed_url;
 }
+/**
+ * Helper function
+ */
+export const constructGDSUrl = ({
+  volume_name,
+  path,
+}: {
+  volume_name: string;
+  path: string;
+}): string => {
+  return 'gds://' + volume_name + path;
+};

@@ -1,17 +1,10 @@
 import API from '@aws-amplify/api';
 import { useQuery } from 'react-query';
 import { S3Row } from './s3';
+import { GDSRow } from './gds';
 /**
  * Portal `/subject/{subjectId}` api
  */
-
-export type GDSRow = {
-  id: number;
-  path: string;
-  time_modified: string;
-  size_in_bytes: number;
-  volume_name: string;
-} & Record<string, string | number | boolean | null>;
 
 export type SubjectApiRes = {
   id: string;
@@ -39,21 +32,3 @@ export function usePortalSubjectAPI(apiConfig: Record<string, any>) {
     }
   );
 }
-
-/**
- * utils
- */
-
-export const getBaseNameFromKey = (key: string) => {
-  return key.split('/')[key.split('/').length - 1];
-};
-
-export const constructGDSUrl = ({
-  volume_name,
-  path,
-}: {
-  volume_name: string;
-  path: string;
-}): string => {
-  return 'gds://' + volume_name + path;
-};

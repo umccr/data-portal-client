@@ -6,14 +6,12 @@ import { Dialog } from 'primereact/dialog';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { getStringReadableBytes } from '../../../utils/util';
-import { S3Row, GDSRow } from '../../../API/subject';
+import { GDSRow } from '../../../api/gds';
+import { S3Row } from '../../../api/s3';
 import moment from 'moment';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { LoadSubjectDataType } from '.';
-
-const fetchSubjectInformation = async (subjectId: string) => {
-  return await API.get('portal', `/subjects/${subjectId}/`, {});
-};
+import { usePortalSubjectDataAPI } from '../../../api/subject';
 
 type Props = {
   subjectId: string;
@@ -38,10 +36,7 @@ function LoadSubjectDataButton({
   };
 
   // Fetch existing subject data (will be move out and cache elsewhere)
-  const { isLoading, isError, data } = useQuery(['fetchSubjectInformation', subjectId], () =>
-    fetchSubjectInformation(subjectId)
-  );
-
+  const { isLoading, isError, data } = usePortalSubjectDataAPI(subjectId);
   if (isError) {
     // Activate alert
     console.log('temp alert');

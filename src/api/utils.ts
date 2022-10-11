@@ -7,3 +7,7 @@ export type DjangoRestApiResponse = {
   };
   results: unknown[];
 };
+
+export const getBaseNameFromKey = (key: string) => {
+  return key.split('/')[key.split('/').length - 1];
+};
