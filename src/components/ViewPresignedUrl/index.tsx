@@ -52,110 +52,115 @@ function ViewPresignedUrl({ presingedUrl }: Props) {
 
   // Download data if needed be
   const isDownloadable = ![...IMAGE_FILETYPE_LIST, ...HTML_FILETYPE_LIST].includes(filetype);
-  const { isFetching, isLoading, isError, data } = useQuery(
-    ['getPresignedContent', presingedUrl],
-    () => getPreSignedUrlData(presingedUrl),
-    { enabled: isDownloadable }
-  );
 
-  if (isLoading || isFetching || !data) {
-    return <CircularLoaderWithText />;
-  }
-
-  if (isError) {
-    toast?.show({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to load presignedUrl content.',
-      life: 3000,
-    });
-  }
-
-  if (IMAGE_FILETYPE_LIST.includes(filetype)) {
-    return (
-      <img
-        style={{
-          maxHeight: '100%',
-          maxWidth: '100%',
-          backgroundColor: 'white',
-          padding: '1px',
-        }}
-        onClick={() => window.open(presingedUrl, '_blank')}
-        src={presingedUrl}
-      />
-    );
-  }
-
-  if (HTML_FILETYPE_LIST.includes(filetype)) {
-    return (
-      <iframe
-        src={presingedUrl}
-        style={{
-          height: '100%',
-          maxWidth: '100%',
-          backgroundColor: 'white',
-          padding: '1px',
-          position: 'absolute',
-          left: 0,
-          width: '100%',
-        }}
-      />
-    );
-  }
-
-  if (filetype == 'json') {
-    const cssTheme = {
-      main: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
-      error: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
-      key: 'color:#a21515;',
-      string: 'color:#0551a5;',
-      value: 'color:#0b8658;',
-      boolean: 'color:#0551a5;',
-    };
-
-    // Sanitize if JSON is
-    try {
-      const JSONParse = JSON.parse(data);
+  if (!isDownloadable) {
+    if (IMAGE_FILETYPE_LIST.includes(filetype)) {
       return (
-        <JSONPretty
-          id='json-pretty'
-          data={JSONParse}
-          theme={cssTheme}
+        <img
           style={{
-            borderRadius: '5px',
+            maxHeight: '100%',
+            maxWidth: '100%',
+            backgroundColor: 'white',
+            padding: '1px',
+          }}
+          onClick={() => window.open(presingedUrl, '_blank')}
+          src={presingedUrl}
+        />
+      );
+    }
+
+    if (HTML_FILETYPE_LIST.includes(filetype)) {
+      return (
+        <iframe
+          src={presingedUrl}
+          style={{
+            height: '100%',
+            maxWidth: '100%',
+            backgroundColor: 'white',
+            padding: '1px',
+            position: 'absolute',
+            left: 0,
             width: '100%',
-            minWidth: '100%',
           }}
         />
       );
-    } catch (err) {
+    }
+  } else {
+    const { isFetching, isLoading, isError, data } = useQuery(
+      ['getPresignedContent', presingedUrl],
+      () => getPreSignedUrlData(presingedUrl),
+      { enabled: isDownloadable }
+    );
+
+    if (isLoading || isFetching || !data) {
+      return <CircularLoaderWithText text='Fetching Content' />;
+    }
+
+    if (isError) {
+      toast?.show({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to load presignedUrl content.',
+        life: 3000,
+      });
+    }
+
+    if (filetype == 'json') {
+      const cssTheme = {
+        main: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
+        error: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
+        key: 'color:#a21515;',
+        string: 'color:#0551a5;',
+        value: 'color:#0b8658;',
+        boolean: 'color:#0551a5;',
+      };
+
+      // Sanitize if JSON is
+      try {
+        const JSONParse = JSON.parse(data);
+        return (
+          <JSONPretty
+            id='json-pretty'
+            data={JSONParse}
+            theme={cssTheme}
+            style={{
+              borderRadius: '5px',
+              width: '100%',
+              minWidth: '100%',
+            }}
+          />
+        );
+      } catch (err) {
+        return (
+          <div>
+            <p>ERROR</p>
+          </div>
+        );
+      }
+    }
+
+    if (
+      [...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST, ...PLAIN_FILETYPE_LIST, 'yaml'].includes(
+        filetype
+      )
+    ) {
       return (
-        <div>
-          <p>ERROR</p>
+        <div style={{ maxHeight: '80vh', maxWidth: '100%', margin: '1rem' }}>
+          <pre
+            style={{
+              minWidth: '50vw',
+              display: 'inline-block',
+              borderRadius: '5px',
+              border: '1px solid black',
+              backgroundColor: 'white',
+              padding: '1rem',
+              margin: 0,
+            }}>
+            {data}
+          </pre>
         </div>
       );
     }
-  }
-
-  if (
-    [...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST, ...PLAIN_FILETYPE_LIST, 'yaml'].includes(filetype)
-  ) {
-    return (
-      <div style={{ maxHeight: '80vh', maxWidth: '100%', margin: '1rem' }}>
-        <pre
-          style={{
-            minWidth: '50vw',
-            display: 'inline-block',
-            borderRadius: '5px',
-            border: '1px solid black',
-            backgroundColor: 'white',
-            padding: '1rem',
-            margin: 0,
-          }}>
-          {data}
-        </pre>
-      </div>
-    );
   }
 
   return <div>Cannot display file</div>;

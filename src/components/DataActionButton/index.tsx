@@ -8,7 +8,8 @@ import { Column } from 'primereact/column';
 import { useQuery } from 'react-query';
 import moment from 'moment';
 
-import { getS3PreSignedUrl, getGDSPreSignedUrl } from '../../utils/api';
+import { getS3PreSignedUrl } from '../../api/s3';
+import { getGDSPreSignedUrl } from '../../api/gds';
 import { parseUrlParams } from '../../utils/util';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';

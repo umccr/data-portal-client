@@ -1,7 +1,6 @@
 import React from 'react';
 import moment from 'moment';
 import API from '@aws-amplify/api';
-import { useQuery } from 'react-query';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -9,6 +8,7 @@ import { getStringReadableBytes } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import DataActionButton from '../../../components/DataActionButton';
+import { usePortalSubjectDataAPI } from '../../../api/subject';
 
 // Creating Table
 type AnalysisResultGDSTableProps = {
@@ -48,17 +48,12 @@ const previewGDSTemplate = (rowData: Record<string, any>) => {
   const filename = rowData.path.split('/').pop();
   const fileSizeInBytes = rowData.size_in_bytes;
 
-  const cachePresignedUrl = (url: string) => {
-    rowData['presigned_url'] = url;
-  };
-
   return (
     <FilePreviewButton
       id={rowData.id}
       filename={filename}
       fileSizeInBytes={fileSizeInBytes}
       type='gds'
-      handleUpdateData={cachePresignedUrl}
     />
   );
 };
@@ -67,17 +62,12 @@ const previewS3Template = (rowData: Record<string, any>) => {
   const filename = rowData.key.split('/').pop();
   const fileSizeInBytes = rowData.size;
 
-  const cachePresignedUrl = (url: string) => {
-    rowData['presigned_url'] = url;
-  };
-
   return (
     <FilePreviewButton
       fileSizeInBytes={fileSizeInBytes}
       id={rowData.id}
       filename={filename}
       type='s3'
-      handleUpdateData={cachePresignedUrl}
     />
   );
 };
@@ -123,17 +113,10 @@ function AnalysisResultS3Table(prop: AnalysisResultGDSTableProps) {
   );
 }
 
-// API Functions
-async function fetchSubjectData(subjectId: string) {
-  return await API.get('portal', `/subjects/${subjectId}`, {});
-}
-
 type Props = { subjectId: string };
 
 function AnalysisResultsPanel({ subjectId }: Props) {
-  const { isFetching, isLoading, data } = useQuery('getSubjectData', () =>
-    fetchSubjectData(subjectId)
-  );
+  const { isFetching, isLoading, data } = usePortalSubjectDataAPI(subjectId);
 
   if (isLoading || isFetching) {
     return <CircularLoaderWithText />;

@@ -5,17 +5,12 @@ import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
 import API from '@aws-amplify/api';
 import { Link } from 'react-router-dom';
-
-const fetchMetadataList = async () => {
-  return await API.get('portal', '/metadata/', {});
-};
+import { usePortalMetadataAPI } from '../../../api/metadata';
 
 function MetadataHomeCard() {
   const toast = useToastContext();
 
-  const { isFetching, isLoading, isError, data } = useQuery(['getMetadataList', {}], () =>
-    fetchMetadataList()
-  );
+  const { isFetching, isLoading, isError, data } = usePortalMetadataAPI({});
 
   if (isError) {
     toast?.show({

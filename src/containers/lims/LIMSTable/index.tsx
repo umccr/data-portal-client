@@ -18,15 +18,7 @@ import DataTableWrapper, {
   InfoDialogColumnProps,
   convertDjangoSortParamToDataTableProp,
 } from '../../../components/DataTableWrapper';
-
-const fetchLIMSList = async (params: { [key: string]: string | number }) => {
-  const APIConfig = {
-    queryStringParameters: {
-      ...params,
-    },
-  };
-  return await API.get('portal', `/lims/`, APIConfig);
-};
+import { usePortalLimsAPI } from '../../../api/lims';
 
 function LIMSTable() {
   const toast = useToastContext();
@@ -55,10 +47,11 @@ function LIMSTable() {
   // Data states
   type ObjKeyType = { [key: string]: string | number };
   let limsDataList: ObjKeyType[] = [];
-  const { isFetching, isLoading, isError, data } = useQuery(
-    ['getLIMSList', apiQueryParameter],
-    () => fetchLIMSList(apiQueryParameter)
-  );
+  const { isFetching, isLoading, isError, data } = usePortalLimsAPI({
+    queryStringParameters: {
+      ...apiQueryParameter,
+    },
+  });
 
   if (isError) {
     toast?.show({
