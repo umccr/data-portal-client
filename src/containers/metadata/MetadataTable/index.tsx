@@ -18,17 +18,8 @@ import DataTableWrapper, {
   InfoDialogColumnProps,
   convertDjangoSortParamToDataTableProp,
 } from '../../../components/DataTableWrapper';
-
+import { usePortalMetadataAPI } from '../../../api/metadata';
 import './index.css';
-
-const fetchMetadataList = async (params: { [key: string]: string | number }) => {
-  const APIConfig = {
-    queryStringParameters: {
-      ...params,
-    },
-  };
-  return await API.get('portal', `/metadata/`, APIConfig);
-};
 
 function MetadataTable() {
   const toast = useToastContext();
@@ -57,10 +48,11 @@ function MetadataTable() {
   // Data states
   type ObjKeyType = { [key: string]: string | number };
   let metadataDataList: ObjKeyType[] = [];
-  const { isFetching, isLoading, isError, data } = useQuery(
-    ['getMetadataList', apiQueryParameter],
-    () => fetchMetadataList(apiQueryParameter)
-  );
+  const { isFetching, isLoading, isError, data } = usePortalMetadataAPI({
+    queryStringParameters: {
+      ...apiQueryParameter,
+    },
+  });
 
   if (isError) {
     toast?.show({

@@ -7,7 +7,9 @@ import { Button } from 'primereact/button';
 import { Dropdown, DropdownChangeParams } from 'primereact/dropdown';
 import { Toolbar } from 'primereact/toolbar';
 import LoadSubjectDataButton from './LoadSubjectDataButton';
-import { S3Row, GDSRow, getBaseNameFromKey } from '../../../API/subject';
+import { getBaseNameFromKey } from '../../../api/utils';
+import { GDSRow } from '../../../api/gds';
+import { S3Row } from '../../../api/s3';
 import {
   initIgv,
   convertGdsRowToIgvTrack,

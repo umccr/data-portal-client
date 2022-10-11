@@ -35,7 +35,7 @@ function SubjectLaunchPad() {
           <div className='pt-2'>
             {/* What to trigger? */}
             {selectedKey == 'gpl' ? (
-              <SubjectGPLLaunch />
+              <SubjectGPLLaunch subjectId={subjectId} />
             ) : selectedKey == 'rna-sum' ? (
               <SubjectRNASumLaunch subjectId={subjectId} />
             ) : (

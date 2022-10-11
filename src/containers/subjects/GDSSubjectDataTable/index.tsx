@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
-import API from '@aws-amplify/api';
 import { ColumnProps } from 'primereact/column';
-
-import DataActionButton from '../../../components/DataActionButton';
 import moment from 'moment';
 
 // Custom component
+import DataActionButton from '../../../components/DataActionButton';
 import { useToastContext } from '../../../providers/ToastProvider';
 import DataTableWrapper, {
   PaginationProps,
@@ -16,19 +13,7 @@ import DataTableWrapper, {
 } from '../../../components/DataTableWrapper';
 import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
-
-const fetchGDSSubjectData = async (
-  subjectId: string,
-  params: { [key: string]: string | number }
-) => {
-  const APIConfig = {
-    queryStringParameters: {
-      subject: subjectId,
-      ...params,
-    },
-  };
-  return await API.get('portal', `/gds/`, APIConfig);
-};
+import { usePortalGDSAPI } from '../../../api/gds';
 
 type ObjectStringValType = { id: number } & { [key: string]: string };
 type Props = { subjectId: string };
@@ -56,10 +41,12 @@ function GDSSubjectDataTable(props: Props) {
   type ObjKeyType = { [key: string]: string | number };
   let subjectDataList: ObjKeyType[] = [];
 
-  const { isFetching, isLoading, isError, data } = useQuery(
-    ['getGDSSubjectData', apiQueryParameter],
-    () => fetchGDSSubjectData(subjectId, apiQueryParameter)
-  );
+  const { isFetching, isLoading, isError, data } = usePortalGDSAPI({
+    queryStringParameters: {
+      subject: subjectId,
+      ...apiQueryParameter,
+    },
+  });
 
   if (isError) {
     toast?.show({
@@ -126,10 +113,6 @@ function GDSSubjectDataTable(props: Props) {
               fileSizeInBytes={fileSizeInBytes}
               type='gds'
               id={rowData.id}
-              presignedUrl={rowData.presigned_url}
-              handleUpdateData={(url: string) => {
-                rowData.presigned_url = url;
-              }}
             />
           );
         },

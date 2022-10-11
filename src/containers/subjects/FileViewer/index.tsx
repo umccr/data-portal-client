@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-import API from '@aws-amplify/api';
 import { Card } from 'primereact/card';
 import { Dropdown } from 'primereact/dropdown';
 import { Splitter, SplitterPanel } from 'primereact/splitter';
@@ -10,6 +9,13 @@ import './index.css';
 import { useToastContext } from '../../../providers/ToastProvider';
 import ViewPresignedUrl from '../../../components/ViewPresignedUrl';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
+import {
+  usePortalS3API,
+  S3ApiData,
+  S3Row,
+  usePortalS3PresignAPI,
+  PresignApiData,
+} from '../../../api/s3';
 
 // CONSTANT
 type pipelineOptionType = {
@@ -46,40 +52,6 @@ const PIPELINE_OPTIONS_LIST: pipelineOptionType[] = [
   ...UMCCRISED_PIPELINE_OPTIONS,
 ];
 
-// API Functions
-const fetchFileListInit = async (subjectId: string, regexKey: string) => {
-  const APIConfig = {
-    queryStringParameters: {
-      subject: subjectId,
-      search: regexKey,
-      rowsPerPage: 25,
-      ordering: 'key',
-    },
-  };
-  return await API.get('portal', `/s3/`, APIConfig);
-};
-
-const fetchS3FileFromURL = async (url: string) => {
-  const queryString = url.split('?').pop();
-  return await API.get('portal', `/s3?${queryString}`, {});
-};
-
-async function getPreSignedUrl(id: number) {
-  const { error, signed_url } = await API.get('portal', `/s3/${id}/presign`, {});
-  if (error) {
-    throw Error('Unable to fetch get presigned url.');
-  }
-  return signed_url;
-}
-
-// Types
-
-interface FileMetadata extends Record<string, string | number> {
-  id: number;
-  key: string;
-  presignedUrl: string;
-}
-
 type Props = { subjectId: string };
 function FileViewer({ subjectId }: Props) {
   const toast = useToastContext();
@@ -87,113 +59,57 @@ function FileViewer({ subjectId }: Props) {
   const [selectedFilter, setSelectedFilter] =
     useState<pipelineOptionType>(DEFAULT_PIPELINE_OPTIONS);
 
-  // Current selected File
-  const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [selectedFile, setSelectedFile] = useState<S3Row | null>(null);
+  const [fileList, setFileList] = useState<S3Row[]>([]);
 
-  // Fetching URL
-  const [isFetchingPresignedUrl, setIsFetchingPresignedUrl] = useState<boolean>(true);
+  const [apiQueryParameter, setApiQueryParameter] = useState<
+    Record<string, string | number | null>
+  >({
+    subject: subjectId,
+    search: selectedFilter.regexKey,
+    rowsPerPage: 25,
+    ordering: 'key',
+  });
 
-  // Isloading for fetching list
-  const [isFetchingFileListLoading, setIsFetchingFileListLoading] = useState<boolean>(true);
-  const [fileList, setFileList] = useState<FileMetadata[]>([]);
-  const [nextQueryURLString, setNextQueryURLString] = useState<string | null>(null);
-  const [isPaginationLoading, setIsPaginationLoading] = useState<boolean>(false);
+  const s3QueryRes = usePortalS3API({
+    queryStringParameters: { ...apiQueryParameter },
+  });
+  const s3Data: S3ApiData = s3QueryRes.data;
 
-  // API CALLS
+  if (s3QueryRes.isError) {
+    toast?.show({
+      severity: 'error',
+      summary: 'Something went wrong!',
+      detail: 'Unable to fetch data from Portal API',
+      life: 3000,
+    });
+  }
+
   useEffect(() => {
     let componentUnmount = false;
-    const fetchInitData = async () => {
-      setIsFetchingFileListLoading(true);
-      // Build API-config
-      let apiResponse;
-      try {
-        apiResponse = await fetchFileListInit(subjectId, selectedFilter.regexKey);
-      } catch (er) {
-        toast?.show({
-          severity: 'error',
-          summary: 'Something went wrong!',
-          detail: 'Unable to fetch data from Portal API',
-          life: 3000,
-        });
-        apiResponse = {
-          results: [],
-          apiResponse: '',
-        };
+    if (s3Data) {
+      const dataResults = s3Data.results;
+      setFileList((prev) => [...prev, ...dataResults]);
+      if (dataResults.length > 0 && !selectedFile) {
+        setSelectedFile(dataResults[0]);
       }
-      if (componentUnmount) return;
-
-      setFileList(apiResponse['results']);
-      setNextQueryURLString(apiResponse['links']['next']);
-      if (apiResponse['results'].length > 0) setSelectedFile(apiResponse['results'][0]);
-      setIsFetchingFileListLoading(false);
-    };
-
-    fetchInitData();
+    }
+    if (componentUnmount) return;
     return () => {
       componentUnmount = true;
     };
-  }, [selectedFilter]);
+  }, [s3Data]);
 
-  const paginateNext = async () => {
-    if (nextQueryURLString) {
-      setIsPaginationLoading(true);
-      try {
-        const apiResponse = await fetchS3FileFromURL(nextQueryURLString);
-        const mergedList = [...fileList, ...apiResponse['results']];
-        setFileList(mergedList);
-        setNextQueryURLString(apiResponse['links']['next']);
-      } catch (er) {
-        toast?.show({
-          severity: 'error',
-          summary: 'Something went wrong!',
-          detail: 'Unable paginate more data from Portal API',
-          life: 3000,
-        });
-      }
+  const fetchPresignedRes = usePortalS3PresignAPI(selectedFile?.id);
+  const fetchPresignedData: PresignApiData | undefined = fetchPresignedRes.data;
 
-      setIsPaginationLoading(false);
+  const paginateNext = () => {
+    const nextLink = s3Data.links.next;
+    if (nextLink) {
+      const searchParamsObj = new URLSearchParams(nextLink);
+      setApiQueryParameter(Object.fromEntries(searchParamsObj));
     }
   };
-
-  useEffect(() => {
-    let componentUnmount = false;
-    setIsFetchingPresignedUrl(true);
-
-    const fetchPresignedUrl = async (id: number) => {
-      try {
-        let newSelectedFile;
-        const signed_url: string = await getPreSignedUrl(id);
-
-        if (componentUnmount) return;
-        const newState = [...fileList];
-
-        for (const item of newState) {
-          if (item.id === id) {
-            item['presingedUrl'] = signed_url;
-            newSelectedFile = item;
-          }
-        }
-        setFileList(newState);
-        if (newSelectedFile) setSelectedFile(newSelectedFile);
-        setIsFetchingPresignedUrl(false);
-      } catch (e) {
-        if (componentUnmount) return;
-        toast?.show({
-          severity: 'error',
-          summary: 'Something went wrong!',
-          detail: 'Unable to fetch presign URL',
-          life: 3000,
-        });
-        return;
-      }
-    };
-    if (selectedFile && !selectedFile.presingedUrl) {
-      fetchPresignedUrl(selectedFile.id);
-    }
-    return () => {
-      componentUnmount = true;
-    };
-  }, [selectedFile]);
 
   return (
     <Card
@@ -210,7 +126,7 @@ function FileViewer({ subjectId }: Props) {
         />
       </div>
       <div id='body-display' className='mt-5 h-full'>
-        {isFetchingFileListLoading ? (
+        {fileList.length == 0 && s3QueryRes.isLoading ? (
           <CircularLoaderWithText />
         ) : fileList.length == 0 ? (
           <div className='flex align-items-center justify-content-center'>No Data</div>
@@ -236,13 +152,13 @@ function FileViewer({ subjectId }: Props) {
                   );
                 })}
 
-                {isPaginationLoading ? (
+                {fileList.length > 0 && s3QueryRes.isLoading ? (
                   <div
                     style={{ height: '3rem' }}
                     className='surface-100 flex align-items-center justify-content-center'>
                     <ProgressSpinner style={{ width: '2rem', height: '2rem' }} />
                   </div>
-                ) : nextQueryURLString ? (
+                ) : s3Data?.links.next ? (
                   <div
                     onClick={paginateNext}
                     className='surface-100 cursor-pointer flex align-items-center justify-content-center p-2 cursor-pointer'>
@@ -255,16 +171,16 @@ function FileViewer({ subjectId }: Props) {
               </div>
             </SplitterPanel>
             <SplitterPanel className='flex align-items-center justify-content-center'>
-              {isFetchingPresignedUrl ? (
+              {fetchPresignedRes.isLoading ? (
                 <CircularLoaderWithText />
-              ) : selectedFile.presingedUrl ? (
+              ) : fetchPresignedData?.signed_url ? (
                 <div className='flex align-items-center justify-content-cente relative h-full w-full'>
-                  <ViewPresignedUrl presingedUrl={selectedFile.presingedUrl} />
+                  <ViewPresignedUrl presingedUrl={fetchPresignedData?.signed_url} />
                 </div>
-              ) : selectedFile.size > 60000000 ? (
+              ) : fetchPresignedData?.signed_url && selectedFile && selectedFile.size > 60000000 ? (
                 <div
                   className='flex align-items-center justify-content-cente relative h-full w-full cursor-pointer'
-                  onClick={() => window.open(selectedFile.presigned_url, '_blank')}>
+                  onClick={() => window.open(fetchPresignedData?.signed_url, '_blank')}>
                   <div>FileSize exceed 60MB. Click here to open in a new tab.</div>
                 </div>
               ) : (
