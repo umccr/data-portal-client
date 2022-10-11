@@ -151,13 +151,20 @@ function GDSSubjectDataTable(props: Props) {
   }
 
   return (
-    <DataTableWrapper
-      isLoading={isFetching}
-      columns={columnList}
-      dataTableValue={subjectDataList}
-      paginationProps={paginationProps}
-      handlePaginationPropsChange={handleTablePaginationPropChange}
-    />
+    <>
+      <div className={isFetching || isLoading ? '' : 'hidden'}>
+        <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
+      </div>
+      <div className={isFetching || isLoading ? 'hidden' : ''}>
+        <DataTableWrapper
+          isLoading={isFetching}
+          columns={columnList}
+          dataTableValue={subjectDataList}
+          paginationProps={paginationProps}
+          handlePaginationPropsChange={handleTablePaginationPropChange}
+        />
+      </div>
+    </>
   );
 }
 

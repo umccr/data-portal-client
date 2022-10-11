@@ -59,7 +59,7 @@ function SubjectListTable() {
   // Column Templates
   const SubjectTemplate = (rowData: subjectObjectList) => {
     return (
-      <Link to={`${rowData.subject}`} className='w-2 text-center text-color'>
+      <Link to={`${rowData.subject}/overview`} className='w-2 text-center text-color'>
         {rowData.subject}
       </Link>
     );
@@ -81,7 +81,7 @@ function SubjectListTable() {
         icon='pi pi-file '
         className='p-button-rounded p-button-secondary p-button-text'
         aria-label='File'
-        onClick={() => navigate(`${rowData.subject}/files`)}
+        onClick={() => navigate(`${rowData.subject}/file-viewer`)}
       />
     );
   };
@@ -92,7 +92,7 @@ function SubjectListTable() {
         icon='pi pi-chevron-circle-right'
         className='p-button-rounded p-button-secondary p-button-text'
         aria-label='Bookmark'
-        onClick={() => navigate(`${rowData.subject}/launch`)}
+        onClick={() => navigate(`${rowData.subject}/launch-pad`)}
       />
     );
   };
