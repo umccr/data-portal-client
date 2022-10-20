@@ -71,13 +71,15 @@ oauth_redirect_out_local=$(aws ssm get-parameter --name '/data_portal/client/oau
 
 gpl_submit_job=$(aws ssm get-parameter --name '/gpl/submit_job_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
 gpl_submit_job_manual=$(aws ssm get-parameter --name '/gpl/submit_job_manual_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
-gpl_create_linx_plot=$(aws ssm get-parameter --name '/gpl/create_linx_plot_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
+# As of GPL v0.2.0, Do not deploy LINX plotting Lambda
+# See https://github.com/umccr/gridss-purple-linx-nf/commit/a015146e95e1b7cd3de3bc639cbc600887ba42ff
+#gpl_create_linx_plot=$(aws ssm get-parameter --name '/gpl/create_linx_plot_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
 
 export VITE_API_URL=$api_url
 export VITE_HTSGET_URL=$htsget_url
 export VITE_GPL_SUBMIT_JOB=$gpl_submit_job
 export VITE_GPL_SUBMIT_JOB_MANUAL=$gpl_submit_job_manual
-export VITE_GPL_CREATE_LINX_PLOT=$gpl_create_linx_plot
+#export VITE_GPL_CREATE_LINX_PLOT=$gpl_create_linx_plot
 export VITE_STAGE=localhost
 export VITE_REGION=ap-southeast-2
 export VITE_COG_USER_POOL_ID=$cog_user_pool_id
