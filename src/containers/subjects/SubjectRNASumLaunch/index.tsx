@@ -13,7 +13,8 @@ import {
   PAN_CANCER_DATASETS_OPTION,
 } from './utils';
 import { useToastContext } from '../../../providers/ToastProvider';
-import { SubjectApiRes, usePortalSubjectDataAPI, GDSRow } from '../../../api/subject';
+import { GDSRow } from '../../../api/gds';
+import { SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
 
 const ALL_DATASETS_OPTION = [
   ...PRIMARY_DATASETS_OPTION,

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ColumnProps } from 'primereact/column';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import moment from 'moment';
 
 // Custom component

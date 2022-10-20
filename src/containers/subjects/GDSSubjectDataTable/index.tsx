@@ -14,6 +14,7 @@ import DataTableWrapper, {
 import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import { usePortalGDSAPI } from '../../../api/gds';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 
 type ObjectStringValType = { id: number } & { [key: string]: string };
 type Props = { subjectId: string };
