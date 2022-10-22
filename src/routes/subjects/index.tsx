@@ -39,10 +39,10 @@ function SubjectPageLayout() {
     <SideBar
       sideBarElement={<SubjectSideBar />}
       mainPageElement={
-        <div className='px-5 py-3'>
+        <>
           <Breadcrumbs />
           <Outlet />
-        </div>
+        </>
       }
     />
   );
