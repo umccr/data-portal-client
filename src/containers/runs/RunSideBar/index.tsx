@@ -15,7 +15,6 @@ function RunSideBar() {
   const handleOnChangeListPage = (e: ListBoxChangeParams) => {
     const sidebarObject = e.value; // Possibility of null when clicked the current page
     if (sidebarObject) {
-      console.log(sidebarObject.postfixPath);
       navigate(`${sidebarObject.postfixPath}`);
     }
   };
