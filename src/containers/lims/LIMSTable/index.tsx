@@ -116,6 +116,15 @@ function LIMSTable({ defaultQueryParam }: Props) {
           );
         },
       };
+    } else if (column == 'illumina_id') {
+      newColToShow = {
+        ...newColToShow,
+        body: (rowData: any): React.ReactNode => {
+          return (
+            <Link to={`/runs/${rowData.illumina_id}`}>{textBodyTemplate(rowData[column])}</Link>
+          );
+        },
+      };
     }
 
     columnList.push(newColToShow);

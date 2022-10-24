@@ -6,7 +6,7 @@ import RunSideBar from '../../containers/runs/RunSideBar';
 import Breadcrumbs from '../../layouts/Breadcrumbs';
 import SideBar from '../../layouts/SideBar';
 import RunDataPage from '../../pages/runs/RunDataPage';
-import RunMetadataPage from '../../pages/runs/RunMetadataPage';
+import RunLIMSPage from '../../pages/runs/RunLIMSPage';
 import RunOverviewPage from '../../pages/runs/RunOverviewPage';
 
 function RunRoutes() {
@@ -18,7 +18,7 @@ function RunRoutes() {
           <Route index element={<Navigate to='overview' />} />
           <Route path='overview' element={<RunOverviewPage />} />
           <Route path='run-data' element={<RunDataPage />} />
-          <Route path='metadata' element={<RunMetadataPage />} />
+          <Route path='lims' element={<RunLIMSPage />} />
         </Route>
       </Route>
     </RouterRoutes>

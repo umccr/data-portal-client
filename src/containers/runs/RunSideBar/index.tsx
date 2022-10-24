@@ -5,7 +5,7 @@ import { ListBox, ListBoxChangeParams } from 'primereact/listbox';
 const sidebarMapping = [
   { postfixPath: 'overview', label: 'Overview' },
   { postfixPath: 'run-data', label: 'Run Data' },
-  { postfixPath: 'metadata', label: 'Metadata' },
+  { postfixPath: 'lims', label: 'LIMS' },
 ];
 
 function RunSideBar() {
