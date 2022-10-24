@@ -1,6 +1,4 @@
 import React, { memo, useState } from 'react';
-import { useQuery } from 'react-query';
-import API from '@aws-amplify/api';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { DataTable } from 'primereact/datatable';
@@ -150,7 +148,7 @@ type S3SelectTableProps = {
   title: string;
   currentS3RowData: S3Row[];
   currentS3Selection: S3Row[];
-  handleSelectionChange(slected: S3Row[]): void;
+  handleSelectionChange(selected: S3Row[]): void;
 };
 const S3SelectTable = ({
   title,
@@ -187,7 +185,7 @@ type GDSSelectTableProps = {
   title: string;
   currentGDSRowData: GDSRow[];
   currentGDSSelection: GDSRow[];
-  handleSelectionChange(slected: GDSRow[]): void;
+  handleSelectionChange(selected: GDSRow[]): void;
 };
 const GDSSelectTable = ({
   title,

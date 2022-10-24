@@ -15,7 +15,7 @@ function Breadcrumbs() {
   }
 
   const breadcrumbItems = [];
-  // Creating breadcrums
+  // Creating breadcrumbs
   while (lastSlashIndex != 0) {
     const breadcrumbItem = {
       label: showDisplayText(currentPath.substring(lastSlashIndex + 1)),

@@ -48,7 +48,7 @@ function DataTableWrapper(props: DataTableWrapperProps) {
   } = props;
 
   const additionalDataTableProps = { ...overrideDataTableProps };
-  // Pagination could be undefined (if not needed or dont't want it)
+  // Pagination could be undefined (if not needed or don't want it)
   // This will guard if pagination props exist and could be mounter to the UI
   if (paginationProps && handlePaginationPropsChange) {
     const { firstIndexNumberAppearOnCurrentTable, currentNumberOfRows, totalNumberOfItems } =
@@ -85,8 +85,8 @@ function DataTableWrapper(props: DataTableWrapperProps) {
       resizableColumns
       columnResizeMode='fit'
       {...additionalDataTableProps}>
-      {columns.map((columpProperties, i) => {
-        return <Column key={i} {...columpProperties} />;
+      {columns.map((columnProperties, i) => {
+        return <Column key={i} {...columnProperties} />;
       })}
     </DataTable>
   );

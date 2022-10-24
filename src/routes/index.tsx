@@ -49,7 +49,7 @@ function Routes() {
 export default Routes;
 
 function SignedInLayout() {
-  // Add layout componet for SignedIn page
+  // Add layout component for SignedIn page
   return (
     <>
       <MenuBar />

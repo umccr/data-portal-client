@@ -174,12 +174,12 @@ function FileViewer({ subjectId }: Props) {
               {fetchPresignedRes.isLoading ? (
                 <CircularLoaderWithText />
               ) : fetchPresignedData?.signed_url ? (
-                <div className='flex align-items-center justify-content-cente relative h-full w-full'>
+                <div className='flex align-items-center justify-content-center relative h-full w-full'>
                   <ViewPresignedUrl presingedUrl={fetchPresignedData?.signed_url} />
                 </div>
               ) : fetchPresignedData?.signed_url && selectedFile && selectedFile.size > 60000000 ? (
                 <div
-                  className='flex align-items-center justify-content-cente relative h-full w-full cursor-pointer'
+                  className='flex align-items-center justify-content-center relative h-full w-full cursor-pointer'
                   onClick={() => window.open(fetchPresignedData?.signed_url, '_blank')}>
                   <div>FileSize exceed 60MB. Click here to open in a new tab.</div>
                 </div>

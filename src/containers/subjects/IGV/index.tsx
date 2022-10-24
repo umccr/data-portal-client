@@ -49,7 +49,7 @@ function IGV({ subjectId }: Props) {
   );
   const igvBrowser = igv.data;
 
-  // RefGenome seting for IGV
+  // RefGenome setting for IGV
   const [refGenome, setRefGenome] = useState<string>('hg38');
   const handleRefGenomeChange = (newRefGenome: string) => {
     setRefGenome(newRefGenome);
