@@ -1,13 +1,11 @@
 import React from 'react';
 import { BreadCrumb } from 'primereact/breadcrumb';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { showDisplayText } from '../../utils/util';
 import './index.css';
 
 function Breadcrumbs() {
-  const navigate = useNavigate();
-
   let currentPath = useLocation().pathname;
   let lastSlashIndex = currentPath.lastIndexOf('/');
   // Remove trailing slash ('/')

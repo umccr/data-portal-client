@@ -39,7 +39,9 @@ function SideBar({ sideBarElement, mainPageElement }: sideBarProps) {
           />
         )}
       </div>
-      <div className='layout-main-container'>{mainPageElement}</div>
+      <div className='layout-main-container'>
+        <div className='px-5 py-3'>{mainPageElement}</div>
+      </div>
     </div>
   );
 }

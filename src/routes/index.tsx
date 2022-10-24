@@ -13,6 +13,7 @@ import LIMSPage from '../pages/LIMS';
 
 // Other Components
 import MenuBar from '../layouts/MenuBar';
+import RunRoutes from './runs';
 
 function Routes() {
   const isUserSignedIn = useUserContext().isAuth;
@@ -34,6 +35,7 @@ function Routes() {
 
           {/* More than one routing for the same prefix will be split into their own component. */}
           <Route path='/subjects/*' element={<SubjectRoutes />} />
+          <Route path='/runs/*' element={<RunRoutes />} />
 
           {/* Non matching page redirect to NotFound */}
           <Route path='*' element={<h1>NotFoundPage</h1>}></Route>

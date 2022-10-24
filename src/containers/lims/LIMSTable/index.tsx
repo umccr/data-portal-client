@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import API from '@aws-amplify/api';
-import { useQuery } from 'react-query';
-import { Card } from 'primereact/card';
 import { ColumnProps } from 'primereact/column';
 import { Link } from 'react-router-dom';
 import { DataTablePFSEvent } from 'primereact/datatable';
@@ -20,7 +17,8 @@ import DataTableWrapper, {
 } from '../../../components/DataTableWrapper';
 import { usePortalLimsAPI } from '../../../api/lims';
 
-function LIMSTable() {
+type Props = { defaultQueryParam?: Record<string, string | number> };
+function LIMSTable({ defaultQueryParam }: Props) {
   const toast = useToastContext();
 
   // Pagination Properties
@@ -28,20 +26,21 @@ function LIMSTable() {
   const [apiQueryParameter, setApiQueryParameter] = useState<{ [key: string]: string | number }>({
     rowsPerPage: paginationProps.currentNumberOfRows,
     ordering: '-subject_id',
+    ...defaultQueryParam,
   });
   const handleTablePaginationPropChange = (event: { [key: string]: number }) => {
     const paginationProps = convertPaginationEventToDjangoQueryParams(event);
     setApiQueryParameter((prev) => ({ ...prev, ...paginationProps }));
   };
 
-  // Soriting mechanism
+  // Sorting mechanism
   const sorting = convertDjangoSortParamToDataTableProp(apiQueryParameter);
   const handleTableSortPropChange = (event: DataTablePFSEvent) => {
-    const djangoSoringQuery = convertDjangoStateToDjangoQuery({
+    const djangoSortingQuery = convertDjangoStateToDjangoQuery({
       sortOrder: event.sortOrder,
       sortField: event.sortField,
     });
-    setApiQueryParameter((prev) => ({ ...prev, ...djangoSoringQuery }));
+    setApiQueryParameter((prev) => ({ ...prev, ...djangoSortingQuery }));
   };
 
   // Data states
@@ -123,23 +122,19 @@ function LIMSTable() {
   }
 
   return (
-    <Card className='p-0'>
-      <div className='font-bold text-2xl pb-3'>LIMS Table</div>
-
-      <DataTableWrapper
-        overrideDataTableProps={{
-          style: { display: isLoading ? 'none' : '' },
-        }}
-        sortField={sorting.sortField}
-        sortOrder={sorting.sortOrder}
-        onSort={handleTableSortPropChange}
-        isLoading={isFetching}
-        columns={columnList}
-        dataTableValue={limsDataList}
-        paginationProps={paginationProps}
-        handlePaginationPropsChange={handleTablePaginationPropChange}
-      />
-    </Card>
+    <DataTableWrapper
+      overrideDataTableProps={{
+        style: { display: isLoading ? 'none' : '' },
+      }}
+      sortField={sorting.sortField}
+      sortOrder={sorting.sortOrder}
+      onSort={handleTableSortPropChange}
+      isLoading={isFetching}
+      columns={columnList}
+      dataTableValue={limsDataList}
+      paginationProps={paginationProps}
+      handlePaginationPropsChange={handleTablePaginationPropChange}
+    />
   );
 }
 

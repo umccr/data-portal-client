@@ -79,6 +79,12 @@ function MenuBar() {
       },
     },
     {
+      label: 'Runs',
+      command: () => {
+        navigate('/runs');
+      },
+    },
+    {
       label: 'Search',
       command: () => {
         navigate('/search');
