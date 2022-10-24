@@ -13,11 +13,16 @@ import moment from 'moment';
 import DataActionButton from '../../../components/DataActionButton';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import { usePortalS3API } from '../../../api/s3';
+import DataSearchFilterButton from '../../../components/DataSearchFilterButton';
 
-type Props = { defaultQueryParam: Record<string, string | number> };
+type Props = { defaultQueryParam: { search?: string } & Record<string, string | number> };
 
 function S3DataTable({ defaultQueryParam }: Props) {
   const toast = useToastContext();
+
+  // Search
+  const defaultSearch: string | undefined = defaultQueryParam['search'];
+  const [searchField, setSearchField] = useState<string>(defaultSearch ? defaultSearch : '');
 
   // Pagination Properties
   let paginationProps: PaginationProps = paginationPropsInitValue;
@@ -37,6 +42,7 @@ function S3DataTable({ defaultQueryParam }: Props) {
   const { isFetching, isLoading, isError, data } = usePortalS3API({
     queryStringParameters: {
       ...apiQueryParameter,
+      search: searchField,
     },
   });
 
@@ -60,6 +66,10 @@ function S3DataTable({ defaultQueryParam }: Props) {
         <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
       </div>
       <div className={isFetching || isLoading ? 'hidden' : ''}>
+        <DataSearchFilterButton
+          currentFilter={searchField}
+          handleFilterChange={(s: string) => setSearchField(s)}
+        />
         <DataTableWrapper
           isLoading={isFetching}
           columns={columnList}
