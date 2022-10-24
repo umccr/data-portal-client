@@ -61,8 +61,8 @@ function LoadSubjectDataButton({
         />
         <Button
           className='bg-blue-800'
-          label='Save'
-          icon='pi pi-save'
+          label='Load'
+          icon='pi pi-cloud-upload'
           onClick={() => saveIgvDataSelection()}
           autoFocus
         />
