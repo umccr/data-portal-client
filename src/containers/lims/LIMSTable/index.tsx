@@ -16,10 +16,19 @@ import DataTableWrapper, {
   convertDjangoSortParamToDataTableProp,
 } from '../../../components/DataTableWrapper';
 import { usePortalLimsAPI } from '../../../api/lims';
+import { InputText } from 'primereact/inputtext';
 
 type Props = { defaultQueryParam?: Record<string, string | number> };
 function LIMSTable({ defaultQueryParam }: Props) {
   const toast = useToastContext();
+
+  // Search Bar
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const handleSearchEnter = (event: { key: string }) => {
+    if (event.key === 'Enter') {
+      setApiQueryParameter((prev) => ({ ...prev, search: searchQuery }));
+    }
+  };
 
   // Pagination Properties
   let paginationProps: PaginationProps = paginationPropsInitValue;
@@ -122,19 +131,33 @@ function LIMSTable({ defaultQueryParam }: Props) {
   }
 
   return (
-    <DataTableWrapper
-      overrideDataTableProps={{
-        style: { display: isLoading ? 'none' : '' },
-      }}
-      sortField={sorting.sortField}
-      sortOrder={sorting.sortOrder}
-      onSort={handleTableSortPropChange}
-      isLoading={isFetching}
-      columns={columnList}
-      dataTableValue={limsDataList}
-      paginationProps={paginationProps}
-      handlePaginationPropsChange={handleTablePaginationPropChange}
-    />
+    <div>
+      <div className='w-full pb-4'>
+        <span className='w-full p-input-icon-left'>
+          <i className='pi pi-search' />
+          <InputText
+            className='w-full p-inputtext-sm'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder='Search'
+            onKeyDown={handleSearchEnter}
+          />
+        </span>
+      </div>
+      <DataTableWrapper
+        overrideDataTableProps={{
+          style: { display: isLoading ? 'none' : '' },
+        }}
+        sortField={sorting.sortField}
+        sortOrder={sorting.sortOrder}
+        onSort={handleTableSortPropChange}
+        isLoading={isFetching}
+        columns={columnList}
+        dataTableValue={limsDataList}
+        paginationProps={paginationProps}
+        handlePaginationPropsChange={handleTablePaginationPropChange}
+      />
+    </div>
   );
 }
 
