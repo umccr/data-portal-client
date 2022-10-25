@@ -217,15 +217,47 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
       const message =
         'Cannot open automatically in IGV. Please make sure you have opened IGV app and try again. ' +
         'Otherwise please click "Copy" button and open the URL in browser new tab.';
-      toast?.show({
-        severity: 'error',
-        summary: 'Unable to open IGV Desktop!',
-        detail: message,
-        sticky: true,
-      });
+
+      <Dialog
+        header='Opening in IGV Desktop'
+        visible={true}
+        style={{ width: '50vw' }}
+        draggable={false}
+        resizable={false}
+        onHide={() => handleIsOpen(false)}>
+        <DataTable
+          value={[
+            {
+              key: 'Message',
+              value: message,
+            },
+            { key: 'IGV url', value: localIgvUrl },
+          ]}
+          responsiveLayout='scroll'>
+          <Column headerStyle={{ display: 'none' }} field='key' />
+          <Column headerStyle={{ display: 'none' }} field='value' />
+        </DataTable>
+        <div style={{ padding: '1rem 0rem' }}>
+          <Button
+            label='Copy'
+            icon='pi pi-copy'
+            className='p-button-raised p-button-secondary'
+            style={{ width: '100%' }}
+            onClick={() => {
+              navigator.clipboard.writeText(localIgvUrl);
+              toast?.show({
+                severity: 'success',
+                summary: 'URL has been copied',
+                life: 3000,
+              });
+            }}
+          />
+        </div>
+      </Dialog>;
     }
   };
   xhr.send();
+
   handleIsOpen(false);
   return <></>;
 }
