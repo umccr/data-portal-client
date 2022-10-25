@@ -121,7 +121,9 @@ function LIMSTable({ defaultQueryParam }: Props) {
         ...newColToShow,
         body: (rowData: any): React.ReactNode => {
           return (
-            <Link to={`/runs/${rowData.illumina_id}`}>{textBodyTemplate(rowData[column])}</Link>
+            <Link to={`/runs/${rowData.illumina_id}/overview`}>
+              {textBodyTemplate(rowData[column])}
+            </Link>
           );
         },
       };
