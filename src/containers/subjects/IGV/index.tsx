@@ -49,7 +49,7 @@ function IGV({ subjectId }: Props) {
   );
   const igvBrowser = igv.data;
 
-  // RefGenome seting for IGV
+  // RefGenome setting for IGV
   const [refGenome, setRefGenome] = useState<string>('hg38');
   const handleRefGenomeChange = (newRefGenome: string) => {
     setRefGenome(newRefGenome);
@@ -183,6 +183,10 @@ function IGV({ subjectId }: Props) {
         )}
 
         <div id='igv-div' />
+        <div className='text-xs mt-5'>
+          Note: IGV in browser may not fill the given space properly. Try resizing the browser
+          window to solve this problem.
+        </div>
       </div>
     </>
   );

@@ -1,9 +1,7 @@
 import React from 'react';
 import { Card } from 'primereact/card';
-import { useQuery } from 'react-query';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
-import API from '@aws-amplify/api';
 import { Link } from 'react-router-dom';
 import { usePortalLimsAPI } from '../../../api/lims';
 

@@ -3,21 +3,25 @@ import SubjectCard from '../../containers/home/SubjectCard';
 import MetadataHomeCard from '../../containers/home/MetadataCard';
 import LimsHomeCard from '../../containers/home/LimsCard';
 import SequenceHomeCard from '../../containers/home/SequenceCard';
+import RunHomeCard from '../../containers/home/RunsCard';
 
 function HomePage() {
   return (
     <>
-      <div className='grid px-5 py-3'>
-        <div className='col-12 lg:col-6 xl:col-3'>
+      <div className='mt-3 w-full h-full flex flex-column align-items-center'>
+        <div className='w-9 h-8rem p-2'>
           <SubjectCard />
         </div>
-        <div className='col-12 lg:col-6 xl:col-3'>
+        <div className='w-9 h-8rem p-2'>
           <MetadataHomeCard />
         </div>
-        <div className='col-12 lg:col-6 xl:col-3'>
-          <LimsHomeCard />
+        <div className='w-9 h-8rem p-2'>
+          <RunHomeCard />
         </div>
-        <div className='col-12 lg:col-6 xl:col-3'>
+        {/* <div className='w-9 h-8rem p-2'>
+          <LimsHomeCard />
+        </div> */}
+        <div className='w-9 h-8rem p-2'>
           <SequenceHomeCard />
         </div>
       </div>

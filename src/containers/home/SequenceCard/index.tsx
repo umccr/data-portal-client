@@ -1,9 +1,7 @@
 import React from 'react';
 import { Card } from 'primereact/card';
-import { useQuery } from 'react-query';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
-import API from '@aws-amplify/api';
 import { usePortalSequenceAPI } from '../../../api/sequence';
 
 function SequenceHomeCard() {
@@ -24,7 +22,7 @@ function SequenceHomeCard() {
   if (data) totalSequenceCount = data.pagination.count;
 
   return (
-    <Card className='mb-0'>
+    <Card className='mb-0 surface-100'>
       {isLoading && isFetching ? (
         <div className='flex justify-content-center align-items-center'>
           <CircularLoaderWithText />

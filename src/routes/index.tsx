@@ -33,12 +33,15 @@ function Routes() {
           <Route path='/metadata' element={<MetadataPage />} />
           <Route path='/lims' element={<LIMSPage />} />
 
+          {/* TODO: implement /search */}
+          <Route path='/search' element={<h1>Not Implemented</h1>} />
+
           {/* More than one routing for the same prefix will be split into their own component. */}
           <Route path='/subjects/*' element={<SubjectRoutes />} />
           <Route path='/runs/*' element={<RunRoutes />} />
 
           {/* Non matching page redirect to NotFound */}
-          <Route path='*' element={<h1>NotFoundPage</h1>}></Route>
+          <Route path='*' element={<h1>Page Not Found</h1>}></Route>
         </Route>
         <Route path='/signIn' element={<Navigate replace to='/' />}></Route>
       </RouterRoutes>
@@ -49,11 +52,11 @@ function Routes() {
 export default Routes;
 
 function SignedInLayout() {
-  // Add layout componet for SignedIn page
+  // Add layout component for SignedIn page
   return (
     <>
       <MenuBar />
-      <div style={{ top: '3rem', position: 'relative' }}>
+      <div style={{ top: '3rem', position: 'relative', height: 'calc(100% - 3rem)' }}>
         <Outlet />
       </div>
     </>

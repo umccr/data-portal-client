@@ -23,7 +23,7 @@ function ToastProvider(props: Props) {
 
   return (
     <>
-      <Toast ref={toastRef} position='top-center' />
+      <Toast ref={toastRef} position='top-center' className='opacity-100 w-6' />
       <ToastContext.Provider value={toastRef.current}>{props.children}</ToastContext.Provider>
     </>
   );
