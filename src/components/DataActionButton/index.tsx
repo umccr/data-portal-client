@@ -110,7 +110,7 @@ const constructGDSLocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKe
   // GDS
   const fileGdsUrl = constructGDSUrl({ volume_name: bucketOrVolume, path: pathOrKey });
   const idxFileGdsUrl = constructGDSUrl({ volume_name: bucketOrVolume, path: idxFilePath });
-  const { signed_urls } = await API.post('files', `/presign`, {
+  const { signed_urls } = await API.post('portal', `/presign`, {
     body: [fileGdsUrl, idxFileGdsUrl],
   });
 
@@ -206,10 +206,15 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
 
   const xhr = new XMLHttpRequest();
 
-  let localIgvUrl = '';
+  let localIgvUrl: string;
 
-  localIgvUrl = type == 'gds' && gdsLocalIgvUrl.data ? gdsLocalIgvUrl.data : '';
-  localIgvUrl = type == 's3' && s3LocalIgvUrl.data ? s3LocalIgvUrl.data : '';
+  if (type == 'gds' && gdsLocalIgvUrl.data) {
+    localIgvUrl = gdsLocalIgvUrl.data;
+  } else if (type == 's3' && s3LocalIgvUrl.data) {
+    localIgvUrl = s3LocalIgvUrl.data;
+  } else {
+    localIgvUrl = '';
+  }
 
   xhr.open('GET', localIgvUrl, true);
   xhr.onreadystatechange = () => {
