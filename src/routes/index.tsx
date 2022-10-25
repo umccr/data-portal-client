@@ -53,7 +53,7 @@ function SignedInLayout() {
   return (
     <>
       <MenuBar />
-      <div style={{ top: '3rem', position: 'relative' }}>
+      <div style={{ top: '3rem', position: 'relative', height: 'calc(100% - 3rem)' }}>
         <Outlet />
       </div>
     </>

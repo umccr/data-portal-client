@@ -7,17 +7,17 @@ import SequenceHomeCard from '../../containers/home/SequenceCard';
 function HomePage() {
   return (
     <>
-      <div className='grid px-5 py-3'>
-        <div className='col-12 lg:col-6 xl:col-3'>
+      <div className='mt-3 w-full h-full flex flex-column align-items-center'>
+        <div className='w-9 h-8rem p-2'>
           <SubjectCard />
         </div>
-        <div className='col-12 lg:col-6 xl:col-3'>
+        <div className='w-9 h-8rem p-2'>
           <MetadataHomeCard />
         </div>
-        <div className='col-12 lg:col-6 xl:col-3'>
+        {/* <div className='w-9 h-8rem p-2'>
           <LimsHomeCard />
-        </div>
-        <div className='col-12 lg:col-6 xl:col-3'>
+        </div> */}
+        <div className='w-9 h-8rem p-2'>
           <SequenceHomeCard />
         </div>
       </div>
