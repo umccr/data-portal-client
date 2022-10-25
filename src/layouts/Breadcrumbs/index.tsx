@@ -2,7 +2,6 @@ import React from 'react';
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { useLocation } from 'react-router-dom';
 
-import { showDisplayText } from '../../utils/util';
 import './index.css';
 
 function Breadcrumbs() {
@@ -18,9 +17,9 @@ function Breadcrumbs() {
   // Creating breadcrumbs
   while (lastSlashIndex != 0) {
     const breadcrumbItem = {
-      label: showDisplayText(currentPath.substring(lastSlashIndex + 1)),
+      label: currentPath.substring(lastSlashIndex + 1),
       url: currentPath,
-      className: 'capitalize font-medium',
+      className: 'uppercase font-medium',
     };
     breadcrumbItems.unshift(breadcrumbItem);
     currentPath = currentPath.substring(0, lastSlashIndex);
@@ -29,7 +28,7 @@ function Breadcrumbs() {
 
   // Last for base URL
   const breadcrumbItem = {
-    label: showDisplayText(currentPath.substring(lastSlashIndex + 1)),
+    label: currentPath.substring(lastSlashIndex + 1),
     url: currentPath,
     className: 'uppercase font-medium',
   };

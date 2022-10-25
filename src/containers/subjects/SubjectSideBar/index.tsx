@@ -21,21 +21,32 @@ function SubjectSideBar() {
     }
   };
 
+  const itemTemplate = (option: { postfixPath: string; label: string }) => {
+    return (
+      // Will wrap in an '<a>' tag (with href) to get the benefit open in new tab/window from right-click
+      <a href={option.postfixPath} style={{ all: 'unset' }}>
+        <div>{option.label}</div>
+      </a>
+    );
+  };
+
   return (
     <div className='flex flex-column'>
       {/* Sidebar Title */}
       <div
         id='subject-sidebar-title'
-        className='font-bold text-3xl border-bottom-1 border-gray-300'
+        className='cursor-pointer font-bold text-3xl border-bottom-1 border-gray-300'
         style={{ padding: '0.5rem 0 1.5rem' }}>
-        Subject
+        <a href={`../`} style={{ all: 'unset' }}>
+          Subject
+        </a>
       </div>
 
       <ListBox
         value={selectedPage}
         options={sidebarMapping}
         onChange={handleOnChangeListPage}
-        optionLabel='label'
+        itemTemplate={itemTemplate}
         className='border-none'
       />
     </div>
