@@ -183,6 +183,10 @@ function IGV({ subjectId }: Props) {
         )}
 
         <div id='igv-div' />
+        <div className='text-xs mt-5'>
+          Note: IGV in browser may not fill the given space properly. Try resizing the browser
+          window to solve this problem.
+        </div>
       </div>
     </>
   );
