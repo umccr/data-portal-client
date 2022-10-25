@@ -191,7 +191,7 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
     toast?.show({
       severity: 'error',
       summary: 'Error on locating object URL.',
-      detail: `${s3LocalIgvUrl.error.toString()}`,
+      detail: `${s3LocalIgvUrl.error}`,
       sticky: true,
     });
   }
@@ -199,7 +199,7 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
     toast?.show({
       severity: 'error',
       summary: 'Error on locating object URL.',
-      detail: `${gdsLocalIgvUrl.error.toString()}`,
+      detail: `${gdsLocalIgvUrl.error}`,
       sticky: true,
     });
   }

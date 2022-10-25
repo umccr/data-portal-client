@@ -13,7 +13,7 @@ export type S3Row = {
   last_modified_date: string;
   e_tag: string;
   unique_hash: string;
-} & Record<string, string | number | null>;
+} & Record<string, string>;
 
 export type S3ApiData = DjangoRestApiResponse & { results: S3Row[] };
 
