@@ -9,7 +9,7 @@ import { Column } from 'primereact/column';
 import { useQuery } from 'react-query';
 import moment from 'moment';
 
-import { getS3PreSignedUrl } from '../../api/s3';
+import { getS3PreSignedUrl, getS3Status, S3StatusData } from '../../api/s3';
 import { constructGDSUrl, getGDSPreSignedUrl } from '../../api/gds';
 import { parseUrlParams } from '../../utils/util';
 import { useToastContext } from '../../providers/ToastProvider';
@@ -131,8 +131,17 @@ const constructGDSLocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKe
   return `http://localhost:60151/load?index=${idx}&file=${enf}&name=${name}`;
 };
 
-const constructS3LocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKey: string }) => {
-  const { bucketOrVolume, pathOrKey } = props;
+const constructS3LocalIgvUrl = async (props: {
+  id: number;
+  bucketOrVolume: string;
+  pathOrKey: string;
+}) => {
+  const { id, bucketOrVolume, pathOrKey } = props;
+
+  const objStatus = await getS3Status(id);
+  if (objStatus != S3StatusData.AVAILABLE) {
+    throw new Error(`Invalid object storage class! (${S3StatusData[objStatus]})`);
+  }
 
   const name = pathOrKey.split('/').pop() ?? pathOrKey;
   const file = `s3://${bucketOrVolume + '/' + pathOrKey}`;
@@ -144,7 +153,7 @@ type OpenIGVDesktopType = DataActionButtonProps & { handleIsOpen: (val: boolean)
 function OpenIGVDesktop(props: OpenIGVDesktopType) {
   const toast = useToastContext();
 
-  const { bucketOrVolume, pathOrKey, type, handleIsOpen } = props;
+  const { id, bucketOrVolume, pathOrKey, type, handleIsOpen } = props;
 
   const gdsLocalIgvUrl = useQuery(
     ['gds-local-igv', bucketOrVolume, pathOrKey],
@@ -156,11 +165,15 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
   const s3LocalIgvUrl = useQuery(
     ['s3-local-igv', bucketOrVolume, pathOrKey],
     async () =>
-      await constructS3LocalIgvUrl({ bucketOrVolume: bucketOrVolume, pathOrKey: pathOrKey }),
+      await constructS3LocalIgvUrl({
+        id: id,
+        bucketOrVolume: bucketOrVolume,
+        pathOrKey: pathOrKey,
+      }),
     { enabled: type == 's3' }
   );
 
-  if (gdsLocalIgvUrl.isLoading || s3LocalIgvUrl.isLoading)
+  if (gdsLocalIgvUrl.isLoading || s3LocalIgvUrl.isLoading) {
     return (
       <Dialog
         header='Opening in IGV Desktop'
@@ -172,6 +185,24 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
         <CircularLoaderWithText />
       </Dialog>
     );
+  }
+
+  if (s3LocalIgvUrl.isError && s3LocalIgvUrl.error) {
+    toast?.show({
+      severity: 'error',
+      summary: 'Error on locating object URL.',
+      detail: `${s3LocalIgvUrl.error.toString()}`,
+      sticky: true,
+    });
+  }
+  if (gdsLocalIgvUrl.isError && gdsLocalIgvUrl.error) {
+    toast?.show({
+      severity: 'error',
+      summary: 'Error on locating object URL.',
+      detail: `${gdsLocalIgvUrl.error.toString()}`,
+      sticky: true,
+    });
+  }
 
   const xhr = new XMLHttpRequest();
 
@@ -190,10 +221,12 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
         severity: 'error',
         summary: 'Unable to open IGV Desktop!',
         detail: message,
+        sticky: true,
       });
     }
   };
   xhr.send();
+  handleIsOpen(false);
   return <></>;
 }
 

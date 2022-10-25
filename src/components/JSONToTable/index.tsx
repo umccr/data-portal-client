@@ -14,7 +14,7 @@ type Props = {
 // Type for Data Table show
 type rowDataType = {
   key: string;
-  value: (string | number) | (string | number)[];
+  value: string | number | (string | number)[];
 };
 
 function JSONToTable(props: Props) {
