@@ -2,8 +2,8 @@ import React from 'react';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { useParams } from 'react-router-dom';
 import './index.css';
-import S3SubjectDataTable from '../../../containers/subjects/S3SubjectDataTable';
-import GDSSubjectDataTable from '../../../containers/subjects/GDSSubjectDataTable';
+import GDSDataTable from '../../../containers/gds/GDSDataTable';
+import S3DataTable from '../../../containers/s3/S3DataTable';
 
 function SubjectDataPage() {
   const { subjectId } = useParams();
@@ -15,11 +15,11 @@ function SubjectDataPage() {
   return (
     <div className='mb-3 w-auto' style={{ minWidth: '80%' }}>
       <TabView renderActiveOnly className='border-round-md overflow-hidden'>
-        <TabPanel header='S3'>
-          <S3SubjectDataTable subjectId={subjectId} />
-        </TabPanel>
         <TabPanel header='GDS'>
-          <GDSSubjectDataTable subjectId={subjectId} />
+          <GDSDataTable defaultQueryParam={{ subject: subjectId }} />
+        </TabPanel>
+        <TabPanel header='S3'>
+          <S3DataTable defaultQueryParam={{ subject: subjectId }} />
         </TabPanel>
       </TabView>
     </div>
