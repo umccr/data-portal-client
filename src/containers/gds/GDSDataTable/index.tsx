@@ -13,10 +13,15 @@ import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
 import moment from 'moment';
 import DataActionButton from '../../../components/DataActionButton';
 import FilePreviewButton from '../../../components/FilePreviewButton';
+import DataSearchFilterButton from '../../../components/DataSearchFilterButton';
 
-type Props = { defaultQueryParam: Record<string, string | number> };
+type Props = { defaultQueryParam: { search?: string } & Record<string, string | number> };
 function GDSDataTable({ defaultQueryParam }: Props) {
   const toast = useToastContext();
+
+  // Search
+  const defaultSearch: string | undefined = defaultQueryParam['search'];
+  const [searchField, setSearchField] = useState<string>(defaultSearch ? defaultSearch : '');
 
   // Pagination Properties
   let paginationProps: PaginationProps = paginationPropsInitValue;
@@ -36,6 +41,7 @@ function GDSDataTable({ defaultQueryParam }: Props) {
   const { isFetching, isLoading, isError, data } = usePortalGDSAPI({
     queryStringParameters: {
       ...apiQueryParameter,
+      search: searchField,
     },
   });
 
@@ -58,6 +64,10 @@ function GDSDataTable({ defaultQueryParam }: Props) {
         <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
       </div>
       <div className={isFetching || isLoading ? 'hidden' : ''}>
+        <DataSearchFilterButton
+          currentFilter={searchField}
+          handleFilterChange={(s: string) => setSearchField(s)}
+        />
         <DataTableWrapper
           isLoading={isFetching}
           columns={columnList}

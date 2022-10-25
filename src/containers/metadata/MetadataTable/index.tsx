@@ -18,9 +18,18 @@ import DataTableWrapper, {
 } from '../../../components/DataTableWrapper';
 import { usePortalMetadataAPI } from '../../../api/metadata';
 import './index.css';
+import { InputText } from 'primereact/inputtext';
 
 function MetadataTable() {
   const toast = useToastContext();
+
+  // Search Bar
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const handleSearchEnter = (event: { key: string }) => {
+    if (event.key === 'Enter') {
+      setApiQueryParameter((prev) => ({ ...prev, search: searchQuery }));
+    }
+  };
 
   // Pagination Properties
   let paginationProps: PaginationProps = paginationPropsInitValue;
@@ -123,7 +132,19 @@ function MetadataTable() {
 
   return (
     <Card className='p-0'>
-      <div className='font-bold text-2xl pb-3'>Metadata Table</div>
+      <div className='flex justify-content-between pb-4'>
+        <div className='inline font-bold text-3xl flex align-items-center'>Metadata Table</div>
+        <span className='p-input-icon-left'>
+          <i className='pi pi-search' />
+          <InputText
+            className='p-inputtext-sm'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder='Search'
+            onKeyDown={handleSearchEnter}
+          />
+        </span>
+      </div>
 
       <DataTableWrapper
         overrideDataTableProps={{
