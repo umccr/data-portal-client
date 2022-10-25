@@ -72,12 +72,13 @@ function MenuBar() {
         navigate('/metadata');
       },
     },
-    {
-      label: 'LIMS',
-      command: () => {
-        navigate('/lims');
-      },
-    },
+    // Will hide LIMS endpoint from menubar to test if it is still required.
+    // {
+    //   label: 'LIMS',
+    //   command: () => {
+    //     navigate('/lims');
+    //   },
+    // },
     {
       label: 'Runs',
       command: () => {
