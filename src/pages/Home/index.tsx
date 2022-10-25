@@ -3,6 +3,7 @@ import SubjectCard from '../../containers/home/SubjectCard';
 import MetadataHomeCard from '../../containers/home/MetadataCard';
 import LimsHomeCard from '../../containers/home/LimsCard';
 import SequenceHomeCard from '../../containers/home/SequenceCard';
+import RunHomeCard from '../../containers/home/RunsCard';
 
 function HomePage() {
   return (
@@ -13,6 +14,9 @@ function HomePage() {
         </div>
         <div className='w-9 h-8rem p-2'>
           <MetadataHomeCard />
+        </div>
+        <div className='w-9 h-8rem p-2'>
+          <RunHomeCard />
         </div>
         {/* <div className='w-9 h-8rem p-2'>
           <LimsHomeCard />

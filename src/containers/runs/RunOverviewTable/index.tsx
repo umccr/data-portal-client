@@ -63,8 +63,7 @@ function RunOverviewTable({ runId }: Props) {
         </div>
 
         <div id='helper-text' className='block p-2 text-500'>
-          <div className='font-semibold inline'>*</div>
-          <div className='font-normal inline'>
+          <div className='text-xs inline'>
             run_id dropdown list will only show the last 250 runs. Otherwise, copy and paste run_id
             to the field above.
           </div>

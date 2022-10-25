@@ -22,7 +22,7 @@ function SequenceHomeCard() {
   if (data) totalSequenceCount = data.pagination.count;
 
   return (
-    <Card className='mb-0'>
+    <Card className='mb-0 surface-100'>
       {isLoading && isFetching ? (
         <div className='flex justify-content-center align-items-center'>
           <CircularLoaderWithText />

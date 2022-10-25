@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ColumnProps } from 'primereact/column';
-import { Link } from 'react-router-dom';
 import { DataTablePFSEvent } from 'primereact/datatable';
 
 // Custom component
@@ -16,6 +15,7 @@ import DataTableWrapper, {
   convertDjangoSortParamToDataTableProp,
 } from '../../../components/DataTableWrapper';
 import { usePortalLimsAPI } from '../../../api/lims';
+import { Link } from 'react-router-dom';
 
 type Props = { defaultQueryParam?: Record<string, string | number> };
 function LIMSTable({ defaultQueryParam }: Props) {
@@ -112,7 +112,9 @@ function LIMSTable({ defaultQueryParam }: Props) {
         ...newColToShow,
         body: (rowData: any): React.ReactNode => {
           return (
-            <Link to={`/subjects/${rowData.subject_id}`}>{textBodyTemplate(rowData[column])}</Link>
+            <Link to={`/subjects/${rowData.subject_id}/overview`}>
+              {textBodyTemplate(rowData[column])}
+            </Link>
           );
         },
       };

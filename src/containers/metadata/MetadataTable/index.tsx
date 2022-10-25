@@ -110,7 +110,9 @@ function MetadataTable() {
         ...newColToShow,
         body: (rowData: any): React.ReactNode => {
           return (
-            <Link to={`/subjects/${rowData.subject_id}`}>{textBodyTemplate(rowData[column])}</Link>
+            <Link to={`/subjects/${rowData.subject_id}/overview`}>
+              {textBodyTemplate(rowData[column])}
+            </Link>
           );
         },
       };
