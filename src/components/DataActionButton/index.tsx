@@ -219,46 +219,37 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
   xhr.open('GET', localIgvUrl, true);
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4 && xhr.status === 0) {
-      const message =
-        'Cannot open automatically in IGV. Please make sure you have opened IGV app and try again. ' +
-        'Otherwise please click "Copy" button and open the URL in browser new tab.';
-
-      <Dialog
-        header='Opening in IGV Desktop'
-        visible={true}
-        style={{ width: '50vw' }}
-        draggable={false}
-        resizable={false}
-        onHide={() => handleIsOpen(false)}>
-        <DataTable
-          value={[
-            {
-              key: 'Message',
-              value: message,
-            },
-            { key: 'IGV url', value: localIgvUrl },
-          ]}
-          responsiveLayout='scroll'>
-          <Column headerStyle={{ display: 'none' }} field='key' />
-          <Column headerStyle={{ display: 'none' }} field='value' />
-        </DataTable>
-        <div style={{ padding: '1rem 0rem' }}>
-          <Button
-            label='Copy'
-            icon='pi pi-copy'
-            className='p-button-raised p-button-secondary'
-            style={{ width: '100%' }}
-            onClick={() => {
-              navigator.clipboard.writeText(localIgvUrl);
-              toast?.show({
-                severity: 'success',
-                summary: 'URL has been copied',
-                life: 3000,
-              });
-            }}
-          />
+      const CopyLocalIGVLink = (
+        <div className='flex flex-column'>
+          <div>
+            {`Please make sure you have opened IGV app and try again. Otherwise, click "Copy" button
+            and open the URL in browser new tab.`}
+          </div>
+          <div className='mt-2'>
+            <Button
+              label='Copy'
+              icon='pi pi-copy'
+              className='p-button-raised p-button-secondary bg-orange-600 border-orange-700'
+              style={{ width: '100%' }}
+              onClick={() => {
+                navigator.clipboard.writeText(localIgvUrl);
+                toast?.show({
+                  severity: 'success',
+                  summary: 'URL has been copied',
+                  life: 3000,
+                });
+              }}
+            />
+          </div>
         </div>
-      </Dialog>;
+      );
+
+      toast?.show({
+        severity: 'warn',
+        summary: 'Unable to open IGV automatically',
+        detail: CopyLocalIGVLink,
+        sticky: true,
+      });
     }
   };
   xhr.send();
