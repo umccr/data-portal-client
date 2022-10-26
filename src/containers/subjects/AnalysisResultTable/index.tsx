@@ -48,15 +48,27 @@ const actionS3Template = (rowData: S3Row) => {
 };
 const fileSizeGDSTemplate = (rowData: Record<string, any>) => {
   const readableSize = getStringReadableBytes(rowData.size_in_bytes);
-  return <div className='white-space-nowrap overflow-visible'>{readableSize}</div>;
+  return (
+    <div className='white-space-nowrap overflow-visible' style={{ width: '75px' }}>
+      {readableSize}
+    </div>
+  );
 };
 const fileSizeS3Template = (rowData: Record<string, any>) => {
   const readableSize = getStringReadableBytes(rowData.size);
-  return <div className='white-space-nowrap overflow-visible'>{readableSize}</div>;
+  return (
+    <div className='white-space-nowrap overflow-visible' style={{ width: '75px' }}>
+      {readableSize}
+    </div>
+  );
 };
 const timeModifiedTemplate = (rowData: Record<string, any>) => {
   const readableTimeStamp = moment(rowData.last_modified_date).local().format('LLL');
-  return <div className='white-space-nowrap'>{readableTimeStamp}</div>;
+  return (
+    <div className='white-space-nowrap' style={{ width: '180px' }}>
+      {readableTimeStamp}
+    </div>
+  );
 };
 
 const previewGDSTemplate = (rowData: Record<string, any>) => {
@@ -64,12 +76,14 @@ const previewGDSTemplate = (rowData: Record<string, any>) => {
   const fileSizeInBytes = rowData.size_in_bytes;
 
   return (
-    <FilePreviewButton
-      id={rowData.id}
-      filename={filename}
-      fileSizeInBytes={fileSizeInBytes}
-      type='gds'
-    />
+    <div style={{ width: '15px' }}>
+      <FilePreviewButton
+        id={rowData.id}
+        filename={filename}
+        fileSizeInBytes={fileSizeInBytes}
+        type='gds'
+      />
+    </div>
   );
 };
 
@@ -78,12 +92,14 @@ const previewS3Template = (rowData: Record<string, any>) => {
   const fileSizeInBytes = rowData.size;
 
   return (
-    <FilePreviewButton
-      fileSizeInBytes={fileSizeInBytes}
-      id={rowData.id}
-      filename={filename}
-      type='s3'
-    />
+    <div style={{ width: '15px' }}>
+      <FilePreviewButton
+        fileSizeInBytes={fileSizeInBytes}
+        id={rowData.id}
+        filename={filename}
+        type='s3'
+      />
+    </div>
   );
 };
 
