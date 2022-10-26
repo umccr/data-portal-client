@@ -87,7 +87,12 @@ function TokenDialog(props: Props) {
 
   return (
     <>
-      <Toast ref={toast} position='top-center' className='opacity-100 w-6' />
+      <Toast
+        ref={toast}
+        position='top-center'
+        className='opacity-100 w-6'
+        style={{ maxWidth: '1000px' }}
+      />
       <Dialog
         header='Token'
         visible={isOpen}
