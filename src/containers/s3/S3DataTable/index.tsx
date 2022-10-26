@@ -12,7 +12,7 @@ import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
 import moment from 'moment';
 import DataActionButton from '../../../components/DataActionButton';
 import FilePreviewButton from '../../../components/FilePreviewButton';
-import { usePortalS3API } from '../../../api/s3';
+import { S3Row, usePortalS3API } from '../../../api/s3';
 import DataSearchFilterButton from '../../../components/DataSearchFilterButton';
 
 type Props = { defaultQueryParam: { search?: string } & Record<string, string | number> };
@@ -87,9 +87,8 @@ export default S3DataTable;
 /**
  * TABLE COLUMN PROPERTIES
  */
-type ObjectWithIdType = { id: number } & Record<string, string>;
-const textBodyTemplate = (text: string | number | null): React.ReactNode => {
-  return <div>{text}</div>;
+const textBodyTemplate = (text: string | number | boolean | null): React.ReactNode => {
+  return <div>{text?.toString()}</div>;
 };
 const column_to_display: string[] = [
   'bucket',
@@ -112,7 +111,7 @@ for (const column of column_to_display) {
         {showDisplayText(column)}
       </p>
     ),
-    body: (rowData: ObjectWithIdType): React.ReactNode => {
+    body: (rowData: S3Row): React.ReactNode => {
       return textBodyTemplate(rowData[column]);
     },
     className: 'text-left white-space-nowrap',
@@ -123,9 +122,8 @@ for (const column of column_to_display) {
     newColToShow = {
       ...newColToShow,
       className: 'text-center white-space-nowrap overflow-visible',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      body: (rowData: any): React.ReactNode => {
-        const filename = rowData.key.split('/').pop();
+      body: (rowData: S3Row): React.ReactNode => {
+        const filename = rowData.key.split('/').pop() ?? rowData.key;
         const fileSizeInBytes = rowData.size;
         return (
           <FilePreviewButton
@@ -140,15 +138,22 @@ for (const column of column_to_display) {
   } else if (column == 'action') {
     newColToShow = {
       ...newColToShow,
-      body: (rowData: ObjectWithIdType): React.ReactNode => {
-        return <DataActionButton id={rowData.id} type='s3' pathOrKey={rowData.key} />;
+      body: (rowData: S3Row): React.ReactNode => {
+        return (
+          <DataActionButton
+            id={rowData.id}
+            type='s3'
+            pathOrKey={rowData.key}
+            bucketOrVolume={rowData.bucket}
+          />
+        );
       },
       className: 'text-center white-space-nowrap',
     };
   } else if (column == 'size') {
     newColToShow = {
       ...newColToShow,
-      body: (rowData: ObjectWithIdType): React.ReactNode => {
+      body: (rowData: S3Row): React.ReactNode => {
         let sizeNumber = 0;
         if (typeof rowData.size == 'string') {
           sizeNumber = parseInt(rowData.size);
@@ -161,7 +166,7 @@ for (const column of column_to_display) {
   } else if (column == 'last_modified_date') {
     newColToShow = {
       ...newColToShow,
-      body: (rowData: ObjectWithIdType): React.ReactNode => {
+      body: (rowData: S3Row): React.ReactNode => {
         return textBodyTemplate(moment(rowData.last_modified_date).local().format('LLL'));
       },
     };

@@ -13,7 +13,7 @@ export type S3Row = {
   last_modified_date: string;
   e_tag: string;
   unique_hash: string;
-};
+} & Record<string, string>;
 
 export type S3ApiData = DjangoRestApiResponse & { results: S3Row[] };
 
@@ -65,7 +65,7 @@ export async function getS3Status(s3Id: string | number): Promise<S3StatusData> 
     const isArchived = head_object['StorageClass'] === 'DEEP_ARCHIVE';
     const restoreStatus = head_object['Restore'];
 
-    if (isArchived && !restoreStatus) {
+    if (isArchived || !restoreStatus) {
       return S3StatusData.ARCHIVED;
     }
 

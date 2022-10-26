@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { usePortalGDSAPI } from '../../../api/gds';
+import { GDSRow, usePortalGDSAPI } from '../../../api/gds';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import DataTableWrapper, {
   PaginationProps,
@@ -85,9 +85,8 @@ export default GDSDataTable;
 /**
  * TABLE COLUMN PROPERTIES
  */
-type ObjectWithIdType = { id: number } & Record<string, string>;
-const textBodyTemplate = (text: string | number | null): React.ReactNode => {
-  return <div>{text}</div>;
+const textBodyTemplate = (text: string | number | boolean | null): React.ReactNode => {
+  return <div>{text?.toString()}</div>;
 };
 const column_to_display: string[] = [
   'volume_name',
@@ -95,7 +94,7 @@ const column_to_display: string[] = [
   'preview',
   'action',
   'size_in_bytes',
-  'last_modified_date',
+  'time_modified',
 ];
 const columnList: ColumnProps[] = [];
 
@@ -109,7 +108,7 @@ for (const column of column_to_display) {
         {showDisplayText(column)}
       </p>
     ),
-    body: (rowData: ObjectWithIdType): React.ReactNode => {
+    body: (rowData: GDSRow): React.ReactNode => {
       return textBodyTemplate(rowData[column]);
     },
     className: 'text-left white-space-nowrap',
@@ -141,15 +140,22 @@ for (const column of column_to_display) {
   } else if (column == 'action') {
     newColToShow = {
       ...newColToShow,
-      body: (rowData: ObjectWithIdType): React.ReactNode => {
-        return <DataActionButton id={rowData.id} type='gds' pathOrKey={rowData.key} />;
+      body: (rowData: GDSRow): React.ReactNode => {
+        return (
+          <DataActionButton
+            id={rowData.id}
+            type='gds'
+            pathOrKey={rowData.path}
+            bucketOrVolume={rowData.volume_name}
+          />
+        );
       },
       className: 'text-center white-space-nowrap overflow-visible',
     };
   } else if (column == 'size_in_bytes') {
     newColToShow = {
       ...newColToShow,
-      body: (rowData: ObjectWithIdType): React.ReactNode => {
+      body: (rowData: GDSRow): React.ReactNode => {
         let sizeNumber = 0;
         if (typeof rowData.size_in_bytes == 'string') {
           sizeNumber = parseInt(rowData.size_in_bytes);
@@ -159,11 +165,11 @@ for (const column of column_to_display) {
         return textBodyTemplate(getStringReadableBytes(sizeNumber));
       },
     };
-  } else if (column == 'last_modified_date') {
+  } else if (column == 'time_modified') {
     newColToShow = {
       ...newColToShow,
-      body: (rowData: ObjectWithIdType): React.ReactNode => {
-        return textBodyTemplate(moment(rowData.last_modified_date).local().format('LLL'));
+      body: (rowData: GDSRow): React.ReactNode => {
+        return textBodyTemplate(moment(rowData.time_modified).local().format('LLL'));
       },
     };
   }

@@ -159,7 +159,7 @@ async function checkGPLTriggerAllow(s3Results: S3Row[]): Promise<GplLaunchCheckT
   const s3IdStatus = await getS3Status(id);
   if (s3IdStatus == S3StatusData.ERROR) {
     gplCheck.isGplLaunchAllowed = false;
-    gplCheck.message = 'An error has occured on checking S3 Data.';
+    gplCheck.message = 'An error has occurred on checking S3 Data.';
     return gplCheck;
   }
 

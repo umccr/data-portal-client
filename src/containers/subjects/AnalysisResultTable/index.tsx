@@ -8,6 +8,8 @@ import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import DataActionButton from '../../../components/DataActionButton';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
+import { S3Row } from '../../../api/s3';
+import { GDSRow } from '../../../api/gds';
 
 // Creating Table
 type AnalysisResultGDSTableProps = {
@@ -23,12 +25,26 @@ const filenameTemplate = (rowData: Record<string, any>) => {
   return <div className='white-space-nowrap'>{filename}</div>;
 };
 
-const actionGDSTemplate = (rowData: Record<string, any>) => {
-  return <DataActionButton type='gds' pathOrKey={rowData.path} id={rowData.id} />;
+const actionGDSTemplate = (rowData: GDSRow) => {
+  return (
+    <DataActionButton
+      type='gds'
+      pathOrKey={rowData.path}
+      id={rowData.id}
+      bucketOrVolume={rowData.volume_name}
+    />
+  );
 };
 
-const actionS3Template = (rowData: Record<string, any>) => {
-  return <DataActionButton type='s3' pathOrKey={rowData.key} id={rowData.id} />;
+const actionS3Template = (rowData: S3Row) => {
+  return (
+    <DataActionButton
+      type='s3'
+      pathOrKey={rowData.key}
+      id={rowData.id}
+      bucketOrVolume={rowData.bucket}
+    />
+  );
 };
 const fileSizeGDSTemplate = (rowData: Record<string, any>) => {
   const readableSize = getStringReadableBytes(rowData.size_in_bytes);
