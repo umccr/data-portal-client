@@ -3,7 +3,7 @@
   "version": "2.0.0-rc.1",
   "private": true,
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "scripts": {
     "start": "source start.sh",
