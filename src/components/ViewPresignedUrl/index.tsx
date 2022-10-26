@@ -9,14 +9,14 @@ import './index.css';
 
 export const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 export const HTML_FILETYPE_LIST: string[] = ['html'];
-export const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
+export const DELIMITER_SEPARATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
 export const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
 export const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
 
 export const DATA_TYPE_SUPPORTED = [
   ...IMAGE_FILETYPE_LIST,
   ...HTML_FILETYPE_LIST,
-  ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
+  ...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST,
   ...PLAIN_FILETYPE_LIST,
   ...OTHER_FILETYPE_LIST,
 ];
@@ -140,7 +140,7 @@ function ViewPresignedUrl({ presingedUrl }: Props) {
     }
 
     if (
-      [...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST, ...PLAIN_FILETYPE_LIST, 'yaml'].includes(
+      [...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST, ...PLAIN_FILETYPE_LIST, 'yaml'].includes(
         filetype
       )
     ) {

@@ -1,6 +1,5 @@
 import React from 'react';
 import moment from 'moment';
-import API from '@aws-amplify/api';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';

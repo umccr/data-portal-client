@@ -48,7 +48,7 @@ function DataTableWrapper(props: DataTableWrapperProps) {
   } = props;
 
   const additionalDataTableProps = { ...overrideDataTableProps };
-  // Pagination could be undefined (if not needed or dont't want it)
+  // Pagination could be undefined (if not needed or don't want it)
   // This will guard if pagination props exist and could be mounter to the UI
   if (paginationProps && handlePaginationPropsChange) {
     const { firstIndexNumberAppearOnCurrentTable, currentNumberOfRows, totalNumberOfItems } =
@@ -58,7 +58,7 @@ function DataTableWrapper(props: DataTableWrapperProps) {
     additionalDataTableProps['first'] = firstIndexNumberAppearOnCurrentTable;
     additionalDataTableProps['rows'] = currentNumberOfRows;
     additionalDataTableProps['totalRecords'] = totalNumberOfItems;
-    additionalDataTableProps['rowsPerPageOptions'] = [10, 25, 50, 100];
+    additionalDataTableProps['rowsPerPageOptions'] = [50, 100, 200];
     additionalDataTableProps['onPage'] = handlePaginationPropsChange;
     additionalDataTableProps['paginatorTemplate'] =
       'CurrentPageReport RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink';
@@ -85,8 +85,8 @@ function DataTableWrapper(props: DataTableWrapperProps) {
       resizableColumns
       columnResizeMode='fit'
       {...additionalDataTableProps}>
-      {columns.map((columpProperties, i) => {
-        return <Column key={i} {...columpProperties} />;
+      {columns.map((columnProperties, i) => {
+        return <Column key={i} {...columnProperties} />;
       })}
     </DataTable>
   );
@@ -149,7 +149,7 @@ export const InfoDialogColumnProps: ColumnProps = {
  */
 export const paginationPropsInitValue: PaginationProps = {
   firstIndexNumberAppearOnCurrentTable: 0,
-  currentNumberOfRows: 10,
+  currentNumberOfRows: 50,
   totalNumberOfItems: 0, // Must set to 0, or will cause unwanted pagination clicks
 };
 

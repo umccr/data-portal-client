@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import API from '@aws-amplify/api';
-import { useQuery } from 'react-query';
 import { Card } from 'primereact/card';
 import { ColumnProps } from 'primereact/column';
 import { Link } from 'react-router-dom';
@@ -44,14 +42,14 @@ function MetadataTable() {
     setApiQueryParameter((prev) => ({ ...prev, ...paginationProps }));
   };
 
-  // Soriting mechanism
+  // Sorting mechanism
   const sorting = convertDjangoSortParamToDataTableProp(apiQueryParameter);
   const handleTableSortPropChange = (event: DataTablePFSEvent) => {
-    const djangoSoringQuery = convertDjangoStateToDjangoQuery({
+    const djangoSortingQuery = convertDjangoStateToDjangoQuery({
       sortOrder: event.sortOrder,
       sortField: event.sortField,
     });
-    setApiQueryParameter((prev) => ({ ...prev, ...djangoSoringQuery }));
+    setApiQueryParameter((prev) => ({ ...prev, ...djangoSortingQuery }));
   };
 
   // Data states
@@ -121,7 +119,9 @@ function MetadataTable() {
         ...newColToShow,
         body: (rowData: any): React.ReactNode => {
           return (
-            <Link to={`/subjects/${rowData.subject_id}`}>{textBodyTemplate(rowData[column])}</Link>
+            <Link to={`/subjects/${rowData.subject_id}/overview`}>
+              {textBodyTemplate(rowData[column])}
+            </Link>
           );
         },
       };
