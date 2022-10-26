@@ -194,6 +194,8 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
       detail: `${s3LocalIgvUrl.error}`,
       sticky: true,
     });
+    handleIsOpen(false);
+    return <></>;
   }
   if (gdsLocalIgvUrl.isError && gdsLocalIgvUrl.error) {
     toast?.show({
@@ -202,6 +204,8 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
       detail: `${gdsLocalIgvUrl.error}`,
       sticky: true,
     });
+    handleIsOpen(false);
+    return <></>;
   }
 
   const xhr = new XMLHttpRequest();
