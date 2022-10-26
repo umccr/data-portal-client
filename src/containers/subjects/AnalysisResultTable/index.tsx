@@ -148,7 +148,6 @@ type Props = { subjectId: string };
 
 function AnalysisResultsPanel({ subjectId }: Props) {
   const { isFetching, isLoading, data } = usePortalSubjectDataAPI(subjectId);
-  console.log(data);
 
   if (isLoading || isFetching) {
     return <CircularLoaderWithText />;
