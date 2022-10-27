@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Menu } from 'primereact/menu';
 import { MenuItem } from 'primereact/menuitem';
 import { Button } from 'primereact/button';
@@ -76,7 +76,11 @@ function DataActionButton(props: DataActionButtonProps) {
       {isPresignedUrlDialog ? (
         <PresignedUrlDialog {...props} handleIsOpen={handleIsPresignedUrlDialogChange} />
       ) : isIGVDesktopOpen ? (
-        <OpenIGVDesktop {...props} handleIsOpen={handleIsIGVDesktopOpen} />
+        <OpenIGVDesktop
+          {...props}
+          isOpen={isIGVDesktopOpen}
+          handleIsOpen={handleIsIGVDesktopOpen}
+        />
       ) : (
         <></>
       )}
@@ -149,17 +153,20 @@ const constructS3LocalIgvUrl = async (props: {
   return `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${name}`;
 };
 
-type OpenIGVDesktopType = DataActionButtonProps & { handleIsOpen: (val: boolean) => void };
+type OpenIGVDesktopType = DataActionButtonProps & {
+  isOpen: boolean;
+  handleIsOpen: (val: boolean) => void;
+};
 function OpenIGVDesktop(props: OpenIGVDesktopType) {
   const toast = useToastContext();
 
-  const { id, bucketOrVolume, pathOrKey, type, handleIsOpen } = props;
+  const { id, bucketOrVolume, pathOrKey, type, isOpen, handleIsOpen } = props;
 
   const gdsLocalIgvUrl = useQuery(
     ['gds-local-igv', bucketOrVolume, pathOrKey],
     async () =>
       await constructGDSLocalIgvUrl({ bucketOrVolume: bucketOrVolume, pathOrKey: pathOrKey }),
-    { enabled: type == 'gds' }
+    { enabled: type == 'gds' && isOpen, retry: false }
   );
 
   const s3LocalIgvUrl = useQuery(
@@ -170,96 +177,93 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
         bucketOrVolume: bucketOrVolume,
         pathOrKey: pathOrKey,
       }),
-    { enabled: type == 's3' }
+    { enabled: type == 's3' && isOpen, retry: false }
   );
 
-  if (gdsLocalIgvUrl.isLoading || s3LocalIgvUrl.isLoading) {
-    return (
-      <Dialog
-        header='Opening in IGV Desktop'
-        visible={true}
-        style={{ width: '50vw' }}
-        draggable={false}
-        resizable={false}
-        onHide={() => handleIsOpen(false)}>
-        <CircularLoaderWithText />
-      </Dialog>
-    );
-  }
-
-  if (s3LocalIgvUrl.isError && s3LocalIgvUrl.error) {
-    toast?.show({
-      severity: 'error',
-      summary: 'Error on locating object URL.',
-      detail: `${s3LocalIgvUrl.error}`,
-      sticky: true,
-    });
-    handleIsOpen(false);
-    return <></>;
-  }
-  if (gdsLocalIgvUrl.isError && gdsLocalIgvUrl.error) {
-    toast?.show({
-      severity: 'error',
-      summary: 'Error on locating object URL.',
-      detail: `${gdsLocalIgvUrl.error}`,
-      sticky: true,
-    });
-    handleIsOpen(false);
-    return <></>;
-  }
-
-  const xhr = new XMLHttpRequest();
-
-  let localIgvUrl: string;
-
-  if (type == 'gds' && gdsLocalIgvUrl.data) {
-    localIgvUrl = gdsLocalIgvUrl.data;
-  } else if (type == 's3' && s3LocalIgvUrl.data) {
-    localIgvUrl = s3LocalIgvUrl.data;
-  } else {
-    localIgvUrl = '';
-  }
-
-  xhr.open('GET', localIgvUrl, true);
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4 && xhr.status === 0) {
-      const CopyLocalIGVLink = (
-        <div className='flex flex-column'>
-          <div>
-            {`Please make sure you have opened IGV app and try again. Otherwise, click "Copy" button
-            and open the URL in browser new tab.`}
-          </div>
-          <div className='mt-2'>
-            <Button
-              label='Copy'
-              icon='pi pi-copy'
-              className='p-button-raised p-button-secondary bg-orange-600 border-orange-700'
-              style={{ width: '100%' }}
-              onClick={() => {
-                navigator.clipboard.writeText(localIgvUrl);
-                toast?.show({
-                  severity: 'success',
-                  summary: 'URL has been copied',
-                  life: 3000,
-                });
-              }}
-            />
-          </div>
-        </div>
-      );
-
+  useEffect(() => {
+    if (s3LocalIgvUrl.isError && s3LocalIgvUrl.error) {
       toast?.show({
-        severity: 'warn',
-        summary: 'Unable to open IGV automatically',
-        detail: CopyLocalIGVLink,
+        severity: 'error',
+        summary: 'Error on locating object URL.',
+        detail: `${s3LocalIgvUrl.error}`,
         sticky: true,
       });
+      handleIsOpen(false);
     }
-  };
-  xhr.send();
+    if (gdsLocalIgvUrl.isError && gdsLocalIgvUrl.error) {
+      toast?.show({
+        severity: 'error',
+        summary: 'Error on locating object URL.',
+        detail: `${gdsLocalIgvUrl.error}`,
+        life: 10000,
+      });
 
-  handleIsOpen(false);
-  return <></>;
+      handleIsOpen(false);
+    }
+  }, [s3LocalIgvUrl.isError, s3LocalIgvUrl.error, gdsLocalIgvUrl.isError, gdsLocalIgvUrl.error]);
+
+  useEffect(() => {
+    let localIgvUrl: string;
+    if (type == 'gds' && gdsLocalIgvUrl.data) {
+      localIgvUrl = gdsLocalIgvUrl.data;
+    } else if (type == 's3' && s3LocalIgvUrl.data) {
+      localIgvUrl = s3LocalIgvUrl.data;
+    } else {
+      localIgvUrl = '';
+    }
+    if (localIgvUrl && localIgvUrl != '') {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', localIgvUrl, true);
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4 && xhr.status === 0) {
+          const CopyLocalIGVLink = (
+            <div className='flex flex-column'>
+              <div>
+                {`Please make sure you have opened IGV app and try again. Otherwise, click "Copy" button
+            and open the URL in browser new tab.`}
+              </div>
+              <div className='mt-2'>
+                <Button
+                  label='Copy'
+                  icon='pi pi-copy'
+                  className='p-button-raised p-button-secondary bg-orange-600 border-orange-700'
+                  style={{ width: '100%' }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(localIgvUrl);
+                    toast?.show({
+                      severity: 'success',
+                      summary: 'URL has been copied',
+                      life: 3000,
+                    });
+                  }}
+                />
+              </div>
+            </div>
+          );
+          toast?.show({
+            severity: 'warn',
+            summary: 'Unable to open IGV automatically',
+            detail: CopyLocalIGVLink,
+            sticky: true,
+          });
+          handleIsOpen(false);
+        }
+      };
+      xhr.send();
+    }
+  }, [gdsLocalIgvUrl.data, s3LocalIgvUrl.data]);
+
+  return (
+    <Dialog
+      header='Opening in IGV Desktop'
+      visible={isOpen}
+      style={{ width: '50vw' }}
+      draggable={false}
+      resizable={false}
+      onHide={() => handleIsOpen(false)}>
+      <CircularLoaderWithText />
+    </Dialog>
+  );
 }
 
 /**
