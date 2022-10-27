@@ -1,26 +1,23 @@
-import React, { useRef, useState, useEffect, createContext, useContext } from 'react';
-import { Toast } from 'primereact/toast';
+import React, { useRef, createContext, useContext, useCallback } from 'react';
+import { Toast, ToastMessageType } from 'primereact/toast';
 
 /**
  * Create ToastContext
  */
-const ToastContext = createContext<Toast | null>(null);
+const ToastContext = createContext<{
+  toastShow: (m: ToastMessageType) => void;
+  toastReplace: (m: ToastMessageType) => void;
+}>({
+  toastShow: () => undefined,
+  toastReplace: () => undefined,
+});
 
 type Props = { children: React.ReactNode };
 function ToastProvider(props: Props) {
   const toastRef = useRef<Toast>(null);
 
-  // To refresh when toastRef change
-  // Ref: https://stackoverflow.com/questions/57573148/how-correctly-pass-a-node-from-a-ref-to-a-context
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [toastRefState, setToastRefState] = useState<Toast | null>(null);
-  useEffect(() => {
-    if (!toastRef.current) {
-      return;
-    }
-    setToastRefState(toastRef.current);
-  }, []);
-
+  const toastShow = useCallback((m: ToastMessageType) => toastRef.current?.show(m), []);
+  const toastReplace = useCallback((m: ToastMessageType) => toastRef.current?.replace(m), []);
   return (
     <>
       <Toast
@@ -29,7 +26,9 @@ function ToastProvider(props: Props) {
         className='opacity-100 w-6'
         style={{ maxWidth: '1000px' }}
       />
-      <ToastContext.Provider value={toastRef.current}>{props.children}</ToastContext.Provider>
+      <ToastContext.Provider value={{ toastShow: toastShow, toastReplace: toastReplace }}>
+        {props.children}
+      </ToastContext.Provider>
     </>
   );
 }

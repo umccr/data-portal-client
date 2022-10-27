@@ -36,14 +36,14 @@ function DataActionButton(props: DataActionButtonProps) {
   const handleIsIGVDesktopOpen = useCallback((b: boolean) => setIsIGVDesktopOpen(b), []);
 
   const menu = useRef<Menu>(null);
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
   const items: MenuItem[] = [
     {
       label: 'Copy Path',
       icon: 'pi pi-copy',
       command: () => {
         navigator.clipboard.writeText(pathOrKey);
-        toast?.show({
+        toastShow({
           severity: 'success',
           summary: 'Path Copied',
           life: 3000,
@@ -158,7 +158,7 @@ type OpenIGVDesktopType = DataActionButtonProps & {
   handleIsOpen: (val: boolean) => void;
 };
 function OpenIGVDesktop(props: OpenIGVDesktopType) {
-  const toast = useToastContext();
+  const { toastShow, toastReplace } = useToastContext();
 
   const { id, bucketOrVolume, pathOrKey, type, isOpen, handleIsOpen } = props;
 
@@ -182,7 +182,7 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
 
   useEffect(() => {
     if (s3LocalIgvUrl.isError && s3LocalIgvUrl.error) {
-      toast?.show({
+      toastShow({
         severity: 'error',
         summary: 'Error on locating object URL.',
         detail: `${s3LocalIgvUrl.error}`,
@@ -191,7 +191,7 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
       handleIsOpen(false);
     }
     if (gdsLocalIgvUrl.isError && gdsLocalIgvUrl.error) {
-      toast?.show({
+      toastShow({
         severity: 'error',
         summary: 'Error on locating object URL.',
         detail: `${gdsLocalIgvUrl.error}`,
@@ -230,17 +230,17 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
                   style={{ width: '100%' }}
                   onClick={() => {
                     navigator.clipboard.writeText(localIgvUrl);
-                    toast?.show({
+                    toastReplace({
                       severity: 'success',
                       summary: 'URL has been copied',
-                      life: 3000,
+                      life: 5000,
                     });
                   }}
                 />
               </div>
             </div>
           );
-          toast?.show({
+          toastShow({
             severity: 'warn',
             summary: 'Unable to open IGV automatically',
             detail: CopyLocalIGVLink,
@@ -279,7 +279,7 @@ const keyTemplate = (rowData: rowDataType) => {
 };
 type PresignedUrlDialogProps = { id: number; type: string; handleIsOpen: (val: boolean) => void };
 function PresignedUrlDialog(props: PresignedUrlDialogProps) {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   const { id, type, handleIsOpen } = props;
   const { isLoading, isError, data } = useQuery('fetchDataPresignedUrl', () => {
@@ -330,7 +330,7 @@ function PresignedUrlDialog(props: PresignedUrlDialogProps) {
               style={{ width: '100%' }}
               onClick={() => {
                 navigator.clipboard.writeText(data);
-                toast?.show({
+                toastShow({
                   severity: 'success',
                   summary: 'Path has been copied',
                   life: 3000,
