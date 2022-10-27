@@ -11,7 +11,7 @@ import { usePortalSequenceAPI } from '../../../api/sequence';
 type Props = { runId: string };
 
 function RunOverviewTable({ runId }: Props) {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
   const navigate = useNavigate();
 
   const [inputRunId, setInputRunId] = useState<string>(runId);
@@ -27,7 +27,7 @@ function RunOverviewTable({ runId }: Props) {
   }
 
   if (runsQuery.isError || sequenceQuery.isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

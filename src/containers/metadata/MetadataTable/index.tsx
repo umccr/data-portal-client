@@ -21,7 +21,7 @@ import './index.css';
 import { InputText } from 'primereact/inputtext';
 
 function MetadataTable() {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   // Search Bar
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -62,7 +62,7 @@ function MetadataTable() {
   });
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

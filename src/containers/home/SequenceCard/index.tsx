@@ -5,12 +5,12 @@ import { useToastContext } from '../../../providers/ToastProvider';
 import { usePortalSequenceAPI } from '../../../api/sequence';
 
 function SequenceHomeCard() {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   const { isFetching, isLoading, isError, data } = usePortalSequenceAPI({});
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

@@ -34,7 +34,7 @@ async function getPreSignedUrlData(url: string) {
 
 type Props = { presingedUrl: string };
 function ViewPresignedUrl({ presingedUrl }: Props) {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   let pathname = '';
   try {
@@ -97,7 +97,7 @@ function ViewPresignedUrl({ presingedUrl }: Props) {
     }
 
     if (isError) {
-      toast?.show({
+      toastShow({
         severity: 'error',
         summary: 'Something went wrong!',
         detail: 'Unable to load presignedUrl content.',

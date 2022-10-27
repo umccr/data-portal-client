@@ -26,7 +26,7 @@ type Props = { subjectId: string };
 function SampleInformationTable(props: Props) {
   const { subjectId } = props;
   let subjectLimsList: ObjectStringValType[] = [];
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   // Dialog properties
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -44,7 +44,7 @@ function SampleInformationTable(props: Props) {
   const { isLoading, isError, data } = he;
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

@@ -23,7 +23,7 @@ function SubjectOverviewTable(props: Props) {
   const { subjectId } = props;
   let subjectOverview: JsonOfArrayType = {};
 
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   const { isLoading, isError, data } = usePortalSubjectDataAPI(subjectId);
 
@@ -32,7 +32,7 @@ function SubjectOverviewTable(props: Props) {
   }
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

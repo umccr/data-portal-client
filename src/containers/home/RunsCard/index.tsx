@@ -6,12 +6,12 @@ import { usePortalRunsAPI } from '../../../api/run';
 import { Link } from 'react-router-dom';
 
 function RunHomeCard() {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   const { isFetching, isLoading, isError, data } = usePortalRunsAPI({});
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

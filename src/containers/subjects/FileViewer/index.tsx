@@ -54,7 +54,7 @@ const PIPELINE_OPTIONS_LIST: pipelineOptionType[] = [
 
 type Props = { subjectId: string };
 function FileViewer({ subjectId }: Props) {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   const [selectedFilter, setSelectedFilter] =
     useState<pipelineOptionType>(DEFAULT_PIPELINE_OPTIONS);
@@ -77,7 +77,7 @@ function FileViewer({ subjectId }: Props) {
   const s3Data: S3ApiData = s3QueryRes.data;
 
   if (s3QueryRes.isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

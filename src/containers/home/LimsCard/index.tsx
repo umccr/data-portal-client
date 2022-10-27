@@ -6,12 +6,12 @@ import { Link } from 'react-router-dom';
 import { usePortalLimsAPI } from '../../../api/lims';
 
 function LimsHomeCard() {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   const { isFetching, isLoading, isError, data } = usePortalLimsAPI({});
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

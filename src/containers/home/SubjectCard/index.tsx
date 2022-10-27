@@ -6,12 +6,12 @@ import { Link } from 'react-router-dom';
 import { usePortalSubjectAPI } from '../../../api/subject';
 
 function SubjectHomeCard() {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   const { isFetching, isLoading, isError, data } = usePortalSubjectAPI({});
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

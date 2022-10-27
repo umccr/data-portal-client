@@ -20,7 +20,7 @@ import { InputText } from 'primereact/inputtext';
 
 type Props = { defaultQueryParam?: Record<string, string | number> };
 function LIMSTable({ defaultQueryParam }: Props) {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   // Search Bar
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -62,7 +62,7 @@ function LIMSTable({ defaultQueryParam }: Props) {
   });
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

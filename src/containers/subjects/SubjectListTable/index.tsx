@@ -14,7 +14,7 @@ import { usePortalSubjectAPI } from '../../../api/subject';
 import './index.css';
 
 function SubjectListTable() {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
   const navigate = useNavigate();
 
   // Pagination Properties
@@ -48,7 +48,7 @@ function SubjectListTable() {
   }
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',

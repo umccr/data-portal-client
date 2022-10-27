@@ -17,7 +17,7 @@ import DataSearchFilterButton from '../../../components/DataSearchFilterButton';
 
 type Props = { defaultQueryParam: { search?: string } & Record<string, string | number> };
 function GDSDataTable({ defaultQueryParam }: Props) {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   // Search
   const defaultSearch: string | undefined = defaultQueryParam['search'];
@@ -46,7 +46,7 @@ function GDSDataTable({ defaultQueryParam }: Props) {
   });
 
   if (isError) {
-    toast?.show({
+    toastShow({
       severity: 'error',
       summary: 'Something went wrong!',
       detail: 'Unable to fetch data from Portal API',
