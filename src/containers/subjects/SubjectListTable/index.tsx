@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from 'primereact/button';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -47,14 +47,16 @@ function SubjectListTable() {
     paginationProps = djangoToTablePaginationFormat(data.pagination);
   }
 
-  if (isError) {
-    toastShow({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
-  }
+  useEffect(() => {
+    if (isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [isError]);
 
   // Column Templates
   const SubjectTemplate = (rowData: subjectObjectList) => {

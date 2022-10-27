@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card } from 'primereact/card';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
@@ -9,14 +9,16 @@ function SequenceHomeCard() {
 
   const { isFetching, isLoading, isError, data } = usePortalSequenceAPI({});
 
-  if (isError) {
-    toastShow({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
-  }
+  useEffect(() => {
+    if (isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [isError]);
 
   let totalSequenceCount = 0;
   if (data) totalSequenceCount = data.pagination.count;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ColumnProps } from 'primereact/column';
 import { DataTablePFSEvent } from 'primereact/datatable';
 
@@ -61,14 +61,16 @@ function LIMSTable({ defaultQueryParam }: Props) {
     },
   });
 
-  if (isError) {
-    toastShow({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
-  }
+  useEffect(() => {
+    if (isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [isError]);
 
   if (data && !isFetching && !isLoading) {
     limsDataList = data.results;

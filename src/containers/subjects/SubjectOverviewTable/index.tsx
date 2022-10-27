@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 // Custom component
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
@@ -27,18 +27,21 @@ function SubjectOverviewTable(props: Props) {
 
   const { isLoading, isError, data } = usePortalSubjectDataAPI(subjectId);
 
+  useEffect(() => {
+    if (isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [isError]);
+
   if (isLoading) {
     return <CircularLoaderWithText />;
   }
 
-  if (isError) {
-    toastShow({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
-  }
   if (data && !isLoading) {
     subjectOverview = convertArrayOfJsonToJsonOfArray(data.lims);
   }

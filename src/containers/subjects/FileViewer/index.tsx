@@ -76,14 +76,16 @@ function FileViewer({ subjectId }: Props) {
   });
   const s3Data: S3ApiData = s3QueryRes.data;
 
-  if (s3QueryRes.isError) {
-    toastShow({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
-  }
+  useEffect(() => {
+    if (s3QueryRes.isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [s3QueryRes.isError]);
 
   useEffect(() => {
     let componentUnmount = false;

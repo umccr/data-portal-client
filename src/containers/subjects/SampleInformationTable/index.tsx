@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ColumnProps } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
@@ -40,17 +40,18 @@ function SampleInformationTable(props: Props) {
     setIsDialogOpen(false);
   };
 
-  const he = usePortalSubjectDataAPI(subjectId);
-  const { isLoading, isError, data } = he;
+  const { isLoading, isError, data } = usePortalSubjectDataAPI(subjectId);
 
-  if (isError) {
-    toastShow({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
-  }
+  useEffect(() => {
+    if (isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [isError]);
 
   if (data && !isLoading) {
     subjectLimsList = data.lims;

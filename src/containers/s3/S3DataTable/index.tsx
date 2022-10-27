@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import DataTableWrapper, {
   PaginationProps,
@@ -46,14 +46,16 @@ function S3DataTable({ defaultQueryParam }: Props) {
     },
   });
 
-  if (isError) {
-    toastShow({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
-  }
+  useEffect(() => {
+    if (isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [isError]);
 
   if (data && !isFetching && !isLoading) {
     subjectDataList = data.results;

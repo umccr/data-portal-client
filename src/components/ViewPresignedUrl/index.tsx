@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../CircularLoaderWithText';
@@ -92,17 +92,19 @@ function ViewPresignedUrl({ presingedUrl }: Props) {
       { enabled: isDownloadable }
     );
 
+    useEffect(() => {
+      if (isError) {
+        toastShow({
+          severity: 'error',
+          summary: 'Something went wrong!',
+          detail: 'Unable to load presignedUrl content.',
+          life: 3000,
+        });
+      }
+    }, [isError]);
+
     if (isLoading || isFetching || !data) {
       return <CircularLoaderWithText text='Fetching Content' />;
-    }
-
-    if (isError) {
-      toastShow({
-        severity: 'error',
-        summary: 'Something went wrong!',
-        detail: 'Unable to load presignedUrl content.',
-        life: 3000,
-      });
     }
 
     if (filetype == 'json') {
