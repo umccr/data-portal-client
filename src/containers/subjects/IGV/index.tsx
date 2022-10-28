@@ -45,7 +45,9 @@ function IGV({ subjectId }: Props) {
         initRefGenome: refGenome,
         oAuthToken: cognitoUser.getSignInUserSession().getIdToken().getJwtToken(),
       }),
-    {}
+    {
+      refetchOnMount: true,
+    }
   );
   const igvBrowser = igv.data;
 
