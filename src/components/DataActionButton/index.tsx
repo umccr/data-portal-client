@@ -158,7 +158,7 @@ type OpenIGVDesktopType = DataActionButtonProps & {
   handleIsOpen: (val: boolean) => void;
 };
 function OpenIGVDesktop(props: OpenIGVDesktopType) {
-  const { toastShow, toastReplace } = useToastContext();
+  const { toastShow } = useToastContext();
 
   const { id, bucketOrVolume, pathOrKey, type, isOpen, handleIsOpen } = props;
 
@@ -230,10 +230,10 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
                   style={{ width: '100%' }}
                   onClick={() => {
                     navigator.clipboard.writeText(localIgvUrl);
-                    toastReplace({
+                    toastShow({
                       severity: 'success',
                       summary: 'URL has been copied',
-                      life: 5000,
+                      life: 3000,
                     });
                   }}
                 />

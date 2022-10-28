@@ -6,10 +6,8 @@ import { Toast, ToastMessageType } from 'primereact/toast';
  */
 const ToastContext = createContext<{
   toastShow: (m: ToastMessageType) => void;
-  toastReplace: (m: ToastMessageType) => void;
 }>({
   toastShow: () => undefined,
-  toastReplace: () => undefined,
 });
 
 type Props = { children: React.ReactNode };
@@ -17,7 +15,6 @@ function ToastProvider(props: Props) {
   const toastRef = useRef<Toast>(null);
 
   const toastShow = useCallback((m: ToastMessageType) => toastRef.current?.show(m), []);
-  const toastReplace = useCallback((m: ToastMessageType) => toastRef.current?.replace(m), []);
   return (
     <>
       <Toast
@@ -26,7 +23,7 @@ function ToastProvider(props: Props) {
         className='opacity-100 w-6'
         style={{ maxWidth: '1000px' }}
       />
-      <ToastContext.Provider value={{ toastShow: toastShow, toastReplace: toastReplace }}>
+      <ToastContext.Provider value={{ toastShow: toastShow }}>
         {props.children}
       </ToastContext.Provider>
     </>
