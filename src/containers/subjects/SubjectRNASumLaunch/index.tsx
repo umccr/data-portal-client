@@ -27,7 +27,7 @@ type Props = {
 };
 
 function SubjectRNASumLaunch({ subjectId }: Props) {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   const [projectSelected, setProjectSelected] = useState<string>('');
   const [isRnasumTableShow, setIsRnasumTableShow] = useState<boolean>(false);
@@ -48,7 +48,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
         },
       };
       await API.post('portal', '/manops/rnasum', init);
-      toast?.show({
+      toastShow({
         severity: 'success',
         summary: 'RNASum report has been triggered.',
         detail: `Generating '${projectSelected}' dataset RNAsum report for ${subjectId}. Check Slack for updates!`,
@@ -56,7 +56,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
         life: 3000,
       });
     } catch (e: any) {
-      toast?.show({
+      toastShow({
         severity: 'error',
         summary: 'Something went wrong triggering RNASum report',
         detail: e.message,

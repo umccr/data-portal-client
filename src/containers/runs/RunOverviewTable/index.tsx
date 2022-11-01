@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import JSONToTable from '../../../components/JSONToTable';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
@@ -11,7 +11,7 @@ import { usePortalSequenceAPI } from '../../../api/sequence';
 type Props = { runId: string };
 
 function RunOverviewTable({ runId }: Props) {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
   const navigate = useNavigate();
 
   const [inputRunId, setInputRunId] = useState<string>(runId);
@@ -22,17 +22,19 @@ function RunOverviewTable({ runId }: Props) {
     queryStringParameters: { instrument_run_id: runId },
   });
 
+  useEffect(() => {
+    if (runsQuery.isError || sequenceQuery.isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [runsQuery.isError, sequenceQuery.isError]);
+
   if (runsQuery.isLoading || sequenceQuery.isLoading) {
     return <CircularLoaderWithText />;
-  }
-
-  if (runsQuery.isError || sequenceQuery.isError) {
-    toast?.show({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
   }
 
   const runsResults = runsQuery.data.results;

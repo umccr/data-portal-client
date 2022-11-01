@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from 'primereact/card';
 import { ColumnProps } from 'primereact/column';
 import { Link } from 'react-router-dom';
@@ -21,7 +21,7 @@ import './index.css';
 import { InputText } from 'primereact/inputtext';
 
 function MetadataTable() {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   // Search Bar
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -61,14 +61,16 @@ function MetadataTable() {
     },
   });
 
-  if (isError) {
-    toast?.show({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
-  }
+  useEffect(() => {
+    if (isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [isError]);
 
   if (data && !isFetching && !isLoading) {
     metadataDataList = data.results;

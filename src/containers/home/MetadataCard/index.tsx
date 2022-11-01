@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card } from 'primereact/card';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
@@ -6,18 +6,20 @@ import { Link } from 'react-router-dom';
 import { usePortalMetadataAPI } from '../../../api/metadata';
 
 function MetadataHomeCard() {
-  const toast = useToastContext();
+  const { toastShow } = useToastContext();
 
   const { isFetching, isLoading, isError, data } = usePortalMetadataAPI({});
 
-  if (isError) {
-    toast?.show({
-      severity: 'error',
-      summary: 'Something went wrong!',
-      detail: 'Unable to fetch data from Portal API',
-      life: 3000,
-    });
-  }
+  useEffect(() => {
+    if (isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [isError]);
 
   let totalMetadataCount = 0;
   if (data) totalMetadataCount = data.pagination.count;
