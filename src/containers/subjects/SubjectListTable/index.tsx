@@ -12,10 +12,21 @@ import { useToastContext } from '../../../providers/ToastProvider';
 import { usePortalSubjectAPI } from '../../../api/subject';
 
 import './index.css';
+import { Card } from 'primereact/card';
+import { InputText } from 'primereact/inputtext';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 
 function SubjectListTable() {
   const { toastShow } = useToastContext();
   const navigate = useNavigate();
+
+  // Search Bar
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const handleSearchEnter = (event: { key: string }) => {
+    if (event.key === 'Enter') {
+      setApiQueryParameter((prev) => ({ ...prev, search: searchQuery }));
+    }
+  };
 
   // Pagination Properties
   let paginationProps: PaginationProps = paginationPropsInitValue;
@@ -132,13 +143,34 @@ function SubjectListTable() {
   ];
 
   return (
-    <DataTableWrapper
-      isLoading={isLoading || isFetching}
-      columns={columnsList}
-      dataTableValue={subjectList}
-      paginationProps={paginationProps}
-      handlePaginationPropsChange={handleTablePaginationPropChange}
-    />
+    <Card className='p-0'>
+      <div className={isFetching || isLoading ? '' : 'hidden'}>
+        <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
+      </div>
+      <div className={isFetching || isLoading ? 'hidden' : ''}>
+        <div className='flex justify-content-between pb-4'>
+          <div className='inline font-bold text-3xl flex align-items-center'>Subject Table</div>
+          <span className='p-input-icon-left'>
+            <i className='pi pi-search' />
+            <InputText
+              className='p-inputtext-sm w-12'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder='Search'
+              onKeyDown={handleSearchEnter}
+            />
+          </span>
+        </div>
+
+        <DataTableWrapper
+          isLoading={isLoading || isFetching}
+          columns={columnsList}
+          dataTableValue={subjectList}
+          paginationProps={paginationProps}
+          handlePaginationPropsChange={handleTablePaginationPropChange}
+        />
+      </div>
+    </Card>
   );
 }
 

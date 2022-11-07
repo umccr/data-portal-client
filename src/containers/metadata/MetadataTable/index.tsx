@@ -19,6 +19,7 @@ import DataTableWrapper, {
 import { usePortalMetadataAPI } from '../../../api/metadata';
 import './index.css';
 import { InputText } from 'primereact/inputtext';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 
 function MetadataTable() {
   const { toastShow } = useToastContext();
@@ -134,33 +135,38 @@ function MetadataTable() {
 
   return (
     <Card className='p-0'>
-      <div className='flex justify-content-between pb-4'>
-        <div className='inline font-bold text-3xl flex align-items-center'>Metadata Table</div>
-        <span className='p-input-icon-left'>
-          <i className='pi pi-search' />
-          <InputText
-            className='p-inputtext-sm'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder='Search'
-            onKeyDown={handleSearchEnter}
-          />
-        </span>
+      <div className={isFetching || isLoading ? '' : 'hidden'}>
+        <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
       </div>
+      <div className={isFetching || isLoading ? 'hidden' : ''}>
+        <div className='flex justify-content-between pb-4'>
+          <div className='inline font-bold text-3xl flex align-items-center'>Metadata Table</div>
+          <span className='p-input-icon-left'>
+            <i className='pi pi-search' />
+            <InputText
+              className='p-inputtext-sm'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder='Search'
+              onKeyDown={handleSearchEnter}
+            />
+          </span>
+        </div>
 
-      <DataTableWrapper
-        overrideDataTableProps={{
-          style: { display: isLoading ? 'none' : '' },
-        }}
-        sortField={sorting.sortField}
-        sortOrder={sorting.sortOrder}
-        onSort={handleTableSortPropChange}
-        isLoading={isFetching}
-        columns={columnList}
-        dataTableValue={metadataDataList}
-        paginationProps={paginationProps}
-        handlePaginationPropsChange={handleTablePaginationPropChange}
-      />
+        <DataTableWrapper
+          overrideDataTableProps={{
+            style: { display: isLoading ? 'none' : '' },
+          }}
+          sortField={sorting.sortField}
+          sortOrder={sorting.sortOrder}
+          onSort={handleTableSortPropChange}
+          isLoading={isFetching}
+          columns={columnList}
+          dataTableValue={metadataDataList}
+          paginationProps={paginationProps}
+          handlePaginationPropsChange={handleTablePaginationPropChange}
+        />
+      </div>
     </Card>
   );
 }
