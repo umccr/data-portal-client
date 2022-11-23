@@ -281,7 +281,7 @@ class AppBar extends Component {
         <DialogTitle>{'Token'}</DialogTitle>
         <DialogContent>
           {this.state.signing && (
-            <div align={'center'}>
+            <div>
               <Typography variant='button' display='block' gutterBottom noWrap>
                 Generating, Please wait...
               </Typography>

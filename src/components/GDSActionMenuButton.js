@@ -249,7 +249,7 @@ class GDSActionMenuButton extends React.Component {
           <DialogTitle>{this.state.expires ? 'Download Link' : 'Message'}</DialogTitle>
           <DialogContent>
             {this.state.signing && (
-              <div align={'center'}>
+              <div>
                 <Typography variant='button' display='block' gutterBottom noWrap>
                   Generating, Please wait...
                 </Typography>
