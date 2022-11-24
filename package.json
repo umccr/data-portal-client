@@ -1,6 +1,6 @@
 {
   "name": "data-portal-client",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0",
   "private": true,
   "engines": {
     "node": ">=14.0.0"
