@@ -15,7 +15,8 @@ const ImageCSS = {
 
 function Copyright() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
       <p>{'©'}&nbsp;</p>
       <a href='https://umccr.org'>{'UMCCR'}</a>
       &nbsp;
@@ -36,7 +37,7 @@ function SignInContainer() {
 
   const header = (
     <div className='flex justify-content-center align-items-center' style={{ padding: '20px' }}>
-      <img src='/uomlogo.png' style={{ width: '20%', height: 'auto' }} alt='uomlogo.png' />
+      <img src='/uomlogo.png' style={{ width: '30%', height: 'auto' }} alt='uomlogo.png' />
     </div>
   );
 
@@ -45,7 +46,7 @@ function SignInContainer() {
       <Button
         onClick={() => loggingIn()}
         style={{ width: '100%', background: '#0E297A' }}
-        label='Sign In'
+        label='SIGN IN'
         icon='pi pi-sign-in'
         className='p-button-info'
         loading={isLoading}
@@ -57,15 +58,25 @@ function SignInContainer() {
   return (
     <div className='flex justify-content-center align-items-center' style={{ height: '100%' }}>
       <Card
-        title='UMCCR Data Portal'
-        style={{ width: '25em', boxShadow: 'none', backgroundColor: 'white', padding: '20px' }}
+        style={{
+          width: '40em',
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.8)',
+          background: 'rgba(255, 255, 255, 0.1)',
+          padding: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          borderRadius: '16px',
+          backdropFilter: 'blur(2.2px)',
+        }}
         header={header}
         footer={footer}>
-        <p className='m-0' style={{ lineHeight: '1.5' }}>
-          Led by Professor Sean Grimmond, the UMCCR aims to foster innovation and integration in
-          cancer care, research, education and training to achieve a world-leading cancer centre and
-          workforce.
-        </p>
+        <div style={{ textAlign: 'justify', color: 'white' }}>
+          <h1 style={{ fontSize: '2em', textAlign: 'center' }}>UMCCR Data Portal</h1>
+          <p className='m-0' style={{ lineHeight: '1.5' }}>
+            Led by Professor Sean Grimmond, UMCCR aims to foster innovation and integration in
+            cancer care, research, education and training to achieve a world-leading cancer centre
+            and workforce.
+          </p>
+        </div>
       </Card>
     </div>
   );
