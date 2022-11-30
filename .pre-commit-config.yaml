@@ -27,13 +27,14 @@ repos:
         language: system
         pass_filenames: false
 
-  - repo: local
-    hooks:
-      - id: yarn-audit
-        name: yarn audit
-        entry: npx yarn audit --groups dependencies
-        language: system
-        pass_filenames: false
+# Portal v1 enter into maintenance mode -- dependencies outdated/audit are handled manually on case by case basis
+#  - repo: local
+#    hooks:
+#      - id: yarn-audit
+#        name: yarn audit
+#        entry: npx yarn audit --groups dependencies
+#        language: system
+#        pass_filenames: false
 
 # Hitting a bit too wide
 #  - repo: https://github.com/pre-commit/mirrors-prettier

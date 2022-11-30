@@ -75,6 +75,8 @@ gpl_submit_job_manual=$(aws ssm get-parameter --name '/gpl/submit_job_manual_lam
 # See https://github.com/umccr/gridss-purple-linx-nf/commit/a015146e95e1b7cd3de3bc639cbc600887ba42ff
 #gpl_create_linx_plot=$(aws ssm get-parameter --name '/gpl/create_linx_plot_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
 
+unsplash_client_id=$(aws ssm get-parameter --name '/data_portal/unsplash/client_id' --with-decryption | jq -r .Parameter.Value)
+
 export REACT_APP_API_URL=$api_url
 export REACT_APP_HTSGET_URL=$htsget_url
 export REACT_APP_GPL_SUBMIT_JOB=$gpl_submit_job
@@ -88,6 +90,7 @@ export REACT_APP_COG_APP_CLIENT_ID_LOCAL=$cog_app_client_id_local
 export REACT_APP_OAUTH_DOMAIN=$oauth_domain
 export REACT_APP_OAUTH_REDIRECT_IN_LOCAL=$oauth_redirect_in_local
 export REACT_APP_OAUTH_REDIRECT_OUT_LOCAL=$oauth_redirect_out_local
+export REACT_APP_UNSPLASH_CLIENT_ID=$unsplash_client_id
 env | grep REACT
 
 # See https://github.com/facebook/create-react-app/discussions/11767 for GENERATE_SOURCEMAP=false
