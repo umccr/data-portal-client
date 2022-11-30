@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Auth, CognitoHostedUIIdentityProvider } from '@aws-amplify/auth';
 import { Navigate } from 'react-router-dom';
 import { useUserContext } from '../../providers/UserProvider';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
+import { createApi } from 'unsplash-js';
+import { Random } from 'unsplash-js/dist/methods/photos/types';
 
-const ImageCSS = {
-  backgroundImage:
-    'linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)), url(https://source.unsplash.com/user/umccr/likes)',
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-};
+const clientId = import.meta.env.VITE_UNSPLASH_CLIENT_ID;
 
 function Copyright() {
   return (
     <div
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
       <p>{'©'}&nbsp;</p>
-      <a href='https://umccr.org'>{'UMCCR'}</a>
+      <a
+        style={{ color: 'white', textDecoration: 'underline', fontSize: 'small' }}
+        href='https://umccr.org'>
+        {'UMCCR'}
+      </a>
       &nbsp;
       <p>{new Date().getFullYear()}</p>
     </div>
@@ -88,6 +88,35 @@ function SignInPage() {
     return <Navigate replace to='/' />;
   }
 
+  const [imageUrl, setImageUrl] = useState<string>('iStock-529081597-2.jpg');
+  const [imageLink, setImageLink] = useState<string>('https://portal.umccr.org');
+  const [userName, setUserName] = useState<string>('');
+  const [userLink, setUserLink] = useState<string>('');
+
+  useEffect(() => {
+    const unsplashApi = createApi({
+      apiUrl: 'https://api.unsplash.com',
+      headers: { Authorization: 'Client-ID ' + clientId },
+    });
+
+    unsplashApi.photos
+      .getRandom({
+        collectionIds: ['ce-IsXyySA4'],
+        count: 1,
+      })
+      .then((result) => {
+        if (result.errors) {
+          // console.log('error occurred: ', result.errors[0]);
+        } else {
+          const randoms: Random[] = result.response as Random[];
+          setImageUrl(randoms[0].urls.regular);
+          setImageLink(randoms[0].links.html);
+          setUserName(randoms[0].user.username);
+          setUserLink(randoms[0].user.links.html);
+        }
+      });
+  }, []);
+
   return (
     <div className='relative overflow-hidden' style={{ height: '100%', width: '100%' }}>
       <div
@@ -97,7 +126,11 @@ function SignInPage() {
           height: '100%',
           width: '100%',
           zIndex: -1,
-          ...ImageCSS,
+          backgroundImage:
+            'linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)), url(' + imageUrl + ')',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         }}
       />
       <div
@@ -105,6 +138,34 @@ function SignInPage() {
         style={{ height: '100%' }}>
         <SignInContainer />
       </div>
+      {userLink && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            right: 0,
+            padding: '20px',
+            fontSize: 'small',
+            color: 'lightgrey',
+          }}>
+          Photo by&nbsp;
+          <a
+            style={{ fontSize: 'small', color: 'lightgrey', textDecoration: 'underline' }}
+            href={userLink + '?utm_source=umccr_data_portal&utm_medium=referral'}
+            target={'_blank'}
+            rel='noreferrer'>
+            {userName}
+          </a>
+          &nbsp;on&nbsp;
+          <a
+            style={{ fontSize: 'small', color: 'lightgrey', textDecoration: 'underline' }}
+            href={imageLink + '?utm_source=umccr_data_portal&utm_medium=referral'}
+            target={'_blank'}
+            rel='noreferrer'>
+            Unsplash
+          </a>
+        </div>
+      )}
     </div>
   );
 }
