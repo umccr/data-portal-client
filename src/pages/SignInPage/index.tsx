@@ -6,6 +6,7 @@ import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { createApi } from 'unsplash-js';
 import { Random } from 'unsplash-js/dist/methods/photos/types';
+import { ProgressBar } from 'primereact/progressbar';
 
 const clientId = import.meta.env.VITE_UNSPLASH_CLIENT_ID;
 
@@ -88,8 +89,8 @@ function SignInPage() {
     return <Navigate replace to='/' />;
   }
 
-  const [imageUrl, setImageUrl] = useState<string>('iStock-529081597-2.jpg');
-  const [imageLink, setImageLink] = useState<string>('https://portal.umccr.org');
+  const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageLink, setImageLink] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [userLink, setUserLink] = useState<string>('');
 
@@ -107,6 +108,7 @@ function SignInPage() {
       .then((result) => {
         if (result.errors) {
           // console.log('error occurred: ', result.errors[0]);
+          setImageUrl('iStock-529081597-2.jpg');
         } else {
           const randoms: Random[] = result.response as Random[];
           setImageUrl(randoms[0].urls.regular);
@@ -114,11 +116,16 @@ function SignInPage() {
           setUserName(randoms[0].user.username);
           setUserLink(randoms[0].user.links.html);
         }
+      })
+      .catch((err) => {
+        // console.log('fetch error occurred: ', err);
+        setImageUrl('iStock-529081597-2.jpg');
       });
   }, []);
 
   return (
     <div className='relative overflow-hidden' style={{ height: '100%', width: '100%' }}>
+      {!imageUrl && <ProgressBar mode='indeterminate' style={{ height: '6px' }} />}
       <div
         className='absolute'
         style={{
