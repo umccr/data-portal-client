@@ -293,7 +293,11 @@ function PresignedUrlDialog(props: PresignedUrlDialogProps) {
   let expiresIn = '';
   if (data) {
     const queryParam = parseUrlParams(data);
-    expiresIn = queryParam['Expires'];
+    if (type == 's3') {
+      expiresIn = queryParam['Expires'];
+    } else {
+      expiresIn = queryParam['X-Amz-Expires'];
+    }
   }
 
   return (
