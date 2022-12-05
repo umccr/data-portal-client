@@ -167,7 +167,7 @@ for (const column of column_to_display) {
     columnList.push({
       ...defaultProps,
       body: (rowData: GDSRow): React.ReactNode => {
-        return textBodyTemplate(moment(rowData.time_modified).local().format('LLL'));
+        return textBodyTemplate(moment(rowData.time_modified).toString());
       },
     });
   } else {

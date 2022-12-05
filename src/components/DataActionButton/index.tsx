@@ -294,9 +294,9 @@ function PresignedUrlDialog(props: PresignedUrlDialogProps) {
   if (data) {
     const queryParam = parseUrlParams(data);
     if (type == 's3') {
-      expiresIn = queryParam['Expires'];
+      expiresIn = moment.unix(parseInt(queryParam['Expires'])).local().toString();
     } else {
-      expiresIn = queryParam['X-Amz-Expires'];
+      expiresIn = moment().add(parseInt(queryParam['X-Amz-Expires']), 's').toString();
     }
   }
 
@@ -318,7 +318,7 @@ function PresignedUrlDialog(props: PresignedUrlDialogProps) {
             value={[
               {
                 key: 'Expires in',
-                value: moment.unix(parseInt(expiresIn)).local().format('LLLL'),
+                value: expiresIn,
               },
               { key: 'URL', value: data },
             ]}

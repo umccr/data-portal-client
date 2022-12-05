@@ -166,7 +166,7 @@ for (const column of column_to_display) {
     columnList.push({
       ...defaultProps,
       body: (rowData: S3Row): React.ReactNode => {
-        return textBodyTemplate(moment(rowData.last_modified_date).local().format('LLL'));
+        return textBodyTemplate(moment(rowData.last_modified_date).toString());
       },
     });
   } else {
