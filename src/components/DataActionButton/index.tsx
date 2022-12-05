@@ -282,19 +282,25 @@ function PresignedUrlDialog(props: PresignedUrlDialogProps) {
   const { toastShow } = useToastContext();
 
   const { id, type, handleIsOpen } = props;
-  const { isLoading, isError, data } = useQuery('fetchDataPresignedUrl', () => {
-    if (type == 's3') {
-      return getS3PreSignedUrl(id);
-    } else {
-      return getGDSPreSignedUrl(id);
-    }
+  const { isLoading, isError, data } = useQuery({
+    queryKey: ['fetchDataPresignedUrl', id, type],
+    keepPreviousData: false,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    queryFn: async () => {
+      if (type == 's3') {
+        return await getS3PreSignedUrl(id);
+      } else {
+        return await getGDSPreSignedUrl(id);
+      }
+    },
   });
 
   let expiresIn = '';
   if (data) {
     const queryParam = parseUrlParams(data);
     if (type == 's3') {
-      expiresIn = moment.unix(parseInt(queryParam['Expires'])).local().toString();
+      expiresIn = moment.unix(parseInt(queryParam['Expires'])).toString();
     } else {
       expiresIn = moment().add(parseInt(queryParam['X-Amz-Expires']), 's').toString();
     }
