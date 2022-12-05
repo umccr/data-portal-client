@@ -14,15 +14,15 @@ export type GDSRow = {
   file_id: string;
   name: string;
   volume_id: string;
-  type: string;
+  type: string | null;
   tenant_id: string;
   sub_tenant_id: string;
   time_created: string;
   created_by: string;
   modified_by: string;
-  inherited_acl: string;
+  inherited_acl: string | null;
   urn: string;
-  is_uploaded: true;
+  is_uploaded: true | null;
   archive_status: string;
   time_archived: string | null;
   storage_tier: string;
