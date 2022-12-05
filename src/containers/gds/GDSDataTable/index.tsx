@@ -90,19 +90,19 @@ export default GDSDataTable;
 const textBodyTemplate = (text: string | number | boolean | null): React.ReactNode => {
   return <div>{text?.toString()}</div>;
 };
-const column_to_display: string[] = [
+const column_to_display = [
   'volume_name',
   'path',
   'preview',
   'action',
   'size_in_bytes',
   'time_modified',
-];
+] as const;
 const columnList: ColumnProps[] = [];
 
 // Creating column properties based on field to display
 for (const column of column_to_display) {
-  let newColToShow = {
+  const defaultProps = {
     field: column,
     alignHeader: 'left' as const,
     header: (
@@ -110,24 +110,20 @@ for (const column of column_to_display) {
         {showDisplayText(column)}
       </p>
     ),
-    body: (rowData: GDSRow): React.ReactNode => {
-      return textBodyTemplate(rowData[column]);
-    },
     className: 'text-left white-space-nowrap',
   };
 
   if (column == 'preview') {
-    newColToShow = {
-      ...newColToShow,
+    columnList.push({
+      ...defaultProps,
       header: (
         <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap overflow-visible'>
           {showDisplayText(column)}
         </p>
       ),
       className: 'text-center white-space-nowrap overflow-visible',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      body: (rowData: any): React.ReactNode => {
-        const filename = rowData.path.split('/').pop();
+      body: (rowData: GDSRow): React.ReactNode => {
+        const filename = rowData.path.split('/').pop() ?? rowData.path;
         const fileSizeInBytes = rowData.size_in_bytes;
         return (
           <FilePreviewButton
@@ -138,10 +134,10 @@ for (const column of column_to_display) {
           />
         );
       },
-    };
+    });
   } else if (column == 'action') {
-    newColToShow = {
-      ...newColToShow,
+    columnList.push({
+      ...defaultProps,
       body: (rowData: GDSRow): React.ReactNode => {
         return (
           <DataActionButton
@@ -153,10 +149,10 @@ for (const column of column_to_display) {
         );
       },
       className: 'text-center white-space-nowrap overflow-visible',
-    };
+    });
   } else if (column == 'size_in_bytes') {
-    newColToShow = {
-      ...newColToShow,
+    columnList.push({
+      ...defaultProps,
       body: (rowData: GDSRow): React.ReactNode => {
         let sizeNumber = 0;
         if (typeof rowData.size_in_bytes == 'string') {
@@ -166,15 +162,20 @@ for (const column of column_to_display) {
         }
         return textBodyTemplate(getStringReadableBytes(sizeNumber));
       },
-    };
+    });
   } else if (column == 'time_modified') {
-    newColToShow = {
-      ...newColToShow,
+    columnList.push({
+      ...defaultProps,
       body: (rowData: GDSRow): React.ReactNode => {
         return textBodyTemplate(moment(rowData.time_modified).local().format('LLL'));
       },
-    };
+    });
+  } else {
+    columnList.push({
+      ...defaultProps,
+      body: (rowData: GDSRow): React.ReactNode => {
+        return textBodyTemplate(rowData[column]);
+      },
+    });
   }
-
-  columnList.push(newColToShow);
 }

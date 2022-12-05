@@ -25,6 +25,11 @@ const filenameTemplate = (rowData: Record<string, any>) => {
   return <div className='white-space-nowrap'>{filename}</div>;
 };
 
+/**
+ * The following some template to view column data.
+ * Note that the variable naming might be specific to S3 or GDS.
+ */
+
 const actionGDSTemplate = (rowData: GDSRow) => {
   return (
     <DataActionButton
@@ -46,15 +51,8 @@ const actionS3Template = (rowData: S3Row) => {
     />
   );
 };
-const fileSizeGDSTemplate = (rowData: Record<string, any>) => {
-  const readableSize = getStringReadableBytes(rowData.size_in_bytes);
-  return (
-    <div className='white-space-nowrap overflow-visible' style={{ width: '75px' }}>
-      {readableSize}
-    </div>
-  );
-};
-const fileSizeS3Template = (rowData: Record<string, any>) => {
+
+const fileSizeS3Template = (rowData: S3Row) => {
   const readableSize = getStringReadableBytes(rowData.size);
   return (
     <div className='white-space-nowrap overflow-visible' style={{ width: '75px' }}>
@@ -62,7 +60,17 @@ const fileSizeS3Template = (rowData: Record<string, any>) => {
     </div>
   );
 };
-const timeModifiedTemplate = (rowData: Record<string, any>) => {
+
+const fileSizeGDSTemplate = (rowData: GDSRow) => {
+  const readableSize = getStringReadableBytes(rowData.size_in_bytes);
+  return (
+    <div className='white-space-nowrap overflow-visible' style={{ width: '75px' }}>
+      {readableSize}
+    </div>
+  );
+};
+
+const timeModifiedS3Template = (rowData: S3Row) => {
   const readableTimeStamp = moment(rowData.last_modified_date).local().format('LLL');
   return (
     <div className='white-space-nowrap' style={{ width: '180px' }}>
@@ -71,24 +79,17 @@ const timeModifiedTemplate = (rowData: Record<string, any>) => {
   );
 };
 
-const previewGDSTemplate = (rowData: Record<string, any>) => {
-  const filename = rowData.path.split('/').pop();
-  const fileSizeInBytes = rowData.size_in_bytes;
-
+const timeModifiedGDSTemplate = (rowData: GDSRow) => {
   return (
-    <div style={{ width: '15px' }}>
-      <FilePreviewButton
-        id={rowData.id}
-        filename={filename}
-        fileSizeInBytes={fileSizeInBytes}
-        type='gds'
-      />
+    <div className='white-space-nowrap' style={{ width: '180px' }}>
+      {moment(rowData.time_modified).local().format('LLL')}
+      {/* <Moment local>{rowData.time_modified}</Moment> */}
     </div>
   );
 };
 
-const previewS3Template = (rowData: Record<string, any>) => {
-  const filename = rowData.key.split('/').pop();
+const previewS3Template = (rowData: S3Row) => {
+  const filename = rowData.key.split('/').pop() ?? rowData.key;
   const fileSizeInBytes = rowData.size;
 
   return (
@@ -98,6 +99,22 @@ const previewS3Template = (rowData: Record<string, any>) => {
         id={rowData.id}
         filename={filename}
         type='s3'
+      />
+    </div>
+  );
+};
+
+const previewGDSTemplate = (rowData: GDSRow) => {
+  const filename = rowData.path.split('/').pop() ?? rowData.path;
+  const fileSizeInBytes = rowData.size_in_bytes;
+
+  return (
+    <div style={{ width: '15px' }}>
+      <FilePreviewButton
+        id={rowData.id}
+        filename={filename}
+        fileSizeInBytes={fileSizeInBytes}
+        type='gds'
       />
     </div>
   );
@@ -117,7 +134,7 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
         <Column body={previewGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={actionGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={fileSizeGDSTemplate} headerStyle={{ display: 'none' }} />
-        <Column body={timeModifiedTemplate} headerStyle={{ display: 'none' }} />
+        <Column body={timeModifiedGDSTemplate} headerStyle={{ display: 'none' }} />
       </DataTable>
     </div>
   );
@@ -138,7 +155,7 @@ function AnalysisResultS3Table(prop: AnalysisResultGDSTableProps) {
         <Column body={previewS3Template} headerStyle={{ display: 'none' }} />
         <Column body={actionS3Template} headerStyle={{ display: 'none' }} />
         <Column body={fileSizeS3Template} headerStyle={{ display: 'none' }} />
-        <Column body={timeModifiedTemplate} headerStyle={{ display: 'none' }} />
+        <Column body={timeModifiedS3Template} headerStyle={{ display: 'none' }} />
       </DataTable>
     </div>
   );

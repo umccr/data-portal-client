@@ -11,7 +11,24 @@ export type GDSRow = {
   time_modified: string;
   size_in_bytes: number;
   volume_name: string;
-} & Record<string, string | number | boolean | null>;
+  file_id: string;
+  name: string;
+  volume_id: string;
+  type: string;
+  tenant_id: string;
+  sub_tenant_id: string;
+  time_created: string;
+  created_by: string;
+  modified_by: string;
+  inherited_acl: string;
+  urn: string;
+  is_uploaded: true;
+  archive_status: string;
+  time_archived: string | null;
+  storage_tier: string;
+  presigned_url: string | null;
+  unique_hash: string;
+};
 
 export function usePortalGDSAPI(apiConfig: Record<string, any>) {
   return useQuery(

@@ -92,20 +92,19 @@ export default S3DataTable;
 const textBodyTemplate = (text: string | number | boolean | null): React.ReactNode => {
   return <div>{text?.toString()}</div>;
 };
-const column_to_display: string[] = [
+const column_to_display = [
   'bucket',
   'key',
   'preview',
   'action',
   'size',
   'last_modified_date',
-];
+] as const;
 const columnList: ColumnProps[] = [];
 
 // Creating column properties based on field to display
 for (const column of column_to_display) {
-  // Column template
-  let newColToShow = {
+  const defaultProps = {
     field: column,
     alignHeader: 'left' as const,
     header: (
@@ -113,16 +112,14 @@ for (const column of column_to_display) {
         {showDisplayText(column)}
       </p>
     ),
-    body: (rowData: S3Row): React.ReactNode => {
-      return textBodyTemplate(rowData[column]);
-    },
+
     className: 'text-left white-space-nowrap',
   };
 
   // Customize column from the template column above
   if (column == 'preview') {
-    newColToShow = {
-      ...newColToShow,
+    columnList.push({
+      ...defaultProps,
       className: 'text-center white-space-nowrap overflow-visible',
       body: (rowData: S3Row): React.ReactNode => {
         const filename = rowData.key.split('/').pop() ?? rowData.key;
@@ -136,10 +133,10 @@ for (const column of column_to_display) {
           />
         );
       },
-    };
+    });
   } else if (column == 'action') {
-    newColToShow = {
-      ...newColToShow,
+    columnList.push({
+      ...defaultProps,
       body: (rowData: S3Row): React.ReactNode => {
         return (
           <DataActionButton
@@ -151,10 +148,10 @@ for (const column of column_to_display) {
         );
       },
       className: 'text-center white-space-nowrap',
-    };
+    });
   } else if (column == 'size') {
-    newColToShow = {
-      ...newColToShow,
+    columnList.push({
+      ...defaultProps,
       body: (rowData: S3Row): React.ReactNode => {
         let sizeNumber = 0;
         if (typeof rowData.size == 'string') {
@@ -164,15 +161,20 @@ for (const column of column_to_display) {
         }
         return textBodyTemplate(getStringReadableBytes(sizeNumber));
       },
-    };
+    });
   } else if (column == 'last_modified_date') {
-    newColToShow = {
-      ...newColToShow,
+    columnList.push({
+      ...defaultProps,
       body: (rowData: S3Row): React.ReactNode => {
         return textBodyTemplate(moment(rowData.last_modified_date).local().format('LLL'));
       },
-    };
+    });
+  } else {
+    columnList.push({
+      ...defaultProps,
+      body: (rowData: S3Row): React.ReactNode => {
+        return textBodyTemplate(rowData[column]);
+      },
+    });
   }
-
-  columnList.push(newColToShow);
 }
