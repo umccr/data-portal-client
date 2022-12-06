@@ -109,7 +109,7 @@ function TokenDialog(props: Props) {
               value={[
                 {
                   key: 'Expires in',
-                  value: moment.unix(parseInt(JWTData.expires)).local().format('LLLL'),
+                  value: moment.unix(parseInt(JWTData.expires)).toString(),
                 },
                 { key: 'JWT', value: JWTData.token },
               ]}
