@@ -5,7 +5,7 @@ import { Button } from 'primereact/button';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import JSONToTable from '../../../components/JSONToTable';
 import { SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
-import { getS3Status, S3Row, S3StatusData } from '../../../api/s3';
+import { GDSRow } from '../../../api/gds';
 
 type Props = { subjectId: string };
 function SubjectGPLLaunch({ subjectId }: Props) {
@@ -39,7 +39,7 @@ function SubjectGPLLaunch({ subjectId }: Props) {
 
   const gplLaunchCheckQuery = useQuery(
     ['checkGPLTriggerAllow', subjectId],
-    async () => await checkGPLTriggerAllow(subjectApiData.results),
+    async () => await checkGPLTriggerAllow(subjectApiData.results_gds),
     {
       enabled: !!subjectApiData,
     }
@@ -124,12 +124,12 @@ type GplLaunchCheckType = {
   additionalJSXComponent?: JSX.Element;
 };
 
-async function checkGPLTriggerAllow(s3Results: S3Row[]): Promise<GplLaunchCheckType> {
+async function checkGPLTriggerAllow(gdsResults: GDSRow[]): Promise<GplLaunchCheckType> {
   const gplCheck: GplLaunchCheckType = { isGplLaunchAllowed: true };
 
   // Check if GPL report had exist in bucket
-  const gplReport = s3Results.filter(
-    (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
+  const gplReport = gdsResults.filter(
+    (r) => r.path.includes('gridss_purple_linx') && r.path.endsWith('linx.html')
   );
   if (Array.isArray(gplReport) && gplReport.length) {
     gplCheck.isGplLaunchAllowed = false;
@@ -143,45 +143,14 @@ async function checkGPLTriggerAllow(s3Results: S3Row[]): Promise<GplLaunchCheckT
   // as this should better be part of ICA Pipeline Workflow Automation like everyone else
   // The need of on-demand "LaunchPad" feature is different thing -- i.e. to be considered
   // better in Portal v2 revamp from ground up! Or, elsewhere dashboard. We shall see...
-  const wgsBams = s3Results
-    .filter((r) => r.key.includes('WGS') && r.key.endsWith('.bam'))
+  const wgsBams = gdsResults
+    .filter((r) => r.path.includes('wgs_tumor_normal') && r.path.endsWith('.bam'))
     .map((r) => r.id);
 
   // Unable to find WGS files
   if (!(Array.isArray(wgsBams) && wgsBams.length)) {
     gplCheck.isGplLaunchAllowed = false;
-    gplCheck.message = 'No WGS (bcbio) BAMs are available for the Subject';
-    return gplCheck;
-  }
-
-  const id = wgsBams.sort((a, b) => b - a)[0]; // detect at least one wgs bam has already frozen
-
-  const s3IdStatus = await getS3Status(id);
-  if (s3IdStatus == S3StatusData.ERROR) {
-    gplCheck.isGplLaunchAllowed = false;
-    gplCheck.message = 'An error has occurred on checking S3 Data.';
-    return gplCheck;
-  }
-
-  if (s3IdStatus == S3StatusData.ARCHIVED) {
-    gplCheck.isGplLaunchAllowed = false;
-    gplCheck.message = 'Subject WGS BAMs are archived. Please restore both tumor and normal BAMs.';
-    return gplCheck;
-  }
-
-  if (s3IdStatus == S3StatusData.RESTORING) {
-    gplCheck.isGplLaunchAllowed = false;
-    gplCheck.message = 'Subject WGS BAMs are restoring in progress.';
-    return gplCheck;
-  }
-
-  if (s3IdStatus == S3StatusData.EXPIRED) {
-    gplCheck.isGplLaunchAllowed = false;
-    gplCheck.message = 'Restoration have expired. Please restore both tumor and normal BAMs.';
-    return gplCheck;
-  }
-
-  if (s3IdStatus == S3StatusData.AVAILABLE) {
+    gplCheck.message = 'No WGS BAMs are available for this Subject';
     return gplCheck;
   }
 
