@@ -126,6 +126,10 @@ function IGV({ subjectId }: Props) {
       trackNameList: removalTrackNameList,
       igvBrowser: igvBrowser,
     });
+    setIgvSubjectTrackData({
+      s3RowList: [],
+      gdsRowList: [],
+    });
   };
 
   const leftToolbarContents = (
