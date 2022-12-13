@@ -263,7 +263,7 @@ const createNewIgvTrackList = async (
     if (newS3Itrack != null) newIgvLoadTrackList.push(newS3Itrack);
   }
 
-  // Find new IGV Track Data for S3
+  // Find new IGV Track Data for GDS
   const newGdsObjectList = diffArrayAlphaAndArrayBetaOnObjData({
     arrayA: newTrackData.gdsRowList,
     arrayB: oldTrackData.gdsRowList,

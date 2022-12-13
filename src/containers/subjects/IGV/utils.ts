@@ -86,7 +86,7 @@ export const convertGdsRowToIgvTrack = async (
   const fileGdsUrl = constructGDSUrl({ volume_name: volume_name, path: path });
   const idxFileGdsUrl = constructGDSUrl({ volume_name: volume_name, path: idxFilePath });
 
-  const { signed_urls } = await API.post('files', `/presign`, {
+  const { signed_urls } = await API.post('portal', `/presign`, {
     body: [fileGdsUrl, idxFileGdsUrl],
   });
 
