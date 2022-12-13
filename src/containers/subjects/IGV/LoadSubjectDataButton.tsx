@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { DataTable } from 'primereact/datatable';
@@ -10,6 +10,7 @@ import moment from 'moment';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { LoadSubjectDataType } from '.';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
+import { useToastContext } from '../../../providers/ToastProvider';
 
 type Props = {
   subjectId: string;
@@ -21,6 +22,7 @@ function LoadSubjectDataButton({
   currentIgvTrackData,
   handleIgvTrackDataChange,
 }: Props) {
+  const { toastShow } = useToastContext();
   const [isLoadDialogOpen, setIsLoadDialogOpen] = useState<boolean>(false);
 
   // Current checkbox state and handleChange functions
@@ -35,10 +37,17 @@ function LoadSubjectDataButton({
 
   // Fetch existing subject data (will be move out and cache elsewhere)
   const { isLoading, isError, data } = usePortalSubjectDataAPI(subjectId);
-  if (isError) {
-    // Activate alert
-    console.log('temp alert');
-  }
+
+  useEffect(() => {
+    if (isError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Something went wrong!',
+        detail: 'Unable to fetch subject data from Portal API',
+        life: 3000,
+      });
+    }
+  }, [isError]);
 
   const saveIgvDataSelection = () => {
     handleIgvTrackDataChange(currentDataSelection);
