@@ -62,14 +62,14 @@ function GDSDataTable({ defaultQueryParam }: Props) {
   }
   return (
     <>
+      <DataSearchFilterButton
+        currentFilter={searchField}
+        handleFilterChange={(s: string) => setSearchField(s)}
+      />
       <div className={isFetching || isLoading ? '' : 'hidden'}>
         <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
       </div>
       <div className={isFetching || isLoading ? 'hidden' : ''}>
-        <DataSearchFilterButton
-          currentFilter={searchField}
-          handleFilterChange={(s: string) => setSearchField(s)}
-        />
         <DataTableWrapper
           isLoading={isFetching}
           columns={columnList}
