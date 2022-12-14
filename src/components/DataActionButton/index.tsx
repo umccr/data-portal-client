@@ -247,6 +247,13 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
             sticky: true,
           });
           handleIsOpen(false);
+        } else if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 300) {
+          handleIsOpen(false);
+          toastShow({
+            severity: 'success',
+            summary: 'Successfully open in IGV desktop.',
+            life: 3000,
+          });
         }
       };
       xhr.send();
