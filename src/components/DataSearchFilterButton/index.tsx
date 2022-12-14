@@ -24,7 +24,7 @@ function DataSearchFilterButton({ currentFilter, handleFilterChange }: Props) {
   };
 
   return (
-    <div className='mb-1'>
+    <div className='mb-3'>
       <div className='flex w-full'>
         <Dropdown
           id='dropdown-data-filter-group'
@@ -39,6 +39,9 @@ function DataSearchFilterButton({ currentFilter, handleFilterChange }: Props) {
           editable
           showClear
           optionGroupTemplate={groupedItemTemplate}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleFilterChange(dropdownState);
+          }}
         />
         <Button
           onClick={() => handleFilterChange(dropdownState)}
@@ -48,8 +51,8 @@ function DataSearchFilterButton({ currentFilter, handleFilterChange }: Props) {
       </div>
 
       <div className='text-sm py-2'>
-        The above dropdown list shows the suggested filter for stored objects. Alternatively, you
-        could type your own regex and click on the search button.
+        The dropdown list shows the suggested filter. Alternatively, you could type your own keyword
+        and click on the search button.
       </div>
     </div>
   );

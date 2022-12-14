@@ -73,7 +73,7 @@ const fileSizeGDSTemplate = (rowData: GDSRow) => {
 const timeModifiedS3Template = (rowData: S3Row) => {
   const readableTimeStamp = moment(rowData.last_modified_date).toString();
   return (
-    <div className='white-space-nowrap' style={{ width: '250px' }}>
+    <div className='white-space-nowrap' style={{ width: '300px' }}>
       {readableTimeStamp}
     </div>
   );
@@ -81,7 +81,7 @@ const timeModifiedS3Template = (rowData: S3Row) => {
 
 const timeModifiedGDSTemplate = (rowData: GDSRow) => {
   return (
-    <div className='white-space-nowrap' style={{ width: '250px' }}>
+    <div className='white-space-nowrap' style={{ width: '300px' }}>
       {moment(rowData.time_modified).toString()}
     </div>
   );

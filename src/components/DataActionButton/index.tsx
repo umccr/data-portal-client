@@ -39,13 +39,13 @@ function DataActionButton(props: DataActionButtonProps) {
   const { toastShow } = useToastContext();
   const items: MenuItem[] = [
     {
-      label: 'Copy Path',
+      label: 'Copy Key/Path',
       icon: 'pi pi-copy',
       command: () => {
         navigator.clipboard.writeText(pathOrKey);
         toastShow({
           severity: 'success',
-          summary: 'Path Copied',
+          summary: 'Key/Path Copied',
           life: 3000,
         });
       },
