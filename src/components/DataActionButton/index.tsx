@@ -184,7 +184,7 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
     if (s3LocalIgvUrl.isError && s3LocalIgvUrl.error) {
       toastShow({
         severity: 'error',
-        summary: 'Error on locating object URL.',
+        summary: 'Error on locating S3 URL.',
         detail: `${s3LocalIgvUrl.error}`,
         sticky: true,
       });
@@ -193,9 +193,9 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
     if (gdsLocalIgvUrl.isError && gdsLocalIgvUrl.error) {
       toastShow({
         severity: 'error',
-        summary: 'Error on locating object URL.',
+        summary: 'Error on locating GDS URL.',
         detail: `${gdsLocalIgvUrl.error}`,
-        life: 10000,
+        sticky: true,
       });
 
       handleIsOpen(false);
