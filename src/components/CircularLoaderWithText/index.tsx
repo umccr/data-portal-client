@@ -1,8 +1,10 @@
 import { ProgressSpinner } from 'primereact/progressspinner';
 
-type Props = { text?: string };
+type Props = { text?: string; spinnerSize?: string };
 
 export default function CircularLoaderWithText(props: Props): React.ReactElement {
+  const { text, spinnerSize = '50px' } = props;
+
   return (
     <div
       style={{
@@ -13,8 +15,8 @@ export default function CircularLoaderWithText(props: Props): React.ReactElement
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      <ProgressSpinner style={{ height: '50px', width: '50px' }} />
-      {props.text ? <div style={{ paddingTop: '1rem' }}>{props.text}</div> : <></>}
+      <ProgressSpinner style={{ height: spinnerSize, width: spinnerSize }} />
+      {props.text ? <div style={{ paddingTop: '1rem' }}>{text}</div> : <></>}
     </div>
   );
 }

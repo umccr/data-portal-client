@@ -25,25 +25,23 @@ function SequenceHomeCard() {
 
   return (
     <Card className='mb-0 surface-100'>
-      {isLoading && isFetching ? (
-        <div className='flex justify-content-center align-items-center'>
-          <CircularLoaderWithText />
+      <div className='flex justify-content-between mb-3'>
+        <div>
+          <span className='block text-500 font-medium mb-3'>Sequence</span>
+          {isLoading || isFetching ? (
+            <div className='flex justify-content-center align-items-center'>
+              <CircularLoaderWithText spinnerSize='20px' />
+            </div>
+          ) : (
+            <div className='text-900 font-medium text-xl'>{totalSequenceCount}</div>
+          )}
         </div>
-      ) : (
-        <>
-          <div className='flex justify-content-between mb-3'>
-            <div>
-              <span className='block text-500 font-medium mb-3'>Sequence</span>
-              <div className='text-900 font-medium text-xl'>{totalSequenceCount}</div>
-            </div>
-            <div
-              className='flex align-items-center justify-content-center bg-purple-100 border-round'
-              style={{ width: '2.5rem', height: '2.5rem' }}>
-              <i className='pi pi-desktop text-purple-500 text-xl' />
-            </div>
-          </div>
-        </>
-      )}
+        <div
+          className='flex align-items-center justify-content-center bg-purple-100 border-round'
+          style={{ width: '2.5rem', height: '2.5rem' }}>
+          <i className='pi pi-desktop text-purple-500 text-xl' />
+        </div>
+      </div>
     </Card>
   );
 }

@@ -27,25 +27,23 @@ function RunHomeCard() {
   return (
     <Link to='/runs' style={{ textDecoration: 'unset' }}>
       <Card className='mb-0'>
-        {isLoading && isFetching ? (
-          <div className='flex justify-content-center align-items-center'>
-            <CircularLoaderWithText />
+        <div className='flex justify-content-between mb-3'>
+          <div>
+            <span className='block text-500 font-medium mb-3'>Runs</span>
+            {isLoading || isFetching ? (
+              <div className='flex justify-content-center align-items-center'>
+                <CircularLoaderWithText spinnerSize='20px' />
+              </div>
+            ) : (
+              <div className='text-900 font-medium text-xl'>{totalRunCount}</div>
+            )}
           </div>
-        ) : (
-          <>
-            <div className='flex justify-content-between mb-3'>
-              <div>
-                <span className='block text-500 font-medium mb-3'>Runs</span>
-                <div className='text-900 font-medium text-xl'>{totalRunCount}</div>
-              </div>
-              <div
-                className='flex align-items-center justify-content-center  bg-green-100 border-round'
-                style={{ width: '2.5rem', height: '2.5rem' }}>
-                <i className='pi pi-book text-green-500 text-xl' />
-              </div>
-            </div>
-          </>
-        )}
+          <div
+            className='flex align-items-center justify-content-center  bg-green-100 border-round'
+            style={{ width: '2.5rem', height: '2.5rem' }}>
+            <i className='pi pi-book text-green-500 text-xl' />
+          </div>
+        </div>
       </Card>
     </Link>
   );
