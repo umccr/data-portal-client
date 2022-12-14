@@ -247,6 +247,13 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
             sticky: true,
           });
           handleIsOpen(false);
+        } else if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 300) {
+          handleIsOpen(false);
+          toastShow({
+            severity: 'success',
+            summary: 'Successfully open in IGV desktop.',
+            life: 3000,
+          });
         }
       };
       xhr.send();
@@ -255,13 +262,12 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
 
   return (
     <Dialog
-      header='Opening in IGV Desktop'
       visible={isOpen}
       style={{ width: '50vw' }}
       draggable={false}
       resizable={false}
       onHide={() => handleIsOpen(false)}>
-      <CircularLoaderWithText />
+      <CircularLoaderWithText text='Opening in IGV desktop' />
     </Dialog>
   );
 }
