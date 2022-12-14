@@ -262,13 +262,12 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
 
   return (
     <Dialog
-      header='Opening in IGV Desktop'
       visible={isOpen}
       style={{ width: '50vw' }}
       draggable={false}
       resizable={false}
       onHide={() => handleIsOpen(false)}>
-      <CircularLoaderWithText />
+      <CircularLoaderWithText text='Opening in IGV desktop' />
     </Dialog>
   );
 }
