@@ -29,8 +29,8 @@ function SubjectHomeCard() {
           <div className='flex justify-content-between mb-3'>
             <div>
               <span className='block text-500 font-medium mb-3'>Subjects</span>
-              {isLoading || isFetching ? (
-                <div className='flex justify-content-center align-items-center'>
+              {isLoading || isFetching || !totalSubjectCount ? (
+                <div className='flex justify-content-center align-items-center max-w-fit'>
                   <CircularLoaderWithText spinnerSize='20px' />
                 </div>
               ) : (
