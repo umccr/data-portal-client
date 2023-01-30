@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import API from '@aws-amplify/api';
+import { API } from '@aws-amplify/api';
 import { useQuery } from 'react-query';
 import { Button } from 'primereact/button';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';

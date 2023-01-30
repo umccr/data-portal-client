@@ -14,7 +14,7 @@ import { constructGDSUrl, getGDSPreSignedUrl } from '../../api/gds';
 import { parseUrlParams } from '../../utils/util';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
-import API from '@aws-amplify/api';
+import { API } from '@aws-amplify/api';
 
 type DataActionButtonProps = {
   id: number;

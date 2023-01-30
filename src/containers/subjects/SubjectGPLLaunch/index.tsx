@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
-import API from '@aws-amplify/api';
+import { API } from '@aws-amplify/api';
 import { Button } from 'primereact/button';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import JSONToTable from '../../../components/JSONToTable';

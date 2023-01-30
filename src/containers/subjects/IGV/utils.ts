@@ -2,7 +2,7 @@ import config from '../../../config';
 import { getBaseNameFromKey } from '../../../api/utils';
 import { constructGDSUrl } from '../../../api/gds';
 import igv, { IGVBrowser, ITrack } from 'igv';
-import API from '@aws-amplify/api';
+import { API } from '@aws-amplify/api';
 import genomes from './genomes';
 
 /**

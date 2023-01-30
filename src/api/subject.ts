@@ -1,4 +1,4 @@
-import API from '@aws-amplify/api';
+import { API } from '@aws-amplify/api';
 import { useQuery } from 'react-query';
 import { S3Row } from './s3';
 import { GDSRow } from './gds';
