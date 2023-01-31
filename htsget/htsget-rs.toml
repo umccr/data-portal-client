@@ -1,0 +1,34 @@
+ticket_server_addr = '127.0.0.1:3100'
+ticket_server_cors_allow_origins = 'All'
+
+data_server_addr = '127.0.0.1:3101'
+data_server_local_path = 'data'
+data_server_serve_at = '/data'
+data_server_cors_allow_origins = 'All'
+
+[[resolvers]]
+regex = '^local/(?P<key>.*)$'
+substitution_string = '$key'
+
+[resolvers.storage_type]
+type = 'Local'
+scheme = 'HTTP'
+authority = '127.0.0.1:3101'
+local_path = 'data'
+path_prefix = '/data'
+
+[[resolvers]]
+regex = '^umccr-research-dev/(?P<key>.*)$'
+substitution_string = '$key'
+
+[resolvers.storage_type]
+type = 'S3'
+bucket = 'umccr-research-dev'
+
+[[resolvers]]
+regex = '^umccr-primary-data-dev/(?P<key>.*)$'
+substitution_string = '$key'
+
+[resolvers.storage_type]
+type = 'S3'
+bucket = 'umccr-primary-data-dev'
