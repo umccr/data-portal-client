@@ -35,9 +35,10 @@ function LoadCustomTrackDataButton({
   const isFiletypeSupported = isIgvReadableFile(inputText);
 
   // Strip protocol from path
-  const reMatch = inputText.match(/(^s3?:\/\/|^gds?:\/\/)\/?(.*?)$/i);
+  // eslint-disable-next-line no-useless-escape
+  const reMatch = inputText.match(/(^s3?:\/\/|^gds?:\/\/)([^\/]+)\/\/?(.*?)$/i);
   let path = '';
-  if (reMatch && reMatch.length === 3) path = reMatch[2];
+  if (reMatch && reMatch.length === 4) path = reMatch[3];
 
   const [isAddCustomTrackDialogOpen, setIsAddCustomTrackDialogOpen] = useState<boolean>(false);
 
