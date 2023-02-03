@@ -1,27 +1,84 @@
 import React, { useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { RequiredS3RowType } from './utils';
+import { RequiredGDSRowType, RequiredS3RowType } from './utils';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
+import { GDSApiData, usePortalGDSAPI } from '../../../api/gds';
+import { S3ApiData, usePortalS3API } from '../../../api/s3';
+import { isIgvReadableFile } from './LoadSubjectDataButton';
 
 type Props = {
-  handleAddCustomLoadTrack(newTrackData: RequiredS3RowType): void;
+  handleAddCustomS3LoadTrack(newTrackData: RequiredS3RowType): void;
+  handleAddCustomGDSLoadTrack(newTrackData: RequiredGDSRowType): void;
 };
+enum PathType {
+  GDS,
+  S3,
+}
 
-function LoadCustomTrackDataButton({ handleAddCustomLoadTrack }: Props) {
+function LoadCustomTrackDataButton({
+  handleAddCustomS3LoadTrack,
+  handleAddCustomGDSLoadTrack,
+}: Props) {
+  const [inputText, setInputText] = useState<string>('');
+
+  // Check what kind of path type is entered
+  let pathType: PathType | '' = '';
+  if (inputText?.startsWith('gds://')) {
+    pathType = PathType.GDS;
+  } else if (inputText?.startsWith('s3://')) {
+    pathType = PathType.S3;
+  }
+
+  // Check if filetype is supported
+  const isFiletypeSupported = isIgvReadableFile(inputText);
+
+  // Strip protocol from path
+  const reMatch = inputText.match(/(^s3?:\/\/|^gds?:\/\/)\/?(.*?)$/i);
+  let path = '';
+  if (reMatch && reMatch.length === 3) path = reMatch[2];
+
   const [isAddCustomTrackDialogOpen, setIsAddCustomTrackDialogOpen] = useState<boolean>(false);
 
-  const [inputState, setInputState] = useState<RequiredS3RowType>({
-    bucket: 'production',
-    key: '',
-  });
+  // GDS Row checking
+  const gdsApiRes = usePortalGDSAPI(
+    {
+      queryStringParameters: {
+        search: `${path}$`,
+      },
+    },
+    {
+      enabled: pathType === PathType.GDS && isFiletypeSupported,
+    }
+  );
+
+  // S3 Row checking
+  const s3ApiRes = usePortalS3API(
+    {
+      queryStringParameters: {
+        search: `${path}$`,
+      },
+    },
+    {
+      enabled: pathType === PathType.S3 && isFiletypeSupported,
+    }
+  );
+
+  // Check if path entered exist in the portal
+  let isValidPath = false;
+  const gdsData: GDSApiData = gdsApiRes.data;
+  const s3Data: S3ApiData = s3ApiRes.data;
+  if (gdsData && gdsData.results.length == 1) isValidPath = true;
+  if (s3Data && s3Data.results.length == 1) isValidPath = true;
+
   const handleOpenCustomTrackButton = () => {
-    setInputState((prev) => ({ ...prev, key: '' }));
+    setInputText('');
     setIsAddCustomTrackDialogOpen((prev) => !prev);
   };
   const addNewTrackData = () => {
-    handleAddCustomLoadTrack(inputState);
+    if (pathType == PathType.S3) handleAddCustomS3LoadTrack(s3Data.results[0]);
+    if (pathType == PathType.GDS) handleAddCustomGDSLoadTrack(gdsData.results[0]);
     setIsAddCustomTrackDialogOpen((prev) => !prev);
   };
 
@@ -36,6 +93,7 @@ function LoadCustomTrackDataButton({ handleAddCustomLoadTrack }: Props) {
         />
         <Button
           className='bg-blue-800'
+          disabled={!(isValidPath && inputText)}
           label='ADD'
           icon='pi pi-plus'
           onClick={() => addNewTrackData()}
@@ -54,32 +112,39 @@ function LoadCustomTrackDataButton({ handleAddCustomLoadTrack }: Props) {
         footer={renderFooter()}
         onHide={() => setIsAddCustomTrackDialogOpen((prev) => !prev)}>
         <>
-          <div className='mb-4 text-500 '>
-            To add a custom track, please enter S3 Key. Typically you get it by Copy S3 Path button
-            when browsing through Subject data.
+          <div className='mb-4 text-500'>
+            {`To add a custom track, please enter S3 or GDS (URL) path.`}
           </div>
           <div className='my-3'>
-            <label htmlFor='username1' className='block mb-1'>
-              S3 Bucket Name
-            </label>
-            <Dropdown
-              disabled={true}
-              value={inputState.bucket}
-              options={[{ label: 'production', value: 'production' }]}
-              onChange={(e) => setInputState((prev) => ({ ...prev, bucket: e.value }))}
-              placeholder='Bucket Name'
-            />
-          </div>
-          <div className='my-3'>
-            <label htmlFor='username1' className='block mb-1'>
-              S3 Path
-            </label>
             <InputText
-              className='w-full block focus:border-blue-800'
+              className='w-full block focus:border-blue-800 mb-3'
               style={{ boxShadow: 'var(--blue-800)' }}
-              value={inputState.key}
-              onChange={(e) => setInputState((prev) => ({ ...prev, key: e.target.value }))}
+              value={inputText}
+              placeholder={`e.g. "s3://umccr-primary-data-prod/.../SUBJ0001.bam" or "gds://production/.../SUBJ0001.bam"`}
+              onChange={(e) => setInputText(e.target.value)}
             />
+            <small>
+              {!isFiletypeSupported && inputText ? (
+                <div className='text-500 text-red-600'>{`Unsupported filetype. Only support BAM, CRAM, and VCF.`}</div>
+              ) : (
+                <>
+                  {gdsApiRes.isLoading || s3ApiRes.isLoading ? (
+                    <div className={`flex flex-row align-items-content`}>
+                      <div className='mr-2'>
+                        <CircularLoaderWithText spinnerSize='20px' />
+                      </div>
+                      <div className='text-500 text-yellow-600'>{`Validating Path`}</div>
+                    </div>
+                  ) : !isValidPath && inputText ? (
+                    <div className='text-500 text-red-600'>{`Path does not exist.`}</div>
+                  ) : isValidPath && inputText ? (
+                    <div className='text-500 text-green-600'>{`Path is valid`}</div>
+                  ) : (
+                    <div className='text-500'>{`Please enter a valid path.`}</div>
+                  )}
+                </>
+              )}
+            </small>
           </div>
         </>
       </Dialog>

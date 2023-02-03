@@ -17,12 +17,16 @@ export type S3Row = {
 
 export type S3ApiData = DjangoRestApiResponse & { results: S3Row[] };
 
-export function usePortalS3API(apiConfig: Record<string, any>) {
+export function usePortalS3API(
+  apiConfig: Record<string, any>,
+  useQueryOption?: Record<string, any>
+) {
   return useQuery(
     ['portal-s3', apiConfig],
     async () => await API.get('portal', `/s3/`, apiConfig),
     {
       staleTime: Infinity,
+      ...useQueryOption,
     }
   );
 }
