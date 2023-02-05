@@ -114,7 +114,7 @@ function LoadCustomTrackDataButton({
         onHide={() => setIsAddCustomTrackDialogOpen((prev) => !prev)}>
         <>
           <div className='mb-4 text-500'>
-            {`To add a custom track, please enter S3 or GDS (URL) path.`}
+            {`To add a custom track, please enter S3 or GDS URI.`}
           </div>
           <div className='my-3'>
             <InputText
@@ -134,14 +134,14 @@ function LoadCustomTrackDataButton({
                       <div className='mr-2'>
                         <CircularLoaderWithText spinnerSize='20px' />
                       </div>
-                      <div className='text-500 text-yellow-600'>{`Validating Path`}</div>
+                      <div className='text-500 text-yellow-600'>{`Validating URI.`}</div>
                     </div>
                   ) : !isValidPath && inputText ? (
-                    <div className='text-500 text-red-600'>{`Path does not exist.`}</div>
+                    <div className='text-500 text-red-600'>{`URI does not exist.`}</div>
                   ) : isValidPath && inputText ? (
-                    <div className='text-500 text-green-600'>{`Path is valid`}</div>
+                    <div className='text-500 text-green-600'>{`URI is valid.`}</div>
                   ) : (
-                    <div className='text-500'>{`Please enter a valid path.`}</div>
+                    <div className='text-500'>{`Please enter a valid URI.`}</div>
                   )}
                 </>
               )}
