@@ -24,7 +24,13 @@ type DataActionButtonProps = {
 };
 
 function DataActionButton(props: DataActionButtonProps) {
-  const { pathOrKey } = props;
+  const { bucketOrVolume, pathOrKey, type } = props;
+  let uri = '';
+  if (type == 's3') {
+    uri = `s3://${bucketOrVolume}/${pathOrKey}`;
+  } else if (type == 'gds') {
+    uri = `gds://${bucketOrVolume}/${pathOrKey}`;
+  }
 
   const [isPresignedUrlDialog, setIsPresignedUrlDialog] = useState<boolean>(false);
   const handleIsPresignedUrlDialogChange = useCallback(
@@ -39,10 +45,10 @@ function DataActionButton(props: DataActionButtonProps) {
   const { toastShow } = useToastContext();
   const items: MenuItem[] = [
     {
-      label: 'Copy Key/Path',
+      label: 'Copy URI',
       icon: 'pi pi-copy',
       command: () => {
-        navigator.clipboard.writeText(pathOrKey);
+        navigator.clipboard.writeText(uri);
         toastShow({
           severity: 'success',
           summary: 'Key/Path Copied',
