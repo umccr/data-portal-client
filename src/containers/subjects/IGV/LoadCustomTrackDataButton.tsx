@@ -12,7 +12,7 @@ type Props = {
   handleAddCustomS3LoadTrack(newTrackData: RequiredS3RowType): void;
   handleAddCustomGDSLoadTrack(newTrackData: RequiredGDSRowType): void;
 };
-enum PathType {
+enum URIType {
   GDS,
   S3,
 }
@@ -24,11 +24,11 @@ function LoadCustomTrackDataButton({
   const [inputText, setInputText] = useState<string>('');
 
   // Check what kind of path type is entered
-  let pathType: PathType | '' = '';
+  let uriType: URIType | '' = '';
   if (inputText?.startsWith('gds://')) {
-    pathType = PathType.GDS;
+    uriType = URIType.GDS;
   } else if (inputText?.startsWith('s3://')) {
-    pathType = PathType.S3;
+    uriType = URIType.S3;
   }
 
   // Check if filetype is supported
@@ -38,11 +38,13 @@ function LoadCustomTrackDataButton({
   // eslint-disable-next-line no-useless-escape
   const reMatch = inputText.match(/(^s3?:\/\/|^gds?:\/\/)([^\/]+)\/\/?(.*?)$/i);
   let path = '';
-  if (reMatch && reMatch.length === 4) path = reMatch[3];
+  let bucketOrVolume = '';
+  if (reMatch && reMatch.length === 4) path = reMatch[3]; // Refers to the path after the volume/bucket name
+  if (reMatch && reMatch.length === 4) bucketOrVolume = reMatch[2]; // Refers to the volume/bucket name
 
   const [isAddCustomTrackDialogOpen, setIsAddCustomTrackDialogOpen] = useState<boolean>(false);
 
-  // GDS Row checking
+  // GDS Row checking (portal must exist to use this)
   const gdsApiRes = usePortalGDSAPI(
     {
       queryStringParameters: {
@@ -50,36 +52,23 @@ function LoadCustomTrackDataButton({
       },
     },
     {
-      enabled: pathType === PathType.GDS && isFiletypeSupported,
+      enabled: uriType === URIType.GDS && isFiletypeSupported,
     }
   );
 
-  // S3 Row checking
-  const s3ApiRes = usePortalS3API(
-    {
-      queryStringParameters: {
-        search: `${path}$`,
-      },
-    },
-    {
-      enabled: pathType === PathType.S3 && isFiletypeSupported,
-    }
-  );
-
-  // Check if path entered exist in the portal
-  let isValidPath = false;
+  // Check if GDS URI entered exist in the portal
+  let isValidUri = false;
   const gdsData: GDSApiData = gdsApiRes.data;
-  const s3Data: S3ApiData = s3ApiRes.data;
-  if (gdsData && gdsData.results.length == 1) isValidPath = true;
-  if (s3Data && s3Data.results.length == 1) isValidPath = true;
+  if (gdsData && gdsData.results.length == 1) isValidUri = true;
+  if (uriType == URIType.S3) isValidUri = true;
 
   const handleOpenCustomTrackButton = () => {
     setInputText('');
     setIsAddCustomTrackDialogOpen((prev) => !prev);
   };
   const addNewTrackData = () => {
-    if (pathType == PathType.S3) handleAddCustomS3LoadTrack(s3Data.results[0]);
-    if (pathType == PathType.GDS) handleAddCustomGDSLoadTrack(gdsData.results[0]);
+    if (uriType == URIType.S3) handleAddCustomS3LoadTrack({ key: path, bucket: bucketOrVolume });
+    if (uriType == URIType.GDS) handleAddCustomGDSLoadTrack(gdsData.results[0]);
     setIsAddCustomTrackDialogOpen((prev) => !prev);
   };
 
@@ -94,7 +83,7 @@ function LoadCustomTrackDataButton({
         />
         <Button
           className='bg-blue-800'
-          disabled={!(isValidPath && inputText)}
+          disabled={!(isValidUri && inputText)}
           label='ADD'
           icon='pi pi-plus'
           onClick={() => addNewTrackData()}
@@ -127,21 +116,23 @@ function LoadCustomTrackDataButton({
             <small>
               {!isFiletypeSupported && inputText ? (
                 <div className='text-500 text-red-600'>{`Unsupported filetype. Only support BAM, CRAM, and VCF.`}</div>
+              ) : !inputText ? (
+                <div className='text-500'>{`Please enter a valid URI.`}</div>
               ) : (
                 <>
-                  {gdsApiRes.isLoading || s3ApiRes.isLoading ? (
+                  {gdsApiRes.isLoading ? (
                     <div className={`flex flex-row align-items-content`}>
                       <div className='mr-2'>
                         <CircularLoaderWithText spinnerSize='20px' />
                       </div>
-                      <div className='text-500 text-yellow-600'>{`Validating URI.`}</div>
+                      <div className='text-500 text-yellow-600'>{`Validating GDS URI.`}</div>
                     </div>
-                  ) : !isValidPath && inputText ? (
-                    <div className='text-500 text-red-600'>{`URI does not exist.`}</div>
-                  ) : isValidPath && inputText ? (
+                  ) : !isValidUri ? (
+                    <div className='text-500 text-red-600'>{`Invalid URI or URI does not exist.`}</div>
+                  ) : isValidUri ? (
                     <div className='text-500 text-green-600'>{`URI is valid.`}</div>
                   ) : (
-                    <div className='text-500'>{`Please enter a valid URI.`}</div>
+                    <></>
                   )}
                 </>
               )}
