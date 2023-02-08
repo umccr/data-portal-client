@@ -36,7 +36,7 @@ function LoadCustomTrackDataButton({
 
   // Strip protocol from path
   // eslint-disable-next-line no-useless-escape
-  const reMatch = inputText.match(/(^s3\/\/|^gds:\/\/)([^\/]+)\/\/?(.*?)$/i);
+  const reMatch = inputText.match(/(^s3:\/\/|^gds:\/\/)([^\/]+)\/\/?(.*?)$/i);
   let path = '';
   let bucketOrVolume = '';
   if (reMatch && reMatch.length === 4) path = reMatch[3]; // Refers to the path after the volume/bucket name
