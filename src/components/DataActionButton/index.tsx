@@ -29,7 +29,7 @@ function DataActionButton(props: DataActionButtonProps) {
   if (type == 's3') {
     uri = `s3://${bucketOrVolume}/${pathOrKey}`;
   } else if (type == 'gds') {
-    uri = `gds://${bucketOrVolume}/${pathOrKey}`;
+    uri = constructGDSUrl({ volume_name: bucketOrVolume, path: pathOrKey });
   }
 
   const [isPresignedUrlDialog, setIsPresignedUrlDialog] = useState<boolean>(false);
