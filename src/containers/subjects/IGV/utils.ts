@@ -31,7 +31,7 @@ export const convertS3RowToHtsgetIgvTrack = (s3row: RequiredS3RowType): ITrack =
   const { key, bucket } = s3row;
   const baseName = getBaseNameFromKey(key);
 
-  // we have a umccr specific rule about how our htsget ids are constructed
+  // we have umccr specific rule about how our htsget ids are constructed
   const id = bucket + '/' + key;
 
   if (key.endsWith('bam')) {
@@ -41,7 +41,7 @@ export const convertS3RowToHtsgetIgvTrack = (s3row: RequiredS3RowType): ITrack =
       sourceType: 'htsget',
       url: config.htsget.URL,
       endpoint: config.htsget.ENDPOINT_READS,
-      id: id,
+      id: id.replace('.bam', ''),
       name: baseName,
       removable: false,
     };
@@ -52,7 +52,7 @@ export const convertS3RowToHtsgetIgvTrack = (s3row: RequiredS3RowType): ITrack =
       sourceType: 'htsget',
       url: config.htsget.URL,
       endpoint: config.htsget.ENDPOINT_VARIANTS,
-      id: id,
+      id: id.replace('.vcf', '').replace('.gz', ''),
       name: baseName,
       removable: false,
       visibilityWindow: -1,

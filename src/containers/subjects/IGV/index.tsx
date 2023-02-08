@@ -17,6 +17,7 @@ import {
   removeIgvLoadTrackFromName,
   addIgvLoadTrackFromITrackList,
   RequiredS3RowType,
+  RequiredGDSRowType,
 } from './utils';
 import { useUserContext } from '../../../providers/UserProvider';
 import LoadCustomTrackDataButton from './LoadCustomTrackDataButton';
@@ -110,6 +111,24 @@ function IGV({ subjectId }: Props) {
     [igvBrowser]
   );
 
+  const handleCustomIgvGDSTrackDataChange = useCallback(
+    async (gdsRow: RequiredGDSRowType) => {
+      if (!igvBrowser) return;
+
+      const newCustomLoadTrack = await convertGdsRowToIgvTrack(gdsRow);
+      if (newCustomLoadTrack) {
+        await addIgvLoadTrackFromITrackList({
+          iTrackList: [newCustomLoadTrack],
+          igvBrowser: igvBrowser,
+        });
+      }
+
+      const basename = getBaseNameFromKey(gdsRow.path);
+      setCustomTrackDataNameList((prev) => [...prev, basename]);
+    },
+    [igvBrowser]
+  );
+
   // Handle remove IGV trackdata
   const handleRemoveAllTrackData = () => {
     if (!igvBrowser) return;
@@ -149,7 +168,10 @@ function IGV({ subjectId }: Props) {
         subjectId={subjectId}
         handleIgvTrackDataChange={handleIgvTrackDataChange}
       />
-      <LoadCustomTrackDataButton handleAddCustomLoadTrack={handleCustomIgvS3TrackDataChange} />
+      <LoadCustomTrackDataButton
+        handleAddCustomS3LoadTrack={handleCustomIgvS3TrackDataChange}
+        handleAddCustomGDSLoadTrack={handleCustomIgvGDSTrackDataChange}
+      />
       <Button
         onClick={handleRemoveAllTrackData}
         className='m-1 p-button-outlined p-button-secondary'

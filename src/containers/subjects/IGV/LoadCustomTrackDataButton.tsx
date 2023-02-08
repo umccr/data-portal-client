@@ -1,27 +1,74 @@
 import React, { useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { RequiredS3RowType } from './utils';
+import { RequiredGDSRowType, RequiredS3RowType } from './utils';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
+import { GDSApiData, usePortalGDSAPI } from '../../../api/gds';
+import { S3ApiData, usePortalS3API } from '../../../api/s3';
+import { isIgvReadableFile } from './LoadSubjectDataButton';
 
 type Props = {
-  handleAddCustomLoadTrack(newTrackData: RequiredS3RowType): void;
+  handleAddCustomS3LoadTrack(newTrackData: RequiredS3RowType): void;
+  handleAddCustomGDSLoadTrack(newTrackData: RequiredGDSRowType): void;
 };
+enum URIType {
+  GDS,
+  S3,
+}
 
-function LoadCustomTrackDataButton({ handleAddCustomLoadTrack }: Props) {
+function LoadCustomTrackDataButton({
+  handleAddCustomS3LoadTrack,
+  handleAddCustomGDSLoadTrack,
+}: Props) {
+  const [inputText, setInputText] = useState<string>('');
+
+  // Check what kind of path type is entered
+  let uriType: URIType | '' = '';
+  if (inputText?.startsWith('gds://')) {
+    uriType = URIType.GDS;
+  } else if (inputText?.startsWith('s3://')) {
+    uriType = URIType.S3;
+  }
+
+  // Check if filetype is supported
+  const isFiletypeSupported = isIgvReadableFile(inputText);
+
+  // Strip protocol from path
+  // eslint-disable-next-line no-useless-escape
+  const reMatch = inputText.match(/(^s3:\/\/|^gds:\/\/)([^\/]+)\/\/?(.*?)$/i);
+  let path = '';
+  let bucketOrVolume = '';
+  if (reMatch && reMatch.length === 4) path = reMatch[3]; // Refers to the path after the volume/bucket name
+  if (reMatch && reMatch.length === 4) bucketOrVolume = reMatch[2]; // Refers to the volume/bucket name
+
   const [isAddCustomTrackDialogOpen, setIsAddCustomTrackDialogOpen] = useState<boolean>(false);
 
-  const [inputState, setInputState] = useState<RequiredS3RowType>({
-    bucket: 'production',
-    key: '',
-  });
+  // GDS Row checking (portal must exist to use this)
+  const gdsApiRes = usePortalGDSAPI(
+    {
+      queryStringParameters: {
+        search: `${path}$`,
+      },
+    },
+    {
+      enabled: uriType === URIType.GDS && isFiletypeSupported,
+    }
+  );
+
+  // Check if GDS URI entered exist in the portal
+  let isValidUri = false;
+  const gdsData: GDSApiData = gdsApiRes.data;
+  if (gdsData && gdsData.results.length == 1) isValidUri = true;
+  if (uriType == URIType.S3) isValidUri = true;
+
   const handleOpenCustomTrackButton = () => {
-    setInputState((prev) => ({ ...prev, key: '' }));
+    setInputText('');
     setIsAddCustomTrackDialogOpen((prev) => !prev);
   };
   const addNewTrackData = () => {
-    handleAddCustomLoadTrack(inputState);
+    if (uriType == URIType.S3) handleAddCustomS3LoadTrack({ key: path, bucket: bucketOrVolume });
+    if (uriType == URIType.GDS) handleAddCustomGDSLoadTrack(gdsData.results[0]);
     setIsAddCustomTrackDialogOpen((prev) => !prev);
   };
 
@@ -36,6 +83,7 @@ function LoadCustomTrackDataButton({ handleAddCustomLoadTrack }: Props) {
         />
         <Button
           className='bg-blue-800'
+          disabled={!(isValidUri && inputText)}
           label='ADD'
           icon='pi pi-plus'
           onClick={() => addNewTrackData()}
@@ -54,32 +102,41 @@ function LoadCustomTrackDataButton({ handleAddCustomLoadTrack }: Props) {
         footer={renderFooter()}
         onHide={() => setIsAddCustomTrackDialogOpen((prev) => !prev)}>
         <>
-          <div className='mb-4 text-500 '>
-            To add a custom track, please enter S3 Key. Typically you get it by Copy S3 Path button
-            when browsing through Subject data.
+          <div className='mb-4 text-500'>
+            {`To add a custom track, please enter S3 or GDS URI.`}
           </div>
           <div className='my-3'>
-            <label htmlFor='username1' className='block mb-1'>
-              S3 Bucket Name
-            </label>
-            <Dropdown
-              disabled={true}
-              value={inputState.bucket}
-              options={[{ label: 'production', value: 'production' }]}
-              onChange={(e) => setInputState((prev) => ({ ...prev, bucket: e.value }))}
-              placeholder='Bucket Name'
-            />
-          </div>
-          <div className='my-3'>
-            <label htmlFor='username1' className='block mb-1'>
-              S3 Path
-            </label>
             <InputText
-              className='w-full block focus:border-blue-800'
+              className='w-full block focus:border-blue-800 mb-3'
               style={{ boxShadow: 'var(--blue-800)' }}
-              value={inputState.key}
-              onChange={(e) => setInputState((prev) => ({ ...prev, key: e.target.value }))}
+              value={inputText}
+              placeholder={`e.g. "s3://umccr-primary-data-prod/.../SUBJ0001.bam" or "gds://production/.../SUBJ0001.bam"`}
+              onChange={(e) => setInputText(e.target.value)}
             />
+            <small>
+              {!isFiletypeSupported && inputText ? (
+                <div className='text-500 text-red-600'>{`Unsupported filetype. Only support BAM, CRAM, and VCF.`}</div>
+              ) : !inputText ? (
+                <div className='text-500'>{`Please enter a valid URI.`}</div>
+              ) : (
+                <>
+                  {gdsApiRes.isLoading ? (
+                    <div className={`flex flex-row align-items-content`}>
+                      <div className='mr-2'>
+                        <CircularLoaderWithText spinnerSize='20px' />
+                      </div>
+                      <div className='text-500 text-yellow-600'>{`Validating GDS URI.`}</div>
+                    </div>
+                  ) : !isValidUri ? (
+                    <div className='text-500 text-red-600'>{`Invalid URI or URI does not exist.`}</div>
+                  ) : isValidUri ? (
+                    <div className='text-500 text-green-600'>{`URI is valid.`}</div>
+                  ) : (
+                    <></>
+                  )}
+                </>
+              )}
+            </small>
           </div>
         </>
       </Dialog>

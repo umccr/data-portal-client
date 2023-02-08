@@ -140,7 +140,7 @@ export default memo(LoadSubjectDataButton);
  * Helper function
  */
 
-const isIgvReadableFile = (filename: string): boolean => {
+export const isIgvReadableFile = (filename: string): boolean => {
   if (
     filename.endsWith('bam') ||
     filename.endsWith('vcf') ||

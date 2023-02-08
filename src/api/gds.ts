@@ -1,5 +1,6 @@
 import { API } from '@aws-amplify/api';
 import { useQuery } from 'react-query';
+import { DjangoRestApiResponse } from './utils';
 
 /**
  * Portal `/gds/` api
@@ -30,12 +31,18 @@ export type GDSRow = {
   unique_hash: string;
 };
 
-export function usePortalGDSAPI(apiConfig: Record<string, any>) {
+export type GDSApiData = DjangoRestApiResponse & { results: GDSRow[] };
+
+export function usePortalGDSAPI(
+  apiConfig: Record<string, any>,
+  useQueryOption?: Record<string, any>
+) {
   return useQuery(
     ['portal-gds', apiConfig],
     async () => await API.get('portal', `/gds/`, apiConfig),
     {
       staleTime: Infinity,
+      ...useQueryOption,
     }
   );
 }

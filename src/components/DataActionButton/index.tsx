@@ -10,6 +10,7 @@ import { useQuery } from 'react-query';
 import moment from 'moment';
 
 import { getS3PreSignedUrl, getS3Status, S3StatusData } from '../../api/s3';
+import { isIgvReadableFile } from '../../containers/subjects/IGV/LoadSubjectDataButton';
 import { constructGDSUrl, getGDSPreSignedUrl } from '../../api/gds';
 import { parseUrlParams } from '../../utils/util';
 import { useToastContext } from '../../providers/ToastProvider';
@@ -59,7 +60,7 @@ function DataActionButton(props: DataActionButtonProps) {
     },
   ];
 
-  if (pathOrKey.endsWith('bam') || pathOrKey.endsWith('vcf') || pathOrKey.endsWith('vcf.gz')) {
+  if (isIgvReadableFile(pathOrKey)) {
     items.push({
       label: 'Open IGV Desktop',
       icon: <img src={'/igv.png'} alt='igv.png' width='14px' height='14px' className='mr-2' />,
