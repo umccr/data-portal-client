@@ -256,7 +256,7 @@ class IGV extends Component<Props, State> {
       return;
     }
 
-    // we have a umccr specific rule about how our htsget ids are constructed
+    // we have umccr specific rule about how our htsget ids are constructed
     const id = bucket + '/' + key;
 
     if (key.endsWith('bam')) {
@@ -267,7 +267,7 @@ class IGV extends Component<Props, State> {
           sourceType: 'htsget',
           url: config.htsget.URL,
           endpoint: config.htsget.ENDPOINT_READS,
-          id: id,
+          id: id.replace('.bam', ''),
           name: baseName,
           removable: false,
         })
@@ -284,7 +284,7 @@ class IGV extends Component<Props, State> {
           sourceType: 'htsget',
           url: config.htsget.URL,
           endpoint: config.htsget.ENDPOINT_VARIANTS,
-          id: id,
+          id: id.replace('.vcf', '').replace('.gz', ''),
           name: baseName,
           removable: false,
           visibilityWindow: -1,
