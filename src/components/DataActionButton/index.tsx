@@ -234,7 +234,7 @@ function RestoreArchiveObjectDialog(props: RestoreArchiveObjectDialogProps) {
             <div className='col-6'>
               <Button
                 label='Restore'
-                disabled={isAllowRestore}
+                disabled={!isAllowRestore}
                 icon='pi pi-history'
                 className='p-button-raised p-button-danger w-12'
                 style={{ width: '50%' }}
@@ -296,17 +296,8 @@ const constructGDSLocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKe
   return `http://localhost:60151/load?index=${idx}&file=${enf}&name=${name}`;
 };
 
-const constructS3LocalIgvUrl = async (props: {
-  id: number;
-  bucketOrVolume: string;
-  pathOrKey: string;
-}) => {
-  const { id, bucketOrVolume, pathOrKey } = props;
-
-  const objStatus = await getS3Status(id);
-  if (objStatus != S3StatusData.AVAILABLE) {
-    throw new Error(`Invalid object storage class! (${objStatus})`);
-  }
+const constructS3LocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKey: string }) => {
+  const { bucketOrVolume, pathOrKey } = props;
 
   const name = pathOrKey.split('/').pop() ?? pathOrKey;
   const file = `s3://${bucketOrVolume + '/' + pathOrKey}`;
@@ -315,7 +306,7 @@ const constructS3LocalIgvUrl = async (props: {
 };
 
 type OpenIGVDesktopType = DataActionButtonProps & {
-  handleClose: () => void;
+  handleClose: (newSelection?: DataAction) => void;
 };
 function OpenIGVDesktop(props: OpenIGVDesktopType) {
   const { toastShow } = useToastContext();
@@ -331,12 +322,18 @@ function OpenIGVDesktop(props: OpenIGVDesktopType) {
 
   const s3LocalIgvUrl = useQuery(
     ['s3-local-igv', bucketOrVolume, pathOrKey],
-    async () =>
-      await constructS3LocalIgvUrl({
-        id: id,
+    async () => {
+      const objStatus = await getS3Status(id);
+      // When unavailable redirect to Restore objects
+      if (objStatus != S3StatusData.AVAILABLE) {
+        handleClose(DataAction.RESTORE_OBJECT);
+      }
+
+      return constructS3LocalIgvUrl({
         bucketOrVolume: bucketOrVolume,
         pathOrKey: pathOrKey,
-      }),
+      });
+    },
     { enabled: type == 's3', retry: false }
   );
 
