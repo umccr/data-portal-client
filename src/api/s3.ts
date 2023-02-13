@@ -47,11 +47,11 @@ export function usePortalS3PresignAPI(s3Id?: string | number) {
 }
 
 export enum S3StatusData {
-  AVAILABLE,
-  ARCHIVED,
-  RESTORING,
-  EXPIRED,
-  ERROR,
+  AVAILABLE = 'available',
+  ARCHIVED = 'archived',
+  RESTORING = 'restoring',
+  EXPIRED = 'expired',
+  ERROR = 'error',
 }
 export async function getS3Status(s3Id: string | number): Promise<S3StatusData> {
   const data = await API.get('portal', `/s3/${s3Id}/status`, {});
@@ -69,16 +69,16 @@ export async function getS3Status(s3Id: string | number): Promise<S3StatusData> 
     const isArchived = head_object['StorageClass'] === 'DEEP_ARCHIVE';
     const restoreStatus = head_object['Restore'];
 
-    if (isArchived || !restoreStatus) {
+    if (isArchived && !restoreStatus) {
       return S3StatusData.ARCHIVED;
     }
 
-    const isRestoring = restoreStatus.includes('true');
+    const isRestoring = restoreStatus?.includes('true');
     if (isRestoring) {
       return S3StatusData.RESTORING;
     }
 
-    const expiryChunk = restoreStatus.slice(25);
+    const expiryChunk = restoreStatus?.slice(25);
     if (!isRestoring && expiryChunk) {
       const expiryDateStr = expiryChunk.split('=')[1];
       const expiryDate = Date.parse(expiryDateStr);
