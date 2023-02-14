@@ -151,8 +151,8 @@ function RestoreArchiveObjectDialog(props: RestoreArchiveObjectDialogProps) {
 
     toastShow({
       severity: 'success',
-      summary: 'Successfully submitted restore request!',
-      life: 3000,
+      summary: 'Successfully submitted restore request! Restoration may take 48 hours.',
+      sticky: true,
     });
   };
 
