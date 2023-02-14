@@ -2,12 +2,12 @@ import React, { useRef, useState, useCallback } from 'react';
 import { Menu } from 'primereact/menu';
 import { MenuItem } from 'primereact/menuitem';
 
-import { isIgvReadableFile } from '../../containers/subjects/IGV/LoadSubjectDataButton';
-import { constructGDSUrl } from '../../api/gds';
-import { useToastContext } from '../../providers/ToastProvider';
-import RestoreArchiveObjectDialog from '../RestoreArchiveObjectDialog';
-import GeneratePresignedDialog from '../GeneratePresignedDialog';
-import OpenIGVDesktopDialog from '../OpenInIgvDialog';
+import { isIgvReadableFile } from '../../subjects/IGV/LoadSubjectDataButton';
+import { constructGDSUrl } from '../../../api/gds';
+import { useToastContext } from '../../../providers/ToastProvider';
+import RestoreArchiveObjectDialog from '../../../components/RestoreArchiveObjectDialog';
+import GeneratePresignedDialog from '../../../components/GeneratePresignedDialog';
+import OpenIGVDesktopDialog from '../../../components/OpenInIgvDialog';
 
 export enum DataAction {
   NONE,
