@@ -166,7 +166,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     const [isTablePreview, setIsTablePreview] = useState<boolean>(true);
     const options = ['Table', 'Raw'];
     return (
-      <div className='w-full m-3 justify-content-center' style={{ maxHeight: '80vh' }}>
+      <div className='w-full m-3 text-center' style={{ maxHeight: '80vh' }}>
         <SelectButton
           id='toggle-table-view'
           className='pb-2'
@@ -180,7 +180,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
             showGridlines
             rowHover
             value={allRows.slice(1)}
-            tableClassName={data.length == 0 ? 'hidden' : ''}>
+            tableClassName={allRows.length == 0 ? 'hidden' : ''}>
             <Column
               body={rowNumTemplate}
               header={<pre className='m-0'>1</pre>}
@@ -221,7 +221,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     [...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST, ...PLAIN_FILETYPE_LIST, 'yaml'].includes(filetype)
   ) {
     return (
-      <div className='w-full m-3 justify-content-center' style={{ maxHeight: '80vh' }}>
+      <div className='w-full m-3 text-center' style={{ maxHeight: '80vh' }}>
         <pre
           style={{
             minWidth: '50vw',
@@ -232,7 +232,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
             padding: '1rem',
             margin: 0,
           }}>
-          {/* {data} */}
+          {data}
         </pre>
       </div>
     );
