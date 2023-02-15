@@ -6,7 +6,7 @@ import { Column } from 'primereact/column';
 import { getStringReadableBytes } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
-import DataActionButton from '../../../components/DataActionButton';
+import DataActionButton from '../../utils/DataActionButton';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { S3Row } from '../../../api/s3';
 import { GDSRow } from '../../../api/gds';

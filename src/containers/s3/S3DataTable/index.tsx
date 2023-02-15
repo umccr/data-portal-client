@@ -10,7 +10,7 @@ import { useToastContext } from '../../../providers/ToastProvider';
 import { ColumnProps } from 'primereact/column';
 import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
 import moment from 'moment';
-import DataActionButton from '../../../components/DataActionButton';
+import DataActionButton from '../../utils/DataActionButton';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import { S3Row, usePortalS3API } from '../../../api/s3';
 import DataSearchFilterButton from '../../../components/DataSearchFilterButton';

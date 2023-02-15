@@ -5,7 +5,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { getStringReadableBytes } from '../../../utils/util';
 import { GDSRow } from '../../../api/gds';
-import { S3Row } from '../../../api/s3';
+import { getS3Status, S3Row, S3StatusData } from '../../../api/s3';
 import moment from 'moment';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { LoadSubjectDataType } from '.';
@@ -37,6 +37,7 @@ function LoadSubjectDataButton({
 
   // Fetch existing subject data (will be move out and cache elsewhere)
   const { isLoading, isError, data } = usePortalSubjectDataAPI(subjectId);
+  const [isCustomLoading, setIsCustomLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (isError) {
@@ -49,9 +50,35 @@ function LoadSubjectDataButton({
     }
   }, [isError]);
 
-  const saveIgvDataSelection = () => {
+  const saveIgvDataSelection = async () => {
+    // Check S3 status
+    setIsCustomLoading(true);
+    const unavailableSelection: string[] = [];
+    for (const s3Row of currentDataSelection.s3RowList) {
+      const status = await getS3Status(s3Row.id);
+      if (status != S3StatusData.AVAILABLE) {
+        unavailableSelection.push(s3Row.key);
+      }
+    }
+    console.log(unavailableSelection.join('\n'));
+    if (unavailableSelection.length) {
+      toastShow({
+        severity: 'warn',
+        summary: 'Unavailable Data',
+        detail: (
+          <>
+            The following data is archived or at the restoring stage.
+            {unavailableSelection.map((objKey, idx) => (
+              <pre key={idx}>{objKey}</pre>
+            ))}
+          </>
+        ),
+        sticky: true,
+      });
+    }
     handleIgvTrackDataChange(currentDataSelection);
     setIsLoadDialogOpen((prev) => !prev);
+    setIsCustomLoading(false);
   };
 
   const openDialog = () => {
@@ -59,7 +86,7 @@ function LoadSubjectDataButton({
     setIsLoadDialogOpen((prev) => !prev);
   };
 
-  const renderFooter = () => {
+  const FooterContent = () => {
     return (
       <div className='pt-4'>
         <Button
@@ -69,6 +96,7 @@ function LoadSubjectDataButton({
           className='p-button-text text-blue-800'
         />
         <Button
+          disabled={isCustomLoading || isLoading || !data}
           className='bg-blue-800'
           label='Load'
           icon='pi pi-cloud-upload'
@@ -119,9 +147,13 @@ function LoadSubjectDataButton({
         visible={isLoadDialogOpen}
         className='w-11'
         draggable={false}
-        footer={renderFooter()}
+        footer={<FooterContent />}
         onHide={() => setIsLoadDialogOpen((prev) => !prev)}>
-        {isLoading || !data ? <CircularLoaderWithText /> : <RenderDialogContent data={data} />}
+        {isCustomLoading || isLoading || !data ? (
+          <CircularLoaderWithText />
+        ) : (
+          <RenderDialogContent data={data} />
+        )}
       </Dialog>
 
       <Button
