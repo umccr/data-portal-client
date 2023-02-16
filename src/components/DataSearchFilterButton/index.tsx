@@ -28,7 +28,7 @@ function DataSearchFilterButton({ currentFilter, handleFilterChange }: Props) {
       <div className='flex w-full'>
         <Dropdown
           id='dropdown-data-filter-group'
-          className='w-full '
+          className='w-full cursor-auto'
           placeholder='Search'
           value={dropdownState}
           options={SUGGESTED_REGEX_FILTER}

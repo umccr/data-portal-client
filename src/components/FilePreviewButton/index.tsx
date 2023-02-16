@@ -90,17 +90,17 @@ function FilePreviewDialog(props: FilePreviewDialogProps) {
       resizable={false}
       draggable={false}
       header={filename}
-      style={{ width: '75vw' }}
+      style={{ width: '75vw', boxSizing: 'border-box', border: 'solid var(--surface-600) 1px' }}
       visible={true}
       onHide={handleDialogClose}
       contentStyle={{ minHeight: '5rem', maxHeight: '75vh' }}
       contentClassName='relative p-0 surface-400 flex align-items-center justify-content-center'>
       {portalPresignedUrlRes.data ? (
-        <div style={{ height: '75vh', width: '100%' }}>
+        <div className='w-full p-3' style={{ height: '75vh' }}>
           <ViewPresignedUrl presingedUrl={portalPresignedUrlRes.data.signed_url} />
         </div>
       ) : portalPresignedUrlRes.isLoading ? (
-        <CircularLoaderWithText />
+        <CircularLoaderWithText text='Generating presigned URL.' />
       ) : portalPresignedUrlRes.isError ? (
         <div className='pi pi-exclamation-triangle text-xl' />
       ) : (
