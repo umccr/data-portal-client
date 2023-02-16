@@ -104,6 +104,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
       });
     }
   }, [isError]);
+  const [isPrettifyPreview, setIsPrettifyPreview] = useState<boolean>(true);
 
   if (isLoading || isFetching || !data) {
     return <CircularLoaderWithText text='Fetching Content' />;
@@ -163,19 +164,18 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     const rowNumTemplate = (_: string, prop: { rowIndex: number }) => {
       return <pre className='m-0'>{prop.rowIndex + 2} </pre>;
     };
-    const [isTablePreview, setIsTablePreview] = useState<boolean>(true);
     const options = ['Table', 'Raw'];
     return (
-      <div className='w-full m-3 text-center' style={{ maxHeight: '80vh' }}>
+      <div className='w-full' style={{ maxHeight: '80vh' }}>
         <SelectButton
           id='toggle-table-view'
           className='pb-2'
-          value={isTablePreview ? 'Table' : 'Raw'}
-          onChange={(e) => setIsTablePreview(e.value == 'Table' ? true : false)}
+          value={isPrettifyPreview ? 'Table' : 'Raw'}
+          onChange={(e) => setIsPrettifyPreview(e.value == 'Table' ? true : false)}
           options={options}
         />
 
-        {isTablePreview ? (
+        {isPrettifyPreview ? (
           <DataTable
             showGridlines
             rowHover
@@ -200,14 +200,9 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
           </DataTable>
         ) : (
           <pre
+            className='inline-block m-0 p-3 w-full bg-white border-1 border-solid border-900 border-round-xs'
             style={{
               minWidth: '50vw',
-              display: 'inline-block',
-              borderRadius: '5px',
-              border: '1px solid black',
-              backgroundColor: 'white',
-              padding: '1rem',
-              margin: 0,
             }}>
             {data}
           </pre>
@@ -221,16 +216,11 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     [...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST, ...PLAIN_FILETYPE_LIST, 'yaml'].includes(filetype)
   ) {
     return (
-      <div className='w-full m-3 text-center' style={{ maxHeight: '80vh' }}>
+      <div className='w-full' style={{ maxHeight: '80vh' }}>
         <pre
+          className='inline-block m-0 p-3 w-full bg-white border-1 border-solid border-900 border-round-xs'
           style={{
             minWidth: '50vw',
-            display: 'inline-block',
-            borderRadius: '5px',
-            border: '1px solid black',
-            backgroundColor: 'white',
-            padding: '1rem',
-            margin: 0,
           }}>
           {data}
         </pre>
