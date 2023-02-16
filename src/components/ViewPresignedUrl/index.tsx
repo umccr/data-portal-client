@@ -56,34 +56,22 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
   // Return IMAGE display
   if (IMAGE_FILETYPE_LIST.includes(filetype)) {
     return (
-      <img
-        style={{
-          maxHeight: '100%',
-          maxWidth: '100%',
-          backgroundColor: 'white',
-          padding: '1px',
-        }}
-        onClick={() => window.open(presingedUrl, '_blank')}
-        src={presingedUrl}
-      />
+      <div className='w-full h-full text-center'>
+        <img
+          className='max-w-full max-h-full bg-white'
+          onClick={() => window.open(presingedUrl, '_blank')}
+          src={presingedUrl}
+        />
+      </div>
     );
   }
 
   // Return HTML (via iframe) display
   if (HTML_FILETYPE_LIST.includes(filetype)) {
     return (
-      <iframe
-        src={presingedUrl}
-        style={{
-          height: '100%',
-          maxWidth: '100%',
-          backgroundColor: 'white',
-          padding: '1px',
-          position: 'absolute',
-          left: 0,
-          width: '100%',
-        }}
-      />
+      <div className='w-full h-full'>
+        <iframe className='w-full h-full bg-white' src={presingedUrl} />
+      </div>
     );
   }
 
@@ -100,7 +88,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
         severity: 'error',
         summary: 'Something went wrong!',
         detail: 'Unable to load presignedUrl content.',
-        life: 3000,
+        sticky: true,
       });
     }
   }, [isError]);
@@ -125,16 +113,18 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     try {
       const JSONParse = JSON.parse(data);
       return (
-        <JSONPretty
-          id='json-pretty'
-          data={JSONParse}
-          theme={cssTheme}
-          style={{
-            borderRadius: '5px',
-            width: '100%',
-            minWidth: '100%',
-          }}
-        />
+        <div className='w-full h-full overflow-auto'>
+          <JSONPretty
+            id='json-pretty'
+            data={JSONParse}
+            theme={cssTheme}
+            style={{
+              borderRadius: '5px',
+              width: '100%',
+              minWidth: '100%',
+            }}
+          />
+        </div>
       );
     } catch (err) {
       return (
@@ -166,7 +156,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     };
     const options = ['Table', 'Raw'];
     return (
-      <div className='w-full' style={{ maxHeight: '80vh' }}>
+      <div className='w-full h-full flex flex-column'>
         <SelectButton
           id='toggle-table-view'
           className='pb-2'
@@ -180,7 +170,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
             showGridlines
             rowHover
             value={allRows.slice(1)}
-            tableClassName={allRows.length == 0 ? 'hidden' : ''}>
+            className={allRows.length == 0 ? 'hidden' : 'overflow-auto'}>
             <Column
               body={rowNumTemplate}
               header={<pre className='m-0'>1</pre>}
@@ -191,7 +181,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
               <Column
                 key={idx}
                 header={colName}
-                headerClassName='text-color font-bold surface-200'
+                headerClassName='text-color font-bold surface-200 border-none'
                 field={`${idx}`}
                 body={cellContentTemplate}
                 bodyClassName='py-1'
@@ -200,7 +190,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
           </DataTable>
         ) : (
           <pre
-            className='inline-block m-0 p-3 w-full bg-white border-1 border-solid border-900 border-round-xs'
+            className='overflow-auto inline-block m-0 p-3 w-full bg-white border-1 border-solid border-900 border-round-xs'
             style={{
               minWidth: '50vw',
             }}>
@@ -216,7 +206,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     [...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST, ...PLAIN_FILETYPE_LIST, 'yaml'].includes(filetype)
   ) {
     return (
-      <div className='w-full' style={{ maxHeight: '80vh' }}>
+      <div className='w-full h-full overflow-auto'>
         <pre
           className='inline-block m-0 p-3 w-full bg-white border-1 border-solid border-900 border-round-xs'
           style={{
