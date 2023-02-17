@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Card } from 'primereact/card';
 
 import { Button } from 'primereact/button';
@@ -12,7 +12,7 @@ export enum launchPadOptions {
   NONE = '',
   RNASUM = 'rna-sum',
   GPL = 'gpl',
-  WGS_TN = 'wgs-t/n',
+  WGS_TN = 'wgs-tn',
 }
 
 export default function SubjectLaunchPad() {
@@ -26,28 +26,22 @@ export default function SubjectLaunchPad() {
     { key: launchPadOptions.RNASUM, label: 'RNAsum' },
     { key: launchPadOptions.WGS_TN, label: 'Whole-Genome Sequencing Tumor-Normal (WGS T/N)' },
   ];
-  const [selectedKey, setSelectedKey] = useState<launchPadOptions>(launchPadOptions.WGS_TN);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const lastPath = location.pathname.split('/').pop();
 
   return (
     <div>
       <Card>
         <div className='relative'>
-          {selectedKey ? (
-            <Button
-              icon='pi pi-arrow-circle-left'
-              onClick={() => setSelectedKey(launchPadOptions.NONE)}
-              className='text-600 p-button-info p-button-text absolute right-0 top-0'
-            />
-          ) : (
-            <></>
-          )}
           <div className='pt-2 pr-5'>
             {/* What to trigger? */}
-            {selectedKey == launchPadOptions.GPL ? (
+            {lastPath == launchPadOptions.GPL ? (
               <SubjectGPLLaunch subjectId={subjectId} />
-            ) : selectedKey == launchPadOptions.RNASUM ? (
+            ) : lastPath == launchPadOptions.RNASUM ? (
               <SubjectRNASumLaunch subjectId={subjectId} />
-            ) : selectedKey == launchPadOptions.WGS_TN ? (
+            ) : lastPath == launchPadOptions.WGS_TN ? (
               <SubjectWGSTNLaunch subjectId={subjectId} />
             ) : (
               <div className='h-full'>
@@ -57,7 +51,7 @@ export default function SubjectLaunchPad() {
                   return (
                     <div key={option.key} className='mb-3'>
                       <Button
-                        onClick={() => setSelectedKey(option.key)}
+                        onClick={() => navigate(option.key)}
                         label={option.label}
                         className='w-full p-button-outlined p-button-secondary'
                       />
