@@ -3,7 +3,8 @@ import { InputText } from 'primereact/inputtext';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
-import { ConfirmDialog } from 'primereact/confirmdialog';
+import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
 
 import { useToastContext } from '../../../providers/ToastProvider';
 import { usePortalFastqAPI, FastqRow as APIFastqRow } from '../../../api/fastq';
@@ -13,6 +14,26 @@ import StyledJsonPretty from '../../../components/StyledJsonPretty';
 import './index.css';
 import { usePortalMetadataAPI } from '../../../api/metadata';
 
+const metadataHeaderToDisplay: string[] = [
+  'subject_id',
+  'sample_id',
+  'library_id',
+  'external_subject_id',
+  'external_sample_id',
+  'type',
+  'phenotype',
+  'project_name',
+];
+const fastqHeaderToDisplay: string[] = [
+  'id',
+  'rgid',
+  'rgsm',
+  'rglb',
+  'lane',
+  'read_1',
+  'read_2',
+  'sequence_run',
+];
 /**
  * T/N Lambda Input
  */
@@ -41,11 +62,11 @@ type Payload = {
 
 type Input = {
   subjectId: string;
-  normalLibraryId: string;
-  tumorLibraryId: string;
-  tumorSampleId: string;
+  sampleName: string;
+  outputFilePrefix: string;
+  outputDirectory: string;
   normalFastqRow: APIFastqRow | null;
-  tumorFastqRow: APIFastqRow | null;
+  tumorFastqRow: APIFastqRow[];
 };
 
 type Props = { subjectId: string };
@@ -56,28 +77,31 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
 
   const [input, setInput] = useState<Input>({
     subjectId: subjectId,
-    normalLibraryId: '',
-    tumorLibraryId: '',
-    tumorSampleId: '',
+    sampleName: '',
+    outputFilePrefix: '',
+    outputDirectory: '',
     normalFastqRow: null,
-    tumorFastqRow: null,
+    tumorFastqRow: [],
   });
-  const handleFastqListRowChange = (v: APIFastqRow) =>
-    setInput((prev) => ({ ...prev, normalLibraryId: v.rglb, normalFastqRow: v }));
-  const handleTumorFastqListRowChange = (v: APIFastqRow) =>
-    setInput((prev) => ({
-      ...prev,
-      tumorLibraryId: v.rglb,
-      tumorSampleId: v.rgsm,
-      tumorFastqRow: v,
-    }));
 
-  const fastqUseQueryRes = usePortalFastqAPI({
-    additionalPath: '?workflow=clinical&workflow=research&phenotype=tumor&phenotype=normal',
+  const normalFastqUseQueryRes = usePortalFastqAPI({
+    additionalPath: '?workflow=clinical&workflow=research',
     apiConfig: {
       queryStringParameters: {
         subject_id: subjectId,
         type: 'wgs',
+        phenotype: 'normal',
+      },
+    },
+  });
+
+  const tumorFastqUseQueryRes = usePortalFastqAPI({
+    additionalPath: '?workflow=clinical&workflow=research',
+    apiConfig: {
+      queryStringParameters: {
+        subject_id: subjectId,
+        type: 'wgs',
+        phenotype: 'tumor',
       },
     },
   });
@@ -92,8 +116,35 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
     },
   });
 
+  // Setting up defaults for straight forward data (results only 1)
   useEffect(() => {
-    if (fastqUseQueryRes.isError || metadataUseQueryRes.isError) {
+    if (input.normalFastqRow && input.tumorFastqRow.length != 0) {
+      const normalFastq = input.normalFastqRow;
+      const tumorFastq = input.tumorFastqRow[0];
+      setInput((prev) => ({
+        ...prev,
+        sampleName: tumorFastq.rglb,
+        outputFilePrefix: tumorFastq.rgsm,
+        outputDirectory: `${tumorFastq.rglb}_${normalFastq.rglb}`,
+      }));
+    }
+  }, [input.normalFastqRow, input.tumorFastqRow]);
+
+  // Setting up defaults for straight forward data (results only 1)
+  useEffect(() => {
+    const normalFastqRowList = normalFastqUseQueryRes.data?.results;
+    if (normalFastqRowList?.length == 1)
+      setInput((prev) => ({ ...prev, normalFastqRow: normalFastqRowList[0] }));
+
+    const tumorFastqRowList = tumorFastqUseQueryRes.data?.results;
+    if (tumorFastqRowList?.length == 1)
+      setInput((prev) => ({ ...prev, tumorFastqRow: tumorFastqRowList }));
+  }, [normalFastqUseQueryRes.data, tumorFastqUseQueryRes.data]);
+
+  const isError =
+    normalFastqUseQueryRes.isError || tumorFastqUseQueryRes.isError || metadataUseQueryRes.isError;
+  useEffect(() => {
+    if (isError) {
       toastShow({
         severity: 'error',
         summary: 'Something went wrong!',
@@ -101,13 +152,15 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
         sticky: true,
       });
     }
-  }, [fastqUseQueryRes.isError, metadataUseQueryRes.isError]);
+  }, [isError]);
 
-  if (fastqUseQueryRes.isLoading || metadataUseQueryRes.isLoading) {
+  const isLoading =
+    normalFastqUseQueryRes.isLoading ||
+    tumorFastqUseQueryRes.isLoading ||
+    metadataUseQueryRes.isLoading;
+  if (isLoading) {
     return <CircularLoaderWithText text={`Fetching available FASTQ for "${subjectId}"`} />;
   }
-
-  const payload = convertInputToPayload(input);
 
   return (
     <div>
@@ -115,128 +168,170 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
         {subjectId} - Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch
       </div>
 
-      <h5>Description</h5>
-      <div>
-        This launch should able to construct payload that would be sufficient to trigger WGS T/N
-        workflow. This details of the payload could be found on{' '}
-        <a
-          target={`_blank`}
-          href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md'>
-          https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md
-        </a>
-        .
-        <br /> <br />
-        Please select the intended Normal Fastq and Tumor Fastq row to initiate the workflow. Fastq
-        displayed are filtered on libraries that has Tumor/Normal phenotype, clinical/research
-        workflow, a WGS type and the relevant subjectId.
+      <div className='surface-200 border-1 border-round-md p-3'>
+        <h5 className='mt-0'>Description</h5>
+        <div>
+          {`This page should launch should able to launch WGS T/N workflow for Subject Id "${subjectId}". `}
+          {`Please select relevant libraries for tumor and normal as well as other inputs if available. `}
+          {`These inputs will construct payload and invoke lambda describe at `}
+          <a
+            target={`_blank`}
+            href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md'>
+            data-portal-pipeline-t/n-docs
+          </a>
+          {`.`}
+        </div>
+
+        <h5>Lab Metadata Table</h5>
+        <div className='mb-3'>{`This is just an additional metadata table to help you to select relevant FASTQ.`}</div>
+        <div className='w-full'>
+          <DataTable
+            size='small'
+            showGridlines
+            autoLayout
+            responsiveLayout='scroll'
+            value={metadataUseQueryRes.data?.results ?? []}
+            dataKey='id'>
+            {metadataHeaderToDisplay.map((header, idx) => (
+              <Column
+                key={idx}
+                field={header}
+                header={header.replaceAll('_', ' ')}
+                headerClassName='capitalize surface-100'
+              />
+            ))}
+          </DataTable>
+        </div>
       </div>
 
       <h5>Subject Id</h5>
       <div className='w-full' style={{ cursor: 'not-allowed' }}>
-        <InputText className='w-full' type='text' disabled value={payload.subject_id} />
+        <InputText className='w-full' type='text' disabled value={input.subjectId} />
       </div>
 
-      <h5>Sample Name</h5>
-      <div className='w-full' style={{ cursor: 'not-allowed' }}>
-        <InputText className='w-full' type='text' disabled value={payload.sample_name} />
-      </div>
-
-      <h5>Output File Prefix</h5>
-      <div className='w-full' style={{ cursor: 'not-allowed' }}>
-        <InputText className='w-full' type='text' disabled value={payload.output_file_prefix} />
-      </div>
-
-      <h5>Output Directory</h5>
-      <div className='w-full' style={{ cursor: 'not-allowed' }}>
-        <InputText className='w-full' type='text' disabled value={payload.output_directory} />
-      </div>
-
-      <h5>Lab Metadata Table</h5>
+      <h5>Select Normal Fastq List Row</h5>
       <div className='w-full'>
         <DataTable
           autoLayout
           responsiveLayout='scroll'
-          value={metadataUseQueryRes.data?.results ?? []}
+          value={normalFastqUseQueryRes.data?.results}
+          selection={input.normalFastqRow}
+          onSelectionChange={(e) => setInput((prev) => ({ ...prev, normalFastqRow: e.value }))}
           dataKey='id'>
-          <Column field='id' header='ID' />
-          <Column field='sample_name' header='sample_name' />
-          <Column field='sample_id' header='sample_id' />
-          <Column field='external_sample_id' header='external_sample_id' />
-          <Column field='subject_id' header='subject_id' />
-          <Column field='external_subject_id' header='external_subject_id' />
-          <Column field='phenotype' header='phenotype' />
-          <Column field='workflow' header='workflow' />
-          <Column field='coverage' header='coverage' />
-          <Column field='project_owner' header='project_owner' />
-          <Column field='coverage' header='coverage' />
-          <Column field='override_cycles' header='override_cycles' />
-          <Column field='experiment_id' header='experiment_id' />
-          <Column field='truseqindex' header='project_owner' />
+          <Column selectionMode='single' headerClassName='capitalize surface-100' />
+          {fastqHeaderToDisplay.map((header, idx) => (
+            <Column
+              key={idx}
+              field={header}
+              header={header.replaceAll('_', ' ')}
+              headerClassName='uppercase surface-100'
+              bodyClassName='font-normal'
+            />
+          ))}
         </DataTable>
       </div>
 
-      <h5>Normal Fastq List Rows</h5>
-      <div className='w-full' style={{ cursor: 'not-allowed' }}>
-        <SelectableFastqTable
-          options={fastqUseQueryRes.data?.results || []}
-          selected={input.normalFastqRow}
-          handleChange={(v: APIFastqRow) => handleFastqListRowChange(v)}
-        />
+      <h5>Select Tumor Fastq List Rows</h5>
+      <div className='fastqTable w-full'>
+        <DataTable
+          autoLayout
+          responsiveLayout='scroll'
+          value={tumorFastqUseQueryRes.data?.results}
+          selection={input.tumorFastqRow}
+          onSelectionChange={(e) => setInput((prev) => ({ ...prev, tumorFastqRow: e.value }))}
+          dataKey='id'>
+          <Column
+            selectionMode='multiple'
+            headerClassName='capitalize surface-100'
+            bodyClassName='shadow-none'
+          />
+          {fastqHeaderToDisplay.map((header, idx) => (
+            <Column
+              key={idx}
+              field={header}
+              header={header.replaceAll('_', ' ')}
+              headerClassName='uppercase surface-100'
+              bodyClassName='font-normal'
+            />
+          ))}
+        </DataTable>
       </div>
 
-      <h5>Tumor Fastq List Rows</h5>
-      <div className='w-full'>
-        <SelectableFastqTable
-          options={fastqUseQueryRes.data?.results || []}
-          selected={input.tumorFastqRow}
-          handleChange={(v: APIFastqRow) => handleTumorFastqListRowChange(v)}
-        />
-      </div>
+      {input.normalFastqRow && input.tumorFastqRow.length ? (
+        <>
+          <h5>Sample Name (Tumor Library Id)</h5>
+          <Dropdown
+            className='w-full'
+            options={input.tumorFastqRow.map((tf) => tf.rglb)}
+            onChange={(e) => setInput((prev) => ({ ...prev, sampleName: e.value }))}
+            value={input.sampleName}
+          />
 
-      <div className='w-full mt-5 text-right '>
-        <ConfirmDialog
-          id='wgs-confirmation-dialog'
-          style={{ width: '75vw' }}
-          visible={isConfirmDialogOpen}
-          onHide={() => setIsConfirmDialogOpen(false)}
-          draggable={false}
-          // Accept or Reject Buttons
-          acceptClassName='p-button-danger'
-          acceptLabel='Launch'
-          rejectLabel='Cancel'
-          // Header
-          header='Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch Confirmation'
-          headerClassName='border-bottom-1'
-          // Content
-          contentClassName='w-full'
-          message={
-            <div className='w-full'>
-              <div>Please confirm the following JSON before launching the workflow.</div>
-              <br />
-              <div>
-                You can check the details on{' '}
-                <a
-                  target={`_blank`}
-                  href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md'>
-                  https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md
-                </a>
-                .
+          <h5>Output File Prefix (Tumor Sample Id)</h5>
+          <Dropdown
+            className='w-full'
+            options={input.tumorFastqRow.map((tf) => tf.rgsm)}
+            onChange={(e) => setInput((prev) => ({ ...prev, outputFilePrefix: e.value }))}
+            value={input.outputFilePrefix}
+          />
+
+          <h5>Output Directory (tumorLibraryId_normalLibraryId)</h5>
+          <Dropdown
+            className='w-full'
+            options={input.tumorFastqRow.map((tf) => `${tf.rglb}_${input.normalFastqRow?.rglb}`)}
+            onChange={(e) => setInput((prev) => ({ ...prev, outputDirectory: e.value }))}
+            value={input.outputDirectory}
+          />
+
+          <div className='w-full mt-5 text-center '>
+            <Dialog
+              id='wgs-confirmation-dialog'
+              style={{ width: '75vw' }}
+              visible={isConfirmDialogOpen}
+              onHide={() => setIsConfirmDialogOpen(false)}
+              draggable={false}
+              footer={
+                <span>
+                  <Button
+                    label='Cancel'
+                    className='p-button-secondary p-button-text'
+                    onClick={() => setIsConfirmDialogOpen(false)}
+                  />
+                  <Button label='Launch' className='p-button-raised p-button-danger' />
+                </span>
+              }
+              header='Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch Confirmation'
+              headerClassName='border-bottom-1'
+              contentClassName='w-full'>
+              <div className='w-full'>
+                <div>Please confirm the following JSON before launching the workflow.</div>
+                <br />
+                <div>
+                  You can check the details on{' '}
+                  <a
+                    target={`_blank`}
+                    href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md'>
+                    https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md
+                  </a>
+                  .
+                </div>
+                <StyledJsonPretty
+                  wrapperClassName='border-solid border-round-md p-3 mt-3'
+                  data={convertInputToPayload(input)}
+                />
               </div>
-              <StyledJsonPretty
-                wrapperClassName='border-solid border-round-md p-3 mt-3'
-                data={payload}
-              />
-            </div>
-          }
-        />
-        <Button
-          className='p-button-info'
-          disabled={!input.tumorFastqRow || !input.normalFastqRow}
-          onClick={() => setIsConfirmDialogOpen(true)}
-          icon='pi pi-check'
-          label='Confirm'
-        />
-      </div>
+            </Dialog>
+            <Button
+              className='p-button-info p-button-rounded p-button-outlined'
+              disabled={!isInputValid(input)}
+              onClick={() => setIsConfirmDialogOpen(true)}
+              icon='pi pi-chevron-right'
+            />
+          </div>
+        </>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
@@ -244,38 +339,11 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
 /**
  * Helper functions
  */
-type SelectableFastqTableProp = {
-  options: APIFastqRow[];
-  selected: APIFastqRow | null;
-  handleChange: (fastqList: APIFastqRow) => void;
-};
-const SelectableFastqTable = ({ options, selected, handleChange }: SelectableFastqTableProp) => {
-  return (
-    <DataTable
-      autoLayout
-      responsiveLayout='scroll'
-      selectionMode='single'
-      value={options}
-      selection={selected}
-      onSelectionChange={(e) => handleChange(e.value)}
-      dataKey='id'>
-      <Column field='id' header='ID' />
-      <Column field='rgid' header='RGID' />
-      <Column field='rgsm' header='RGSM' />
-      <Column field='rglb' header='RGLB' />
-      <Column field='lane' header='LANE' />
-      <Column field='read_1' header='READ_1' />
-      <Column field='read_2' header='READ_2' />
-      <Column field='sequence_run' header='SEQUENCE_RUN' />
-    </DataTable>
-  );
-};
-
 const convertInputToPayload = (input: Input): Payload => ({
   subject_id: input.subjectId,
-  sample_name: input.tumorLibraryId,
-  output_file_prefix: input.tumorSampleId,
-  output_directory: `${input.tumorLibraryId}_${input.normalLibraryId}`,
+  sample_name: input.sampleName,
+  output_file_prefix: input.outputFilePrefix,
+  output_directory: input.outputDirectory,
   normalFastqRow: input.normalFastqRow
     ? [
         {
@@ -294,22 +362,40 @@ const convertInputToPayload = (input: Input): Payload => ({
         },
       ]
     : [],
-  tumorFastqRow: input.tumorFastqRow
-    ? [
-        {
-          rgid: input.tumorFastqRow.rgid,
-          rgsm: input.tumorFastqRow.rgsm,
-          rglb: input.tumorFastqRow.rglb,
-          lane: input.tumorFastqRow.lane,
-          read_1: {
-            class: 'File',
-            location: input.tumorFastqRow.read_1,
-          },
-          read_2: {
-            class: 'File',
-            location: input.tumorFastqRow.read_2,
-          },
-        },
-      ]
-    : [],
+  tumorFastqRow: input.tumorFastqRow.map((tumor) => ({
+    rgid: tumor.rgid,
+    rgsm: tumor.rgsm,
+    rglb: tumor.rglb,
+    lane: tumor.lane,
+    read_1: {
+      class: 'File',
+      location: tumor.read_1,
+    },
+    read_2: {
+      class: 'File',
+      location: tumor.read_2,
+    },
+  })),
 });
+
+const isInputValid = (input: Input): boolean => {
+  if (!input.subjectId) {
+    return false;
+  }
+  if (!input.sampleName) {
+    return false;
+  }
+  if (!input.outputFilePrefix) {
+    return false;
+  }
+  if (!input.outputDirectory) {
+    return false;
+  }
+  if (!input.normalFastqRow) {
+    return false;
+  }
+  if (input.tumorFastqRow.length == 0) {
+    return false;
+  }
+  return true;
+};
