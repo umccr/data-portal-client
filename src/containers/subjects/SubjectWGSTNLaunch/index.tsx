@@ -7,7 +7,6 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 
-import { useToastContext } from '../../../providers/ToastProvider';
 import { usePortalFastqAPI, FastqRow as APIFastqRow } from '../../../api/fastq';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import StyledJsonPretty from '../../../components/StyledJsonPretty';
@@ -15,7 +14,6 @@ import StyledJsonPretty from '../../../components/StyledJsonPretty';
 import './index.css';
 import { usePortalMetadataAPI } from '../../../api/metadata';
 import { invokeWGSTNWorkflow, Payload } from './aws';
-import { json } from 'stream/consumers';
 
 const metadataHeaderToDisplay: string[] = [
   'subject_id',
