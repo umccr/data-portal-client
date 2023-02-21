@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useQuery } from 'react-query';
 import { InputText } from 'primereact/inputtext';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -13,6 +14,8 @@ import StyledJsonPretty from '../../../components/StyledJsonPretty';
 
 import './index.css';
 import { usePortalMetadataAPI } from '../../../api/metadata';
+import { invokeWGSTNWorkflow, Payload } from './aws';
+import { json } from 'stream/consumers';
 
 const metadataHeaderToDisplay: string[] = [
   'subject_id',
@@ -34,31 +37,6 @@ const fastqHeaderToDisplay: string[] = [
   'read_2',
   'sequence_run',
 ];
-/**
- * T/N Lambda Input
- */
-type ReadFiles = {
-  class: 'File';
-  location: string;
-};
-
-type FastqRow = {
-  rgid: string;
-  rgsm: string;
-  rglb: string;
-  lane: number;
-  read_1: ReadFiles;
-  read_2: ReadFiles;
-};
-
-type Payload = {
-  subject_id: string;
-  sample_name: string;
-  output_file_prefix: string;
-  output_directory: string;
-  normalFastqRow: FastqRow[];
-  tumorFastqRow: FastqRow[];
-};
 
 type Input = {
   subjectId: string;
@@ -71,9 +49,8 @@ type Input = {
 
 type Props = { subjectId: string };
 export default function SubjectWGSTNLaunch({ subjectId }: Props) {
-  const { toastShow } = useToastContext();
-
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
+  const [isLaunch, setIsLaunch] = useState<boolean>(false);
 
   const [input, setInput] = useState<Input>({
     subjectId: subjectId,
@@ -83,6 +60,14 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
     normalFastqRow: null,
     tumorFastqRow: [],
   });
+
+  const workflowTriggerRes = useQuery(
+    ['wgs-tn-invoke', input],
+    async () => await invokeWGSTNWorkflow(convertInputToPayload(input)),
+    {
+      enabled: isLaunch && isInputValid(input),
+    }
+  );
 
   const normalFastqUseQueryRes = usePortalFastqAPI({
     additionalPath: '?workflow=clinical&workflow=research',
@@ -116,9 +101,9 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
     },
   });
 
-  // Setting up defaults for straight forward data (results only 1)
+  // Setting up defaults for straight forward data (where results only 1)
   useEffect(() => {
-    if (input.normalFastqRow && input.tumorFastqRow.length != 0) {
+    if (input.normalFastqRow && input.tumorFastqRow.length == 1) {
       const normalFastq = input.normalFastqRow;
       const tumorFastq = input.tumorFastqRow[0];
       setInput((prev) => ({
@@ -130,7 +115,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
     }
   }, [input.normalFastqRow, input.tumorFastqRow]);
 
-  // Setting up defaults for straight forward data (results only 1)
+  // Setting up defaults for straight forward data (where results only 1)
   useEffect(() => {
     const normalFastqRowList = normalFastqUseQueryRes.data?.results;
     if (normalFastqRowList?.length == 1)
@@ -141,25 +126,69 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
       setInput((prev) => ({ ...prev, tumorFastqRow: tumorFastqRowList }));
   }, [normalFastqUseQueryRes.data, tumorFastqUseQueryRes.data]);
 
-  const isError =
-    normalFastqUseQueryRes.isError || tumorFastqUseQueryRes.isError || metadataUseQueryRes.isError;
-  useEffect(() => {
-    if (isError) {
-      toastShow({
-        severity: 'error',
-        summary: 'Something went wrong!',
-        detail: 'Unable to load presignedUrl content.',
-        sticky: true,
-      });
-    }
-  }, [isError]);
+  // ERROR components return
+  if (
+    normalFastqUseQueryRes.isError ||
+    tumorFastqUseQueryRes.isError ||
+    metadataUseQueryRes.isError
+  ) {
+    return (
+      <div className='mt-3 text-center'>
+        <Button
+          icon='pi pi-times'
+          className='p-button-rounded p-button-danger bg-red-500 cursor-auto'
+          aria-label='Cancel'
+        />
+        <div className='mt-3'>{'Unable to load FASTQ row from API.'}</div>
+      </div>
+    );
+  }
+  if (workflowTriggerRes.isError) {
+    return (
+      <div className='mt-3 text-center'>
+        <Button
+          icon='pi pi-times'
+          className='p-button-rounded p-button-danger bg-red-500 cursor-auto'
+          aria-label='Cancel'
+        />
+        <div className='mt-3'>{`Something went wrong on launching WGS T/N workflow!`}</div>
+        <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
+          {JSON.stringify(workflowTriggerRes.error, null, 2)}
+        </pre>
+      </div>
+    );
+  }
 
-  const isLoading =
+  // LOADING components return
+  if (
     normalFastqUseQueryRes.isLoading ||
     tumorFastqUseQueryRes.isLoading ||
-    metadataUseQueryRes.isLoading;
-  if (isLoading) {
-    return <CircularLoaderWithText text={`Fetching available FASTQ for "${subjectId}"`} />;
+    metadataUseQueryRes.isLoading
+  ) {
+    return <CircularLoaderWithText text={`Fetching available FASTQ (${subjectId})`} />;
+  }
+  if (workflowTriggerRes.isLoading) {
+    return (
+      <CircularLoaderWithText
+        text={`Launching Whole-Genome Sequencing Tumor-Normal (${subjectId})`}
+      />
+    );
+  }
+
+  // SUCCESS component
+  if (workflowTriggerRes.isSuccess) {
+    if (workflowTriggerRes.data) console.log('workflowTriggerRes.data', workflowTriggerRes.data);
+    return (
+      <div className='mt-3 text-center'>
+        <Button
+          icon='pi pi-check'
+          className='p-button-rounded p-button-success bg-green-700 cursor-auto'
+          aria-label='Cancel'
+        />
+        <div className='mt-3'>{`Successfully launch WGS T/N workflow! Check Slack for updates.`}</div>
+        <pre className='mt-3'>{`You could navigate away from this page.`}</pre>
+      </div>
+    );
   }
 
   return (
@@ -297,7 +326,14 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
                     className='p-button-secondary p-button-text'
                     onClick={() => setIsConfirmDialogOpen(false)}
                   />
-                  <Button label='Launch' className='p-button-raised p-button-danger' />
+                  <Button
+                    label='Launch'
+                    className='p-button-raised p-button-danger'
+                    onClick={() => {
+                      setIsLaunch(true);
+                      setIsConfirmDialogOpen(false);
+                    }}
+                  />
                 </span>
               }
               header='Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch Confirmation'
@@ -344,7 +380,7 @@ const convertInputToPayload = (input: Input): Payload => ({
   sample_name: input.sampleName,
   output_file_prefix: input.outputFilePrefix,
   output_directory: input.outputDirectory,
-  normalFastqRow: input.normalFastqRow
+  fastq_list_rows: input.normalFastqRow
     ? [
         {
           rgid: input.normalFastqRow.rgid,
@@ -362,7 +398,7 @@ const convertInputToPayload = (input: Input): Payload => ({
         },
       ]
     : [],
-  tumorFastqRow: input.tumorFastqRow.map((tumor) => ({
+  tumor_fastq_list_rows: input.tumorFastqRow.map((tumor) => ({
     rgid: tumor.rgid,
     rgsm: tumor.rgsm,
     rglb: tumor.rglb,
