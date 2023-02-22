@@ -44,6 +44,11 @@ type Input = {
   normalFastqRow: APIFastqRow | null;
   tumorFastqRow: APIFastqRow[];
 };
+type DropdownOptions = {
+  sampleName: string[];
+  outputFilePrefix: string[];
+  outputDirectory: string[];
+};
 
 type Props = { subjectId: string };
 export default function SubjectWGSTNLaunch({ subjectId }: Props) {
@@ -57,6 +62,11 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
     outputDirectory: '',
     normalFastqRow: null,
     tumorFastqRow: [],
+  });
+  const [dropdownOptions, setDropdownOptions] = useState<DropdownOptions>({
+    sampleName: [],
+    outputFilePrefix: [],
+    outputDirectory: [],
   });
 
   const workflowTriggerRes = useQuery(
@@ -99,21 +109,38 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
     },
   });
 
-  // Setting up defaults for straight forward data (where results only 1)
+  // Setting up options for sampleName, outputFilePrefix, outputDirectory
   useEffect(() => {
-    if (input.normalFastqRow && input.tumorFastqRow.length == 1) {
-      const normalFastq = input.normalFastqRow;
-      const tumorFastq = input.tumorFastqRow[0];
-      setInput((prev) => ({
-        ...prev,
-        sampleName: tumorFastq.rglb,
-        outputFilePrefix: tumorFastq.rgsm,
-        outputDirectory: `${tumorFastq.rglb}_${normalFastq.rglb}`,
-      }));
-    }
+    setDropdownOptions({
+      sampleName: [...new Set(input.tumorFastqRow.map((tf) => tf.rglb))],
+      outputFilePrefix: [...new Set(input.tumorFastqRow.map((tf) => tf.rgsm))],
+      outputDirectory: [
+        ...new Set(input.tumorFastqRow.map((tf) => `${tf.rglb}_${input.normalFastqRow?.rglb}`)),
+      ],
+    });
   }, [input.normalFastqRow, input.tumorFastqRow]);
 
-  // Setting up defaults for straight forward data (where results only 1)
+  // Setting up defaults values (where only 1 option available)
+  useEffect(() => {
+    const update: Partial<Input> = {
+      sampleName: '',
+      outputFilePrefix: '',
+      outputDirectory: '',
+    };
+
+    if (dropdownOptions.sampleName.length == 1) update.sampleName = dropdownOptions.sampleName[0];
+    if (dropdownOptions.outputFilePrefix.length == 1)
+      update.outputFilePrefix = dropdownOptions.outputFilePrefix[0];
+    if (dropdownOptions.outputDirectory.length == 1)
+      update.outputDirectory = dropdownOptions.outputDirectory[0];
+
+    setInput((prev) => ({
+      ...prev,
+      ...update,
+    }));
+  }, [dropdownOptions]);
+
+  // Setting up defaults values (where only 1 result available)
   useEffect(() => {
     const normalFastqRowList = normalFastqUseQueryRes.data?.results;
     if (normalFastqRowList?.length == 1)
@@ -289,7 +316,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           <h5>Sample Name (Tumor Library Id)</h5>
           <Dropdown
             className='w-full'
-            options={input.tumorFastqRow.map((tf) => tf.rglb)}
+            options={[...new Set(input.tumorFastqRow.map((tf) => tf.rglb))]}
             onChange={(e) => setInput((prev) => ({ ...prev, sampleName: e.value }))}
             value={input.sampleName}
           />
@@ -297,7 +324,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           <h5>Output File Prefix (Tumor Sample Id)</h5>
           <Dropdown
             className='w-full'
-            options={input.tumorFastqRow.map((tf) => tf.rgsm)}
+            options={[...new Set(input.tumorFastqRow.map((tf) => tf.rgsm))]}
             onChange={(e) => setInput((prev) => ({ ...prev, outputFilePrefix: e.value }))}
             value={input.outputFilePrefix}
           />
@@ -305,7 +332,11 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           <h5>Output Directory (tumorLibraryId_normalLibraryId)</h5>
           <Dropdown
             className='w-full'
-            options={input.tumorFastqRow.map((tf) => `${tf.rglb}_${input.normalFastqRow?.rglb}`)}
+            options={[
+              ...new Set(
+                input.tumorFastqRow.map((tf) => `${tf.rglb}_${input.normalFastqRow?.rglb}`)
+              ),
+            ]}
             onChange={(e) => setInput((prev) => ({ ...prev, outputDirectory: e.value }))}
             value={input.outputDirectory}
           />
