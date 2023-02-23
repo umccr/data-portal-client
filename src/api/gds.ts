@@ -51,10 +51,10 @@ export type PresignApiData = {
   signed_url: string;
   error?: string;
 } & Record<string, any>;
-export function usePortalGDSPresignAPI(gdsId?: string | number) {
+export function usePortalGDSPresignAPI(gdsId?: string | number, apiConfig?: any) {
   return useQuery(
-    ['portal-gds-presign', gdsId],
-    async () => await API.get('portal', `/gds/${gdsId}/presign`, {}),
+    ['portal-gds-presign', gdsId, apiConfig],
+    async () => await API.get('portal', `/gds/${gdsId}/presign`, { ...apiConfig }),
     {
       staleTime: 60 * 60 * 1000, // 1hour,
       enabled: !!gdsId,
