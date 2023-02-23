@@ -80,7 +80,9 @@ function FilePreviewDialog(props: FilePreviewDialogProps) {
 
   let portalPresignedUrlRes;
   if (type == 'gds') {
-    portalPresignedUrlRes = usePortalGDSPresignAPI(id);
+    portalPresignedUrlRes = usePortalGDSPresignAPI(id, {
+      headers: { 'Content-Disposition': 'inline' },
+    });
   } else {
     portalPresignedUrlRes = usePortalS3PresignAPI(id);
   }
