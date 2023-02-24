@@ -122,7 +122,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
       </div>
     );
   }
-  if (!pairingOptions.data) return <div>Nothing</div>;
+
   return (
     <div>
       <div className='text-2xl font-medium mb-4'>
@@ -164,31 +164,35 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
       </div>
 
       <h5>Select Appropriate FASTQ Pairing</h5>
-      {pairingOptions.data.map((fastqRow, idx) => {
-        let divClassName =
-          'flex flex-row align-items-center mb-4 p-3 cursor-pointer border-round-xl border-solid border-1 border-300';
+      {(pairingOptions.data?.length == 0 || !pairingOptions.data) && (
+        <div>No FASTQ Pairing Found</div>
+      )}
+      {pairingOptions.data &&
+        pairingOptions.data.map((fastqRow, idx) => {
+          let divClassName =
+            'flex flex-row align-items-center mb-4 p-3 cursor-pointer border-round-xl border-solid border-1 border-300';
 
-        if (input == fastqRow) divClassName += ` surface-200`;
+          if (input == fastqRow) divClassName += ` surface-200`;
 
-        return (
-          <div
-            key={`t/n-fastq-options-${idx}`}
-            className={divClassName}
-            onClick={() => setInput(fastqRow)}>
-            <RadioButton className='mr-3 ' checked={input == fastqRow} />
-            <div className='flex flex-column overflow-hidden gap-4'>
-              <DisplayFastqListRow
-                title={`Normal Fastq List Row`}
-                fastqListRow={fastqRow.fastq_list_rows}
-              />
-              <DisplayFastqListRow
-                title={`Tumor Fastq List Row`}
-                fastqListRow={fastqRow.tumor_fastq_list_rows}
-              />
+          return (
+            <div
+              key={`t/n-fastq-options-${idx}`}
+              className={divClassName}
+              onClick={() => setInput(fastqRow)}>
+              <RadioButton className='mr-3 ' checked={input == fastqRow} />
+              <div className='flex flex-column overflow-hidden gap-4'>
+                <DisplayFastqListRow
+                  title={`Normal Fastq List Row`}
+                  fastqListRow={fastqRow.fastq_list_rows}
+                />
+                <DisplayFastqListRow
+                  title={`Tumor Fastq List Row`}
+                  fastqListRow={fastqRow.tumor_fastq_list_rows}
+                />
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
 
       {input ? (
         <>
