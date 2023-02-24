@@ -2,11 +2,3 @@
   width: 100% !important;
   margin: 0 !important;
 }
-
-div[role=checkbox]{
-  box-shadow: none !important;
-}
-
-div[role=radio] {
-  box-shadow: none !important;
-}
