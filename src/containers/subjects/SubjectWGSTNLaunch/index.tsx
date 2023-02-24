@@ -5,15 +5,15 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { Dropdown } from 'primereact/dropdown';
+import { RadioButton } from 'primereact/radiobutton';
 
-import { usePortalFastqAPI, FastqRow as APIFastqRow } from '../../../api/fastq';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import StyledJsonPretty from '../../../components/StyledJsonPretty';
 
 import './index.css';
 import { usePortalMetadataAPI } from '../../../api/metadata';
-import { invokeWGSTNWorkflow, Payload } from './aws';
+import { invokeWGSTNWorkflow } from './aws';
+import { FastqRow, FASTQPairingPayload, usePortalSubjectParingAPI } from '../../../api/pairing';
 
 const metadataHeaderToDisplay: string[] = [
   'subject_id',
@@ -25,77 +25,28 @@ const metadataHeaderToDisplay: string[] = [
   'phenotype',
   'project_name',
 ];
-const fastqHeaderToDisplay: string[] = [
-  'id',
-  'rgid',
-  'rgsm',
-  'rglb',
-  'lane',
-  'read_1',
-  'read_2',
-  'sequence_run',
-];
-
-type Input = {
-  subjectId: string;
-  sampleName: string;
-  outputFilePrefix: string;
-  outputDirectory: string;
-  normalFastqRow: APIFastqRow | null;
-  tumorFastqRow: APIFastqRow[];
-};
-type DropdownOptions = {
-  sampleName: string[];
-  outputFilePrefix: string[];
-  outputDirectory: string[];
-};
 
 type Props = { subjectId: string };
 export default function SubjectWGSTNLaunch({ subjectId }: Props) {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
   const [isLaunch, setIsLaunch] = useState<boolean>(false);
 
-  const [input, setInput] = useState<Input>({
-    subjectId: subjectId,
-    sampleName: '',
-    outputFilePrefix: '',
-    outputDirectory: '',
-    normalFastqRow: null,
-    tumorFastqRow: [],
-  });
-  const [dropdownOptions, setDropdownOptions] = useState<DropdownOptions>({
-    sampleName: [],
-    outputFilePrefix: [],
-    outputDirectory: [],
-  });
+  const [input, setInput] = useState<FASTQPairingPayload | null>(null);
 
   const workflowTriggerRes = useQuery(
     ['wgs-tn-invoke', input],
-    async () => await invokeWGSTNWorkflow(convertInputToPayload(input)),
+    async () => {
+      if (input) await invokeWGSTNWorkflow(input);
+    },
     {
-      enabled: isLaunch && isInputValid(input),
+      enabled: isLaunch && !!input,
     }
   );
 
-  const normalFastqUseQueryRes = usePortalFastqAPI({
-    additionalPath: '?workflow=clinical&workflow=research',
+  const pairingOptions = usePortalSubjectParingAPI({
     apiConfig: {
-      queryStringParameters: {
-        subject_id: subjectId,
-        type: 'wgs',
-        phenotype: 'normal',
-      },
-    },
-  });
-
-  const tumorFastqUseQueryRes = usePortalFastqAPI({
-    additionalPath: '?workflow=clinical&workflow=research',
-    apiConfig: {
-      queryStringParameters: {
-        subject_id: subjectId,
-        type: 'wgs',
-        phenotype: 'tumor',
-      },
+      header: { 'Content-Type': 'application/json' },
+      body: [subjectId],
     },
   });
 
@@ -109,54 +60,15 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
     },
   });
 
-  // Setting up options for sampleName, outputFilePrefix, outputDirectory
+  // Setting default value for obvious options (Only 1 options available)
   useEffect(() => {
-    setDropdownOptions({
-      sampleName: [...new Set(input.tumorFastqRow.map((tf) => tf.rglb))],
-      outputFilePrefix: [...new Set(input.tumorFastqRow.map((tf) => tf.rgsm))],
-      outputDirectory: [
-        ...new Set(input.tumorFastqRow.map((tf) => `${tf.rglb}_${input.normalFastqRow?.rglb}`)),
-      ],
-    });
-  }, [input.normalFastqRow, input.tumorFastqRow]);
-
-  // Setting up defaults values (where only 1 option available)
-  useEffect(() => {
-    const update: Partial<Input> = {
-      sampleName: '',
-      outputFilePrefix: '',
-      outputDirectory: '',
-    };
-
-    if (dropdownOptions.sampleName.length == 1) update.sampleName = dropdownOptions.sampleName[0];
-    if (dropdownOptions.outputFilePrefix.length == 1)
-      update.outputFilePrefix = dropdownOptions.outputFilePrefix[0];
-    if (dropdownOptions.outputDirectory.length == 1)
-      update.outputDirectory = dropdownOptions.outputDirectory[0];
-
-    setInput((prev) => ({
-      ...prev,
-      ...update,
-    }));
-  }, [dropdownOptions]);
-
-  // Setting up defaults values (where only 1 result available)
-  useEffect(() => {
-    const normalFastqRowList = normalFastqUseQueryRes.data?.results;
-    if (normalFastqRowList?.length == 1)
-      setInput((prev) => ({ ...prev, normalFastqRow: normalFastqRowList[0] }));
-
-    const tumorFastqRowList = tumorFastqUseQueryRes.data?.results;
-    if (tumorFastqRowList?.length == 1)
-      setInput((prev) => ({ ...prev, tumorFastqRow: tumorFastqRowList }));
-  }, [normalFastqUseQueryRes.data, tumorFastqUseQueryRes.data]);
+    if (pairingOptions.data?.length == 1) {
+      setInput(pairingOptions.data[0]);
+    }
+  }, [pairingOptions.data]);
 
   // ERROR components return
-  if (
-    normalFastqUseQueryRes.isError ||
-    tumorFastqUseQueryRes.isError ||
-    metadataUseQueryRes.isError
-  ) {
+  if (pairingOptions.isError || metadataUseQueryRes.isError) {
     return (
       <div className='mt-3 text-center'>
         <Button
@@ -185,11 +97,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
   }
 
   // LOADING components return
-  if (
-    normalFastqUseQueryRes.isLoading ||
-    tumorFastqUseQueryRes.isLoading ||
-    metadataUseQueryRes.isLoading
-  ) {
+  if (pairingOptions.isLoading || metadataUseQueryRes.isLoading) {
     return <CircularLoaderWithText text={`Fetching available FASTQ (${subjectId})`} />;
   }
   if (workflowTriggerRes.isLoading) {
@@ -202,7 +110,6 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
 
   // SUCCESS component
   if (workflowTriggerRes.isSuccess) {
-    if (workflowTriggerRes.data) console.log('workflowTriggerRes.data', workflowTriggerRes.data);
     return (
       <div className='mt-3 text-center'>
         <Button
@@ -215,131 +122,95 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
       </div>
     );
   }
-
+  if (!pairingOptions.data) return <div>Nothing</div>;
   return (
     <div>
       <div className='text-2xl font-medium mb-4'>
         {subjectId} - Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch
       </div>
-
-      <div className='surface-200 border-1 border-round-md p-3'>
-        <h5 className='mt-0'>Description</h5>
-        <div>
-          {`This page should launch should able to launch WGS T/N workflow for Subject Id "${subjectId}". `}
-          {`Please select relevant libraries for tumor and normal as well as other inputs if available. `}
-          {`These inputs will construct payload and invoke lambda describe at `}
-          <a
-            target={`_blank`}
-            href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md'>
-            data-portal-pipeline-t/n-docs
-          </a>
-          {`.`}
-        </div>
-
-        <h5>Lab Metadata Table</h5>
-        <div className='mb-3'>{`This is just an additional metadata table to help you to select relevant FASTQ.`}</div>
-        <div className='w-full'>
-          <DataTable
-            size='small'
-            showGridlines
-            autoLayout
-            responsiveLayout='scroll'
-            value={metadataUseQueryRes.data?.results ?? []}
-            dataKey='id'>
-            {metadataHeaderToDisplay.map((header, idx) => (
-              <Column
-                key={idx}
-                field={header}
-                header={header.replaceAll('_', ' ')}
-                headerClassName='capitalize surface-100'
-              />
-            ))}
-          </DataTable>
-        </div>
+      <h5 className='mt-0'>Description</h5>
+      <div>
+        {`This page should launch should able to launch WGS T/N workflow for Subject Id "${subjectId}". `}
+        {`Please select relevant libraries for tumor and normal as well as other inputs if available. `}
+        {`These inputs will construct payload and invoke lambda describe at `}
+        <a
+          target={`_blank`}
+          href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md'>
+          data-portal-pipeline-t/n-docs
+        </a>
+        {`.`}
       </div>
 
-      <h5>Subject Id</h5>
-      <div className='w-full' style={{ cursor: 'not-allowed' }}>
-        <InputText className='w-full' type='text' disabled value={input.subjectId} />
-      </div>
-
-      <h5>Select Normal Fastq List Row</h5>
+      <h5>Lab Metadata Table</h5>
+      <div className='mb-3'>{`This is just an additional metadata table to help you to select relevant FASTQ.`}</div>
       <div className='w-full'>
         <DataTable
+          className='border-1 border-200'
+          size='small'
+          showGridlines
           autoLayout
           responsiveLayout='scroll'
-          value={normalFastqUseQueryRes.data?.results}
-          selection={input.normalFastqRow}
-          onSelectionChange={(e) => setInput((prev) => ({ ...prev, normalFastqRow: e.value }))}
+          value={metadataUseQueryRes.data?.results ?? []}
           dataKey='id'>
-          <Column selectionMode='single' headerClassName='capitalize surface-100' />
-          {fastqHeaderToDisplay.map((header, idx) => (
+          {metadataHeaderToDisplay.map((header, idx) => (
             <Column
               key={idx}
               field={header}
               header={header.replaceAll('_', ' ')}
-              headerClassName='uppercase surface-100'
-              bodyClassName='font-normal'
+              headerClassName='capitalize surface-100'
             />
           ))}
         </DataTable>
       </div>
 
-      <h5>Select Tumor Fastq List Rows</h5>
-      <div className='fastqTable w-full'>
-        <DataTable
-          autoLayout
-          responsiveLayout='scroll'
-          value={tumorFastqUseQueryRes.data?.results}
-          selection={input.tumorFastqRow}
-          onSelectionChange={(e) => setInput((prev) => ({ ...prev, tumorFastqRow: e.value }))}
-          dataKey='id'>
-          <Column
-            selectionMode='multiple'
-            headerClassName='capitalize surface-100'
-            bodyClassName='shadow-none'
-          />
-          {fastqHeaderToDisplay.map((header, idx) => (
-            <Column
-              key={idx}
-              field={header}
-              header={header.replaceAll('_', ' ')}
-              headerClassName='uppercase surface-100'
-              bodyClassName='font-normal'
-            />
-          ))}
-        </DataTable>
-      </div>
+      <h5>Select Appropriate FASTQ Pairing</h5>
+      {pairingOptions.data.map((fastqRow, idx) => {
+        let divClassName =
+          'flex flex-row align-items-center mb-4 p-3 cursor-pointer border-round-xl border-solid border-1 border-300';
 
-      {input.normalFastqRow && input.tumorFastqRow.length ? (
+        if (input == fastqRow) divClassName += ` surface-200`;
+
+        return (
+          <div
+            key={`t/n-fastq-options-${idx}`}
+            className={divClassName}
+            onClick={() => setInput(fastqRow)}>
+            <RadioButton className='mr-3 ' checked={input == fastqRow} />
+            <div className='flex flex-column overflow-hidden gap-4'>
+              <DisplayFastqListRow
+                title={`Normal Fastq List Row`}
+                fastqListRow={fastqRow.fastq_list_rows}
+              />
+              <DisplayFastqListRow
+                title={`Tumor Fastq List Row`}
+                fastqListRow={fastqRow.tumor_fastq_list_rows}
+              />
+            </div>
+          </div>
+        );
+      })}
+
+      {input ? (
         <>
+          <h5>Subject Id</h5>
+          <div className='w-full' style={{ cursor: 'not-allowed' }}>
+            <InputText className='w-full' type='text' disabled value={input.subject_id} />
+          </div>
+
           <h5>Sample Name (Tumor Library Id)</h5>
-          <Dropdown
-            className='w-full'
-            options={[...new Set(input.tumorFastqRow.map((tf) => tf.rglb))]}
-            onChange={(e) => setInput((prev) => ({ ...prev, sampleName: e.value }))}
-            value={input.sampleName}
-          />
+          <div className='w-full' style={{ cursor: 'not-allowed' }}>
+            <InputText className='w-full' type='text' disabled value={input.sample_name} />
+          </div>
 
           <h5>Output File Prefix (Tumor Sample Id)</h5>
-          <Dropdown
-            className='w-full'
-            options={[...new Set(input.tumorFastqRow.map((tf) => tf.rgsm))]}
-            onChange={(e) => setInput((prev) => ({ ...prev, outputFilePrefix: e.value }))}
-            value={input.outputFilePrefix}
-          />
+          <div className='w-full' style={{ cursor: 'not-allowed' }}>
+            <InputText className='w-full' type='text' disabled value={input.output_file_prefix} />
+          </div>
 
           <h5>Output Directory (tumorLibraryId_normalLibraryId)</h5>
-          <Dropdown
-            className='w-full'
-            options={[
-              ...new Set(
-                input.tumorFastqRow.map((tf) => `${tf.rglb}_${input.normalFastqRow?.rglb}`)
-              ),
-            ]}
-            onChange={(e) => setInput((prev) => ({ ...prev, outputDirectory: e.value }))}
-            value={input.outputDirectory}
-          />
+          <div className='w-full' style={{ cursor: 'not-allowed' }}>
+            <InputText className='w-full' type='text' disabled value={input.output_directory} />
+          </div>
 
           <div className='w-full mt-5 text-center '>
             <Dialog
@@ -382,14 +253,16 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
                 </div>
                 <StyledJsonPretty
                   wrapperClassName='border-solid border-round-md p-3 mt-3'
-                  data={convertInputToPayload(input)}
+                  data={input}
                 />
               </div>
             </Dialog>
             <Button
-              className='p-button-info p-button-rounded p-button-outlined'
-              disabled={!isInputValid(input)}
+              className='p-button-info p-button-raised'
+              disabled={!input}
               onClick={() => setIsConfirmDialogOpen(true)}
+              label='Next'
+              iconPos='right'
               icon='pi pi-chevron-right'
             />
           </div>
@@ -402,65 +275,33 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
 }
 
 /**
- * Helper functions
+ * Helper Components
  */
-const convertInputToPayload = (input: Input): Payload => ({
-  subject_id: input.subjectId,
-  sample_name: input.sampleName,
-  output_file_prefix: input.outputFilePrefix,
-  output_directory: input.outputDirectory,
-  fastq_list_rows: input.normalFastqRow
-    ? [
-        {
-          rgid: input.normalFastqRow.rgid,
-          rgsm: input.normalFastqRow.rgsm,
-          rglb: input.normalFastqRow.rglb,
-          lane: input.normalFastqRow.lane,
-          read_1: {
-            class: 'File',
-            location: input.normalFastqRow.read_1,
-          },
-          read_2: {
-            class: 'File',
-            location: input.normalFastqRow.read_2,
-          },
-        },
-      ]
-    : [],
-  tumor_fastq_list_rows: input.tumorFastqRow.map((tumor) => ({
-    rgid: tumor.rgid,
-    rgsm: tumor.rgsm,
-    rglb: tumor.rglb,
-    lane: tumor.lane,
-    read_1: {
-      class: 'File',
-      location: tumor.read_1,
-    },
-    read_2: {
-      class: 'File',
-      location: tumor.read_2,
-    },
-  })),
-});
 
-const isInputValid = (input: Input): boolean => {
-  if (!input.subjectId) {
-    return false;
-  }
-  if (!input.sampleName) {
-    return false;
-  }
-  if (!input.outputFilePrefix) {
-    return false;
-  }
-  if (!input.outputDirectory) {
-    return false;
-  }
-  if (!input.normalFastqRow) {
-    return false;
-  }
-  if (input.tumorFastqRow.length == 0) {
-    return false;
-  }
-  return true;
+type DisplayFastqListRowProps = { title?: string; fastqListRow?: FastqRow[] };
+const DisplayFastqListRow = ({ title, fastqListRow = [] }: DisplayFastqListRowProps) => {
+  const fastqHeaderToDisplay: string[] = ['rgid', 'rgsm', 'rglb', 'lane', 'read_1', 'read_2'];
+
+  const flatFastqRow: Record<string, string | number>[] = fastqListRow.map((val) => ({
+    ...val,
+    read_1: val.read_1.location,
+    read_2: val.read_2.location,
+  }));
+
+  return (
+    <div className='w-full'>
+      <div className='font-bold pb-2'>{title}</div>
+      <DataTable autoLayout responsiveLayout='scroll' value={flatFastqRow}>
+        {fastqHeaderToDisplay.map((header, idx) => (
+          <Column
+            key={idx}
+            field={header}
+            header={header.replaceAll('_', ' ')}
+            headerClassName='uppercase surface-100'
+            bodyClassName='font-normal'
+          />
+        ))}
+      </DataTable>
+    </div>
+  );
 };

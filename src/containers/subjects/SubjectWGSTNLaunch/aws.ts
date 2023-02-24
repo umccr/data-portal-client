@@ -1,34 +1,14 @@
 import { Auth } from '@aws-amplify/auth';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
+import { FASTQPairingPayload } from '../../../api/pairing';
 import { LAMBDA_PREFIX, REGION } from '../../../config';
 
 const WGS_TN_WF_LAMBDA_NAME = 'tumor_normal';
 /**
  * T/N Lambda Input
  */
-type ReadFiles = {
-  class: 'File';
-  location: string;
-};
 
-type FastqRow = {
-  rgid: string;
-  rgsm: string;
-  rglb: string;
-  lane: number;
-  read_1: ReadFiles;
-  read_2: ReadFiles;
-};
-
-export type Payload = {
-  subject_id: string;
-  sample_name: string;
-  output_file_prefix: string;
-  output_directory: string;
-  fastq_list_rows: FastqRow[];
-  tumor_fastq_list_rows: FastqRow[];
-};
-export const invokeWGSTNWorkflow = async (payload: Payload) => {
+export const invokeWGSTNWorkflow = async (payload: FASTQPairingPayload) => {
   const currentCredentials = await Auth.currentCredentials();
   const lambdaClient = new LambdaClient({
     region: REGION,
