@@ -35,7 +35,7 @@ export default function SubjectLaunchPad() {
     <div>
       <Card>
         <div className='relative'>
-          <div className='pt-2 pr-5'>
+          <div className='pt-2'>
             {/* What to trigger? */}
             {lastPath == launchPadOptions.GPL ? (
               <SubjectGPLLaunch subjectId={subjectId} />

@@ -262,7 +262,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
               </div>
             </Dialog>
             <Button
-              className='p-button-info p-button-raised'
+              className='p-button-info p-button-raised bg-blue-800'
               disabled={!input}
               onClick={() => setIsConfirmDialogOpen(true)}
               label='Next'
