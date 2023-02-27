@@ -2,10 +2,10 @@ import { Auth } from '@aws-amplify/auth';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { LAMBDA_PREFIX, REGION } from '../../../config';
 
-const RNASUM_WF_LAMBDA_NAME = 'rnasum';
+const RNASUM_WF_LAMBDA_NAME = 'rnasum_by_subject';
 
 /**
- * Manops RNAsum lambda input
+ * RNAsum by subject lambda input
  */
 export type RNAsumPayload = {
   subject_id: string;
