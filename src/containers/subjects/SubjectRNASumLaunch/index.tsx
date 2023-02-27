@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
-import { API } from '@aws-amplify/api';
 import { useQuery } from 'react-query';
 import { Button } from 'primereact/button';
+import { ConfirmDialog } from 'primereact/confirmdialog';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { Dropdown } from 'primereact/dropdown';
 import DataTableWrapper from '../../../components/DataTableWrapper';
 import { InputSwitch } from 'primereact/inputswitch';
-import './index.css';
 import {
   PRIMARY_DATASETS_OPTION,
   EXTENDED_DATASETS_OPTION,
   PAN_CANCER_DATASETS_OPTION,
 } from './utils';
-import { useToastContext } from '../../../providers/ToastProvider';
 import { GDSRow } from '../../../api/gds';
-import { SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
+import { usePortalSubjectDataAPI } from '../../../api/subject';
+import { invokeRNAsumWorkflow, RNAsumPayload } from './aws';
+
+import './index.css';
 
 const ALL_DATASETS_OPTION = [
   ...PRIMARY_DATASETS_OPTION,
@@ -27,45 +28,11 @@ type Props = {
 };
 
 function SubjectRNASumLaunch({ subjectId }: Props) {
-  const { toastShow } = useToastContext();
-
-  const [projectSelected, setProjectSelected] = useState<string>('');
+  const [input, setInput] = useState<RNAsumPayload | null>(null);
   const [isRnasumTableShow, setIsRnasumTableShow] = useState<boolean>(false);
 
-  const [rnasumTriggerStatus, setRnasumTriggerStatus] = useState<Record<string, boolean>>({
-    isLoading: false,
-    isTrigger: false,
-  });
-
-  async function triggerRNASum(projectSelected: string) {
-    setRnasumTriggerStatus({ isTrigger: true, isLoading: true });
-    try {
-      const init = {
-        headers: { 'Content-Type': 'application/json' },
-        body: {
-          subject_id: subjectId,
-          dataset: projectSelected,
-        },
-      };
-      await API.post('portal', '/manops/rnasum', init);
-      toastShow({
-        severity: 'success',
-        summary: 'RNASum report has been triggered.',
-        detail: `Generating '${projectSelected}' dataset RNAsum report for ${subjectId}. Check Slack for updates!`,
-        sticky: true,
-        life: 3000,
-      });
-    } catch (e: any) {
-      toastShow({
-        severity: 'error',
-        summary: 'Something went wrong triggering RNASum report',
-        detail: e.message,
-        sticky: true,
-        life: 3000,
-      });
-    }
-    setRnasumTriggerStatus((prev) => ({ ...prev, isLoading: false }));
-  }
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
+  const [isLaunch, setIsLaunch] = useState<boolean>(false);
 
   const columnList = [
     { header: 'Project', field: 'project' },
@@ -76,74 +43,76 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
 
   // Eligibility of RNASum trigger check
   const subjectData = usePortalSubjectDataAPI(subjectId);
-  const resultsGds: SubjectApiRes = subjectData.data;
-  const rnaSumCheckQuery = useQuery(
-    ['rnasumCheck', subjectId],
-    () => checkRnasumTriggerAllow(resultsGds.results_gds),
-    { enabled: !!resultsGds }
+  const rnaSumCheckData: RNASumLaunchCheckType | undefined = checkRnasumTriggerAllow(
+    subjectData.data?.results_gds ?? []
   );
-  const rnaSumCheckData: RNASumLaunchCheckType | undefined = rnaSumCheckQuery.data;
 
-  // Loader components
+  const rnaSumLaunch = useQuery(
+    ['rnasum-invoke', input],
+    async () => {
+      if (input) await invokeRNAsumWorkflow(input);
+    },
+    {
+      enabled: isLaunch && !!input,
+    }
+  );
+
+  // ERROR components return
+  if (subjectData.isError) {
+    return (
+      <div className='mt-3 text-center'>
+        <Button
+          icon='pi pi-times'
+          className='p-button-rounded p-button-danger bg-red-500 cursor-auto'
+          aria-label='Cancel'
+        />
+        <div className='mt-3'>{'Unable to check RNAsum eligibility.'}</div>
+      </div>
+    );
+  }
+  if (rnaSumLaunch.isError) {
+    return (
+      <div className='mt-3 text-center'>
+        <Button
+          icon='pi pi-times'
+          className='p-button-rounded p-button-danger bg-red-500 cursor-auto'
+          aria-label='Cancel'
+        />
+        <div className='mt-3'>{`Something went wrong on launching RNAsum!`}</div>
+        <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
+          {JSON.stringify(rnaSumLaunch.error, null, 2)}
+        </pre>
+      </div>
+    );
+  }
+
+  // LOADER COMPONENT RETURN
   if (subjectData.isLoading || subjectData.isLoading || !rnaSumCheckData) {
     return (
       <CircularLoaderWithText text='Please wait. We are checking if RNASum trigger is available for this subject.' />
     );
   }
-  if (rnasumTriggerStatus.isLoading) {
-    return <CircularLoaderWithText text='Please wait. Triggering RNASum report.' />;
+  if (rnaSumLaunch.isLoading) {
+    return <CircularLoaderWithText text='Launching RNAsum report.' />;
   }
 
-  // Main page
-  if (rnaSumCheckData.isRNASumLaunchAllowed) {
+  // SUCCESS COMPONENT RETURN
+  if (rnaSumLaunch.isSuccess) {
     return (
-      <div>
-        <div className='text-2xl font-medium mb-4'>{subjectId} - RNASum Report Trigger</div>
-
-        <div className='flex align-items-center justify-content-between my-3'>
-          <div>Dataset Project</div>
-          <Dropdown
-            className='m-0'
-            value={projectSelected}
-            options={ALL_DATASETS_OPTION}
-            optionValue='project'
-            optionLabel='project'
-            onChange={(e) => setProjectSelected(e.value)}
-            placeholder='Select a Project'
-          />
-        </div>
-
-        <div className='my-3'>
-          <div className='flex align-items-center justify-content-between'>
-            <div>Show RNASum Table</div>
-            <InputSwitch
-              id='rnasum-toggle'
-              checked={isRnasumTableShow}
-              onChange={() => setIsRnasumTableShow((prev) => !prev)}
-            />
-          </div>
-          {isRnasumTableShow ? (
-            <div className='mt-3'>
-              <DataTableWrapper
-                dataTableValue={ALL_DATASETS_OPTION}
-                columns={columnList}
-                isLoading={false}
-              />
-            </div>
-          ) : (
-            <></>
-          )}
-        </div>
-
+      <div className='mt-3 text-center'>
         <Button
-          disabled={!projectSelected}
-          onClick={() => triggerRNASum(projectSelected)}
-          label='Launch RNASum Report'
-          className='p-button-info bg-blue-800 w-full mt-5'
+          icon='pi pi-check'
+          className='p-button-rounded p-button-success bg-green-700 cursor-auto'
+          aria-label='Cancel'
         />
+        <div className='mt-3'>{`Successfully launch RNAsum! Check Slack for updates.`}</div>
+        <pre className='mt-3'>{`You could navigate away from this page.`}</pre>
       </div>
     );
-  } else {
+  }
+
+  // RNAsum not allowed
+  if (!rnaSumCheckData.isRNASumLaunchAllowed) {
     return (
       <div>
         <div className='text-2xl font-medium mb-4'>
@@ -158,6 +127,85 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
       </div>
     );
   }
+
+  return (
+    <div>
+      <div className='text-2xl font-medium mb-4'>{subjectId} - RNASum Report Trigger</div>
+
+      <div className='flex align-items-center justify-content-between my-3'>
+        <div>Dataset Project</div>
+        <Dropdown
+          className='m-0'
+          value={input?.dataset}
+          options={ALL_DATASETS_OPTION}
+          optionValue='project'
+          optionLabel='project'
+          onChange={(e) => setInput({ subject_id: subjectId, dataset: e.value })}
+          placeholder='Select a Project'
+        />
+      </div>
+
+      <div className='my-3'>
+        <div className='flex align-items-center justify-content-between'>
+          <div>Show RNASum Table</div>
+          <InputSwitch
+            id='rnasum-toggle'
+            checked={isRnasumTableShow}
+            onChange={() => setIsRnasumTableShow((prev) => !prev)}
+          />
+        </div>
+        {isRnasumTableShow ? (
+          <div className='mt-3'>
+            <DataTableWrapper
+              dataTableValue={ALL_DATASETS_OPTION}
+              columns={columnList}
+              isLoading={false}
+              overrideDataTableProps={{
+                selectionMode: 'single',
+                onSelectionChange: (e) => {
+                  setInput({ subject_id: subjectId, dataset: e.value.project });
+                },
+              }}
+            />
+          </div>
+        ) : (
+          <></>
+        )}
+      </div>
+
+      <Button
+        disabled={!input}
+        onClick={() => setIsConfirmDialogOpen(true)}
+        label='Next'
+        className='p-button-info bg-blue-800 w-full mt-3'
+      />
+
+      {/* CONFIRMATION DIALOG */}
+      <ConfirmDialog
+        draggable={false}
+        visible={isConfirmDialogOpen}
+        header='RNAsum Launch Confirmation'
+        message={
+          <div className=''>
+            <div>Please Confirm the following payload before you launch.</div>
+            <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
+              {JSON.stringify(input, null, 2)}
+            </pre>
+          </div>
+        }
+        acceptLabel='Launch'
+        rejectLabel='Cancel'
+        acceptClassName='p-button-raised p-button-danger'
+        rejectClassName='p-button-secondary p-button-text text-blue-800'
+        accept={() => {
+          setIsLaunch(true);
+          setIsConfirmDialogOpen(false);
+        }}
+        reject={() => setIsConfirmDialogOpen(false)}
+        onHide={() => setIsConfirmDialogOpen(false)}
+      />
+    </div>
+  );
 }
 
 export default SubjectRNASumLaunch;
@@ -182,7 +230,7 @@ function groupSubjectGdsResult(results_gds: GDSRow[]) {
     ),
   };
 }
-async function checkRnasumTriggerAllow(gdsResult: GDSRow[]): Promise<RNASumLaunchCheckType> {
+function checkRnasumTriggerAllow(gdsResult: GDSRow[]): RNASumLaunchCheckType {
   const rnasumCheck: RNASumLaunchCheckType = { isRNASumLaunchAllowed: true };
 
   const rnasumInputData = groupSubjectGdsResult(gdsResult);

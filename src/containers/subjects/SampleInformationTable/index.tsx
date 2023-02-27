@@ -20,7 +20,7 @@ const COLUMN_TO_DISPLAY = [
   'override_cycles',
 ];
 
-type ObjectStringValType = { [key: string]: string | number | null };
+type ObjectStringValType = Record<string, string | number | boolean | null>;
 type Props = { subjectId: string };
 
 function SampleInformationTable(props: Props) {
@@ -53,7 +53,7 @@ function SampleInformationTable(props: Props) {
     }
   }, [isError]);
 
-  if (data && !isLoading) {
+  if (data?.lims && !isLoading) {
     subjectLimsList = data.lims;
   }
 

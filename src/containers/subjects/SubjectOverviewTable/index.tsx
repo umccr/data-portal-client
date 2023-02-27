@@ -60,7 +60,7 @@ export default SubjectOverviewTable;
  * Example: [{'name':'John'}, {'name':'Doe'}] to {'name':['John','Doe']}
  * @param jsonArray Array of JSON
  */
-function convertArrayOfJsonToJsonOfArray(jsonArray: { [key: string]: string | number }[]) {
+function convertArrayOfJsonToJsonOfArray(jsonArray: Record<string, any>[]) {
   const JsonOfArray: { [key: string]: (string | number)[] } = {};
 
   for (const object of jsonArray) {

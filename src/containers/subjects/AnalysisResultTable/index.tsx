@@ -220,90 +220,71 @@ function AnalysisResultsPanel({ subjectId }: Props) {
 
 export default AnalysisResultsPanel;
 
-function groupResultsData(
-  results_s3: Record<string, string>[],
-  results_gds: Record<string, string>[]
-) {
-  const wgs = results_s3.filter((r: Record<string, string>) => r.key.includes('WGS/'));
-  const wts = results_s3.filter((r: Record<string, string>) => r.key.includes('WTS/'));
-  const bams = wgs.filter((r: Record<string, string>) => r.key.endsWith('bam'));
-  const vcfs = wgs.filter(
-    (r: Record<string, string>) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf')
-  );
-  const circos = wgs.filter((r: Record<string, string>) => r.key.endsWith('png'));
-  const pcgr = wgs.filter((r: Record<string, string>) => r.key.endsWith('pcgr.html'));
-  const cpsr = wgs.filter((r: Record<string, string>) => r.key.endsWith('cpsr.html'));
+function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
+  const wgs = results_s3.filter((r) => r.key.includes('WGS/'));
+  const wts = results_s3.filter((r) => r.key.includes('WTS/'));
+  const bams = wgs.filter((r) => r.key.endsWith('bam'));
+  const vcfs = wgs.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf'));
+  const circos = wgs.filter((r) => r.key.endsWith('png'));
+  const pcgr = wgs.filter((r) => r.key.endsWith('pcgr.html'));
+  const cpsr = wgs.filter((r) => r.key.endsWith('cpsr.html'));
   const multiqc = wgs.filter(
-    (r: Record<string, string>) =>
-      r.key.includes('umccrised') && r.key.endsWith('multiqc_report.html')
+    (r) => r.key.includes('umccrised') && r.key.endsWith('multiqc_report.html')
   );
   const cancer = wgs.filter(
-    (r: Record<string, string>) =>
-      r.key.includes('umccrised') && r.key.endsWith('cancer_report.html')
+    (r) => r.key.includes('umccrised') && r.key.endsWith('cancer_report.html')
   );
-  const coverage = wgs.filter(
-    (r: Record<string, string>) => r.key.includes('cacao') && r.key.endsWith('html')
-  );
+  const coverage = wgs.filter((r) => r.key.includes('cacao') && r.key.endsWith('html'));
   const gplReport = wgs.filter(
-    (r: Record<string, string>) =>
-      r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
+    (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
   );
-  const wtsBams = wts.filter((r: Record<string, string>) => r.key.endsWith('bam'));
-  const wtsQc = wts.filter((r: Record<string, string>) => r.key.endsWith('multiqc_report.html'));
-  const rnasum = wts.filter((r: Record<string, string>) => r.key.endsWith('RNAseq_report.html'));
+  const wtsBams = wts.filter((r) => r.key.endsWith('bam'));
+  const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
+  const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
 
   // gds ICA
-
   const wgsBams = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('wgs_tumor_normal') && r.path.endsWith('bam')
+    (r) => r.path.includes('wgs_tumor_normal') && r.path.endsWith('bam')
   );
   const wgsVcfs = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('umccrise') && (r.path.endsWith('vcf.gz') || r.path.endsWith('.maf'))
+    (r) => r.path.includes('umccrise') && (r.path.endsWith('vcf.gz') || r.path.endsWith('.maf'))
   );
   const wgsCircos = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('umccrise') && r.path.endsWith('png')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('png')
   );
   const wgsPcgr = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('umccrise') && r.path.endsWith('pcgr.html')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('pcgr.html')
   );
   const wgsCpsr = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('umccrise') && r.path.endsWith('cpsr.html')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('cpsr.html')
   );
   const wgsMultiqc = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('umccrise') && r.path.endsWith('multiqc_report.html')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('multiqc_report.html')
   );
   const wgsCancer = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('umccrise') && r.path.endsWith('cancer_report.html')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('cancer_report.html')
   );
   const wgsCoverage = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('cacao') && r.path.endsWith('html')
+    (r) => r.path.includes('cacao') && r.path.endsWith('html')
   );
 
   const wgsGpl = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('gridss_purple_linx') && r.path.endsWith('linx.html')
+    (r) => r.path.includes('gridss_purple_linx') && r.path.endsWith('linx.html')
   );
 
   const wtsBamsIca = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('wts_tumor_only') && r.path.endsWith('bam')
+    (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('bam')
   );
   const wtsMultiqc = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('wts_tumor_only') && r.path.endsWith('multiqc.html')
+    (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('multiqc.html')
   );
-  const wtsRnasum = results_gds.filter((r: Record<string, string>) =>
-    r.path.endsWith('RNAseq_report.html')
-  );
+  const wtsRnasum = results_gds.filter((r) => r.path.endsWith('RNAseq_report.html'));
 
   const tsoCtdnaBams = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('tso_ctdna') && r.path.endsWith('bam')
+    (r) => r.path.includes('tso_ctdna') && r.path.endsWith('bam')
   );
   const tsoCtdnaVcfs = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('tso_ctdna') && (r.path.endsWith('vcf') || r.path.endsWith('vcf.gz'))
+    (r) => r.path.includes('tso_ctdna') && (r.path.endsWith('vcf') || r.path.endsWith('vcf.gz'))
   );
 
   return {
