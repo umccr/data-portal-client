@@ -28,7 +28,10 @@ type usePortalMetadataAPIProps = {
   additionalPath?: string;
   apiConfig: Record<string, any>;
 };
-export function usePortalMetadataAPI({ additionalPath, apiConfig }: usePortalMetadataAPIProps) {
+export function usePortalMetadataAPI({
+  additionalPath = '',
+  apiConfig,
+}: usePortalMetadataAPIProps) {
   return useQuery(
     ['portal-metadata', apiConfig],
     async (): Promise<MetadataApiRes> =>
