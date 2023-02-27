@@ -134,6 +134,7 @@ function SubjectGPLLaunch({ subjectId }: Props) {
           setIsConfirmDialogOpen(false);
         }}
         reject={() => setIsConfirmDialogOpen(false)}
+        onHide={() => setIsConfirmDialogOpen(false)}
       />
     </div>
   );

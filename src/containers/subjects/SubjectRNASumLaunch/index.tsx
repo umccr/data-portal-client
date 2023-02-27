@@ -202,6 +202,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
           setIsConfirmDialogOpen(false);
         }}
         reject={() => setIsConfirmDialogOpen(false)}
+        onHide={() => setIsConfirmDialogOpen(false)}
       />
     </div>
   );
