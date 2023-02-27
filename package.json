@@ -6,6 +6,7 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.279.0",
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
     "@types/react-router-dom": "^5.3.3",
