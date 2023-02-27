@@ -57,8 +57,10 @@ function MetadataTable() {
   type ObjKeyType = { [key: string]: string | number };
   let metadataDataList: ObjKeyType[] = [];
   const { isFetching, isLoading, isError, data } = usePortalMetadataAPI({
-    queryStringParameters: {
-      ...apiQueryParameter,
+    apiConfig: {
+      queryStringParameters: {
+        ...apiQueryParameter,
+      },
     },
   });
 

@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../CircularLoaderWithText';
-// Other Dependencies
-import JSONPretty from 'react-json-pretty';
+import StyledJsonPretty from '../StyledJsonPretty';
 
-import './index.css';
 import { SelectButton } from 'primereact/selectbutton';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+
+import './index.css';
 
 export const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 export const HTML_FILETYPE_LIST: string[] = ['html'];
@@ -100,30 +100,12 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
 
   // Return JSON
   if (filetype == 'json') {
-    const cssTheme = {
-      main: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
-      error: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
-      key: 'color:#a21515;',
-      string: 'color:#0551a5;',
-      value: 'color:#0b8658;',
-      boolean: 'color:#0551a5;',
-    };
-
     // Sanitize if JSON is
     try {
       const JSONParse = JSON.parse(data);
       return (
         <div className='w-full h-full overflow-auto'>
-          <JSONPretty
-            id='json-pretty'
-            data={JSONParse}
-            theme={cssTheme}
-            style={{
-              borderRadius: '5px',
-              width: '100%',
-              minWidth: '100%',
-            }}
-          />
+          <StyledJsonPretty data={JSONParse} />
         </div>
       );
     } catch (err) {
