@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { API } from 'aws-amplify';
+import { Auth } from 'aws-amplify';
+import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 
 // MUI
 import Dialog from '@material-ui/core/Dialog';
@@ -32,6 +33,7 @@ import {
   EXTENDED_DATASETS_OPTION,
   PAN_CANCER_DATASETS_OPTION,
 } from '../utils/rnasum';
+import { LAMBDA_PREFIX, REGION } from '../config';
 
 const ALL_DATASETS_OPTION = [
   ...PRIMARY_DATASETS_OPTION,
@@ -138,6 +140,8 @@ function LaunchRNAsumReport(props: Props) {
   };
 
   const handleRNAsumTrigger = async () => {
+    const RNASUM_WF_LAMBDA_NAME = 'rnasum';
+
     try {
       setTriggerStatus((prevState) => {
         return {
@@ -145,14 +149,24 @@ function LaunchRNAsumReport(props: Props) {
           isLoading: true,
         };
       });
-      const init = {
-        headers: { 'Content-Type': 'application/json' },
-        body: {
-          subject_id: subject_id,
-          dataset: datasetSelected,
-        },
-      };
-      await API.post('files', '/manops/rnasum', init);
+      const currentCredentials = await Auth.currentCredentials();
+      const lambdaClient = new LambdaClient({
+        region: REGION,
+        credentials: currentCredentials,
+      });
+
+      const command = new InvokeCommand({
+        InvocationType: 'Event',
+        FunctionName: `${LAMBDA_PREFIX}${RNASUM_WF_LAMBDA_NAME}`,
+        Payload: Buffer.from(
+          JSON.stringify({
+            subject_id: subject_id,
+            dataset: datasetSelected,
+          })
+        ),
+      });
+
+      await lambdaClient.send(command);
       setTriggerStatus((prevState) => {
         return {
           ...prevState,
