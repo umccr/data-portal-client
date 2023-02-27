@@ -3,6 +3,8 @@ const REGION = import.meta.env.VITE_REGION;
 const IS_LOCAL = STAGE === 'localhost';
 const OAUTH_DOMAIN = `${import.meta.env.VITE_OAUTH_DOMAIN}.auth.${REGION}.amazoncognito.com`;
 
+const LAMBDA_PREFIX = `data-portal-api-${IS_LOCAL ? 'dev' : STAGE}-`;
+
 const config = {
   apiGateway: {
     REGION: REGION,
@@ -46,3 +48,5 @@ const config = {
 };
 
 export default config;
+
+export { REGION, LAMBDA_PREFIX };

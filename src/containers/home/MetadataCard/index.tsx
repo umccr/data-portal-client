@@ -8,7 +8,7 @@ import { usePortalMetadataAPI } from '../../../api/metadata';
 function MetadataHomeCard() {
   const { toastShow } = useToastContext();
 
-  const { isFetching, isLoading, isError, data } = usePortalMetadataAPI({});
+  const { isFetching, isLoading, isError, data } = usePortalMetadataAPI({ apiConfig: {} });
 
   useEffect(() => {
     if (isError) {

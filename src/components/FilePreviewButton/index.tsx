@@ -80,7 +80,9 @@ function FilePreviewDialog(props: FilePreviewDialogProps) {
 
   let portalPresignedUrlRes;
   if (type == 'gds') {
-    portalPresignedUrlRes = usePortalGDSPresignAPI(id);
+    portalPresignedUrlRes = usePortalGDSPresignAPI(id, {
+      headers: { 'Content-Disposition': 'inline' },
+    });
   } else {
     portalPresignedUrlRes = usePortalS3PresignAPI(id);
   }
@@ -93,7 +95,7 @@ function FilePreviewDialog(props: FilePreviewDialogProps) {
       style={{ width: '75vw', boxSizing: 'border-box', border: 'solid var(--surface-600) 1px' }}
       visible={true}
       onHide={handleDialogClose}
-      contentStyle={{ minHeight: '5rem', maxHeight: '75vh' }}
+      contentStyle={{ minHeight: '10rem', maxHeight: '75vh' }}
       contentClassName='relative p-0 surface-400 flex align-items-center justify-content-center'>
       {portalPresignedUrlRes.data ? (
         <div className='w-full p-3' style={{ height: '75vh' }}>

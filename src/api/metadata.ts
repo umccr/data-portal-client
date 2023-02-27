@@ -24,10 +24,18 @@ export type MetadataRow = {
 
 export type MetadataApiRes = DjangoRestApiResponse & { results: MetadataRow[] };
 
-export function usePortalMetadataAPI(apiConfig: Record<string, any>) {
+type usePortalMetadataAPIProps = {
+  additionalPath?: string;
+  apiConfig: Record<string, any>;
+};
+export function usePortalMetadataAPI({
+  additionalPath = '',
+  apiConfig,
+}: usePortalMetadataAPIProps) {
   return useQuery(
     ['portal-metadata', apiConfig],
-    async () => await API.get('portal', `/metadata/`, apiConfig),
+    async (): Promise<MetadataApiRes> =>
+      await API.get('portal', `/metadata/${additionalPath}`, apiConfig),
     {
       staleTime: Infinity,
     }
