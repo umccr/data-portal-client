@@ -88,7 +88,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           className='p-button-rounded p-button-danger bg-red-500 cursor-auto'
           aria-label='Cancel'
         />
-        <div className='mt-3'>{`Something went wrong on launching WGS T/N workflow!`}</div>
+        <div className='mt-3'>{`Something went wrong upon launching WGS T/N workflow!`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
           {JSON.stringify(workflowTriggerRes.error, null, 2)}
         </pre>
@@ -117,7 +117,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           className='p-button-rounded p-button-success bg-green-700 cursor-auto'
           aria-label='Cancel'
         />
-        <div className='mt-3'>{`Successfully launch WGS T/N workflow! Check Slack for updates.`}</div>
+        <div className='mt-3'>{`Successfully launched WGS T/N workflow! Check Slack for updates.`}</div>
         <pre className='mt-3'>{`You could navigate away from this page.`}</pre>
       </div>
     );
@@ -130,9 +130,9 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
       </div>
       <h5 className='mt-0'>Description</h5>
       <div>
-        {`This page should launch should able to launch WGS T/N workflow for Subject Id "${subjectId}". `}
+        {`This page should be able to launch the WGS T/N workflow for SubjectId "${subjectId}". `}
         {`Please select relevant libraries for tumor and normal as well as other inputs if available. `}
-        {`These inputs will construct payload and invoke lambda describe at `}
+        {`These inputs will construct the payload and invoke the lambda described at `}
         <a
           target={`_blank`}
           href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md'>
@@ -142,7 +142,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
       </div>
 
       <h5>Lab Metadata Table</h5>
-      <div className='mb-3'>{`This is just an additional metadata table to help you to select relevant FASTQ.`}</div>
+      <div className='mb-3'>{`This is just an additional metadata table to help you select relevant FASTQs.`}</div>
       <div className='w-full'>
         <DataTable
           className='border-1 border-200'
