@@ -140,7 +140,7 @@ function LaunchRNAsumReport(props: Props) {
   };
 
   const handleRNAsumTrigger = async () => {
-    const RNASUM_WF_LAMBDA_NAME = 'rnasum';
+    const RNASUM_WF_LAMBDA_NAME = 'rnasum_by_subject';
 
     try {
       setTriggerStatus((prevState) => {
