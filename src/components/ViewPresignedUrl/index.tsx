@@ -67,7 +67,18 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
   }
 
   // Return HTML (via iframe) display
-  if (HTML_FILETYPE_LIST.includes(filetype)) {
+
+  /** **************************** TEMPORARY SOLUTION ****************************
+   *
+   * Only allow S3 presigned url that is allowed to be viewed in this <iframe/> tag.
+   *
+   * See below 'TEMPORARY SOLUTION' block for details. Change to original solution if the fix has been made.
+   *
+   * Current solution: if (HTML_FILETYPE_LIST.includes(filetype) && presingedUrl.startsWith('https://umccr')) {
+   * Original solution: if (HTML_FILETYPE_LIST.includes(filetype)) {
+   *
+   * */
+  if (HTML_FILETYPE_LIST.includes(filetype) && presingedUrl.startsWith('https://umccr')) {
     return (
       <div className='w-full h-full'>
         <iframe className='w-full h-full bg-white' src={presingedUrl} />
@@ -97,6 +108,26 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
   if (isLoading || isFetching || !data) {
     return <CircularLoaderWithText text='Fetching Content' />;
   }
+
+  /** **************************** TEMPORARY SOLUTION ****************************
+   *
+   * This is specific to GDS data as `Content-Type` might be incorrect on GDS presigned URL. This causes
+   * iframe to download file instead of showing it. This is just a work around to download the content
+   * and show with srcDoc in iframe.
+   *
+   * This is a temporary solution. Remove this block when permanent solution is in place.
+   *
+   * Ref: https://umccr.slack.com/archives/CP356DDCH/p1677563982961669?thread_ts=1677476635.509959&cid=CP356DDCH
+   *  */
+
+  if (HTML_FILETYPE_LIST.includes(filetype) && presingedUrl.startsWith('https://stratus-gds')) {
+    return (
+      <div className='w-full h-full'>
+        <iframe className='w-full h-full bg-white' srcDoc={data} />
+      </div>
+    );
+  }
+  /** ************************* END TEMPORARY SOLUTION BLOCK ********************** */
 
   // Return JSON
   if (filetype == 'json') {
