@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
-import { API } from '@aws-amplify/api';
 import { Button } from 'primereact/button';
 import { ConfirmDialog } from 'primereact/confirmdialog';
 
@@ -8,6 +7,7 @@ import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import JSONToTable from '../../../components/JSONToTable';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { GDSRow } from '../../../api/gds';
+import { invokeGPL } from './aws';
 
 type Props = { subjectId: string };
 function SubjectGPLLaunch({ subjectId }: Props) {
@@ -31,7 +31,7 @@ function SubjectGPLLaunch({ subjectId }: Props) {
 
   const gplLaunch = useQuery(
     ['gpl-invoke', subjectId],
-    async (): Promise<Record<string, string | number>> => await invokeGPLWorkflow(subjectId),
+    async () => await invokeGPL({ subject_id: subjectId }),
     {
       enabled: isLaunch,
     }
@@ -75,12 +75,6 @@ function SubjectGPLLaunch({ subjectId }: Props) {
         />
         <div className='mt-3'>{`Successfully launch GPL! Check Slack for updates.`}</div>
         <pre className='mt-3'>{`You could navigate away from this page.`}</pre>
-        {gplLaunch.data && (
-          <>
-            <h5>Trigger Response:</h5>
-            <pre className='mt-3'>{JSON.stringify(gplLaunch.data, null, 2)}</pre>
-          </>
-        )}
       </div>
     );
   }
@@ -105,7 +99,16 @@ function SubjectGPLLaunch({ subjectId }: Props) {
   return (
     <div>
       <div className='text-2xl font-medium mb-4'>{subjectId} - GPL Report Trigger</div>
-      <div>This is a trigger for GRIDSS/PURPLE/LINX (GPL) report</div>
+      <div>
+        This is a trigger for{' '}
+        <a
+          target={`_blank`}
+          href='https://github.com/umccr/gridss-purple-linx-nf/tree/main/deployment#usage'>
+          GRIDSS/PURPLE/LINX-pipeline-stack
+        </a>
+        .
+      </div>
+
       <Button
         onClick={() => setIsConfirmDialogOpen(true)}
         label='Next'
@@ -145,16 +148,6 @@ export default SubjectGPLLaunch;
 /**
  * Helper function
  */
-
-const invokeGPLWorkflow = async (subjectId: string) => {
-  const init = {
-    headers: { 'Content-Type': 'application/json' },
-    body: {
-      subject_id: subjectId,
-    },
-  };
-  return await API.post('gpl', '', init);
-};
 
 type GplLaunchCheckType = {
   isGplLaunchAllowed: boolean;
