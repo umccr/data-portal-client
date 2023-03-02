@@ -132,7 +132,19 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
     <div>
       <div className='text-2xl font-medium mb-4'>{subjectId} - RNASum Report Trigger</div>
 
-      <div className='flex align-items-center justify-content-between my-3'>
+      <h5 className='mt-0'>Description</h5>
+      <div>
+        This is a trigger for the{' '}
+        <a
+          target={`_blank`}
+          href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/rnasum.md'>
+          RNAsum-ICA-Pipeline-Lambda
+        </a>
+        .
+      </div>
+
+      <h5>Select Dataset Project</h5>
+      <div className='flex align-items-center justify-content-between mb-3'>
         <div>Dataset Project</div>
         <Dropdown
           className='m-0'
@@ -165,6 +177,8 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
                 onSelectionChange: (e) => {
                   setInput({ subject_id: subjectId, dataset: e.value.project });
                 },
+                scrollable: true,
+                scrollHeight: '450px',
               }}
             />
           </div>
@@ -173,12 +187,16 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
         )}
       </div>
 
-      <Button
-        disabled={!input}
-        onClick={() => setIsConfirmDialogOpen(true)}
-        label='Next'
-        className='p-button-info bg-blue-800 w-full mt-3'
-      />
+      <div className='w-full mt-5 text-center'>
+        <Button
+          disabled={!input}
+          onClick={() => setIsConfirmDialogOpen(true)}
+          label='Next'
+          iconPos='right'
+          icon='pi pi-chevron-right'
+          className='p-button-info p-button-raised bg-blue-800'
+        />
+      </div>
 
       {/* CONFIRMATION DIALOG */}
       <ConfirmDialog

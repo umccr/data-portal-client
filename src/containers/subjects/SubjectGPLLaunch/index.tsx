@@ -99,6 +99,8 @@ function SubjectGPLLaunch({ subjectId }: Props) {
   return (
     <div>
       <div className='text-2xl font-medium mb-4'>{subjectId} - GPL Report Trigger</div>
+
+      <h5 className='mt-0'>Description</h5>
       <div>
         This is a trigger for{' '}
         <a
@@ -109,11 +111,15 @@ function SubjectGPLLaunch({ subjectId }: Props) {
         .
       </div>
 
-      <Button
-        onClick={() => setIsConfirmDialogOpen(true)}
-        label='Next'
-        className='p-button-info bg-blue-800 w-full mt-5'
-      />
+      <div className='w-full mt-5 text-center'>
+        <Button
+          onClick={() => setIsConfirmDialogOpen(true)}
+          label='Next'
+          className='p-button-info p-button-raised bg-blue-800'
+          iconPos='right'
+          icon='pi pi-chevron-right'
+        />
+      </div>
 
       {/* CONFIRMATION DIALOG */}
       <ConfirmDialog

@@ -216,7 +216,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
             <InputText className='w-full' type='text' disabled value={input.output_directory} />
           </div>
 
-          <div className='w-full mt-5 text-center '>
+          <div className='w-full mt-5 text-center'>
             <Dialog
               id='wgs-confirmation-dialog'
               style={{ width: '75vw' }}
