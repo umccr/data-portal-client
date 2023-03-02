@@ -9,6 +9,9 @@ import {
   startRunningSubjectGDSQuery,
   updateSubjectGDSQueryPrams,
 } from '../actions/subject';
+import { REGION } from '../config';
+
+import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 
 import { connect } from 'react-redux';
 import * as PropTypes from 'prop-types';
@@ -266,29 +269,34 @@ class Subject extends Component {
 
   handleLaunchPadDialogConfirmClicked = async () => {
     const { subject } = this.state;
-
     let launchPadDialogConfirmed = false;
     let launchPadRowData = null;
     this.setState({ launchPadRowData, launchPadDialogConfirmed });
 
-    try {
-      const init = {
-        headers: { 'Content-Type': 'application/json' },
-        body: {
+    // LAMBDA CALL
+    const GPL_LAMBDA_NAME = 'gpl_submit_job';
+    const currentCredentials = await Auth.currentCredentials();
+    const lambdaClient = new LambdaClient({
+      region: REGION,
+      credentials: currentCredentials,
+    });
+
+    const command = new InvokeCommand({
+      InvocationType: 'Event',
+      FunctionName: `${GPL_LAMBDA_NAME}`,
+      Payload: Buffer.from(
+        JSON.stringify({
           subject_id: subject.id,
-        },
-      };
-      const data = await API.post('gpl', '', init);
-      launchPadRowData = {
-        subject_id: subject.id,
-        ...data,
-      };
-    } catch (e) {
-      launchPadRowData = {
-        subject_id: subject.id,
-        error: e.message,
-      };
-    }
+        })
+      ),
+    });
+
+    await lambdaClient.send(command);
+
+    launchPadRowData = {
+      subject_id: subject.id,
+      status: 'GPL Launch Success!',
+    };
 
     this.setState({ launchPadRowData, launchPadDialogConfirmed });
   };

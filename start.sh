@@ -69,19 +69,10 @@ oauth_domain=$(aws ssm get-parameter --name '/data_portal/client/oauth_domain' -
 oauth_redirect_in_local=$(aws ssm get-parameter --name '/data_portal/client/oauth_redirect_in_local' --with-decryption | jq -r .Parameter.Value)
 oauth_redirect_out_local=$(aws ssm get-parameter --name '/data_portal/client/oauth_redirect_out_local' --with-decryption | jq -r .Parameter.Value)
 
-gpl_submit_job=$(aws ssm get-parameter --name '/gpl/submit_job_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
-gpl_submit_job_manual=$(aws ssm get-parameter --name '/gpl/submit_job_manual_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
-# As of GPL v0.2.0, Do not deploy LINX plotting Lambda
-# See https://github.com/umccr/gridss-purple-linx-nf/commit/a015146e95e1b7cd3de3bc639cbc600887ba42ff
-#gpl_create_linx_plot=$(aws ssm get-parameter --name '/gpl/create_linx_plot_lambda_fn_url' --with-decryption | jq -r .Parameter.Value)
-
 unsplash_client_id=$(aws ssm get-parameter --name '/data_portal/unsplash/client_id' --with-decryption | jq -r .Parameter.Value)
 
 export REACT_APP_API_URL=$api_url
 export REACT_APP_HTSGET_URL=$htsget_url
-export REACT_APP_GPL_SUBMIT_JOB=$gpl_submit_job
-export REACT_APP_GPL_SUBMIT_JOB_MANUAL=$gpl_submit_job_manual
-#export REACT_APP_GPL_CREATE_LINX_PLOT=$gpl_create_linx_plot
 export REACT_APP_STAGE=localhost
 export REACT_APP_REGION=ap-southeast-2
 export REACT_APP_COG_USER_POOL_ID=$cog_user_pool_id
