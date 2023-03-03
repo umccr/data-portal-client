@@ -38,13 +38,6 @@ const config = {
     ENDPOINT_READS: '/reads/',
     ENDPOINT_VARIANTS: '/variants/',
   },
-  gpl: {
-    URL: import.meta.env.VITE_GPL_SUBMIT_JOB,
-    MANUAL: import.meta.env.VITE_GPL_SUBMIT_JOB_MANUAL,
-    CREATE_LINX_PLOT: import.meta.env.VITE_GPL_CREATE_LINX_PLOT,
-    REGION: REGION,
-    SERVICE: 'lambda',
-  },
 };
 
 export default config;

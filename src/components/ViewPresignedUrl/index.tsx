@@ -188,9 +188,9 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     [...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST, ...PLAIN_FILETYPE_LIST, 'yaml'].includes(filetype)
   ) {
     return (
-      <div className='w-full h-full overflow-auto'>
+      <div className='w-full h-full flex'>
         <pre
-          className='inline-block m-0 p-3 w-full bg-white border-1 border-solid border-900 border-round-xs'
+          className='overflow-auto inline-block m-0 p-3 w-full bg-white border-1 border-solid border-900 border-round-xs'
           style={{
             minWidth: '50vw',
           }}>
