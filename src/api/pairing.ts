@@ -20,9 +20,12 @@ export type FastqRow = {
 
 export type FASTQPairingPayload = {
   subject_id: string;
-  sample_name: string;
-  output_file_prefix: string;
-  output_directory: string;
+  sample_name_germline: string;
+  sample_name_somatic: string;
+  output_file_prefix_germline: string;
+  output_file_prefix_somatic: string;
+  output_directory_germline: string;
+  output_directory_somatic: string;
   fastq_list_rows: FastqRow[];
   tumor_fastq_list_rows: FastqRow[];
 };

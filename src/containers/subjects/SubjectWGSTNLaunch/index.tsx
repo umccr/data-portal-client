@@ -201,19 +201,54 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
             <InputText className='w-full' type='text' disabled value={input.subject_id} />
           </div>
 
-          <h5>Sample Name (Tumor Library Id)</h5>
+          <h5>Somatic Sample Name (Tumor Library Id)</h5>
           <div className='w-full' style={{ cursor: 'not-allowed' }}>
-            <InputText className='w-full' type='text' disabled value={input.sample_name} />
+            <InputText className='w-full' type='text' disabled value={input.sample_name_somatic} />
           </div>
 
-          <h5>Output File Prefix (Tumor Sample Id)</h5>
+          <h5>Germline Sample Name (Normal Library Id)</h5>
           <div className='w-full' style={{ cursor: 'not-allowed' }}>
-            <InputText className='w-full' type='text' disabled value={input.output_file_prefix} />
+            <InputText className='w-full' type='text' disabled value={input.sample_name_germline} />
           </div>
 
-          <h5>Output Directory (tumorLibraryId_normalLibraryId)</h5>
+          <h5>Somatic Output File Prefix (Tumor Sample Id)</h5>
           <div className='w-full' style={{ cursor: 'not-allowed' }}>
-            <InputText className='w-full' type='text' disabled value={input.output_directory} />
+            <InputText
+              className='w-full'
+              type='text'
+              disabled
+              value={input.output_file_prefix_somatic}
+            />
+          </div>
+
+          <h5>Germline Output File Prefix (Normal Sample Id)</h5>
+          <div className='w-full' style={{ cursor: 'not-allowed' }}>
+            <InputText
+              className='w-full'
+              type='text'
+              disabled
+              value={input.output_file_prefix_germline}
+            />
+          </div>
+
+          <h5>Somatic Output Directory (tumorLibraryId_normalLibraryId)</h5>
+          <div className='w-full' style={{ cursor: 'not-allowed' }}>
+            <InputText
+              className='w-full'
+              type='text'
+              disabled
+              value={input.output_directory_somatic}
+            />
+          </div>
+
+          <h5>Germline Output Directory (Normal Library Id)</h5>
+          <div className='w-full' style={{ cursor: 'not-allowed' }}>
+            <InputText
+              className='w-full'
+              type='text'
+              disabled
+              value={input.output_directory_germline}
+            />
           </div>
 
           <div className='w-full mt-5 text-center'>
