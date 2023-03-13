@@ -565,6 +565,9 @@ class Subject extends Component {
     const tsoCtdnaVcfs = results_gds.filter(
       (r) => r.path.includes('tso_ctdna') && (r.path.endsWith('vcf') || r.path.endsWith('vcf.gz'))
     );
+    const tsoCtdnaTsv = results_gds.filter(
+      (r) => r.path.includes('tso_ctdna') && r.path.endsWith('tsv')
+    );
 
     return (
       <div className={'grid'}>
@@ -622,6 +625,7 @@ class Subject extends Component {
                 <TableContainer>
                   <Paper elevation={0}>
                     <Table size={'small'} aria-label={'a dense table'}>
+                      {this.renderGDSResultTable('tsv', tsoCtdnaTsv)}
                       {this.renderGDSResultTable('vcf', tsoCtdnaVcfs)}
                       {this.renderGDSResultTable('bam', tsoCtdnaBams)}
                     </Table>
