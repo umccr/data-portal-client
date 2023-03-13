@@ -192,6 +192,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
           <AnalysisResultGDSTable title='bam' data={groupedData.wtsBamsIca} />
         </TabPanel>
         <TabPanel header='TSO500'>
+          <AnalysisResultGDSTable title='tsv' data={groupedData.tsoCtdnaTsv} />
           <AnalysisResultGDSTable title='vcf' data={groupedData.tsoCtdnaVcfs} />
           <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
         </TabPanel>
@@ -286,6 +287,9 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
   const tsoCtdnaVcfs = results_gds.filter(
     (r) => r.path.includes('tso_ctdna') && (r.path.endsWith('vcf') || r.path.endsWith('vcf.gz'))
   );
+  const tsoCtdnaTsv = results_gds.filter(
+    (r) => r.path.includes('tso_ctdna') && r.path.endsWith('tsv')
+  );
 
   return {
     wgs: wgs,
@@ -317,5 +321,6 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
     wtsRnasum: wtsRnasum,
     tsoCtdnaBams: tsoCtdnaBams,
     tsoCtdnaVcfs: tsoCtdnaVcfs,
+    tsoCtdnaTsv: tsoCtdnaTsv,
   };
 }
