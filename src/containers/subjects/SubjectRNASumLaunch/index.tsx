@@ -259,12 +259,6 @@ function checkRnasumTriggerAllow(gdsResult: GDSRow[]): RNASumLaunchCheckType {
     return rnasumCheck;
   }
 
-  if (rnasumInputData.wtsBamsIca.length > 1) {
-    rnasumCheck.isRNASumLaunchAllowed = false;
-    rnasumCheck.message = `Multiple transcriptome workflow output found for the Subject.`;
-    return rnasumCheck;
-  }
-
   if (rnasumInputData.wgsCancer.length < 1) {
     rnasumCheck.isRNASumLaunchAllowed = false;
     rnasumCheck.message = `No umccrise workflow output found for the Subject.`;
