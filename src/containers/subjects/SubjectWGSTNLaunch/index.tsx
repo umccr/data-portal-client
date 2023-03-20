@@ -21,9 +21,12 @@ const metadataHeaderToDisplay: string[] = [
   'library_id',
   'external_subject_id',
   'external_sample_id',
-  'type',
   'phenotype',
+  'type',
+  'assay',
+  'source',
   'project_name',
+  'project_owner',
 ];
 
 type Props = { subjectId: string };
@@ -88,7 +91,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           className='p-button-rounded p-button-danger bg-red-500 cursor-auto'
           aria-label='Cancel'
         />
-        <div className='mt-3'>{`Something went wrong upon launching WGS T/N workflow!`}</div>
+        <div className='mt-3'>{`Error launching WGS T/N workflow`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
           {JSON.stringify(workflowTriggerRes.error, null, 2)}
         </pre>
@@ -98,7 +101,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
 
   // LOADING components return
   if (pairingOptions.isLoading || metadataUseQueryRes.isLoading) {
-    return <CircularLoaderWithText text={`Fetching available FASTQ (${subjectId})`} />;
+    return <CircularLoaderWithText text={`Fetching FASTQs for ${subjectId}`} />;
   }
   if (workflowTriggerRes.isLoading) {
     return (
@@ -172,7 +175,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           let divClassName =
             'flex flex-row align-items-center mb-4 p-3 cursor-pointer border-round-xl border-solid border-1 border-300';
 
-          if (input == fastqRow) divClassName += ` surface-200`;
+          if (input == fastqRow) divClassName += ` surface-400`;
 
           return (
             <div
@@ -182,11 +185,11 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
               <RadioButton className='mr-3 ' checked={input == fastqRow} />
               <div className='flex flex-column overflow-hidden gap-4'>
                 <DisplayFastqListRow
-                  title={`Normal Fastq List Row`}
+                  title={`Normal FASTQ List Row`}
                   fastqListRow={fastqRow.fastq_list_rows}
                 />
                 <DisplayFastqListRow
-                  title={`Tumor Fastq List Row`}
+                  title={`Tumor FASTQ List Row`}
                   fastqListRow={fastqRow.tumor_fastq_list_rows}
                 />
               </div>
@@ -262,12 +265,12 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
                 <span>
                   <Button
                     label='Cancel'
-                    className='p-button-secondary p-button-text'
+                    className='p-button-secondary'
                     onClick={() => setIsConfirmDialogOpen(false)}
                   />
                   <Button
                     label='Launch'
-                    className='p-button-raised p-button-danger'
+                    className='p-button-raised p-button-primary'
                     onClick={() => {
                       setIsLaunch(true);
                       setIsConfirmDialogOpen(false);
@@ -297,7 +300,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
               </div>
             </Dialog>
             <Button
-              className='p-button-info p-button-raised bg-blue-800'
+              className='p-button-info p-button-raised bg-primary w-24rem'
               disabled={!input}
               onClick={() => setIsConfirmDialogOpen(true)}
               label='Next'

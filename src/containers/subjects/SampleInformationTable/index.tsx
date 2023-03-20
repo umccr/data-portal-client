@@ -11,12 +11,13 @@ import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 
 const COLUMN_TO_DISPLAY = [
+  'library_id',
   'sample_id',
   'external_sample_id',
-  'library_id',
-  'type',
   'phenotype',
+  'type',
   'assay',
+  'source',
   'override_cycles',
 ];
 

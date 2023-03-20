@@ -69,7 +69,7 @@ function S3DataTable({ defaultQueryParam }: Props) {
         handleFilterChange={(s: string) => setSearchField(s)}
       />
       <div className={isFetching || isLoading ? '' : 'hidden'}>
-        <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
+        <CircularLoaderWithText text='Fetching data, please wait...' />
       </div>
       <div className={isFetching || isLoading ? 'hidden' : ''}>
         <DataTableWrapper

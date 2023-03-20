@@ -20,5 +20,5 @@ code {
 }
 
 .p-galleria .p-galleria-item-nav {
-  background-color: slategray !important;
+  background-color: var(--primary-900) !important;
 }

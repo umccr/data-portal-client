@@ -8,6 +8,7 @@ import JSONToTable from '../../../components/JSONToTable';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { GDSRow } from '../../../api/gds';
 import { invokeGPL } from './aws';
+import { Message } from 'primereact/message';
 
 type Props = { subjectId: string };
 function SubjectGPLLaunch({ subjectId }: Props) {
@@ -39,12 +40,10 @@ function SubjectGPLLaunch({ subjectId }: Props) {
 
   // LOADING COMPONENT RETURN
   if (subjectApiQuery.isLoading) {
-    return (
-      <CircularLoaderWithText text='Please wait. We are checking if GPL trigger is available for this subject.' />
-    );
+    return <CircularLoaderWithText text='Checking GPL report trigger. Please wait...' />;
   }
   if (gplLaunch.isLoading) {
-    return <CircularLoaderWithText text='Launching GPL report.' />;
+    return <CircularLoaderWithText text='Launching GPL report' />;
   }
 
   // ERROR components return
@@ -83,10 +82,14 @@ function SubjectGPLLaunch({ subjectId }: Props) {
   if (gplLaunchCheckData && !gplLaunchCheckData.isGplLaunchAllowed) {
     return (
       <div>
-        <div className='text-2xl font-medium mb-4'>
-          {subjectId} - Unable to trigger GPL for this subject
-        </div>
-        {gplLaunchCheckData.message ? <div>{gplLaunchCheckData.message}</div> : <></>}
+        <div className='text-2xl font-medium mb-4'>{subjectId} - GPL Report</div>
+        {gplLaunchCheckData.message ? (
+          <div>
+            <Message severity='info' text={gplLaunchCheckData.message} />
+          </div>
+        ) : (
+          <></>
+        )}
         {gplLaunchCheckData.additionalJSXComponent ? (
           <div className='mt-5'>{gplLaunchCheckData.additionalJSXComponent}</div>
         ) : (
@@ -102,20 +105,19 @@ function SubjectGPLLaunch({ subjectId }: Props) {
 
       <h5 className='mt-0'>Description</h5>
       <div>
-        This is a trigger for{' '}
+        Report trigger for{' '}
         <a
           target={`_blank`}
-          href='https://github.com/umccr/gridss-purple-linx-nf/tree/main/deployment#usage'>
-          GRIDSS/PURPLE/LINX-pipeline-stack
+          href='https://github.com/umccr/gridss-purple-linx-nf/tree/main/deployment'>
+          GRIDSS/PURPLE/LINX Pipeline
         </a>
-        .
       </div>
 
-      <div className='w-full mt-5 text-center'>
+      <div className='w-full mt-5'>
         <Button
           onClick={() => setIsConfirmDialogOpen(true)}
           label='Next'
-          className='p-button-info p-button-raised bg-blue-800'
+          className='p-button-info p-button-raised bg-primary w-24rem'
           iconPos='right'
           icon='pi pi-chevron-right'
         />
@@ -125,10 +127,10 @@ function SubjectGPLLaunch({ subjectId }: Props) {
       <ConfirmDialog
         draggable={false}
         visible={isConfirmDialogOpen}
-        header='RNAsum Launch Confirmation'
+        header='GPL Launch Confirmation'
         message={
           <div className=''>
-            <div>Please Confirm the following payload before you launch.</div>
+            <div>Please confirm the payload before you launch</div>
             <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
               {JSON.stringify({ subject_id: subjectId }, null, 2)}
             </pre>
@@ -136,8 +138,8 @@ function SubjectGPLLaunch({ subjectId }: Props) {
         }
         acceptLabel='Launch'
         rejectLabel='Cancel'
-        acceptClassName='p-button-raised p-button-danger'
-        rejectClassName='p-button-secondary p-button-text text-blue-800'
+        acceptClassName='p-button-raised p-button-primary'
+        rejectClassName='p-button-secondary'
         accept={() => {
           setIsLaunch(true);
           setIsConfirmDialogOpen(false);
@@ -170,7 +172,8 @@ async function checkGPLTriggerAllow(gdsResults: GDSRow[]): Promise<GplLaunchChec
   );
   if (Array.isArray(gplReport) && gplReport.length) {
     gplCheck.isGplLaunchAllowed = false;
-    gplCheck.message = 'GPL report had exist please check the following file';
+    gplCheck.message =
+      'Existing LINX report found. Please navigate Subject Overview page for download.';
     gplCheck.additionalJSXComponent = <JSONToTable objData={gplReport[0]} />;
     return gplCheck;
   }

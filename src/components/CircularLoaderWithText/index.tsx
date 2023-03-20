@@ -15,7 +15,12 @@ export default function CircularLoaderWithText(props: Props): React.ReactElement
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      <ProgressSpinner style={{ height: spinnerSize, width: spinnerSize }} />
+      <ProgressSpinner
+        style={{ height: spinnerSize, width: spinnerSize }}
+        strokeWidth='8'
+        fill='var(--surface-ground)'
+        animationDuration='.5s'
+      />
       {props.text ? <div style={{ paddingTop: '1rem' }}>{text}</div> : <></>}
     </div>
   );
