@@ -41,7 +41,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
     { header: 'Sample no.', field: 'samples_no' },
   ];
 
-  // Eligibility of RNASum trigger check
+  // Eligibility of RNAsum trigger check
   const subjectData = usePortalSubjectDataAPI(subjectId);
   const rnaSumCheckData: RNASumLaunchCheckType | undefined = checkRnasumTriggerAllow(
     subjectData.data?.results_gds ?? []
@@ -89,7 +89,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
   // LOADER COMPONENT RETURN
   if (subjectData.isLoading || subjectData.isLoading || !rnaSumCheckData) {
     return (
-      <CircularLoaderWithText text='Please wait. We are checking if RNASum trigger is available for this subject.' />
+      <CircularLoaderWithText text='Please wait. We are checking if RNAsum trigger is available for this subject.' />
     );
   }
   if (rnaSumLaunch.isLoading) {
@@ -116,7 +116,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
     return (
       <div>
         <div className='text-2xl font-medium mb-4'>
-          {subjectId} - Unable to trigger RNASum for this subject
+          {subjectId} - Unable to trigger RNAsum for this subject
         </div>
         {rnaSumCheckData.message ? <div>{rnaSumCheckData.message}</div> : <></>}
         {rnaSumCheckData.additionalJSXComponent ? (
@@ -130,44 +130,59 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
 
   return (
     <div>
-      <div className='text-2xl font-medium mb-4'>{subjectId} - RNASum Report Trigger</div>
+      <div className='text-2xl font-medium mb-4'>{subjectId} - RNAsum Report Trigger</div>
 
       <h5 className='mt-0'>Description</h5>
       <div>
-        This is a trigger for the{' '}
+        Report trigger for the{' '}
         <a
           target={`_blank`}
           href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/rnasum.md'>
-          RNAsum-ICA-Pipeline-Lambda
+          RNAsum workflow
         </a>
-        .
       </div>
 
-      <h5>Select Dataset Project</h5>
-      <div className='flex align-items-center justify-content-between mb-3'>
-        <div>Dataset Project</div>
-        <Dropdown
-          className='m-0'
-          value={input?.dataset}
-          options={ALL_DATASETS_OPTION}
-          optionValue='project'
-          optionLabel='project'
-          onChange={(e) => setInput({ subject_id: subjectId, dataset: e.value })}
-          placeholder='Select a Project'
-        />
+      <h5>Select Dataset</h5>
+      <div className={'grid'}>
+        <div className={'col-2 align-items-center'}>Project ID</div>
+        <div className={'col-2'}>
+          <Dropdown
+            className='m-0'
+            value={input?.dataset}
+            options={ALL_DATASETS_OPTION}
+            optionValue='project'
+            optionLabel='project'
+            onChange={(e) => setInput({ subject_id: subjectId, dataset: e.value })}
+            placeholder='Select a Project'
+          />
+        </div>
       </div>
 
-      <div className='my-3'>
-        <div className='flex align-items-center justify-content-between'>
-          <div>Show RNASum Table</div>
+      <div className={'grid'}>
+        <div className={'col-2 align-items-center'}>
+          <div>
+            Show{' '}
+            <a
+              target={'_blank'}
+              href={'https://github.com/umccr/RNAsum/blob/master/TCGA_projects_summary.md'}
+              rel='noreferrer'>
+              TCGA
+            </a>{' '}
+            Datasets Table
+          </div>
+        </div>
+        <div className={'col-2'}>
           <InputSwitch
             id='rnasum-toggle'
             checked={isRnasumTableShow}
             onChange={() => setIsRnasumTableShow((prev) => !prev)}
           />
         </div>
+      </div>
+
+      <div className={'grid'}>
         {isRnasumTableShow ? (
-          <div className='mt-3'>
+          <div className='col-6'>
             <DataTableWrapper
               dataTableValue={ALL_DATASETS_OPTION}
               columns={columnList}
@@ -181,20 +196,23 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
                 scrollHeight: '450px',
               }}
             />
+            <div>
+              <p className='text-sm'>*Click on row to select the dataset</p>
+            </div>
           </div>
         ) : (
           <></>
         )}
       </div>
 
-      <div className='w-full mt-5 text-center'>
+      <div className='w-full mt-5'>
         <Button
           disabled={!input}
           onClick={() => setIsConfirmDialogOpen(true)}
           label='Next'
           iconPos='right'
           icon='pi pi-chevron-right'
-          className='p-button-info p-button-raised bg-blue-800'
+          className='p-button-info p-button-raised bg-primary w-24rem'
         />
       </div>
 
@@ -205,7 +223,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
         header='RNAsum Launch Confirmation'
         message={
           <div className=''>
-            <div>Please Confirm the following payload before you launch.</div>
+            <div>Please confirm the payload before you launch</div>
             <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
               {JSON.stringify(input, null, 2)}
             </pre>
@@ -213,8 +231,8 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
         }
         acceptLabel='Launch'
         rejectLabel='Cancel'
-        acceptClassName='p-button-raised p-button-danger'
-        rejectClassName='p-button-secondary p-button-text text-blue-800'
+        acceptClassName='p-button-raised p-button-primary'
+        rejectClassName='p-button-secondary'
         accept={() => {
           setIsLaunch(true);
           setIsConfirmDialogOpen(false);

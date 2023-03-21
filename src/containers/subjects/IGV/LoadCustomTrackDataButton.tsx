@@ -79,10 +79,10 @@ function LoadCustomTrackDataButton({
           label='Cancel'
           icon='pi pi-times'
           onClick={() => setIsAddCustomTrackDialogOpen((prev) => !prev)}
-          className='p-button-text text-blue-800'
+          className='p-button-secondary'
         />
         <Button
-          className='bg-blue-800'
+          className='bg-primary'
           disabled={!(isValidUri && inputText)}
           label='ADD'
           icon='pi pi-plus'
@@ -97,27 +97,27 @@ function LoadCustomTrackDataButton({
       <Dialog
         header={`Add Custom Track`}
         visible={isAddCustomTrackDialogOpen}
-        className='w-11'
+        className='w-6'
         draggable={false}
         footer={renderFooter()}
         onHide={() => setIsAddCustomTrackDialogOpen((prev) => !prev)}>
         <>
-          <div className='mb-4 text-500'>
-            {`To add a custom track, please enter S3 or GDS URI.`}
+          <div className='mb-4'>
+            {`To add a custom track, please enter S3 or GDS URI`}
           </div>
           <div className='my-3'>
             <InputText
-              className='w-full block focus:border-blue-800 mb-3'
-              style={{ boxShadow: 'var(--blue-800)' }}
+              className='w-full block focus:border-primary-800 mb-3'
+              style={{ boxShadow: 'var(--primary-800)' }}
               value={inputText}
               placeholder={`e.g. "s3://umccr-primary-data-prod/.../SUBJ0001.bam" or "gds://production/.../SUBJ0001.bam"`}
               onChange={(e) => setInputText(e.target.value)}
             />
             <small>
               {!isFiletypeSupported && inputText ? (
-                <div className='text-500 text-red-600'>{`Unsupported filetype. Only support BAM, CRAM, and VCF.`}</div>
+                <div className='text-500 text-red-600'>{`Unsupported filetype. Only support BAM, CRAM, and VCF`}</div>
               ) : !inputText ? (
-                <div className='text-500'>{`Please enter a valid URI.`}</div>
+                <div></div>
               ) : (
                 <>
                   {gdsApiRes.isLoading ? (
@@ -125,12 +125,12 @@ function LoadCustomTrackDataButton({
                       <div className='mr-2'>
                         <CircularLoaderWithText spinnerSize='20px' />
                       </div>
-                      <div className='text-500 text-yellow-600'>{`Validating GDS URI.`}</div>
+                      <div className='text-500 text-yellow-600'>{`Validating GDS URI`}</div>
                     </div>
                   ) : !isValidUri ? (
-                    <div className='text-500 text-red-600'>{`Invalid URI or URI does not exist.`}</div>
+                    <div className='text-500 text-red-600'>{`Invalid URI or URI does not exist`}</div>
                   ) : isValidUri ? (
-                    <div className='text-500 text-green-600'>{`URI is valid.`}</div>
+                    <div className='text-500 text-green-600'>{`URI is valid`}</div>
                   ) : (
                     <></>
                   )}
@@ -143,7 +143,7 @@ function LoadCustomTrackDataButton({
 
       <Button
         onClick={handleOpenCustomTrackButton}
-        className='m-1 bg-blue-800 border-blue-800'
+        className='m-1 bg-primary'
         label='CUSTOM'
         icon='pi pi-plus'
       />

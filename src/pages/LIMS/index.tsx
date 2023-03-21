@@ -6,7 +6,6 @@ function LIMSPage() {
   return (
     <div className='px-5 py-3'>
       <Card className='p-0'>
-        <div className='font-bold text-2xl pb-3'>LIMS Table</div>
         <LIMSTable />
       </Card>
     </div>

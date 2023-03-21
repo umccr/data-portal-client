@@ -8,7 +8,7 @@
   }
 
   .p-menubar .p-menubar-root-list>.p-menuitem>.p-menuitem-link:not(.p-disabled):hover {
-    background-color: var(--blue-900) !important;
+    background-color: var(--primary-900) !important;
   }
 
 }
