@@ -18,7 +18,7 @@ import { usePortalLimsAPI } from '../../../api/lims';
 import { Link } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext';
 
-type Props = { defaultQueryParam?: Record<string, string | number> };
+type Props = { defaultQueryParam?: Record<string, string[] | number[]> };
 function LIMSTable({ defaultQueryParam }: Props) {
   const { toastShow } = useToastContext();
 
@@ -32,7 +32,7 @@ function LIMSTable({ defaultQueryParam }: Props) {
 
   // Pagination Properties
   let paginationProps: PaginationProps = paginationPropsInitValue;
-  const [apiQueryParameter, setApiQueryParameter] = useState<{ [key: string]: string | number }>({
+  const [apiQueryParameter, setApiQueryParameter] = useState<Record<string, any>>({
     rowsPerPage: paginationProps.currentNumberOfRows,
     ordering: '-subject_id',
     ...defaultQueryParam,
@@ -52,6 +52,14 @@ function LIMSTable({ defaultQueryParam }: Props) {
     setApiQueryParameter((prev) => ({ ...prev, ...djangoSortingQuery }));
   };
 
+  useEffect(() => {
+    // update the state iff defaultQueryParam props has been updated again since initial state
+    setApiQueryParameter((prev) => ({
+      ...prev,
+      ...defaultQueryParam,
+    }));
+  }, [defaultQueryParam]);
+
   // Data states
   type ObjKeyType = { [key: string]: string | number };
   let limsDataList: ObjKeyType[] = [];
@@ -60,7 +68,6 @@ function LIMSTable({ defaultQueryParam }: Props) {
       ...apiQueryParameter,
     },
   });
-
   useEffect(() => {
     if (isError) {
       toastShow({
@@ -84,14 +91,18 @@ function LIMSTable({ defaultQueryParam }: Props) {
   };
   const column_to_display: string[] = [
     'illumina_id',
-    'type',
     'timestamp',
     'subject_id',
-    'sample_id',
     'library_id',
-    'external_subject_id',
+    'sample_id',
     'external_sample_id',
+    'external_subject_id',
     'phenotype',
+    'type',
+    'assay',
+    'source',
+    'workflow',
+    'project_owner',
     'project_name',
   ];
 
@@ -107,7 +118,7 @@ function LIMSTable({ defaultQueryParam }: Props) {
       field: column,
       alignHeader: 'left' as const,
       header: (
-        <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
+        <p className='w-2 uppercase text-left font-bold text-color white-space-nowrap'>
           {showDisplayText(column)}
         </p>
       ),
@@ -148,10 +159,10 @@ function LIMSTable({ defaultQueryParam }: Props) {
   return (
     <div>
       <div className='w-full pb-4'>
-        <span className='w-full p-input-icon-left'>
+        <span className='lg:w-4 p-input-icon-left'>
           <i className='pi pi-search' />
           <InputText
-            className='w-full p-inputtext-sm'
+            className='w-full p-inputtext'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder='Search'

@@ -1,33 +1,55 @@
-import React from 'react';
-import SubjectCard from '../../containers/home/SubjectCard';
-import MetadataHomeCard from '../../containers/home/MetadataCard';
-import LimsHomeCard from '../../containers/home/LimsCard';
-import SequenceHomeCard from '../../containers/home/SequenceCard';
-import RunHomeCard from '../../containers/home/RunsCard';
+import React, { useCallback, useState } from 'react';
+import SideBar from '../../layouts/SideBar';
+import LIMSTable from '../../containers/lims/LIMSTable';
+import LimsSideBar from '../../containers/lims/LimsSideBar';
 
 function HomePage() {
+  const initQueryParam: Record<string, string[] | number[]> = {
+    workflow: ['clinical', 'research', 'control'],
+  };
+
+  const [defaultQueryParam, setDefaultQueryParam] = useState(initQueryParam);
+
+  const handleFilterApplied = useCallback(
+    (filteredQueryParam: Record<string, string[] | number[]>) => {
+      setDefaultQueryParam({ ...filteredQueryParam });
+    },
+    [defaultQueryParam]
+  );
+
   return (
-    <>
-      <div className='mt-3 w-full h-full flex flex-column align-items-center'>
-        <div className='w-9 h-8rem p-2'>
-          <SubjectCard />
-        </div>
-        <div className='w-9 h-8rem p-2'>
-          <MetadataHomeCard />
-        </div>
-        <div className='w-9 h-8rem p-2'>
-          <RunHomeCard />
-        </div>
-        {/* <div className='w-9 h-8rem p-2'>
-          <LimsHomeCard />
-        </div> */}
-        <div className='w-9 h-8rem p-2'>
-          <SequenceHomeCard />
-        </div>
-      </div>
-      {/* Idea is to put charts from portal data here. */}
-      {/* Might need to have an api to do so */}
-    </>
+    <SideBar
+      mainPageElement={<LIMSTable defaultQueryParam={defaultQueryParam} />}
+      sideBarElement={
+        <LimsSideBar defaultQueryParam={defaultQueryParam} handleApply={handleFilterApplied} />
+      }
+    />
+
+    // <SideBar
+    //   mainPageElement={
+    //     <Card title={'Hello'}>
+    //       <p>Lorem Ipsum</p>
+    //     </Card>
+    //   }
+    //   sideBarElement={
+    //     <Card title={'Side'}>
+    //       <p>Umm</p>
+    //     </Card>
+    //   }
+    // />
+
+    // <div>
+    //   <div className='grid'>
+    //     <div className='col-2'>
+    //       <>P</>
+    //     </div>
+    //     <div className='col-10 px-5 py-3'>
+    //       <Card className='p-0'>
+    //         <LIMSTable />
+    //       </Card>
+    //     </div>
+    //   </div>
+    // </div>
   );
 }
 
