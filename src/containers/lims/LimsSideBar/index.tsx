@@ -6,11 +6,10 @@ import { usePortalLimsByAggregateCount } from '../../../api/lims';
 import { useToastContext } from '../../../providers/ToastProvider';
 
 type Props = {
-  defaultQueryParam?: Record<string, string[] | number[]>;
   handleApply: (filteredQueryParam: Record<string, string[] | number[]>) => void;
 };
 
-function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
+function LimsSideBar({ handleApply }: Props) {
   const { toastShow } = useToastContext();
 
   const initMetaWorkflows: Record<string, string | number>[] = [];
@@ -20,6 +19,22 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
   const initMetaTypes: Record<string, string | number>[] = [];
   const initMetaAssays: Record<string, string | number>[] = [];
   const initMetaSources: Record<string, string | number>[] = [];
+
+  const [selectedMetaWorkflows, setSelectedMetaWorkflows] = useState(initMetaWorkflows);
+  const [selectedMetaProjectOwners, setSelectedMetaProjectOwners] = useState(initMetaProjectOwners);
+  const [selectedMetaProjectNames, setSelectedMetaProjectNames] = useState(initMetaProjectNames);
+  const [selectedMetaPhenotypes, setSelectedMetaPhenotypes] = useState(initMetaPhenotypes);
+  const [selectedMetaTypes, setSelectedMetaTypes] = useState(initMetaTypes);
+  const [selectedMetaAssays, setSelectedMetaAssays] = useState(initMetaAssays);
+  const [selectedMetaSources, setSelectedMetaSources] = useState(initMetaSources);
+
+  const metaWorkflows: Record<string, string | number>[] = [];
+  const metaProjectOwners: Record<string, string | number>[] = [];
+  const metaProjectNames: Record<string, string | number>[] = [];
+  const metaPhenotypes: Record<string, string | number>[] = [];
+  const metaTypes: Record<string, string | number>[] = [];
+  const metaAssays: Record<string, string | number>[] = [];
+  const metaSources: Record<string, string | number>[] = [];
 
   const { isFetching, isLoading, isError, data } = usePortalLimsByAggregateCount({
     queryStringParameters: {
@@ -36,38 +51,12 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
         life: 3000,
       });
     }
-
-    if (defaultQueryParam) {
-      for (const w of defaultQueryParam.workflow) {
-        initMetaWorkflows.push({
-          name: w,
-          code: w,
-        });
-      }
-    }
   }, [isError]);
-
-  const [selectedMetaWorkflows, setSelectedMetaWorkflows] = useState(initMetaWorkflows);
-  const [selectedMetaProjectOwners, setSelectedMetaProjectOwners] = useState(initMetaProjectOwners);
-  const [selectedMetaProjectNames, setSelectedMetaProjectNames] = useState(initMetaProjectNames);
-  const [selectedMetaPhenotypes, setSelectedMetaPhenotypes] = useState(initMetaPhenotypes);
-  const [selectedMetaTypes, setSelectedMetaTypes] = useState(initMetaTypes);
-  const [selectedMetaAssays, setSelectedMetaAssays] = useState(initMetaAssays);
-  const [selectedMetaSources, setSelectedMetaSources] = useState(initMetaSources);
-
-  const metaWorkflows = [];
-  const metaProjectOwners = [];
-  const metaProjectNames = [];
-  const metaPhenotypes = [];
-  const metaTypes = [];
-  const metaAssays = [];
-  const metaSources = [];
 
   if (data && !isFetching && !isLoading) {
     const { assay, phenotype, project_name, project_owner, source, type, workflow } = data;
 
     for (const w of workflow) {
-      // console.log(w.workflow, w.workflow == null);
       if (w.workflow == null) {
         continue;
       }
@@ -138,6 +127,17 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
     }
   }
 
+  // TODO: this does not work yet -- how do we set initial selected/filtered state
+  // useEffect(() => {
+  //   const initWorkflow = [
+  //     { name: 'clinical', code: 'clinical' },
+  //     { name: 'research', code: 'research' },
+  //     { name: 'control', code: 'control' },
+  //   ];
+  //
+  //   setSelectedMetaWorkflows({ ...initWorkflow });
+  // }, [data]);
+
   const apply = () => {
     const filteredQueryParam: Record<string, string[] | number[]> = {};
 
@@ -188,11 +188,11 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
       <div
         id='subject-sidebar-title'
         className='cursor-pointer font-bold text-3xl border-bottom-1 border-gray-300'
-        style={{ padding: '0.5rem 0 1.5rem' }}>
+        style={{ padding: '1.5rem 1.5rem 1.5rem' }}>
         Filters
       </div>
 
-      <div className='flex justify-content-center'>
+      <div className='flex justify-content-center py-2'>
         <Fieldset legend='Meta Workflow'>
           <MultiSelect
             value={selectedMetaWorkflows}
@@ -202,13 +202,13 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
             display='chip'
             filter
             // showClear
-            placeholder='Select Meta Workflow'
+            placeholder='Select Workflow'
             maxSelectedLabels={2}
-            className='w-full md:w-20rem'
+            className='w-full md:w-15rem'
           />
         </Fieldset>
       </div>
-      <div className='flex justify-content-center'>
+      <div className='flex justify-content-center py-2'>
         <Fieldset legend='Project'>
           <MultiSelect
             value={selectedMetaProjectNames}
@@ -219,11 +219,11 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
             filter
             placeholder='Select Project Name'
             maxSelectedLabels={2}
-            className='w-full md:w-20rem'
+            className='w-full md:w-15rem'
           />
         </Fieldset>
       </div>
-      <div className='flex justify-content-center'>
+      <div className='flex justify-content-center py-2'>
         <Fieldset legend='PI'>
           <MultiSelect
             value={selectedMetaProjectOwners}
@@ -234,11 +234,11 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
             filter
             placeholder='Select Project Owner'
             maxSelectedLabels={2}
-            className='w-full md:w-20rem'
+            className='w-full md:w-15rem'
           />
         </Fieldset>
       </div>
-      <div className='flex justify-content-center'>
+      <div className='flex justify-content-center py-2'>
         <Fieldset legend='Phenotype'>
           <MultiSelect
             value={selectedMetaPhenotypes}
@@ -249,11 +249,11 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
             filter
             placeholder='Select Phenotype'
             maxSelectedLabels={2}
-            className='w-full md:w-20rem'
+            className='w-full md:w-15rem'
           />
         </Fieldset>
       </div>
-      <div className='flex justify-content-center'>
+      <div className='flex justify-content-center py-2'>
         <Fieldset legend='Type'>
           <MultiSelect
             value={selectedMetaTypes}
@@ -264,11 +264,11 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
             filter
             placeholder='Select Type'
             maxSelectedLabels={2}
-            className='w-full md:w-20rem'
+            className='w-full md:w-15rem'
           />
         </Fieldset>
       </div>
-      <div className='flex justify-content-center'>
+      <div className='flex justify-content-center py-2'>
         <Fieldset legend='Assay'>
           <MultiSelect
             value={selectedMetaAssays}
@@ -279,11 +279,11 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
             filter
             placeholder='Select Assay'
             maxSelectedLabels={2}
-            className='w-full md:w-20rem'
+            className='w-full md:w-15rem'
           />
         </Fieldset>
       </div>
-      <div className='flex justify-content-center'>
+      <div className='flex justify-content-center py-2'>
         <Fieldset legend='Source'>
           <MultiSelect
             value={selectedMetaSources}
@@ -294,7 +294,7 @@ function LimsSideBar({ defaultQueryParam, handleApply }: Props) {
             filter
             placeholder='Select Source'
             maxSelectedLabels={2}
-            className='w-full md:w-20rem'
+            className='w-full md:w-15rem'
           />
         </Fieldset>
       </div>
