@@ -1,3 +1,5 @@
+/* TODO marking this component for deprecation at some point  ~victor */
+
 import React, { useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';

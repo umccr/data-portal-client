@@ -13,11 +13,11 @@ function RunRoutes() {
   return (
     <RouterRoutes>
       <Route path='/'>
-        <Route index element={<RunOverviewPage />} />
+        <Route index element={<RunDataPage />} />
         <Route path=':runId' element={<RunPageLayout />}>
-          <Route index element={<Navigate to='overview' />} />
+          <Route index element={<Navigate to='primary-data' />} />
           <Route path='overview' element={<RunOverviewPage />} />
-          <Route path='run-data' element={<RunDataPage />} />
+          <Route path='primary-data' element={<RunDataPage />} />
           <Route path='lims' element={<RunLIMSPage />} />
         </Route>
       </Route>

@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ListBox, ListBoxChangeParams } from 'primereact/listbox';
 
 const sidebarMapping = [
-  { postfixPath: 'overview', label: 'Overview' },
-  { postfixPath: 'run-data', label: 'Run Data' },
+  // { postfixPath: 'overview', label: 'Overview' },
+  { postfixPath: 'primary-data', label: 'Primary Data' },
   { postfixPath: 'lims', label: 'LIMS' },
 ];
 

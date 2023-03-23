@@ -1,3 +1,5 @@
+/* TODO marking this component for deprecation at some point  ~victor */
+
 import React, { useEffect, useState } from 'react';
 import JSONToTable from '../../../components/JSONToTable';
 import { Dropdown } from 'primereact/dropdown';

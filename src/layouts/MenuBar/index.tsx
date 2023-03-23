@@ -60,37 +60,37 @@ function MenuBar() {
       className:
         'text-xl text-black-alpha-90 font-semibold p-button-secondary p-button-text shadow-none',
     },
-    {
-      label: 'Subjects',
-      command: () => {
-        navigate('/subjects');
-      },
-    },
-    {
-      label: 'Metadata',
-      command: () => {
-        navigate('/metadata');
-      },
-    },
-    // Will hide LIMS endpoint from menubar to test if it is still required.
+    // TODO: let's hide these for now ~victor
+    // {
+    //   label: 'Subjects',
+    //   command: () => {
+    //     navigate('/subjects');
+    //   },
+    // },
+    // {
+    //   label: 'Metadata',
+    //   command: () => {
+    //     navigate('/metadata');
+    //   },
+    // },
     // {
     //   label: 'LIMS',
     //   command: () => {
     //     navigate('/lims');
     //   },
     // },
-    {
-      label: 'Runs',
-      command: () => {
-        navigate('/runs');
-      },
-    },
-    {
-      label: 'Search',
-      command: () => {
-        navigate('/search');
-      },
-    },
+    // {
+    //   label: 'Runs',
+    //   command: () => {
+    //     navigate('/runs');
+    //   },
+    // },
+    // {
+    //   label: 'Search',
+    //   command: () => {
+    //     navigate('/search');
+    //   },
+    // },
   ];
   return (
     <Menubar
