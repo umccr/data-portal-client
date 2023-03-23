@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ColumnProps } from 'primereact/column';
 import { DataTablePFSEvent } from 'primereact/datatable';
 
@@ -6,20 +6,26 @@ import { DataTablePFSEvent } from 'primereact/datatable';
 import { useToastContext } from '../../../providers/ToastProvider';
 import { showDisplayText } from '../../../utils/util';
 import DataTableWrapper, {
+  convertDjangoSortParamToDataTableProp,
+  convertDjangoStateToDjangoQuery,
+  convertPaginationEventToDjangoQueryParams,
+  djangoToTablePaginationFormat,
+  InfoDialogColumnProps,
   PaginationProps,
   paginationPropsInitValue,
-  djangoToTablePaginationFormat,
-  convertPaginationEventToDjangoQueryParams,
-  convertDjangoStateToDjangoQuery,
-  InfoDialogColumnProps,
-  convertDjangoSortParamToDataTableProp,
 } from '../../../components/DataTableWrapper';
 import { usePortalLimsAPI } from '../../../api/lims';
 import { Link } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext';
+import SideBar from '../../../layouts/SideBar';
+import LimsSideBar from '../LimsSideBar';
 
-type Props = { defaultQueryParam?: Record<string, string | number> };
-function LIMSTable({ defaultQueryParam }: Props) {
+type Props = {
+  defaultQueryParam?: Record<string, string[] | number[]>;
+  sideBar?: boolean;
+};
+
+function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
   const { toastShow } = useToastContext();
 
   // Search Bar
@@ -32,7 +38,7 @@ function LIMSTable({ defaultQueryParam }: Props) {
 
   // Pagination Properties
   let paginationProps: PaginationProps = paginationPropsInitValue;
-  const [apiQueryParameter, setApiQueryParameter] = useState<{ [key: string]: string | number }>({
+  const [apiQueryParameter, setApiQueryParameter] = useState<Record<string, any>>({
     rowsPerPage: paginationProps.currentNumberOfRows,
     ordering: '-subject_id',
     ...defaultQueryParam,
@@ -60,7 +66,6 @@ function LIMSTable({ defaultQueryParam }: Props) {
       ...apiQueryParameter,
     },
   });
-
   useEffect(() => {
     if (isError) {
       toastShow({
@@ -84,14 +89,18 @@ function LIMSTable({ defaultQueryParam }: Props) {
   };
   const column_to_display: string[] = [
     'illumina_id',
-    'type',
     'timestamp',
     'subject_id',
-    'sample_id',
     'library_id',
-    'external_subject_id',
+    'sample_id',
     'external_sample_id',
+    'external_subject_id',
     'phenotype',
+    'type',
+    'assay',
+    'source',
+    'workflow',
+    'project_owner',
     'project_name',
   ];
 
@@ -107,7 +116,7 @@ function LIMSTable({ defaultQueryParam }: Props) {
       field: column,
       alignHeader: 'left' as const,
       header: (
-        <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
+        <p className='w-2 uppercase text-left font-bold text-color white-space-nowrap'>
           {showDisplayText(column)}
         </p>
       ),
@@ -145,35 +154,58 @@ function LIMSTable({ defaultQueryParam }: Props) {
     columnList.push(newColToShow);
   }
 
-  return (
-    <div>
-      <div className='w-full pb-4'>
-        <span className='w-full p-input-icon-left'>
-          <i className='pi pi-search' />
-          <InputText
-            className='w-full p-inputtext-sm'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder='Search'
-            onKeyDown={handleSearchEnter}
-          />
-        </span>
-      </div>
-      <DataTableWrapper
-        overrideDataTableProps={{
-          style: { display: isLoading ? 'none' : '' },
-        }}
-        sortField={sorting.sortField}
-        sortOrder={sorting.sortOrder}
-        onSort={handleTableSortPropChange}
-        isLoading={isFetching}
-        columns={columnList}
-        dataTableValue={limsDataList}
-        paginationProps={paginationProps}
-        handlePaginationPropsChange={handleTablePaginationPropChange}
-      />
-    </div>
+  const handleFilterApplied = useCallback(
+    (filteredQueryParam: Record<string, string[] | number[]>) => {
+      setApiQueryParameter((prev) => ({
+        ...prev,
+        ...filteredQueryParam,
+      }));
+    },
+    []
   );
+
+  const renderWithSideBarLayout = () => {
+    return (
+      <SideBar
+        sideBarElement={<LimsSideBar handleApply={handleFilterApplied} />}
+        mainPageElement={renderTableOnly()}
+      />
+    );
+  };
+
+  const renderTableOnly = () => {
+    return (
+      <div>
+        <div className='w-full pb-4'>
+          <span className='lg:w-4 p-input-icon-left'>
+            <i className='pi pi-search' />
+            <InputText
+              className='w-full p-inputtext'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder='Search'
+              onKeyDown={handleSearchEnter}
+            />
+          </span>
+        </div>
+        <DataTableWrapper
+          // overrideDataTableProps={{
+          //   style: { display: isLoading ? 'none' : '' },
+          // }}
+          sortField={sorting.sortField}
+          sortOrder={sorting.sortOrder}
+          onSort={handleTableSortPropChange}
+          isLoading={isFetching}
+          columns={columnList}
+          dataTableValue={limsDataList}
+          paginationProps={paginationProps}
+          handlePaginationPropsChange={handleTablePaginationPropChange}
+        />
+      </div>
+    );
+  };
+
+  return <>{sideBar ? renderWithSideBarLayout() : renderTableOnly()}</>;
 }
 
 export default LIMSTable;
