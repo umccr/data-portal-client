@@ -1,0 +1,33 @@
+.button-preset {
+    padding: 0.5rem 0.5rem 1.0rem 0.5rem;
+}
+
+.button-preset .p-button {
+    margin-top: 0.3rem;
+    margin-right: 0.5rem;
+}
+
+.button-preset .p-button .p-button-label {
+    font-size: 12px;
+}
+
+.button-preset .p-buttonset .p-button {
+    margin-right: 0;
+}
+
+/*
+@media screen and (max-width: 960px) {
+    .button-preset .p-button {
+        margin-bottom: 0.5rem;
+    }
+
+    .button-preset .p-button:not(.p-button-icon-only) {
+        display: flex;
+        width: 100%;
+    }
+
+    .button-preset .p-buttonset .p-button {
+        margin-bottom: 0;
+    }
+}
+*/

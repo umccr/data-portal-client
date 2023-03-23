@@ -10,7 +10,6 @@ function RunLIMSPage() {
 
   return (
     <Card className='mb-3 w-auto' style={{ minWidth: '80%' }}>
-      <div className='font-bold text-2xl pb-3'>LIMS Table</div>
       <LIMSTable defaultQueryParam={{ run: [runId] }} />
     </Card>
   );

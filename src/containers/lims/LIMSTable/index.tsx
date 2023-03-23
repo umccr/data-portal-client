@@ -132,9 +132,7 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
         ...newColToShow,
         body: (rowData: any): React.ReactNode => {
           return (
-            <Link to={`/subjects/${rowData.subject_id}/overview`}>
-              {textBodyTemplate(rowData[column])}
-            </Link>
+            <Link to={`/subjects/${rowData.subject_id}`}>{textBodyTemplate(rowData[column])}</Link>
           );
         },
       };
@@ -143,9 +141,7 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
         ...newColToShow,
         body: (rowData: any): React.ReactNode => {
           return (
-            <Link to={`/runs/${rowData.illumina_id}/overview`}>
-              {textBodyTemplate(rowData[column])}
-            </Link>
+            <Link to={`/runs/${rowData.illumina_id}`}>{textBodyTemplate(rowData[column])}</Link>
           );
         },
       };

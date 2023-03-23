@@ -68,7 +68,7 @@ function SampleInformationTable(props: Props) {
   columnList.push({
     alignHeader: 'center' as const,
     header: (
-      <p className='capitalize text-center font-bold text-color white-space-nowrap'>
+      <p className='uppercase text-center font-bold text-color white-space-nowrap'>
         {showDisplayText('info')}
       </p>
     ),
@@ -92,7 +92,7 @@ function SampleInformationTable(props: Props) {
       field: column,
       alignHeader: 'center' as const,
       header: (
-        <p className='capitalize text-center font-bold text-color white-space-nowrap'>
+        <p className='uppercase text-center font-bold text-color white-space-nowrap'>
           {showDisplayText(column)}
         </p>
       ),

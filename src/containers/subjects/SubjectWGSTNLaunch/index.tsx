@@ -160,7 +160,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
               key={idx}
               field={header}
               header={header.replaceAll('_', ' ')}
-              headerClassName='capitalize surface-100'
+              headerClassName='uppercase surface-100'
             />
           ))}
         </DataTable>

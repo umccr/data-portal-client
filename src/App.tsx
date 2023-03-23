@@ -6,7 +6,8 @@ import UserProvider from './providers/UserProvider';
 import ToastProvider from './providers/ToastProvider';
 
 // CSS Import
-import 'primereact/resources/themes/tailwind-light/theme.css';
+import 'primereact/resources/themes/bootstrap4-light-blue/theme.css';
+
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.min.css';

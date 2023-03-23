@@ -1,3 +1,6 @@
+/* TODO marking this component for deprecation at some point  ~victor */
+//  https://github.com/umccr/data-portal-apis/issues/559
+
 import { API } from '@aws-amplify/api';
 import { useQuery } from 'react-query';
 
