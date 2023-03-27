@@ -7,8 +7,8 @@ import DataTableWrapper from '../../../components/DataTableWrapper';
 import { useToastContext } from '../../../providers/ToastProvider';
 import { showDisplayText } from '../../../utils/util';
 import JSONToTable from '../../../components/JSONToTable';
-import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
+import { TableSkeleton } from '../../../components/skel/TableSkeleton';
 
 const COLUMN_TO_DISPLAY = [
   'library_id',
@@ -115,7 +115,7 @@ function SampleInformationTable(props: Props) {
         <JSONToTable objData={moreInformationDialog} />
       </Dialog>
       {isLoading ? (
-        <CircularLoaderWithText />
+        <TableSkeleton />
       ) : (
         <DataTableWrapper
           isLoading={isLoading}

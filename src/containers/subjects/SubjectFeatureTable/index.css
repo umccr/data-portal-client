@@ -1,0 +1,10 @@
+.p-galleria .p-galleria-caption {
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0) !important;
+    /*color: var(--surface-900); !important;*/
+    color: black !important;
+    padding: 0.5rem !important;
+}
