@@ -554,7 +554,9 @@ class Run extends Component {
   };
 
   getGDSPreSignedUrl = async (id) => {
-    return await API.get('files', `/gds/${id}/presign`, {});
+    return await API.get('files', `/gds/${id}/presign`, {
+      headers: { 'Content-Disposition': 'inline' },
+    });
   };
 
   handleGDSOpenInBrowser = async (id) => {

@@ -156,7 +156,9 @@ class GDSActionMenuButton extends React.Component {
   };
 
   getPreSignedUrl = async (id) => {
-    return await API.get('files', `/gds/${id}/presign`, {});
+    return await API.get('files', `/gds/${id}/presign`, {
+      headers: { 'Content-Disposition': 'inline' },
+    });
   };
 
   getGDSPath = (volume_name, path) => {
