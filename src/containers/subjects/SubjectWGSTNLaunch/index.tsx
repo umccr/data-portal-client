@@ -79,7 +79,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           className='p-button-rounded p-button-danger bg-red-500 cursor-auto'
           aria-label='Cancel'
         />
-        <div className='mt-3'>{'Unable to load FASTQ row from API.'}</div>
+        <div className='mt-3'>{'Unable to load FASTQs from API'}</div>
       </div>
     );
   }

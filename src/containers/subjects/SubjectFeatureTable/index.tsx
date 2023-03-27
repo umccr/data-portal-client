@@ -1,8 +1,9 @@
 import { useToastContext } from '../../../providers/ToastProvider';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import React, { useEffect } from 'react';
-import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { Galleria } from 'primereact/galleria';
+import './index.css';
+import { FeatureSkeleton } from '../../../components/skel/FeatureSkeleton';
 
 type Props = { subjectId: string };
 
@@ -27,7 +28,7 @@ function SubjectFeatureTable(props: Props) {
   }, [isError]);
 
   if (isLoading) {
-    return <CircularLoaderWithText />;
+    return <FeatureSkeleton />;
   }
 
   if (data && !isLoading) {
@@ -40,6 +41,17 @@ function SubjectFeatureTable(props: Props) {
 
   const itemTemplate = (item: string) => {
     return <img src={item} alt={''} style={{ width: '100%', display: 'block' }} />;
+  };
+
+  const caption = (item: string) => {
+    const filename = new URL(item).pathname.split('/').pop();
+    return (
+      <React.Fragment>
+        <div className='flex flex-wrap align-items-center justify-content-center'>
+          <h4 className='mb-1'>{filename}</h4>
+        </div>
+      </React.Fragment>
+    );
   };
 
   return (
@@ -55,8 +67,10 @@ function SubjectFeatureTable(props: Props) {
             showItemNavigators
             showItemNavigatorsOnHover
             showIndicators
+            indicatorsPosition='bottom'
             showThumbnails={false}
             item={itemTemplate}
+            caption={caption}
           />
         </div>
       ) : (

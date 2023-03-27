@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 
 // Custom component
-import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
 import JSONToTable from '../../../components/JSONToTable';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
+import { OverviewSkeleton } from '../../../components/skel/OverviewSkeleton';
 
 const OVERVIEW_COLUMN = [
   'subject_id',
@@ -39,7 +39,7 @@ function SubjectOverviewTable(props: Props) {
   }, [isError]);
 
   if (isLoading) {
-    return <CircularLoaderWithText />;
+    return <OverviewSkeleton />;
   }
 
   if (data && !isLoading) {
