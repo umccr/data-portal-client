@@ -291,7 +291,9 @@ function DialogData({ type, data }: DialogDataProps) {
 
 // Helper function
 async function getPreSignedUrl(type: string, id: string) {
-  const { error, signed_url } = await API.get('files', `/${type}/${id}/presign`, {});
+  const { error, signed_url } = await API.get('files', `/${type}/${id}/presign`, {
+    headers: { 'Content-Disposition': 'inline' },
+  });
 
   if (error) {
     throw Error('Unable to fetch get presigned url.');
