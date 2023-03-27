@@ -65,7 +65,7 @@ export function usePortalGDSPresignAPI(gdsId?: string | number, apiConfig?: Reco
 export async function getGDSPreSignedUrl(id: number, apiConfig?: Record<string, any>) {
   const { error, signed_url } = await API.get('portal', `/gds/${id}/presign`, { ...apiConfig });
   if (error) {
-    throw Error('Unable to fetch get presigned url.');
+    throw Error('Unable to get PreSigned URL');
   }
   return signed_url;
 }

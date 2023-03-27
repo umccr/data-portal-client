@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import moment from 'moment';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { DataTable } from 'primereact/datatable';
@@ -8,8 +8,12 @@ import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import DataActionButton from '../../utils/DataActionButton';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
-import { S3Row } from '../../../api/s3';
-import { GDSRow } from '../../../api/gds';
+import { getS3PreSignedUrl, S3Row } from '../../../api/s3';
+import { GDSRow, getGDSPreSignedUrl } from '../../../api/gds';
+import { Button } from 'primereact/button';
+import { BlockUI } from 'primereact/blockui';
+import { DATA_TYPE_SUPPORTED } from '../../../components/ViewPresignedUrl';
+import { Toast } from 'primereact/toast';
 
 // Creating Table
 type AnalysisResultGDSTableProps = {
@@ -18,9 +22,67 @@ type AnalysisResultGDSTableProps = {
 };
 
 const filenameTemplate = (rowData: Record<string, any>) => {
+  const toast = useRef(null);
+  const [blockedPanel, setBlockedPanel] = useState<boolean>(false);
   let filename;
   if (rowData.path) filename = rowData.path.split('/').pop();
   if (rowData.key) filename = rowData.key.split('/').pop();
+
+  const handleOpenInBrowser = async (rowData: Record<string, any>) => {
+    setBlockedPanel(true);
+    if (rowData.path) {
+      try {
+        const signed_url = await getGDSPreSignedUrl(rowData.id, {
+          headers: { 'Content-Disposition': 'inline' },
+        });
+        window.open(signed_url, '_blank');
+      } catch (e) {
+        setBlockedPanel(false);
+        const msg = (e as Error).message;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        toast.current.show({
+          severity: 'error',
+          summary: 'Invalid URL',
+          detail: msg,
+        });
+        // throw e;
+      }
+    }
+    if (rowData.key) {
+      try {
+        const signed_url = await getS3PreSignedUrl(rowData.id);
+        window.open(signed_url, '_blank');
+      } catch (e) {
+        setBlockedPanel(false);
+        const msg = (e as Error).message;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        toast.current.show({
+          severity: 'error',
+          summary: 'Invalid URL',
+          detail: msg,
+        });
+        // throw e;
+      }
+    }
+    setBlockedPanel(false);
+  };
+
+  if (filename.endsWith('html') || filename.endsWith('png')) {
+    return (
+      <>
+        <Toast ref={toast} position='bottom-left' />
+        <BlockUI
+          blocked={blockedPanel}
+          template={<i className='pi pi-spin pi-spinner' style={{ fontSize: '2em' }} />}>
+          <Button className='p-button-link' onClick={() => handleOpenInBrowser(rowData)}>
+            {filename}
+          </Button>
+        </BlockUI>
+      </>
+    );
+  }
 
   return <div className='white-space-nowrap'>{filename}</div>;
 };
@@ -119,6 +181,62 @@ const previewGDSTemplate = (rowData: GDSRow) => {
   );
 };
 
+const downloadGDSTemplate = (rowData: GDSRow) => {
+  /**
+   * For now download option is the special case that only offer within Analysis Results summary panel.
+   * Whether we extend this to S3 or elsewhere is T.B.D  ~victor
+   */
+  const toast = useRef(null);
+  const [blockedPanel, setBlockedPanel] = useState<boolean>(false);
+  const filename = rowData.path.split('/').pop() ?? rowData.path;
+  // const fileSizeInBytes = rowData.size_in_bytes;
+  const filetype = filename.split('.').pop();
+  const allowFileTypes = [...DATA_TYPE_SUPPORTED];
+  const allowDownload = allowFileTypes.includes(filetype as string);
+
+  const handleDownload = async (rowData: GDSRow) => {
+    setBlockedPanel(true);
+    if (rowData.path) {
+      try {
+        const signed_url = await getGDSPreSignedUrl(rowData.id, {
+          headers: { 'Content-Disposition': 'attachment' },
+        });
+        window.open(signed_url, '_blank');
+      } catch (e) {
+        setBlockedPanel(false);
+        const msg = (e as Error).message;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        toast.current.show({
+          severity: 'error',
+          summary: 'Invalid URL',
+          detail: msg,
+        });
+        // throw e;
+      }
+    }
+    setBlockedPanel(false);
+  };
+
+  return (
+    <>
+      {allowDownload && (
+        <>
+          <Toast ref={toast} position='bottom-left' />
+          <BlockUI
+            blocked={blockedPanel}
+            template={<i className='pi pi-spin pi-spinner' style={{ fontSize: '2em' }} />}>
+            <div
+              className='cursor-pointer pi pi-download'
+              onClick={() => handleDownload(rowData)}
+            />
+          </BlockUI>
+        </>
+      )}
+    </>
+  );
+};
+
 function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
   const { title, data } = prop;
   return (
@@ -130,6 +248,7 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
         tableClassName={data.length == 0 ? 'hidden' : ''}>
         {/* Column field determined by the prefix of body Template */}
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
+        <Column body={downloadGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={previewGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={actionGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={fileSizeGDSTemplate} headerStyle={{ display: 'none' }} />
@@ -166,7 +285,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
   const { isFetching, isLoading, data } = usePortalSubjectDataAPI(subjectId);
 
   if (isLoading || isFetching) {
-    return <CircularLoaderWithText />;
+    return <CircularLoaderWithText text='Fetching data, please wait...' />;
   }
 
   let groupedData;

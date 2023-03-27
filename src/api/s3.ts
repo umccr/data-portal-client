@@ -101,7 +101,7 @@ export function usePortalS3StatusAPI(s3Id?: string | number) {
 export async function getS3PreSignedUrl(id: number) {
   const { error, signed_url } = await API.get('portal', `/s3/${id}/presign`, {});
   if (error) {
-    throw Error('Unable to fetch get presigned url.');
+    throw Error('Unable to get PreSigned URL');
   }
   return signed_url;
 }
