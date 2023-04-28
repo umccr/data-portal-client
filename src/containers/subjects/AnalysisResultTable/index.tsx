@@ -12,7 +12,10 @@ import { getS3PreSignedUrl, S3Row } from '../../../api/s3';
 import { GDSRow, getGDSPreSignedUrl } from '../../../api/gds';
 import { Button } from 'primereact/button';
 import { BlockUI } from 'primereact/blockui';
-import { DATA_TYPE_SUPPORTED } from '../../../components/ViewPresignedUrl';
+import {
+  DATA_TYPE_SUPPORTED,
+  isRequestInlineContentDisposition,
+} from '../../../components/ViewPresignedUrl';
 import { Toast } from 'primereact/toast';
 import mime from 'mime';
 
@@ -28,6 +31,8 @@ const filenameTemplate = (rowData: Record<string, any>) => {
   let filename;
   if (rowData.path) filename = rowData.path.split('/').pop();
   if (rowData.key) filename = rowData.key.split('/').pop();
+  const split_path = filename.split('.');
+  const filetype = split_path[split_path.length - 1].toLowerCase();
 
   const handleOpenInBrowser = async (rowData: Record<string, any>) => {
     setBlockedPanel(true);
@@ -35,7 +40,9 @@ const filenameTemplate = (rowData: Record<string, any>) => {
       try {
         const signed_url = await getGDSPreSignedUrl(rowData.id, {
           headers: {
-            'Content-Disposition': 'inline',
+            'Content-Disposition': isRequestInlineContentDisposition(filetype)
+              ? 'inline'
+              : 'attachment',
             'Content-Type': mime.getType(rowData.path),
           },
         });
