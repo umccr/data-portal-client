@@ -233,3 +233,17 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
 
   return <div>Cannot display file</div>;
 }
+
+/**
+ * HELPER FUNCTION
+ */
+
+/**
+ * This would be useful to determine whether the requested URL need to be `inline` or `attachment` content disposition.
+ * HTML and Image by default will need to be inline as the behaviour desired is to open in browser/iframe without download.
+ * @param filetype
+ * @returns
+ */
+export function isRequestInlineContentDisposition(filetype: string): boolean {
+  return [...HTML_FILETYPE_LIST, ...IMAGE_FILETYPE_LIST].includes(filetype);
+}

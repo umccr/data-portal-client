@@ -5,9 +5,11 @@ import ViewPresignedUrl, {
   DATA_TYPE_SUPPORTED,
   HTML_FILETYPE_LIST,
   IMAGE_FILETYPE_LIST,
+  isRequestInlineContentDisposition,
 } from '../ViewPresignedUrl';
 import { usePortalGDSPresignAPI } from '../../api/gds';
 import { usePortalS3PresignAPI } from '../../api/s3';
+import mime from 'mime';
 
 type FilePreviewButtonProps = {
   filename: string;
@@ -77,11 +79,18 @@ type FilePreviewDialogProps = FilePreviewButtonProps & {
 };
 function FilePreviewDialog(props: FilePreviewDialogProps) {
   const { filename, id, type, handleDialogClose } = props;
+  const split_path = filename.split('.');
+  const filetype = split_path[split_path.length - 1].toLowerCase();
 
   let portalPresignedUrlRes;
   if (type == 'gds') {
     portalPresignedUrlRes = usePortalGDSPresignAPI(id, {
-      headers: { 'Content-Disposition': 'inline' },
+      headers: {
+        'Content-Disposition': isRequestInlineContentDisposition(filetype)
+          ? 'inline'
+          : 'attachment',
+        'Content-Type': mime.getType(filename),
+      },
     });
   } else {
     portalPresignedUrlRes = usePortalS3PresignAPI(id);
