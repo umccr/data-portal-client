@@ -8,6 +8,7 @@ import ViewPresignedUrl, {
 } from '../ViewPresignedUrl';
 import { usePortalGDSPresignAPI } from '../../api/gds';
 import { usePortalS3PresignAPI } from '../../api/s3';
+import mime from 'mime';
 
 type FilePreviewButtonProps = {
   filename: string;
@@ -81,7 +82,10 @@ function FilePreviewDialog(props: FilePreviewDialogProps) {
   let portalPresignedUrlRes;
   if (type == 'gds') {
     portalPresignedUrlRes = usePortalGDSPresignAPI(id, {
-      headers: { 'Content-Disposition': 'inline' },
+      headers: {
+        'Content-Disposition': 'inline',
+        'Content-Type': mime.getType(filename),
+      },
     });
   } else {
     portalPresignedUrlRes = usePortalS3PresignAPI(id);

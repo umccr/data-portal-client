@@ -14,6 +14,7 @@ import { Button } from 'primereact/button';
 import { BlockUI } from 'primereact/blockui';
 import { DATA_TYPE_SUPPORTED } from '../../../components/ViewPresignedUrl';
 import { Toast } from 'primereact/toast';
+import mime from 'mime';
 
 // Creating Table
 type AnalysisResultGDSTableProps = {
@@ -33,7 +34,10 @@ const filenameTemplate = (rowData: Record<string, any>) => {
     if (rowData.path) {
       try {
         const signed_url = await getGDSPreSignedUrl(rowData.id, {
-          headers: { 'Content-Disposition': 'inline' },
+          headers: {
+            'Content-Disposition': 'inline',
+            'Content-Type': mime.getType(rowData.path),
+          },
         });
         window.open(signed_url, '_blank');
       } catch (e) {
@@ -191,16 +195,14 @@ const downloadGDSTemplate = (rowData: GDSRow) => {
   const filename = rowData.path.split('/').pop() ?? rowData.path;
   // const fileSizeInBytes = rowData.size_in_bytes;
   const filetype = filename.split('.').pop();
-  const allowFileTypes = [...DATA_TYPE_SUPPORTED];
+  const allowFileTypes = ['gz', 'maf', ...DATA_TYPE_SUPPORTED];
   const allowDownload = allowFileTypes.includes(filetype as string);
 
   const handleDownload = async (rowData: GDSRow) => {
     setBlockedPanel(true);
     if (rowData.path) {
       try {
-        const signed_url = await getGDSPreSignedUrl(rowData.id, {
-          headers: { 'Content-Disposition': 'attachment' },
-        });
+        const signed_url = await getGDSPreSignedUrl(rowData.id);
         window.open(signed_url, '_blank');
       } catch (e) {
         setBlockedPanel(false);

@@ -33,7 +33,7 @@ export default function GeneratePresignedDialog(props: GeneratePresignedDialogPr
       if (type == 's3') {
         return await getS3PreSignedUrl(id);
       } else {
-        return await getGDSPreSignedUrl(id, { headers: { 'Content-Disposition': 'inline' } });
+        return await getGDSPreSignedUrl(id);
       }
     },
   });
