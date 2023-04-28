@@ -30,6 +30,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import mime from 'mime';
+import { isRequestInlineContentDisposition } from './PreviewActionButton';
 
 const styles = (theme) => ({
   close: {
@@ -71,9 +72,15 @@ class GDSActionMenuButton extends React.Component {
 
   handleOpenInBrowser = async (id, path) => {
     this.setState({ openBackdrop: true });
+
+    const split_path = path.split('.');
+    const filetype = split_path[split_path.length - 1].toLowerCase();
+
     const { error, signed_url } = await this.getPreSignedUrl(id, {
       headers: {
-        'Content-Disposition': 'inline',
+        'Content-Disposition': isRequestInlineContentDisposition(filetype)
+          ? 'inline'
+          : 'attachment',
         'Content-Type': mime.getType(path),
       },
     });
