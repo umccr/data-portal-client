@@ -85,7 +85,7 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
    * TABLE COLUMN PROPERTIES
    */
   const textBodyTemplate = (text: string | number | null): React.ReactNode => {
-    return <div>{text}</div>;
+    return <>{text}</>;
   };
   const column_to_display: string[] = [
     'illumina_id',

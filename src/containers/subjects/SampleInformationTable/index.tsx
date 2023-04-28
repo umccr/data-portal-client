@@ -66,13 +66,13 @@ function SampleInformationTable(props: Props) {
 
   // All Information button to show dialog
   columnList.push({
-    alignHeader: 'center' as const,
+    alignHeader: 'left' as const,
     header: (
-      <p className='uppercase text-center font-bold text-color white-space-nowrap'>
+      <p className='uppercase text-left font-bold text-color white-space-nowrap'>
         {showDisplayText('info')}
       </p>
     ),
-    className: 'text-center justify-content-center',
+    className: 'text-left white-space-nowrap',
     body: (rowData: ObjectStringValType) => {
       return (
         <div>
@@ -90,15 +90,15 @@ function SampleInformationTable(props: Props) {
   for (const column of COLUMN_TO_DISPLAY) {
     columnList.push({
       field: column,
-      alignHeader: 'center' as const,
+      alignHeader: 'left' as const,
       header: (
-        <p className='uppercase text-center font-bold text-color white-space-nowrap'>
+        <p className='uppercase text-left font-bold text-color white-space-nowrap'>
           {showDisplayText(column)}
         </p>
       ),
-      className: 'text-center justify-content-center',
+      className: 'text-left white-space-nowrap',
       body: (rowData: ObjectStringValType) => {
-        return <div className='text-center text-color'>{rowData[column]}</div>;
+        return <>{rowData[column]}</>;
       },
     });
   }

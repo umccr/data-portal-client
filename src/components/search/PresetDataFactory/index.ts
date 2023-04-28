@@ -152,6 +152,7 @@ export class PresetDataFactory {
       },
       { key: 12, label: 'tso vcf', keyword: 'tso ctdna .vcf.gz$', style: this.chipStyle },
       { key: 13, label: 'tso tsv', keyword: 'tso ctdna .tsv$', style: this.chipStyle },
+      { key: 14, label: 'tso json', keyword: 'tso ctdna .json.gz$', style: this.chipStyle },
     ];
   }
 }
