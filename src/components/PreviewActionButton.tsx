@@ -21,12 +21,23 @@ import Snackbar from '@material-ui/core/Snackbar';
 
 // Other Dependencies
 import JSONPretty from 'react-json-pretty';
+import mime from 'mime';
 
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 const HTML_FILETYPE_LIST: string[] = ['html'];
-const DELIMITER_SERPERATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
+const DELIMITER_SEPARATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
 const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
 const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
+
+/**
+ * This would be useful to determine whether the requested URL need to be `inline` or `attachment` content disposition.
+ * HTML and Image by default will need to be inline as the behaviour desired is to open in browser/iframe without download.
+ * @param filetype
+ * @returns
+ */
+export function isRequestInlineContentDisposition(filetype: string): boolean {
+  return [...HTML_FILETYPE_LIST, ...IMAGE_FILETYPE_LIST].includes(filetype);
+}
 
 /**
  * Preview Action Button
@@ -133,7 +144,7 @@ function checkIsDataTypeSupoorted(name: string): boolean {
   const dataTypeSupported = [
     ...IMAGE_FILETYPE_LIST,
     ...HTML_FILETYPE_LIST,
-    ...DELIMITER_SERPERATED_VALUE_FILETYPE_LIST,
+    ...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST,
     ...PLAIN_FILETYPE_LIST,
     ...OTHER_FILETYPE_LIST,
   ];
@@ -181,7 +192,7 @@ function DialogData({ type, data }: DialogDataProps) {
 
     const fetchPresignedUrl = async () => {
       try {
-        const presignedUrlString = await getPreSignedUrl(type, data.id);
+        const presignedUrlString = await getPreSignedUrl(type, data.id, fileName);
 
         // Skip streaming data if an image and HTML file
         // NOTE: <img> and <html> tag will src to the presignedUrl data
@@ -290,9 +301,15 @@ function DialogData({ type, data }: DialogDataProps) {
 }
 
 // Helper function
-async function getPreSignedUrl(type: string, id: string) {
+async function getPreSignedUrl(type: string, id: string, fileName: string) {
+  const split_path = fileName.split('.');
+  const filetype = split_path[split_path.length - 1].toLowerCase();
+
   const { error, signed_url } = await API.get('files', `/${type}/${id}/presign`, {
-    headers: { 'Content-Disposition': 'inline' },
+    headers: {
+      'Content-Disposition': isRequestInlineContentDisposition(filetype) ? 'inline' : 'attachment',
+      'Content-Type': mime.getType(fileName),
+    },
   });
 
   if (error) {

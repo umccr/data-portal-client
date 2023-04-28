@@ -63,6 +63,7 @@ import PreviewActionButton from '../components/PreviewActionButton';
 import ImageSearchIcon from '@material-ui/icons/ImageSearch';
 import LaunchRNAsumReport from '../components/LaunchRNAsumReport';
 import AssessmentIcon from '@material-ui/icons/Assessment';
+import mime from 'mime';
 
 const styles = (theme) => ({
   close: {
@@ -1057,15 +1058,18 @@ class Subject extends Component {
 
   // ---
 
-  getGDSPreSignedUrl = async (id) => {
-    return await API.get('files', `/gds/${id}/presign`, {
-      headers: { 'Content-Disposition': 'inline' },
-    });
+  getGDSPreSignedUrl = async (id, apiInit) => {
+    return await API.get('files', `/gds/${id}/presign`, apiInit);
   };
 
-  handleGDSOpenInBrowser = async (id) => {
+  handleGDSOpenInBrowser = async (id, path) => {
     this.setState({ openBackdrop: true });
-    const { error, signed_url } = await this.getGDSPreSignedUrl(id);
+    const { error, signed_url } = await this.getGDSPreSignedUrl(id, {
+      headers: {
+        'Content-Disposition': 'inline',
+        'Content-Type': mime.getType(path),
+      },
+    });
     if (error) {
       this.setState({ errorMessage: error });
     } else {
@@ -1084,7 +1088,7 @@ class Subject extends Component {
         <Link
           className={this.props.classes.linkCursorPointer}
           color={clickedLinks.includes(id) ? 'secondary' : 'primary'}
-          onClick={() => this.handleGDSOpenInBrowser(id)}>
+          onClick={() => this.handleGDSOpenInBrowser(id, path)}>
           {baseName}
         </Link>
       );
@@ -1217,6 +1221,7 @@ class Subject extends Component {
       },
       { key: 12, label: 'tso vcf', keyword: 'tso ctdna .vcf.gz$', color: 'default' },
       { key: 13, label: 'tso tsv', keyword: 'tso ctdna .tsv$', color: 'default' },
+      { key: 14, label: 'tso json', keyword: 'tso ctdna .json.gz$', color: 'default' },
     ];
 
     return (
