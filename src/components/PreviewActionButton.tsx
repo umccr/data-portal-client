@@ -21,6 +21,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 
 // Other Dependencies
 import JSONPretty from 'react-json-pretty';
+import mime from 'mime';
 
 const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 const HTML_FILETYPE_LIST: string[] = ['html'];
@@ -181,7 +182,7 @@ function DialogData({ type, data }: DialogDataProps) {
 
     const fetchPresignedUrl = async () => {
       try {
-        const presignedUrlString = await getPreSignedUrl(type, data.id);
+        const presignedUrlString = await getPreSignedUrl(type, data.id, fileName);
 
         // Skip streaming data if an image and HTML file
         // NOTE: <img> and <html> tag will src to the presignedUrl data
@@ -290,9 +291,12 @@ function DialogData({ type, data }: DialogDataProps) {
 }
 
 // Helper function
-async function getPreSignedUrl(type: string, id: string) {
+async function getPreSignedUrl(type: string, id: string, fileName: string) {
   const { error, signed_url } = await API.get('files', `/${type}/${id}/presign`, {
-    headers: { 'Content-Disposition': 'inline' },
+    headers: {
+      'Content-Disposition': 'inline',
+      'Content-Type': mime.getType(fileName),
+    },
   });
 
   if (error) {

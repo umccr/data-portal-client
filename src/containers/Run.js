@@ -53,6 +53,7 @@ import { Panel } from 'primereact/panel';
 import TableContainer from '@material-ui/core/TableContainer';
 import { TabPanel, TabView } from 'primereact/tabview';
 import PreviewActionButton from '../components/PreviewActionButton';
+import mime from 'mime';
 
 const styles = (theme) => ({
   close: {
@@ -553,18 +554,21 @@ class Run extends Component {
     return key;
   };
 
-  getGDSPreSignedUrl = async (id) => {
-    return await API.get('files', `/gds/${id}/presign`, {
-      headers: { 'Content-Disposition': 'inline' },
-    });
+  getGDSPreSignedUrl = async (id, apiInit) => {
+    return await API.get('files', `/gds/${id}/presign`, apiInit);
   };
 
-  handleGDSOpenInBrowser = async (id) => {
+  handleGDSOpenInBrowser = async (id, path) => {
     const { clickedLinks } = this.state;
     clickedLinks.push(id);
     this.setState({ clickedLinks: clickedLinks });
     this.setState({ openBackdrop: true });
-    const { error, signed_url } = await this.getGDSPreSignedUrl(id);
+    const { error, signed_url } = await this.getGDSPreSignedUrl(id, {
+      headers: {
+        'Content-Disposition': 'inline',
+        'Content-Type': mime.getType(path),
+      },
+    });
     if (error) {
       this.props.runResult.errorMessage = error;
     } else {
@@ -582,7 +586,7 @@ class Run extends Component {
         <Link
           className={this.props.classes.linkCursorPointer}
           color={clickedLinks.includes(id) ? 'secondary' : 'primary'}
-          onClick={() => this.handleGDSOpenInBrowser(id)}>
+          onClick={() => this.handleGDSOpenInBrowser(id, path)}>
           {path}
         </Link>
       );

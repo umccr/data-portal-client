@@ -29,6 +29,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import mime from 'mime';
 
 const styles = (theme) => ({
   close: {
@@ -68,9 +69,14 @@ class GDSActionMenuButton extends React.Component {
     });
   };
 
-  handleOpenInBrowser = async (id) => {
+  handleOpenInBrowser = async (id, path) => {
     this.setState({ openBackdrop: true });
-    const { error, signed_url } = await this.getPreSignedUrl(id);
+    const { error, signed_url } = await this.getPreSignedUrl(id, {
+      headers: {
+        'Content-Disposition': 'inline',
+        'Content-Type': mime.getType(path),
+      },
+    });
     if (error) {
       this.setState({ errorMessage: error });
     } else {
@@ -155,10 +161,8 @@ class GDSActionMenuButton extends React.Component {
       }, {});
   };
 
-  getPreSignedUrl = async (id) => {
-    return await API.get('files', `/gds/${id}/presign`, {
-      headers: { 'Content-Disposition': 'inline' },
-    });
+  getPreSignedUrl = async (id, apiInit) => {
+    return await API.get('files', `/gds/${id}/presign`, apiInit);
   };
 
   getGDSPath = (volume_name, path) => {
@@ -214,7 +218,7 @@ class GDSActionMenuButton extends React.Component {
             <List
               className={this.props.classes.root}
               component={'div'}
-              onClick={() => this.handleOpenInBrowser(id)}>
+              onClick={() => this.handleOpenInBrowser(id, path)}>
               <ListItemIcon>
                 <OpenInBrowserIcon />
               </ListItemIcon>
