@@ -8,6 +8,8 @@ import { useToastContext } from '../../../providers/ToastProvider';
 import RestoreArchiveObjectDialog from '../../../components/RestoreArchiveObjectDialog';
 import GeneratePresignedDialog from '../../../components/GeneratePresignedDialog';
 import OpenIGVDesktopDialog from '../../../components/OpenInIgvDialog';
+import { IFRAME_FILETYPE_LIST, IMAGE_FILETYPE_LIST } from '../../../components/ViewPresignedUrl';
+import { OpenInNewTab } from '../../../components/OpenInNewTab';
 
 export enum DataAction {
   NONE,
@@ -15,6 +17,7 @@ export enum DataAction {
   GENERATE_PRESIGN,
   RESTORE_OBJECT,
   OPEN_IGV_DESKTOP,
+  OPEN_IN_NEW_TAB,
 }
 
 type DataActionButtonProps = {
@@ -87,6 +90,17 @@ function DataActionButton(props: DataActionButtonProps) {
     });
   }
 
+  const filetype = pathOrKey.split('.').pop() ?? '';
+  if (IFRAME_FILETYPE_LIST.includes(filetype) || IMAGE_FILETYPE_LIST.includes(filetype)) {
+    items.push({
+      label: 'Open In New Tab',
+      icon: 'pi pi-external-link',
+      command: () => {
+        setActionSelected(DataAction.OPEN_IN_NEW_TAB);
+      },
+    });
+  }
+
   return (
     <div>
       <Menu style={{ minWidth: '225px' }} model={items} popup ref={menu} id='popup_menu' />
@@ -101,6 +115,8 @@ function DataActionButton(props: DataActionButtonProps) {
         />
       ) : actionSelected == DataAction.RESTORE_OBJECT ? (
         <RestoreArchiveObjectDialog {...props} handleClose={handleCloseActionSelected} />
+      ) : actionSelected == DataAction.OPEN_IN_NEW_TAB ? (
+        <OpenInNewTab {...props} handleClose={handleCloseActionSelected} />
       ) : (
         <></>
       )}
