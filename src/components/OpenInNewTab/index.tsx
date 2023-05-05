@@ -1,40 +1,40 @@
 import React from 'react';
 import { Dialog } from 'primereact/dialog';
-import { useQuery } from 'react-query';
 
-import { getS3PreSignedUrl } from '../../api/s3';
-import { getGDSPreSignedUrl } from '../../api/gds';
-import { useToastContext } from '../../providers/ToastProvider';
+import { usePortalS3PresignAPI } from '../../api/s3';
+import { usePortalGDSPresignAPI } from '../../api/gds';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
+import { isRequestInlineContentDisposition } from '../ViewPresignedUrl';
+import mime from 'mime';
 
-type Props = { id: number; type: 's3' | 'gds'; handleClose: () => void };
+type Props = {
+  id: number;
+  type: 's3' | 'gds';
+  pathOrKey: string;
+  filetype: string;
+  handleClose: () => void;
+};
 export function OpenInNewTab(props: Props) {
-  const { toastShow } = useToastContext();
-  const { id, type, handleClose } = props;
+  const { id, type, pathOrKey, filetype, handleClose } = props;
+  const filename = pathOrKey.split('/').pop() ?? '';
 
-  const { error } = useQuery({
-    queryKey: ['fetchDataPresignedUrl', id, type],
-    keepPreviousData: false,
-    refetchOnMount: true,
-    queryFn: async () => {
-      if (type == 's3') {
-        return await getS3PreSignedUrl(id);
-      } else {
-        return await getGDSPreSignedUrl(id);
-      }
-    },
-    onSuccess: (url: string) => {
-      window.open(url, '_blank');
-      handleClose();
-    },
-  });
-
-  if (error) {
-    toastShow({
-      severity: 'error',
-      summary: 'Error restoring archived objects.',
-      life: 3000,
+  let portalPresignedUrlRes;
+  if (type == 'gds') {
+    portalPresignedUrlRes = usePortalGDSPresignAPI(id, {
+      headers: {
+        'Content-Disposition': isRequestInlineContentDisposition(filetype)
+          ? 'inline'
+          : 'attachment',
+        'Content-Type': mime.getType(filename),
+      },
     });
+  } else {
+    portalPresignedUrlRes = usePortalS3PresignAPI(id);
+  }
+
+  if (portalPresignedUrlRes?.data?.signed_url) {
+    window.open(portalPresignedUrlRes.data.signed_url, '_blank');
+    handleClose();
   }
 
   return (

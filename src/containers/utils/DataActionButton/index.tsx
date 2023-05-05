@@ -116,7 +116,7 @@ function DataActionButton(props: DataActionButtonProps) {
       ) : actionSelected == DataAction.RESTORE_OBJECT ? (
         <RestoreArchiveObjectDialog {...props} handleClose={handleCloseActionSelected} />
       ) : actionSelected == DataAction.OPEN_IN_NEW_TAB ? (
-        <OpenInNewTab {...props} handleClose={handleCloseActionSelected} />
+        <OpenInNewTab {...props} filetype={filetype} handleClose={handleCloseActionSelected} />
       ) : (
         <></>
       )}
