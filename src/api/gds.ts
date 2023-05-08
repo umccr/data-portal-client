@@ -63,6 +63,21 @@ export function usePortalGDSPresignAPI(gdsId?: string | number, apiConfig?: Reco
   );
 }
 
+/**
+ * Generate a brand new presigned url for the particular object Id.
+ *
+ * By default, the API it will have 'Attachment' Content-Disposition. For 'inline' set the 'Content-Disposition' and 'Content-Type'.
+ * Example on specifying inline in the apiConfig as follows. 
+    {
+      "headers": {
+        "Content-Disposition": "inline",
+        "Content-Type": "text/html"
+      }
+    }
+ * @param id
+ * @param apiConfig
+ * @returns
+ */
 export async function getGDSPreSignedUrl(id: number, apiConfig?: Record<string, any>) {
   const { error, signed_url } = await API.get('portal', `/gds/${id}/presign`, { ...apiConfig });
   if (error) {
