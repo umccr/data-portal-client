@@ -38,9 +38,14 @@ git push origin main
 ### TL;DR
 ```
 node -v
-v16.15.0
+v18.16.0
 
 npm i -g yarn
+
+(NOTE: yarn should auto resolve to local version from `.yarn` that configure in `package.json` > `packageManager`)
+yarn -v
+3.5.1
+
 yarn install
 
 aws sso login --profile dev
