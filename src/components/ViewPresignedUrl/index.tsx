@@ -11,14 +11,14 @@ import { Column } from 'primereact/column';
 import './index.css';
 
 export const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
-export const HTML_FILETYPE_LIST: string[] = ['html'];
+export const IFRAME_FILETYPE_LIST: string[] = ['html', 'pdf'];
 export const DELIMITER_SEPARATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
 export const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
 export const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
 
 export const DATA_TYPE_SUPPORTED = [
   ...IMAGE_FILETYPE_LIST,
-  ...HTML_FILETYPE_LIST,
+  ...IFRAME_FILETYPE_LIST,
   ...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST,
   ...PLAIN_FILETYPE_LIST,
   ...OTHER_FILETYPE_LIST,
@@ -67,7 +67,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
   }
 
   // Return HTML (via iframe) display
-  if (HTML_FILETYPE_LIST.includes(filetype)) {
+  if (IFRAME_FILETYPE_LIST.includes(filetype)) {
     return (
       <div className='w-full h-full'>
         <iframe className='w-full h-full bg-white' src={presingedUrl} />
@@ -214,5 +214,5 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
  * @returns
  */
 export function isRequestInlineContentDisposition(filetype: string): boolean {
-  return [...HTML_FILETYPE_LIST, ...IMAGE_FILETYPE_LIST].includes(filetype);
+  return [...IFRAME_FILETYPE_LIST, ...IMAGE_FILETYPE_LIST].includes(filetype);
 }

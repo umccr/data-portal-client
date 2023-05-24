@@ -38,7 +38,7 @@ export type PresignApiData = {
 export function usePortalS3PresignAPI(s3Id?: string | number) {
   return useQuery(
     ['portal-s3-presign', s3Id],
-    async () => await API.get('portal', `/s3/${s3Id}/presign`, {}),
+    async (): Promise<PresignApiData> => await API.get('portal', `/s3/${s3Id}/presign`, {}),
     {
       staleTime: 60 * 60 * 1000, // 1hour,
       enabled: !!s3Id,

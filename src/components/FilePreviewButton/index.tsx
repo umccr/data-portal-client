@@ -3,7 +3,7 @@ import { Dialog } from 'primereact/dialog';
 import CircularLoaderWithText from '../CircularLoaderWithText';
 import ViewPresignedUrl, {
   DATA_TYPE_SUPPORTED,
-  HTML_FILETYPE_LIST,
+  IFRAME_FILETYPE_LIST,
   IMAGE_FILETYPE_LIST,
   isRequestInlineContentDisposition,
 } from '../ViewPresignedUrl';
@@ -33,7 +33,7 @@ export default function FilePreviewButton(props: FilePreviewButtonProps) {
   const isCorsOriginBlock =
     type == 's3' &&
     !IMAGE_FILETYPE_LIST.includes(filetype) &&
-    !HTML_FILETYPE_LIST.includes(filetype);
+    !IFRAME_FILETYPE_LIST.includes(filetype);
 
   const isFileSizeAcceptable = fileSizeInBytes > 60000000;
   const isDataTypeSupported = !DATA_TYPE_SUPPORTED.includes(filetype);
