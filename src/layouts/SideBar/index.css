@@ -18,7 +18,7 @@
 .layout-main-container {
   display: flex;
   flex-direction: column;
-  height: calc( 100vh - 3rem ); /* 3rem is MenuBar height*/ 
+  height: calc(100vh - 3rem); /* 3rem is MenuBar height*/
   /* justify-content: space-between; */
   transition: margin-left 0.2s;
 }
@@ -34,5 +34,6 @@
   background-color: var(--surface-overlay);
   /*padding: 1rem 1.5rem 5rem 1.5rem;*/
   padding-bottom: 5rem;
-  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.02), 0px 0px 2px rgba(0, 0, 0, 0.05), 0px 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.02), 0px 0px 2px rgba(0, 0, 0, 0.05),
+    0px 1px 4px rgba(0, 0, 0, 0.08);
 }
