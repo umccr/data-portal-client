@@ -5,7 +5,6 @@ import { InputText } from 'primereact/inputtext';
 import { RequiredGDSRowType, RequiredS3RowType } from './utils';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { GDSApiData, usePortalGDSAPI } from '../../../api/gds';
-import { S3ApiData, usePortalS3API } from '../../../api/s3';
 import { isIgvReadableFile } from './LoadSubjectDataButton';
 
 type Props = {
