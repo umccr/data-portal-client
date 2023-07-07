@@ -102,9 +102,7 @@ function LoadCustomTrackDataButton({
         footer={renderFooter()}
         onHide={() => setIsAddCustomTrackDialogOpen((prev) => !prev)}>
         <>
-          <div className='mb-4'>
-            {`To add a custom track, please enter S3 or GDS URI`}
-          </div>
+          <div className='mb-4'>{`To add a custom track, please enter S3 or GDS URI`}</div>
           <div className='my-3'>
             <InputText
               className='w-full block focus:border-primary-800 mb-3'
