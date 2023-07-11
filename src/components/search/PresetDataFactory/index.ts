@@ -68,9 +68,15 @@ export class PresetDataFactory {
         keyword: 'wts multiqc/ multiqc_report.html$',
         style: this.chipStyle,
       },
-      { key: 11, label: 'rnasum report', keyword: 'RNAseq_report.html$', style: this.chipStyle },
       {
-        key: 12,
+        key: 11,
+        label: 'wts fusions',
+        keyword: 'wts fusions .pdf$',
+        style: this.chipStyle,
+      },
+      { key: 12, label: 'rnasum report', keyword: 'RNAseq_report.html$', style: this.chipStyle },
+      {
+        key: 13,
         label: 'gpl report',
         keyword: 'gridss_purple_linx linx.html$',
         style: this.chipStyle,
@@ -128,31 +134,37 @@ export class PresetDataFactory {
       },
       {
         key: 8,
+        label: 'wts fusions',
+        keyword: 'wts fusions .pdf$',
+        style: this.chipStyle,
+      },
+      {
+        key: 9,
         label: 't/n bam',
         keyword: 'tumor normal .bam$',
         style: this.chipStyle,
       },
       {
-        key: 9,
+        key: 10,
         label: 't/n vcf',
         keyword: 'tumor normal .vcf.gz$',
         style: this.chipStyle,
       },
       {
-        key: 10,
+        key: 11,
         label: 't/n report',
         keyword: 'tumor normal multiqc .html$',
         style: this.chipStyle,
       },
       {
-        key: 11,
+        key: 12,
         label: 'tso bam',
         keyword: 'tso ctdna .bam$',
         style: this.chipStyle,
       },
-      { key: 12, label: 'tso vcf', keyword: 'tso ctdna .vcf.gz$', style: this.chipStyle },
-      { key: 13, label: 'tso tsv', keyword: 'tso ctdna .tsv$', style: this.chipStyle },
-      { key: 14, label: 'tso json', keyword: 'tso ctdna .json.gz$', style: this.chipStyle },
+      { key: 13, label: 'tso vcf', keyword: 'tso ctdna .vcf.gz$', style: this.chipStyle },
+      { key: 14, label: 'tso tsv', keyword: 'tso ctdna .tsv$', style: this.chipStyle },
+      { key: 15, label: 'tso json', keyword: 'tso ctdna .json.gz$', style: this.chipStyle },
     ];
   }
 }
