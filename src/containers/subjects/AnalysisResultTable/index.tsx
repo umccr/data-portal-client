@@ -379,7 +379,9 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
     (r) => r.path.includes('wgs_tumor_normal') && r.path.endsWith('bam')
   );
   const wgsVcfs = results_gds.filter(
-    (r) => r.path.includes('umccrise') && (r.path.endsWith('vcf.gz') || r.path.endsWith('.maf'))
+    (r) =>
+      (r.path.includes('umccrise') || r.path.includes('wgs_tumor_normal')) &&
+      (r.path.endsWith('vcf.gz') || r.path.endsWith('.maf'))
   );
   const wgsCircos = results_gds.filter(
     (r) => r.path.includes('umccrise') && r.path.endsWith('png')
