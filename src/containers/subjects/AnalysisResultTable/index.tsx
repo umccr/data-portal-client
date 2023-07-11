@@ -80,7 +80,7 @@ const filenameTemplate = (rowData: Record<string, any>) => {
     setBlockedPanel(false);
   };
 
-  if (filename.endsWith('html') || filename.endsWith('png')) {
+  if (filename.endsWith('html') || filename.endsWith('png') || filename.endsWith('pdf')) {
     return (
       <>
         <Toast ref={toast} position='bottom-left' />
@@ -317,6 +317,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
         <TabPanel header='WTS'>
           <AnalysisResultGDSTable title='rnasum report' data={groupedData.wtsRnasum} />
           <AnalysisResultGDSTable title='qc report' data={groupedData.wtsMultiqc} />
+          <AnalysisResultGDSTable title='fusions report' data={groupedData.wtsFusionsIca} />
           <AnalysisResultGDSTable title='bam' data={groupedData.wtsBamsIca} />
         </TabPanel>
         <TabPanel header='TSO500'>
@@ -338,6 +339,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
         <TabPanel header='WTS (bcbio)'>
           <AnalysisResultS3Table title='rnasum report' data={groupedData.rnasum} />
           <AnalysisResultS3Table title='qc report' data={groupedData.wtsQc} />
+          <AnalysisResultS3Table title='fusions report' data={groupedData.wtsFusions} />
           <AnalysisResultS3Table title='bam' data={groupedData.wtsBams} />
         </TabPanel>
       </TabView>
@@ -369,6 +371,7 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
   );
   const wtsBams = wts.filter((r) => r.key.endsWith('bam'));
   const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
+  const wtsFusions = wts.filter((r) => r.key.endsWith('fusions.pdf'));
   const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
 
   // gds ICA
@@ -407,6 +410,9 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
   const wtsMultiqc = results_gds.filter(
     (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('multiqc.html')
   );
+  const wtsFusionsIca = results_gds.filter(
+    (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('fusions.pdf')
+  );
   const wtsRnasum = results_gds.filter((r) => r.path.endsWith('RNAseq_report.html'));
 
   const tsoCtdnaBams = results_gds.filter(
@@ -433,6 +439,7 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
     gplReport: gplReport,
     wtsBams: wtsBams,
     wtsQc: wtsQc,
+    wtsFusions: wtsFusions,
     rnasum: rnasum,
     // Gds
     wgsBams: wgsBams,
@@ -446,6 +453,7 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
     wgsGpl: wgsGpl,
     wtsBamsIca: wtsBamsIca,
     wtsMultiqc: wtsMultiqc,
+    wtsFusionsIca: wtsFusionsIca,
     wtsRnasum: wtsRnasum,
     tsoCtdnaBams: tsoCtdnaBams,
     tsoCtdnaVcfs: tsoCtdnaVcfs,
