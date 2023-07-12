@@ -140,31 +140,37 @@ export class PresetDataFactory {
       },
       {
         key: 9,
-        label: 't/n bam',
-        keyword: 'tumor normal .bam$',
-        style: this.chipStyle,
-      },
-      {
-        key: 10,
-        label: 't/n vcf',
-        keyword: 'tumor normal .vcf.gz$',
-        style: this.chipStyle,
-      },
-      {
-        key: 11,
         label: 't/n report',
         keyword: 'tumor normal multiqc .html$',
         style: this.chipStyle,
       },
       {
+        key: 10,
+        label: 't/n bam',
+        keyword: 'tumor normal .bam$',
+        style: this.chipStyle,
+      },
+      {
+        key: 11,
+        label: 't/n vcf',
+        keyword: 'tumor normal .vcf.gz$',
+        style: this.chipStyle,
+      },
+      {
         key: 12,
+        label: 'germline vcf',
+        keyword: '[umccrise|wgs_tumor_normal] dragen_germline .vcf.gz$',
+        style: this.chipStyle,
+      },
+      {
+        key: 13,
         label: 'tso bam',
         keyword: 'tso ctdna .bam$',
         style: this.chipStyle,
       },
-      { key: 13, label: 'tso vcf', keyword: 'tso ctdna .vcf.gz$', style: this.chipStyle },
-      { key: 14, label: 'tso tsv', keyword: 'tso ctdna .tsv$', style: this.chipStyle },
-      { key: 15, label: 'tso json', keyword: 'tso ctdna .json.gz$', style: this.chipStyle },
+      { key: 14, label: 'tso vcf', keyword: 'tso ctdna .vcf.gz$', style: this.chipStyle },
+      { key: 15, label: 'tso tsv', keyword: 'tso ctdna .tsv$', style: this.chipStyle },
+      { key: 16, label: 'tso json', keyword: 'tso ctdna .json.gz$', style: this.chipStyle },
     ];
   }
 }
