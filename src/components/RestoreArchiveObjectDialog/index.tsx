@@ -3,8 +3,7 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-
-import { useQuery } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 
 import { getS3Status, S3StatusData } from '../../api/s3';
 import { useToastContext } from '../../providers/ToastProvider';
@@ -27,34 +26,46 @@ export default function RestoreArchiveObjectDialog(props: RestoreArchiveObjectDi
   const userInformation = useUserContext().user;
   const uri = `s3://${bucketOrVolume}/${pathOrKey}`;
 
-  // Handle restore request
-  const handleRestoreClicked = async (id: number) => {
-    const init = {
-      headers: { 'Content-Type': 'application/json' },
-      body: {
-        email: userInformation.attributes.email,
-        days: 7,
-        tier: 'Bulk',
-      },
-    };
-    const data = await API.post('files', `/s3/${id}/restore`, init);
-    const { error } = data;
-
-    if (error) {
+  const restoreS3Mutate = useMutation({
+    mutationFn: async (id: number) => {
+      const init = {
+        headers: { 'Content-Type': 'application/json' },
+        body: {
+          email: userInformation.attributes.email,
+          days: 7,
+          tier: 'Bulk',
+        },
+      };
+      return await API.post('portal', `/s3/${id}/restore`, init);
+    },
+    mutationKey: [id],
+    onError: () => {
       toastShow({
         severity: 'error',
-        summary: 'Error restoring archived objects.',
-        detail: error,
-        life: 3000,
+        summary: 'Error on triggering the unarchive API',
+        life: 5000,
       });
-    }
+    },
+    onSuccess: (data) => {
+      const { error } = data;
 
-    toastShow({
-      severity: 'success',
-      summary: 'Successfully submitted restore request! Restoration may take 48 hours.',
-      sticky: true,
-    });
-  };
+      if (error) {
+        toastShow({
+          severity: 'error',
+          summary: 'Error restoring archived objects.',
+          detail: error,
+          life: 5000,
+        });
+      } else {
+        toastShow({
+          severity: 'success',
+          summary: 'Successfully submitted restore request! Restoration may take 48 hours.',
+          life: 5000,
+        });
+        handleClose();
+      }
+    },
+  });
 
   const descriptionText: Record<string, string> = {
     archived:
@@ -138,9 +149,8 @@ export default function RestoreArchiveObjectDialog(props: RestoreArchiveObjectDi
                 icon='pi pi-history'
                 className='p-button-raised p-button-danger w-12'
                 style={{ width: '50%' }}
-                onClick={async () => {
-                  await handleRestoreClicked(id);
-                  handleClose();
+                onClick={() => {
+                  restoreS3Mutate.mutate(id);
                 }}
               />
             </div>
