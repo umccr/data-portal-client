@@ -59,6 +59,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
       queryStringParameters: {
         subject_id: subjectId,
         type: 'wgs',
+        rowsPerPage: 1000,
       },
     },
   });
