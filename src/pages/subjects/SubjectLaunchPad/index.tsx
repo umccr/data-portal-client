@@ -4,9 +4,9 @@ import { Card } from 'primereact/card';
 
 import { Button } from 'primereact/button';
 
-import SubjectGPLLaunch from '../../../containers/subjects/SubjectGPLLaunch';
-import SubjectRNASumLaunch from '../../../containers/subjects/SubjectRNASumLaunch';
-import SubjectWGSTNLaunch from '../../../containers/subjects/SubjectWGSTNLaunch';
+import SubjectGPLLaunch from '../../../containers/subjects-launch/SubjectGPLLaunch';
+import SubjectRNASumLaunch from '../../../containers/subjects-launch/SubjectRNASumLaunch';
+import SubjectWGSTNLaunch from '../../../containers/subjects-launch/SubjectWGSTNLaunch';
 
 export enum launchPadOptions {
   NONE = '',
