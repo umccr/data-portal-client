@@ -7,12 +7,14 @@ import { Button } from 'primereact/button';
 import SubjectGPLLaunch from '../../../containers/subjects-launch/SubjectGPLLaunch';
 import SubjectRNASumLaunch from '../../../containers/subjects-launch/SubjectRNASumLaunch';
 import SubjectWGSTNLaunch from '../../../containers/subjects-launch/SubjectWGSTNLaunch';
+import SubjectLaunchStarAlign from '../../../containers/subjects-launch/SubjectWTSStarAlignment';
 
 export enum launchPadOptions {
   NONE = '',
   RNASUM = 'rna-sum',
   GPL = 'gpl',
   WGS_TN = 'wgs-tn',
+  STAR_ALIGN = 'star-align',
 }
 
 export default function SubjectLaunchPad() {
@@ -25,6 +27,7 @@ export default function SubjectLaunchPad() {
     { key: launchPadOptions.GPL, label: 'GRIDSS PURPLE LINX (GPL)' },
     { key: launchPadOptions.RNASUM, label: 'RNAsum' },
     { key: launchPadOptions.WGS_TN, label: 'Whole-Genome Sequencing Tumor-Normal (WGS T/N)' },
+    { key: launchPadOptions.STAR_ALIGN, label: 'WTS Star Alignment' },
   ];
   const location = useLocation();
   const navigate = useNavigate();
@@ -43,6 +46,8 @@ export default function SubjectLaunchPad() {
               <SubjectRNASumLaunch subjectId={subjectId} />
             ) : lastPath == launchPadOptions.WGS_TN ? (
               <SubjectWGSTNLaunch subjectId={subjectId} />
+            ) : lastPath == launchPadOptions.STAR_ALIGN ? (
+              <SubjectLaunchStarAlign subjectId={subjectId} />
             ) : (
               <div className='h-full'>
                 <div className='text-2xl font-medium mb-4'>{subjectId} - Report trigger</div>

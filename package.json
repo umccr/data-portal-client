@@ -22,6 +22,7 @@
     "@aws-amplify/core": "^5.8.0",
     "@aws-sdk/client-lambda": "^3.382.0",
     "igv": "2.15.10",
+    "lodash": "^4.17.21",
     "mime": "^3.0.0",
     "moment": "^2.29.4",
     "primeflex": "^3.3.1",
@@ -35,6 +36,7 @@
     "unsplash-js": "^7.0.18"
   },
   "devDependencies": {
+    "@types/lodash": "^4",
     "@types/mime": "^3.0.1",
     "@types/node": "^20.4.7",
     "@types/react": "^18.2.18",

@@ -19,16 +19,22 @@ export type FastqRow = {
 
 export type FastqApiRes = DjangoRestApiResponse & { results: FastqRow[] };
 type UsePortalFastqAPIProps = {
-  additionalPath: string;
+  additionalPath?: string;
   apiConfig: Record<string, any>;
+  useQueryOption?: Record<string, any>;
 };
-export function usePortalFastqAPI({ additionalPath, apiConfig }: UsePortalFastqAPIProps) {
+export function usePortalFastqAPI({
+  additionalPath = '',
+  apiConfig,
+  useQueryOption,
+}: UsePortalFastqAPIProps) {
   return useQuery(
     ['portal-fastq', additionalPath, apiConfig],
     async (): Promise<FastqApiRes> =>
       await API.get('portal', `/fastq/${additionalPath}`, apiConfig),
     {
       staleTime: Infinity,
+      ...useQueryOption,
     }
   );
 }
