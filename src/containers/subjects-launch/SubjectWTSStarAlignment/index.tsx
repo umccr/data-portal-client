@@ -144,7 +144,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
   return (
     <div>
       <div className='text-2xl font-medium mb-4'>
-        {subjectId} - Whole-Transcriptome Sequencing Star Alignment Launch
+        {subjectId} - Whole Transcriptome Sequencing Star Alignment Launch
       </div>
       <h5 className='mt-0'>Description</h5>
       <div>

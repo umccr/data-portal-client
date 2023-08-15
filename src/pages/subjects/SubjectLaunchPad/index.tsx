@@ -27,7 +27,7 @@ export default function SubjectLaunchPad() {
     { key: launchPadOptions.GPL, label: 'GRIDSS PURPLE LINX (GPL)' },
     { key: launchPadOptions.RNASUM, label: 'RNAsum' },
     { key: launchPadOptions.WGS_TN, label: 'Whole-Genome Sequencing Tumor-Normal (WGS T/N)' },
-    { key: launchPadOptions.STAR_ALIGN, label: 'WTS Star Alignment' },
+    { key: launchPadOptions.STAR_ALIGN, label: 'Whole Transcriptome Sequencing Star Alignment' },
   ];
   const location = useLocation();
   const navigate = useNavigate();
