@@ -36,7 +36,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
 
   const [input, setInput] = useState<StarAlignmentPayload | null>(null);
 
-  // Find out associated LibraryId
+  // Find out the associated LibraryId
   const {
     isLoading: isLoadingSubjectData,
     isError: isErrorSubjectData,
@@ -44,6 +44,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
   } = usePortalSubjectDataAPI(subjectId);
   const listOfLibrary = subjectData?.lims.map((o) => o.library_id);
 
+  // Find the related FASTQs
   const {
     isLoading: isLoadingFastqData,
     isError: isErrorFastqData,
@@ -60,6 +61,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
     },
   });
 
+  // The function to trigger the workflow
   const {
     isLoading: isLoadingMetadata,
     isError: isErrorMetadata,
