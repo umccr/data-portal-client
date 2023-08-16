@@ -8,6 +8,7 @@ import SubjectGPLLaunch from '../../../containers/subjects-launch/SubjectGPLLaun
 import SubjectRNASumLaunch from '../../../containers/subjects-launch/SubjectRNASumLaunch';
 import SubjectWGSTNLaunch from '../../../containers/subjects-launch/SubjectWGSTNLaunch';
 import SubjectLaunchStarAlign from '../../../containers/subjects-launch/SubjectWTSStarAlignment';
+import SubjectLaunchOncoanalyser from '../../../containers/subjects-launch/SubjectOncoanalyserLaunch';
 
 export enum launchPadOptions {
   NONE = '',
@@ -15,6 +16,7 @@ export enum launchPadOptions {
   GPL = 'gpl',
   WGS_TN = 'wgs-tn',
   STAR_ALIGN = 'star-align',
+  ONCOANALYSER = 'oncoanalyser',
 }
 
 export default function SubjectLaunchPad() {
@@ -28,6 +30,7 @@ export default function SubjectLaunchPad() {
     { key: launchPadOptions.RNASUM, label: 'RNAsum' },
     { key: launchPadOptions.WGS_TN, label: 'Whole-Genome Sequencing Tumor-Normal (WGS T/N)' },
     { key: launchPadOptions.STAR_ALIGN, label: 'Whole Transcriptome Sequencing Star Alignment' },
+    { key: launchPadOptions.ONCOANALYSER, label: 'Oncoanalyser' },
   ];
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,6 +51,8 @@ export default function SubjectLaunchPad() {
               <SubjectWGSTNLaunch subjectId={subjectId} />
             ) : lastPath == launchPadOptions.STAR_ALIGN ? (
               <SubjectLaunchStarAlign subjectId={subjectId} />
+            ) : lastPath == launchPadOptions.ONCOANALYSER ? (
+              <SubjectLaunchOncoanalyser subjectId={subjectId} />
             ) : (
               <div className='h-full'>
                 <div className='text-2xl font-medium mb-4'>{subjectId} - Report trigger</div>
