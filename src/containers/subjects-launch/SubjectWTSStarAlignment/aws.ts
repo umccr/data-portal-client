@@ -5,7 +5,7 @@ import { REGION } from '../../../config';
 const STAR_ALIGNMENT_LAMBDA_NAME = 'star-align-nf-batch-job-submission';
 
 export type StarAlignmentPayload = {
-  portal_id?: string;
+  portal_run_id?: string;
   subject_id: string;
   sample_id: string;
   library_id: string;
