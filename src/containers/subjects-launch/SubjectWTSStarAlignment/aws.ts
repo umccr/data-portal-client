@@ -1,11 +1,11 @@
 import { Auth } from '@aws-amplify/auth';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
-import { LAMBDA_PREFIX, REGION } from '../../../config';
+import { REGION } from '../../../config';
 
 const STAR_ALIGNMENT_LAMBDA_NAME = 'star-align-nf-batch-job-submission';
 
 export type StarAlignmentPayload = {
-  portal_id?: string;
+  portal_run_id?: string;
   subject_id: string;
   sample_id: string;
   library_id: string;
@@ -22,7 +22,7 @@ export const invokeWTSSAWorkflow = async (payload: StarAlignmentPayload) => {
 
   const command = new InvokeCommand({
     InvocationType: 'Event',
-    FunctionName: `${LAMBDA_PREFIX}${STAR_ALIGNMENT_LAMBDA_NAME}`,
+    FunctionName: `${STAR_ALIGNMENT_LAMBDA_NAME}`,
     Payload: Buffer.from(JSON.stringify(payload)),
   });
 

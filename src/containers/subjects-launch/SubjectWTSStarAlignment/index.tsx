@@ -42,7 +42,9 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
     isError: isErrorSubjectData,
     data: subjectData,
   } = usePortalSubjectDataAPI(subjectId);
-  const listOfLibrary = subjectData?.lims.map((o) => o.library_id);
+  const listOfLibrary = subjectData?.lims
+    .filter((lims) => lims.type == 'WTS')
+    .map((o) => o.library_id);
 
   // Find the related FASTQs
   const {
@@ -179,7 +181,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
         </DataTable>
       </div>
 
-      <h5>Select the desired FASTQ for the input launch</h5>
+      <h5>Select the FASTQ for the Star Align input</h5>
       {(fastqData?.pagination.count == 0 || !fastqData) && <div>No FASTQ Pairing Found</div>}
       {fastqData &&
         fastqData.results.map((data: FastqRow, idx) => {
