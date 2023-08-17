@@ -51,7 +51,7 @@ function ConfirmationDialog({ header, payload, onConfirm, descriptionElement }: 
       </Dialog>
       <Button
         className='p-button-info p-button-raised bg-primary w-24rem'
-        disabled={!payload}
+        disabled={!payload || Object.values(payload).includes('')}
         onClick={() => setIsConfirmDialogOpen(true)}
         label='Next'
         iconPos='right'

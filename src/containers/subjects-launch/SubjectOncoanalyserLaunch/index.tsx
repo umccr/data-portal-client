@@ -59,7 +59,10 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
           <div className='w-full' style={{ cursor: 'not-allowed' }}>
             <Dropdown
               value={oncoanalyserInputMode}
-              onChange={(e) => setOncoanalyserInputMode(e.value)}
+              onChange={(e) => {
+                setOncoanalyserInputMode(e.value);
+                setPayload({});
+              }}
               options={Object.values(OncoanalyserEnum)}
               className='w-full'
             />
@@ -87,7 +90,7 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
               <div className='w-full mt-5 text-center'>
                 <ConfirmationDialog
                   header='Oncoanalyser Launch Confirmation'
-                  payload={{ subjectId, mode: oncoanalyserInputMode, ...payload }}
+                  payload={{ subject_id: subjectId, mode: oncoanalyserInputMode, ...payload }}
                   onConfirm={oncoanalyserTrigger.mutate}
                   descriptionElement={
                     <div className='w-full'>

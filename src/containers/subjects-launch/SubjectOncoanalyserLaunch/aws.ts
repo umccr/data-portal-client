@@ -99,6 +99,7 @@ export type AllOncoanalyserPayload =
 
 export const invokeOncoanalyserLambda = async (payload: AllOncoanalyserPayload) => {
   const currentCredentials = await Auth.currentCredentials();
+
   const lambdaClient = new LambdaClient({
     region: REGION,
     credentials: currentCredentials,
