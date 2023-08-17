@@ -1,61 +1,48 @@
 import React, { useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
-import { useMutation, useQuery } from 'react-query';
-import { isEqual } from 'lodash';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
-import { RadioButton } from 'primereact/radiobutton';
+import { useMutation } from 'react-query';
 
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
-import StyledJsonPretty from '../../../components/StyledJsonPretty';
 
-import {
-  invokeWTSSAWorkflow,
-  OncoanalyserWGSPayload,
-  OncoanalyserWTSPayload,
-  OncoanalyserWGTSPayload,
-  OncoanalyserWGTSExistingWGSPayload,
-  OncoanalyserWGTSExistingWTSPayload,
-  OncoanalyserWGTSExistingBothPayload,
-} from './aws';
+import { AllOncoanalyserPayload, invokeOncoanalyserLambda } from './aws';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
-import { FastqRow, usePortalFastqAPI } from '../../../api/fastq';
-import { usePortalMetadataAPI } from '../../../api/metadata';
-import JSONToTable from '../../../components/JSONToTable';
 import SubjectMetadataTable from '../SubjectMetadata';
-import { GDSRow } from '../../../api/gds';
-import { isWGSOncoanalyserOutputExist } from './utils';
-import OncoanalyserWGS, { WGSInput } from './inputModes/OncoanalyserWGS';
+import WGSDragenInput, { WGSInput } from './inputModes/WGSDragenInput';
+import WTSStarAlignInput, { WTSInput } from './inputModes/WTSStarAlignInput';
+import ConfirmationDialog from '../utils/ConfirmationDialog';
 
 export enum OncoanalyserEnum {
   WGS = 'wgs',
   WTS = 'wts',
   WGTS = 'wgts',
-  WGSTS_EXISTING_WGS = 'wgts_existing_wgs',
-  WGSTS_EXISTING_WTS = 'wgts_existing_wts',
-  WGTS_EXISTING_BOTH = 'wgts_existing_both',
+  // WGTS_EXISTING_WGS = 'wgts_existing_wgs',
+  // WGTS_EXISTING_WTS = 'wgts_existing_wts',
+  // WGTS_EXISTING_BOTH = 'wgts_existing_both',
 }
 
 type Props = { subjectId: string };
 export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
-
   const [oncoanalyserInputMode, setOncoanalyserInputMode] = useState<OncoanalyserEnum | null>(
-    OncoanalyserEnum.WGS
+    OncoanalyserEnum.WTS
   );
 
   const { isLoading: isLoadingSubject, data: subjectData } = usePortalSubjectDataAPI(subjectId);
 
-  const [payload, setPayload] = useState<OncoanalyserWGSPayload | null>(null);
-  const onPayloadChange = (p: WGSInput) => {
-    setPayload({
-      subject_id: subjectId,
-      mode: 'wgs',
+  const [payload, setPayload] = useState<Record<string, string>>({});
+  const onPayloadChange = (i: WGSInput | WTSInput) => {
+    setPayload((p) => ({
       ...p,
-    });
+      ...i,
+    }));
   };
+
+  const oncoanalyserTrigger = useMutation(
+    ['oncoanalyser-invoke', subjectId, oncoanalyserInputMode, payload],
+    async (input: Record<string, string | number>) => {
+      await invokeOncoanalyserLambda(input as AllOncoanalyserPayload);
+    },
+    {}
+  );
 
   return (
     <div>
@@ -77,64 +64,44 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
               className='w-full'
             />
           </div>
-
-          {oncoanalyserInputMode == OncoanalyserEnum.WGS ? (
-            <OncoanalyserWGS subjectData={subjectData} onWGSPayloadChange={onPayloadChange} />
-          ) : (
-            <></>
+          {oncoanalyserInputMode && (
+            <>
+              {[
+                OncoanalyserEnum.WGS,
+                OncoanalyserEnum.WGTS,
+                // OncoanalyserEnum.WGTS_EXISTING_WTS,
+              ].includes(oncoanalyserInputMode) && (
+                <WGSDragenInput subjectData={subjectData} onWGSPayloadChange={onPayloadChange} />
+              )}
+              {[
+                OncoanalyserEnum.WTS,
+                OncoanalyserEnum.WGTS,
+                // OncoanalyserEnum.WGTS_EXISTING_WGS,
+              ].includes(oncoanalyserInputMode) && (
+                <WTSStarAlignInput subjectData={subjectData} onWTSPayloadChange={onPayloadChange} />
+              )}
+            </>
           )}
-
-          {payload && (
+          {payload && oncoanalyserInputMode && (
             <>
               <div className='w-full mt-5 text-center'>
-                <Dialog
-                  style={{ width: '75vw' }}
-                  visible={isConfirmDialogOpen}
-                  onHide={() => setIsConfirmDialogOpen(false)}
-                  draggable={false}
-                  footer={
-                    <span>
-                      <Button
-                        label='Cancel'
-                        className='p-button-secondary'
-                        onClick={() => setIsConfirmDialogOpen(false)}
-                      />
-                      <Button
-                        label='Launch'
-                        className='p-button-raised p-button-primary'
-                        onClick={() => {
-                          // workflowTriggerRes.mutate(input);
-                          setIsConfirmDialogOpen(false);
-                        }}
-                      />
-                    </span>
-                  }
-                  header='Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch Confirmation'
-                  headerClassName='border-bottom-1'
-                  contentClassName='w-full'>
-                  <div className='w-full'>
-                    <div>Please confirm the following JSON before launching the workflow.</div>
-                    <br />
-                    <div>
-                      You can check the details on{' '}
-                      <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
-                        umccr/nextflow-stack (dev)
-                      </a>
-                      .
+                <ConfirmationDialog
+                  header='Oncoanalyser Launch Confirmation'
+                  payload={{ subjectId, mode: oncoanalyserInputMode, ...payload }}
+                  onConfirm={oncoanalyserTrigger.mutate}
+                  descriptionElement={
+                    <div className='w-full'>
+                      <div>Please confirm the following JSON before launching the workflow.</div>
+                      <br />
+                      <div>
+                        You can check the details on{' '}
+                        <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
+                          umccr/nextflow-stack (dev)
+                        </a>
+                        .
+                      </div>
                     </div>
-                    <StyledJsonPretty
-                      wrapperClassName='border-solid border-round-md p-3 mt-3'
-                      data={payload}
-                    />
-                  </div>
-                </Dialog>
-                <Button
-                  className='p-button-info p-button-raised bg-primary w-24rem'
-                  disabled={!payload}
-                  onClick={() => setIsConfirmDialogOpen(true)}
-                  label='Next'
-                  iconPos='right'
-                  icon='pi pi-chevron-right'
+                  }
                 />
               </div>
             </>
@@ -170,15 +137,15 @@ const OncoanalyserDescription = ({ subjectId }: { subjectId: string }) => (
           {'Both WGS and WTS (Star Alignment) data present.'}
         </li>
         <li className='my-1'>
-          <b>{'wgts_existing_wgs: '}</b>
+          <b>{'[WIP] wgts_existing_wgs: '}</b>
           {'WTS (Star Alignment) with existing WGS Oncoanalyser output.'}
         </li>
         <li className='my-1'>
-          <b>{'wgts_existing_wts: '}</b>
+          <b>{'[WIP] wgts_existing_wts: '}</b>
           {'WGS with existing WTS Oncoanalyser output.'}
         </li>
         <li className='my-1'>
-          <b>{'wgts_existing_both: '}</b>
+          <b>{'[WIP] wgts_existing_both: '}</b>
           {'Both WGS and WTS Oncoanalyser output.'}
         </li>
       </ul>

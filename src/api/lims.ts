@@ -20,7 +20,7 @@ export type LimsRow = {
   assay: string;
   override_cycles: string;
   phenotype: string;
-} & Record<string, string>;
+} & Record<string, string | number | null>;
 
 export type LimsApiRes = DjangoRestApiResponse & { results: LimsRow[] };
 

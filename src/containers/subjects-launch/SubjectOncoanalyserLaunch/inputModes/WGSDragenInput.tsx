@@ -16,7 +16,7 @@ export type WGSInput = {
 
 type Props = { subjectData: SubjectApiRes; onWGSPayloadChange: (p: WGSInput) => void };
 
-function OncoanalyserWGS({ subjectData, onWGSPayloadChange }: Props) {
+export default function WGSDragenInput({ subjectData, onWGSPayloadChange }: Props) {
   const limsData = subjectData.lims.filter((v) => v.type == 'WGS');
   const tumorLims = limsData.filter((d) => d.phenotype == 'tumor');
   const normalLims = limsData.filter((d) => d.phenotype == 'normal');
@@ -159,5 +159,3 @@ function OncoanalyserWGS({ subjectData, onWGSPayloadChange }: Props) {
     </div>
   );
 }
-
-export default OncoanalyserWGS;
