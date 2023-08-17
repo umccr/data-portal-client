@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation } from 'react-query';
 import { isEqual } from 'lodash';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { RadioButton } from 'primereact/radiobutton';
 
@@ -11,23 +9,9 @@ import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { invokeWTSSAWorkflow, StarAlignmentPayload } from './aws';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { FastqRow, usePortalFastqAPI } from '../../../api/fastq';
-import { usePortalMetadataAPI } from '../../../api/metadata';
 import JSONToTable from '../../../components/JSONToTable';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
-
-const metadataHeaderToDisplay: string[] = [
-  'subject_id',
-  'sample_id',
-  'library_id',
-  'external_subject_id',
-  'external_sample_id',
-  'phenotype',
-  'type',
-  'assay',
-  'source',
-  'project_name',
-  'project_owner',
-];
+import SubjectMetadataTable from '../SubjectMetadata';
 
 type Props = { subjectId: string };
 export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
@@ -60,20 +44,6 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
     },
   });
 
-  // The function to trigger the workflow
-  const {
-    isLoading: isLoadingMetadata,
-    isError: isErrorMetadata,
-    data: metadata,
-  } = usePortalMetadataAPI({
-    apiConfig: {
-      queryStringParameters: {
-        rowsPerPage: 1000,
-        subject_id: subjectId,
-      },
-    },
-  });
-
   const workflowTriggerRes = useMutation(
     ['wts-sa-invoke', input],
     async (input: Record<string, string | number>) => {
@@ -83,7 +53,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
   );
 
   // LOADING components return
-  const isLoading = isLoadingMetadata || isLoadingFastqData || isLoadingSubjectData;
+  const isLoading = isLoadingFastqData || isLoadingSubjectData;
   if (isLoading) {
     return <CircularLoaderWithText text={`Fetching FASTQs for ${subjectId}`} />;
   }
@@ -96,7 +66,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
   }
 
   // ERROR components return
-  const isLoadingInputError = isErrorMetadata || isErrorFastqData || isErrorSubjectData;
+  const isLoadingInputError = isErrorFastqData || isErrorSubjectData;
   if (isLoadingInputError) {
     return (
       <div className='mt-3 text-center'>
@@ -156,27 +126,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
         {`.`}
       </div>
 
-      <h5>Lab Metadata Table</h5>
-      <div className='mb-3'>{`This is just an additional metadata table to help you select relevant FASTQs.`}</div>
-      <div className='w-full'>
-        <DataTable
-          className='border-1 border-200'
-          size='small'
-          showGridlines
-          autoLayout
-          responsiveLayout='scroll'
-          value={metadata?.results ?? []}
-          dataKey='id'>
-          {metadataHeaderToDisplay.map((header, idx) => (
-            <Column
-              key={idx}
-              field={header}
-              header={header.replaceAll('_', ' ')}
-              headerClassName='uppercase surface-100'
-            />
-          ))}
-        </DataTable>
-      </div>
+      <SubjectMetadataTable subjectId={subjectId} />
 
       <h5>Select the FASTQ for the Star Align input</h5>
       {(fastqData?.pagination.count == 0 || !fastqData) && <div>No FASTQ Pairing Found</div>}

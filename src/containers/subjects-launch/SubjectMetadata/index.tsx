@@ -19,15 +19,19 @@ const metadataHeaderToDisplay: string[] = [
   'project_owner',
 ];
 
-type Props = { subjectId: string };
+type Props = {
+  subjectId: string;
+  queryStringParameter?: Record<string, string | string[] | number>;
+};
 
-function SubjectMetadataTable({ subjectId }: Props) {
+function SubjectMetadataTable({ subjectId, queryStringParameter }: Props) {
   // The function to trigger the workflow
   const { isLoading, isError, data } = usePortalMetadataAPI({
     apiConfig: {
       queryStringParameters: {
         rowsPerPage: 1000,
         subject_id: subjectId,
+        ...queryStringParameter,
       },
     },
   });

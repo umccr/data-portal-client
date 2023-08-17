@@ -10,6 +10,7 @@ import SubjectMetadataTable from '../SubjectMetadata';
 import WGSDragenInput, { WGSInput } from './inputModes/WGSDragenInput';
 import WTSStarAlignInput, { WTSInput } from './inputModes/WTSStarAlignInput';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
+import { Button } from 'primereact/button';
 
 export enum OncoanalyserEnum {
   WGS = 'wgs',
@@ -43,6 +44,46 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
     },
     {}
   );
+
+  // Loading component
+  if (oncoanalyserTrigger.isLoading) {
+    return (
+      <CircularLoaderWithText
+        text={`Launching Oncoanalyser-${oncoanalyserInputMode} (${subjectId})`}
+      />
+    );
+  }
+  // ERROR components return
+  if (oncoanalyserTrigger.isError) {
+    return (
+      <div className='mt-3 text-center'>
+        <Button
+          icon='pi pi-times'
+          className='p-button-rounded p-button-danger bg-red-500 cursor-auto'
+          aria-label='Cancel'
+        />
+        <div className='mt-3'>{`Error launching WTS Star Alignment workflow`}</div>
+        <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
+          {JSON.stringify(oncoanalyserTrigger.error, null, 2)}
+        </pre>
+      </div>
+    );
+  }
+
+  // SUCCESS component
+  if (oncoanalyserTrigger.isSuccess) {
+    return (
+      <div className='mt-3 text-center'>
+        <Button
+          icon='pi pi-check'
+          className='p-button-rounded p-button-success bg-green-700 cursor-auto'
+          aria-label='Cancel'
+        />
+        <div className='mt-3'>{`Successfully launched WTS Star Alignment workflow! Check Slack for updates.`}</div>
+        <pre className='mt-3'>{`You could navigate away from this page.`}</pre>
+      </div>
+    );
+  }
 
   return (
     <div>
