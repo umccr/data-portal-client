@@ -6,7 +6,7 @@ const ONCOANALYSER_LAMBDA_NAME = 'oncoanalyser-batch-job-submission';
 
 export type OncoanalyserWGSPayload = {
   mode: 'wgs';
-  portal_id?: string;
+  portal_run_id?: string;
   subject_id: string;
   tumor_wgs_sample_id: string;
   tumor_wgs_library_id: string;
@@ -18,7 +18,7 @@ export type OncoanalyserWGSPayload = {
 
 export type OncoanalyserWTSPayload = {
   mode: 'wts';
-  portal_id?: string;
+  portal_run_id?: string;
   subject_id: string;
   tumor_wts_sample_id: string;
   tumor_wts_library_id: string;
@@ -27,7 +27,7 @@ export type OncoanalyserWTSPayload = {
 
 export type OncoanalyserWGTSPayload = {
   mode: 'wgts';
-  portal_id?: string;
+  portal_run_id?: string;
   subject_id: string;
   tumor_wgs_sample_id: string;
   tumor_wgs_library_id: string;
@@ -42,7 +42,7 @@ export type OncoanalyserWGTSPayload = {
 
 export type OncoanalyserWGTSExistingWGSPayload = {
   mode: 'wgts_existing_wgs';
-  portal_id?: string;
+  portal_run_id?: string;
   subject_id: string;
   tumor_wgs_sample_id: string;
   tumor_wgs_library_id: string;
@@ -58,7 +58,7 @@ export type OncoanalyserWGTSExistingWGSPayload = {
 
 export type OncoanalyserWGTSExistingWTSPayload = {
   mode: 'wgts_existing_wts';
-  portal_id?: string;
+  portal_run_id?: string;
   subject_id: string;
   tumor_wgs_sample_id: string;
   tumor_wgs_library_id: string;
@@ -74,7 +74,7 @@ export type OncoanalyserWGTSExistingWTSPayload = {
 
 export type OncoanalyserWGTSExistingBothPayload = {
   mode: 'wgts_existing_both';
-  portal_id?: string;
+  portal_run_id?: string;
   subject_id: string;
   tumor_wgs_sample_id: string;
   tumor_wgs_library_id: string;
