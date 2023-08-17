@@ -4,17 +4,16 @@ import { isEqual } from 'lodash';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
 import { RadioButton } from 'primereact/radiobutton';
 
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
-import StyledJsonPretty from '../../../components/StyledJsonPretty';
 
 import { invokeWTSSAWorkflow, StarAlignmentPayload } from './aws';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { FastqRow, usePortalFastqAPI } from '../../../api/fastq';
 import { usePortalMetadataAPI } from '../../../api/metadata';
 import JSONToTable from '../../../components/JSONToTable';
+import ConfirmationDialog from '../utils/ConfirmationDialog';
 
 const metadataHeaderToDisplay: string[] = [
   'subject_id',
@@ -32,8 +31,6 @@ const metadataHeaderToDisplay: string[] = [
 
 type Props = { subjectId: string };
 export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
-
   const [input, setInput] = useState<StarAlignmentPayload | null>(null);
 
   // Find out the associated LibraryId
@@ -79,8 +76,8 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
 
   const workflowTriggerRes = useMutation(
     ['wts-sa-invoke', input],
-    async (input: StarAlignmentPayload) => {
-      await invokeWTSSAWorkflow(input);
+    async (input: Record<string, string | number>) => {
+      await invokeWTSSAWorkflow(input as StarAlignmentPayload);
     },
     {}
   );
@@ -208,54 +205,23 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
       {input && (
         <>
           <div className='w-full mt-5 text-center'>
-            <Dialog
-              style={{ width: '75vw' }}
-              visible={isConfirmDialogOpen}
-              onHide={() => setIsConfirmDialogOpen(false)}
-              draggable={false}
-              footer={
-                <span>
-                  <Button
-                    label='Cancel'
-                    className='p-button-secondary'
-                    onClick={() => setIsConfirmDialogOpen(false)}
-                  />
-                  <Button
-                    label='Launch'
-                    className='p-button-raised p-button-primary'
-                    onClick={() => {
-                      workflowTriggerRes.mutate(input);
-                      setIsConfirmDialogOpen(false);
-                    }}
-                  />
-                </span>
-              }
-              header='Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch Confirmation'
-              headerClassName='border-bottom-1'
-              contentClassName='w-full'>
-              <div className='w-full'>
-                <div>Please confirm the following JSON before launching the workflow.</div>
-                <br />
-                <div>
-                  You can check the details on{' '}
-                  <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
-                    umccr/nextflow-stack (dev)
-                  </a>
-                  .
+            <ConfirmationDialog
+              header='Oncoanalyser Launch Confirmation'
+              payload={input}
+              onConfirm={workflowTriggerRes.mutate}
+              descriptionElement={
+                <div className='w-full'>
+                  <div>Please confirm the following JSON before launching the workflow.</div>
+                  <br />
+                  <div>
+                    You can check the details on{' '}
+                    <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
+                      umccr/nextflow-stack (dev)
+                    </a>
+                    .
+                  </div>
                 </div>
-                <StyledJsonPretty
-                  wrapperClassName='border-solid border-round-md p-3 mt-3'
-                  data={input}
-                />
-              </div>
-            </Dialog>
-            <Button
-              className='p-button-info p-button-raised bg-primary w-24rem'
-              disabled={!input}
-              onClick={() => setIsConfirmDialogOpen(true)}
-              label='Next'
-              iconPos='right'
-              icon='pi pi-chevron-right'
+              }
             />
           </div>
         </>
