@@ -54,9 +54,10 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
   });
 
   const metadataUseQueryRes = usePortalMetadataAPI({
-    additionalPath: '?workflow=clinical&workflow=research&phenotype=tumor&phenotype=normal',
     apiConfig: {
       queryStringParameters: {
+        workflow: ['clinical', 'research'],
+        phenotype: ['tumor', 'normal'],
         subject_id: subjectId,
         type: 'wgs',
         rowsPerPage: 1000,
