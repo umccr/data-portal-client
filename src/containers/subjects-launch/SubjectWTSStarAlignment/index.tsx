@@ -153,28 +153,24 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
         })}
 
       {input && (
-        <>
-          <div className='w-full mt-5 text-center'>
-            <ConfirmationDialog
-              header='Oncoanalyser Launch Confirmation'
-              payload={input}
-              onConfirm={workflowTriggerRes.mutate}
-              descriptionElement={
-                <div className='w-full'>
-                  <div>Please confirm the following JSON before launching the workflow.</div>
-                  <br />
-                  <div>
-                    You can check the details on{' '}
-                    <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
-                      umccr/nextflow-stack (dev)
-                    </a>
-                    .
-                  </div>
-                </div>
-              }
-            />
-          </div>
-        </>
+        <ConfirmationDialog
+          header='Oncoanalyser Launch Confirmation'
+          payload={input}
+          onConfirm={workflowTriggerRes.mutate}
+          descriptionElement={
+            <div className='w-full'>
+              <div>Please confirm the following JSON before launching the workflow.</div>
+              <br />
+              <div>
+                You can check the details on{' '}
+                <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
+                  umccr/nextflow-stack (dev)
+                </a>
+                .
+              </div>
+            </div>
+          }
+        />
       )}
     </div>
   );
