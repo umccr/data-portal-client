@@ -32,7 +32,6 @@ function ConfirmationDialog({ header, payload, onConfirm, descriptionElement }: 
               className='p-button-raised p-button-primary'
               onClick={() => {
                 onConfirm(payload);
-                // workflowTriggerRes.mutate(input);
                 setIsConfirmDialogOpen(false);
               }}
             />
