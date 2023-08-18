@@ -49,7 +49,7 @@ function SubjectGPLLaunch({ subjectId }: Props) {
         />
         <div className='mt-3'>{`Something went wrong on launching RNAsum!`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
-          {JSON.stringify(gplTrigger.error, null, 2)}
+          {JSON.stringify(gplTrigger.error, Object.getOwnPropertyNames(gplTrigger.error), 2)}
         </pre>
       </div>
     );

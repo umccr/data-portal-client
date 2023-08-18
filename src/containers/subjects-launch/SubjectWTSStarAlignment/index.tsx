@@ -89,7 +89,11 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
         />
         <div className='mt-3'>{`Error launching WTS Star Alignment workflow`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
-          {JSON.stringify(workflowTriggerRes.error, null, 2)}
+          {JSON.stringify(
+            workflowTriggerRes.error,
+            Object.getOwnPropertyNames(workflowTriggerRes.error),
+            2
+          )}
         </pre>
       </div>
     );

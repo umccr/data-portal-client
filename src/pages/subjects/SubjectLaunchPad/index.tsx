@@ -5,7 +5,7 @@ import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 
 import SubjectGPLLaunch from '../../../containers/subjects-launch/SubjectGPLLaunch';
-import SubjectRNASumLaunch from '../../../containers/subjects-launch/SubjectRNASumLaunch';
+import SubjectRNAsumLaunch from '../../../containers/subjects-launch/SubjectRNAsumLaunch';
 import SubjectWGSTNLaunch from '../../../containers/subjects-launch/SubjectWGSTNLaunch';
 import SubjectLaunchStarAlign from '../../../containers/subjects-launch/SubjectWTSStarAlignment';
 import SubjectLaunchOncoanalyser from '../../../containers/subjects-launch/SubjectOncoanalyserLaunch';
@@ -46,7 +46,7 @@ export default function SubjectLaunchPad() {
             {lastPath == launchPadOptions.GPL ? (
               <SubjectGPLLaunch subjectId={subjectId} />
             ) : lastPath == launchPadOptions.RNASUM ? (
-              <SubjectRNASumLaunch subjectId={subjectId} />
+              <SubjectRNAsumLaunch subjectId={subjectId} />
             ) : lastPath == launchPadOptions.WGS_TN ? (
               <SubjectWGSTNLaunch subjectId={subjectId} />
             ) : lastPath == launchPadOptions.STAR_ALIGN ? (

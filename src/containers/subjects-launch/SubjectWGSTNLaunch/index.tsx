@@ -1,34 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { useQuery } from 'react-query';
+import { useMutation } from 'react-query';
 import { InputText } from 'primereact/inputtext';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
 import { RadioButton } from 'primereact/radiobutton';
 
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
-import StyledJsonPretty from '../../../components/StyledJsonPretty';
 
 import './index.css';
 import { invokeWGSTNWorkflow } from './aws';
 import { FastqRow, FASTQPairingPayload, usePortalSubjectParingAPI } from '../../../api/pairing';
 import SubjectMetadataTable from '../SubjectMetadata';
+import ConfirmationDialog from '../utils/ConfirmationDialog';
 
 type Props = { subjectId: string };
 export default function SubjectWGSTNLaunch({ subjectId }: Props) {
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
-  const [isLaunch, setIsLaunch] = useState<boolean>(false);
-
   const [input, setInput] = useState<FASTQPairingPayload | null>(null);
 
-  const workflowTriggerRes = useQuery(
+  const workflowTriggerRes = useMutation(
     ['wgs-tn-invoke', input],
-    async () => {
-      if (input) await invokeWGSTNWorkflow(input);
-    },
-    {
-      enabled: isLaunch && !!input,
+    async (input: FASTQPairingPayload) => {
+      await invokeWGSTNWorkflow(input);
     }
   );
 
@@ -69,7 +62,11 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
         />
         <div className='mt-3'>{`Error launching WGS T/N workflow`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
-          {JSON.stringify(workflowTriggerRes.error, null, 2)}
+          {JSON.stringify(
+            workflowTriggerRes.error,
+            Object.getOwnPropertyNames(workflowTriggerRes.error),
+            2
+          )}
         </pre>
       </div>
     );
@@ -160,7 +157,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           );
         })}
 
-      {input ? (
+      {input && (
         <>
           <h5>Subject Id</h5>
           <div className='w-full' style={{ cursor: 'not-allowed' }}>
@@ -217,33 +214,11 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
             />
           </div>
 
-          <div className='w-full mt-5 text-center'>
-            <Dialog
-              id='wgs-confirmation-dialog'
-              style={{ width: '75vw' }}
-              visible={isConfirmDialogOpen}
-              onHide={() => setIsConfirmDialogOpen(false)}
-              draggable={false}
-              footer={
-                <span>
-                  <Button
-                    label='Cancel'
-                    className='p-button-secondary'
-                    onClick={() => setIsConfirmDialogOpen(false)}
-                  />
-                  <Button
-                    label='Launch'
-                    className='p-button-raised p-button-primary'
-                    onClick={() => {
-                      setIsLaunch(true);
-                      setIsConfirmDialogOpen(false);
-                    }}
-                  />
-                </span>
-              }
-              header='Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch Confirmation'
-              headerClassName='border-bottom-1'
-              contentClassName='w-full'>
+          <ConfirmationDialog
+            header='Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch Confirmation'
+            payload={input}
+            onConfirm={workflowTriggerRes.mutate}
+            descriptionElement={
               <div className='w-full'>
                 <div>Please confirm the following JSON before launching the workflow.</div>
                 <br />
@@ -252,28 +227,14 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
                   <a
                     target={`_blank`}
                     href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md'>
-                    https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/tumor_normal.md
+                    umccr/data-portal-apis
                   </a>
                   .
                 </div>
-                <StyledJsonPretty
-                  wrapperClassName='border-solid border-round-md p-3 mt-3'
-                  data={input}
-                />
               </div>
-            </Dialog>
-            <Button
-              className='p-button-info p-button-raised bg-primary w-24rem'
-              disabled={!input}
-              onClick={() => setIsConfirmDialogOpen(true)}
-              label='Next'
-              iconPos='right'
-              icon='pi pi-chevron-right'
-            />
-          </div>
+            }
+          />
         </>
-      ) : (
-        <></>
       )}
     </div>
   );
