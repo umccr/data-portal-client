@@ -2,13 +2,14 @@ import { API } from '@aws-amplify/api';
 import { useQuery } from 'react-query';
 import { S3Row } from './s3';
 import { GDSRow } from './gds';
+import { LimsRow } from './lims';
 /**
  * Portal `/subject/{subjectId}` api
  */
 
 export type SubjectApiRes = {
   id: string;
-  lims: Record<string, string | number | boolean | null>[];
+  lims: LimsRow[];
   features: string;
   results: S3Row[];
   results_gds: GDSRow[];
