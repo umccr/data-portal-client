@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ColumnProps } from 'primereact/column';
-import { DataTablePFSEvent } from 'primereact/datatable';
+import { DataTableStateEvent } from 'primereact/datatable';
 
 // Custom component
 import { useToastContext } from '../../../providers/ToastProvider';
@@ -50,7 +50,7 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
 
   // Sorting mechanism
   const sorting = convertDjangoSortParamToDataTableProp(apiQueryParameter);
-  const handleTableSortPropChange = (event: DataTablePFSEvent) => {
+  const handleTableSortPropChange = (event: DataTableStateEvent) => {
     const djangoSortingQuery = convertDjangoStateToDjangoQuery({
       sortOrder: event.sortOrder,
       sortField: event.sortField,
@@ -185,9 +185,6 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
           </span>
         </div>
         <DataTableWrapper
-          // overrideDataTableProps={{
-          //   style: { display: isLoading ? 'none' : '' },
-          // }}
           sortField={sorting.sortField}
           sortOrder={sorting.sortOrder}
           onSort={handleTableSortPropChange}

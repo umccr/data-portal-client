@@ -16,6 +16,7 @@ import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { invokeRNAsumWorkflow, RNAsumPayload } from './aws';
 
 import './index.css';
+import { DataTableSelectionSingleChangeEvent } from 'primereact/datatable';
 
 const ALL_DATASETS_OPTION = [
   ...PRIMARY_DATASETS_OPTION,
@@ -183,7 +184,9 @@ function SubjectrnaSumTrigger({ subjectId }: Props) {
                 isLoading={false}
                 overrideDataTableProps={{
                   selectionMode: 'single',
-                  onSelectionChange: (e) => {
+                  onSelectionChange: (
+                    e: DataTableSelectionSingleChangeEvent<typeof ALL_DATASETS_OPTION>
+                  ) => {
                     setInput({ subject_id: subjectId, dataset: e.value.project });
                   },
                   scrollable: true,

@@ -58,8 +58,6 @@ function SubjectMetadataTable({ subjectId, queryStringParameter }: Props) {
               className='border-1 border-200'
               size='small'
               showGridlines
-              autoLayout
-              responsiveLayout='scroll'
               value={data?.results ?? []}
               dataKey='id'>
               {metadataHeaderToDisplay.map((header, idx) => (

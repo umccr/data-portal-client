@@ -208,8 +208,11 @@ const S3SelectTable = ({
     <DataTable
       resizableColumns
       value={currentS3RowData}
+      selectionMode='multiple'
       selection={currentS3Selection}
-      onSelectionChange={(e) => handleSelectionChange(e.value)}
+      onSelectionChange={(e: any) => {
+        handleSelectionChange(e.value);
+      }}
       isDataSelectable={(e) => isIgvReadableFile(e.data.key)}
       header={<div>{title}</div>}>
       <Column selectionMode='multiple' headerStyle={{ width: '3em' }} />
@@ -246,7 +249,8 @@ const GDSSelectTable = ({
       resizableColumns
       value={currentGDSRowData}
       selection={currentGDSSelection}
-      onSelectionChange={(e) => handleSelectionChange(e.value)}
+      selectionMode='multiple'
+      onSelectionChange={(e: any) => handleSelectionChange(e.value)}
       isDataSelectable={(e) => isIgvReadableFile(e.data.name)}
       header={<div>{title}</div>}>
       <Column selectionMode='multiple' headerStyle={{ width: '3em' }} />

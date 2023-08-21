@@ -112,8 +112,7 @@ function TokenDialog(props: Props) {
                   value: moment.unix(parseInt(JWTData.expires)).toString(),
                 },
                 { key: 'JWT', value: JWTData.token },
-              ]}
-              responsiveLayout='scroll'>
+              ]}>
               <Column headerStyle={{ display: 'none' }} field='key' body={keyTemplate} />
               <Column headerStyle={{ display: 'none' }} field='value' />
             </DataTable>

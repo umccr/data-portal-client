@@ -4,7 +4,7 @@ import { useQuery } from 'react-query';
 import { ProgressBar } from 'primereact/progressbar';
 
 import { Button } from 'primereact/button';
-import { Dropdown, DropdownChangeParams } from 'primereact/dropdown';
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import { Toolbar } from 'primereact/toolbar';
 import LoadSubjectDataButton from './LoadSubjectDataButton';
 import { getBaseNameFromKey } from '../../../api/utils';
@@ -157,7 +157,7 @@ function IGV({ subjectId }: Props) {
         style={{ boxShadow: 'var(--primary-800)' }}
         options={toolbarGenomeList}
         value={refGenome}
-        onChange={(e: DropdownChangeParams) => {
+        onChange={(e: DropdownChangeEvent) => {
           handleRefGenomeChange(e.value);
         }}
         placeholder='Genome'

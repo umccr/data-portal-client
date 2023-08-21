@@ -151,7 +151,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
           <DataTable
             showGridlines
             rowHover
-            value={allRows.slice(1)}
+            value={Object.assign(allRows.slice(1))}
             className={allRows.length == 0 ? 'hidden' : 'overflow-auto'}>
             <Column
               body={rowNumTemplate}

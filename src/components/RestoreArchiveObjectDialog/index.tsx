@@ -121,8 +121,7 @@ export default function RestoreArchiveObjectDialog(props: RestoreArchiveObjectDi
               },
               { key: 'URI', value: uri },
               { key: 'Description', value: descriptionText[data ?? S3StatusData.ERROR] },
-            ]}
-            responsiveLayout='scroll'>
+            ]}>
             <Column headerStyle={{ display: 'none' }} field='key' body={keyTemplate} />
             <Column headerStyle={{ display: 'none' }} field='value' />
           </DataTable>
