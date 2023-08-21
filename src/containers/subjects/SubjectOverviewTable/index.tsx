@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 
 // Custom component
-import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { useToastContext } from '../../../providers/ToastProvider';
 import JSONToTable from '../../../components/JSONToTable';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
+import { OverviewSkeleton } from '../../../components/skel/OverviewSkeleton';
 
 const OVERVIEW_COLUMN = [
   'subject_id',
@@ -39,7 +39,7 @@ function SubjectOverviewTable(props: Props) {
   }, [isError]);
 
   if (isLoading) {
-    return <CircularLoaderWithText />;
+    return <OverviewSkeleton />;
   }
 
   if (data && !isLoading) {
@@ -60,7 +60,7 @@ export default SubjectOverviewTable;
  * Example: [{'name':'John'}, {'name':'Doe'}] to {'name':['John','Doe']}
  * @param jsonArray Array of JSON
  */
-function convertArrayOfJsonToJsonOfArray(jsonArray: { [key: string]: string | number }[]) {
+function convertArrayOfJsonToJsonOfArray(jsonArray: Record<string, any>[]) {
   const JsonOfArray: { [key: string]: (string | number)[] } = {};
 
   for (const object of jsonArray) {

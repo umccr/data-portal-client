@@ -154,14 +154,14 @@ function IGV({ subjectId }: Props) {
   const leftToolbarContents = (
     <>
       <Dropdown
-        style={{ boxShadow: 'var(--blue-800)' }}
+        style={{ boxShadow: 'var(--primary-800)' }}
         options={toolbarGenomeList}
         value={refGenome}
         onChange={(e: DropdownChangeParams) => {
           handleRefGenomeChange(e.value);
         }}
         placeholder='Genome'
-        className='border-blue-800 border-blue-800 m-1'
+        className='border-primary-800 border-primary-800 m-1'
       />
       <LoadSubjectDataButton
         currentIgvTrackData={igvSubjectTrackData}
@@ -174,7 +174,7 @@ function IGV({ subjectId }: Props) {
       />
       <Button
         onClick={handleRemoveAllTrackData}
-        className='m-1 p-button-outlined p-button-secondary'
+        className='m-1 p-button-secondary'
         label='CLEAR ALL'
         icon='pi pi-trash'
       />
@@ -204,7 +204,7 @@ function IGV({ subjectId }: Props) {
         {igv.isLoading && (
           <ProgressBar
             className='mt-3'
-            color='var(--blue-800)'
+            color='var(--primary-800)'
             mode='indeterminate'
             style={{ height: '2px' }}
           />

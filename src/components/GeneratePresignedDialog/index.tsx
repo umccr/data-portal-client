@@ -29,12 +29,11 @@ export default function GeneratePresignedDialog(props: GeneratePresignedDialogPr
     queryKey: ['fetchDataPresignedUrl', id, type],
     keepPreviousData: false,
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
     queryFn: async () => {
       if (type == 's3') {
         return await getS3PreSignedUrl(id);
       } else {
-        return await getGDSPreSignedUrl(id, { headers: { 'Content-Disposition': 'inline' } });
+        return await getGDSPreSignedUrl(id);
       }
     },
   });

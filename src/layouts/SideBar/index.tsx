@@ -31,12 +31,15 @@ function SideBar({ sideBarElement, mainPageElement }: sideBarProps) {
             {sideBarElement}
           </>
         ) : (
-          <Button
-            onClick={handleIsDrawerOpenChange}
-            icon={openCloseIcon}
-            className='top-0 right-0 p-button-rounded p-button-secondary p-button-text absolute'
-            aria-label='Cancel'
-          />
+          <>
+            <Button
+              onClick={handleIsDrawerOpenChange}
+              icon={openCloseIcon}
+              className='top-0 right-0 p-button-rounded p-button-secondary p-button-text absolute'
+              aria-label='Cancel'
+            />
+            {sideBarElement}
+          </>
         )}
       </div>
       <div className='layout-main-container'>

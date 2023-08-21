@@ -7,20 +7,21 @@ import DataTableWrapper from '../../../components/DataTableWrapper';
 import { useToastContext } from '../../../providers/ToastProvider';
 import { showDisplayText } from '../../../utils/util';
 import JSONToTable from '../../../components/JSONToTable';
-import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
+import { TableSkeleton } from '../../../components/skel/TableSkeleton';
 
 const COLUMN_TO_DISPLAY = [
+  'library_id',
   'sample_id',
   'external_sample_id',
-  'library_id',
-  'type',
   'phenotype',
+  'type',
   'assay',
+  'source',
   'override_cycles',
 ];
 
-type ObjectStringValType = { [key: string]: string | number | null };
+type ObjectStringValType = Record<string, string | number | boolean | null>;
 type Props = { subjectId: string };
 
 function SampleInformationTable(props: Props) {
@@ -53,7 +54,7 @@ function SampleInformationTable(props: Props) {
     }
   }, [isError]);
 
-  if (data && !isLoading) {
+  if (data?.lims && !isLoading) {
     subjectLimsList = data.lims;
   }
 
@@ -65,13 +66,13 @@ function SampleInformationTable(props: Props) {
 
   // All Information button to show dialog
   columnList.push({
-    alignHeader: 'center' as const,
+    alignHeader: 'left' as const,
     header: (
-      <p className='capitalize text-center font-bold text-color white-space-nowrap'>
+      <p className='uppercase text-left font-bold text-color white-space-nowrap'>
         {showDisplayText('info')}
       </p>
     ),
-    className: 'text-center justify-content-center',
+    className: 'text-left white-space-nowrap',
     body: (rowData: ObjectStringValType) => {
       return (
         <div>
@@ -89,15 +90,15 @@ function SampleInformationTable(props: Props) {
   for (const column of COLUMN_TO_DISPLAY) {
     columnList.push({
       field: column,
-      alignHeader: 'center' as const,
+      alignHeader: 'left' as const,
       header: (
-        <p className='capitalize text-center font-bold text-color white-space-nowrap'>
+        <p className='uppercase text-left font-bold text-color white-space-nowrap'>
           {showDisplayText(column)}
         </p>
       ),
-      className: 'text-center justify-content-center',
+      className: 'text-left white-space-nowrap',
       body: (rowData: ObjectStringValType) => {
-        return <div className='text-center text-color'>{rowData[column]}</div>;
+        return <>{rowData[column]}</>;
       },
     });
   }
@@ -114,7 +115,7 @@ function SampleInformationTable(props: Props) {
         <JSONToTable objData={moreInformationDialog} />
       </Dialog>
       {isLoading ? (
-        <CircularLoaderWithText />
+        <TableSkeleton />
       ) : (
         <DataTableWrapper
           isLoading={isLoading}

@@ -3,6 +3,8 @@ const REGION = import.meta.env.VITE_REGION;
 const IS_LOCAL = STAGE === 'localhost';
 const OAUTH_DOMAIN = `${import.meta.env.VITE_OAUTH_DOMAIN}.auth.${REGION}.amazoncognito.com`;
 
+const LAMBDA_PREFIX = `data-portal-api-${IS_LOCAL ? 'dev' : STAGE}-`;
+
 const config = {
   apiGateway: {
     REGION: REGION,
@@ -36,13 +38,8 @@ const config = {
     ENDPOINT_READS: '/reads/',
     ENDPOINT_VARIANTS: '/variants/',
   },
-  gpl: {
-    URL: import.meta.env.VITE_GPL_SUBMIT_JOB,
-    MANUAL: import.meta.env.VITE_GPL_SUBMIT_JOB_MANUAL,
-    CREATE_LINX_PLOT: import.meta.env.VITE_GPL_CREATE_LINX_PLOT,
-    REGION: REGION,
-    SERVICE: 'lambda',
-  },
 };
 
 export default config;
+
+export { REGION, LAMBDA_PREFIX };

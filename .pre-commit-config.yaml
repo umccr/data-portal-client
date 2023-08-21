@@ -32,7 +32,7 @@ repos:
     hooks:
       - id: yarn-audit
         name: yarn audit
-        entry: npx yarn audit --groups dependencies
+        entry: npx yarn audit
         language: system
         pass_filenames: false
 

@@ -2,23 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../CircularLoaderWithText';
-// Other Dependencies
-import JSONPretty from 'react-json-pretty';
+import StyledJsonPretty from '../StyledJsonPretty';
 
-import './index.css';
 import { SelectButton } from 'primereact/selectbutton';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
+import './index.css';
+
 export const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
-export const HTML_FILETYPE_LIST: string[] = ['html'];
+export const IFRAME_FILETYPE_LIST: string[] = ['html', 'pdf'];
 export const DELIMITER_SEPARATED_VALUE_FILETYPE_LIST: string[] = ['csv', 'tsv'];
 export const PLAIN_FILETYPE_LIST: string[] = ['txt', 'md5sum'];
 export const OTHER_FILETYPE_LIST: string[] = ['json', 'yaml'];
 
 export const DATA_TYPE_SUPPORTED = [
   ...IMAGE_FILETYPE_LIST,
-  ...HTML_FILETYPE_LIST,
+  ...IFRAME_FILETYPE_LIST,
   ...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST,
   ...PLAIN_FILETYPE_LIST,
   ...OTHER_FILETYPE_LIST,
@@ -67,7 +67,7 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
   }
 
   // Return HTML (via iframe) display
-  if (HTML_FILETYPE_LIST.includes(filetype)) {
+  if (IFRAME_FILETYPE_LIST.includes(filetype)) {
     return (
       <div className='w-full h-full'>
         <iframe className='w-full h-full bg-white' src={presingedUrl} />
@@ -100,30 +100,12 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
 
   // Return JSON
   if (filetype == 'json') {
-    const cssTheme = {
-      main: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
-      error: 'line-height:1.3;color:#a21515;background:#ffffff;overflow:auto;',
-      key: 'color:#a21515;',
-      string: 'color:#0551a5;',
-      value: 'color:#0b8658;',
-      boolean: 'color:#0551a5;',
-    };
-
     // Sanitize if JSON is
     try {
       const JSONParse = JSON.parse(data);
       return (
         <div className='w-full h-full overflow-auto'>
-          <JSONPretty
-            id='json-pretty'
-            data={JSONParse}
-            theme={cssTheme}
-            style={{
-              borderRadius: '5px',
-              width: '100%',
-              minWidth: '100%',
-            }}
-          />
+          <StyledJsonPretty data={JSONParse} />
         </div>
       );
     } catch (err) {
@@ -206,9 +188,9 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     [...DELIMITER_SEPARATED_VALUE_FILETYPE_LIST, ...PLAIN_FILETYPE_LIST, 'yaml'].includes(filetype)
   ) {
     return (
-      <div className='w-full h-full overflow-auto'>
+      <div className='w-full h-full flex'>
         <pre
-          className='inline-block m-0 p-3 w-full bg-white border-1 border-solid border-900 border-round-xs'
+          className='overflow-auto inline-block m-0 p-3 w-full bg-white border-1 border-solid border-900 border-round-xs'
           style={{
             minWidth: '50vw',
           }}>
@@ -219,4 +201,18 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
   }
 
   return <div>Cannot display file</div>;
+}
+
+/**
+ * HELPER FUNCTION
+ */
+
+/**
+ * This would be useful to determine whether the requested URL need to be `inline` or `attachment` content disposition.
+ * HTML and Image by default will need to be inline as the behaviour desired is to open in browser/iframe without download.
+ * @param filetype
+ * @returns
+ */
+export function isRequestInlineContentDisposition(filetype: string): boolean {
+  return [...IFRAME_FILETYPE_LIST, ...IMAGE_FILETYPE_LIST].includes(filetype);
 }

@@ -17,12 +17,7 @@ function ToastProvider(props: Props) {
   const toastShow = useCallback((m: ToastMessageType) => toastRef.current?.show(m), []);
   return (
     <>
-      <Toast
-        ref={toastRef}
-        position='top-center'
-        className='opacity-100 w-6'
-        style={{ maxWidth: '1000px' }}
-      />
+      <Toast ref={toastRef} position='bottom-left' className='w-6' style={{ maxWidth: '1000px' }} />
       <ToastContext.Provider value={{ toastShow: toastShow }}>
         {props.children}
       </ToastContext.Provider>

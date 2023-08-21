@@ -34,7 +34,8 @@
       {
         "extensions": [".js", ".jsx", ".ts", ".tsx"]
       }
-    ]
+    ],
+    "@typescript-eslint/no-explicit-any": "off"
   },
   "settings": {
     "react": {

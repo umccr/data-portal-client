@@ -38,7 +38,7 @@ export type PresignApiData = {
 export function usePortalS3PresignAPI(s3Id?: string | number) {
   return useQuery(
     ['portal-s3-presign', s3Id],
-    async () => await API.get('portal', `/s3/${s3Id}/presign`, {}),
+    async (): Promise<PresignApiData> => await API.get('portal', `/s3/${s3Id}/presign`, {}),
     {
       staleTime: 60 * 60 * 1000, // 1hour,
       enabled: !!s3Id,
@@ -101,7 +101,7 @@ export function usePortalS3StatusAPI(s3Id?: string | number) {
 export async function getS3PreSignedUrl(id: number) {
   const { error, signed_url } = await API.get('portal', `/s3/${id}/presign`, {});
   if (error) {
-    throw Error('Unable to fetch get presigned url.');
+    throw Error('Unable to get PreSigned URL');
   }
   return signed_url;
 }

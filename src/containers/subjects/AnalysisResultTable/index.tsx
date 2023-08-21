@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import moment from 'moment';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { DataTable } from 'primereact/datatable';
@@ -8,8 +8,16 @@ import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import DataActionButton from '../../utils/DataActionButton';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
-import { S3Row } from '../../../api/s3';
-import { GDSRow } from '../../../api/gds';
+import { getS3PreSignedUrl, S3Row } from '../../../api/s3';
+import { GDSRow, getGDSPreSignedUrl } from '../../../api/gds';
+import { Button } from 'primereact/button';
+import { BlockUI } from 'primereact/blockui';
+import {
+  DATA_TYPE_SUPPORTED,
+  isRequestInlineContentDisposition,
+} from '../../../components/ViewPresignedUrl';
+import { Toast } from 'primereact/toast';
+import mime from 'mime';
 
 // Creating Table
 type AnalysisResultGDSTableProps = {
@@ -18,9 +26,74 @@ type AnalysisResultGDSTableProps = {
 };
 
 const filenameTemplate = (rowData: Record<string, any>) => {
+  const toast = useRef(null);
+  const [blockedPanel, setBlockedPanel] = useState<boolean>(false);
   let filename;
   if (rowData.path) filename = rowData.path.split('/').pop();
   if (rowData.key) filename = rowData.key.split('/').pop();
+  const split_path = filename.split('.');
+  const filetype = split_path[split_path.length - 1].toLowerCase();
+
+  const handleOpenInBrowser = async (rowData: Record<string, any>) => {
+    setBlockedPanel(true);
+    if (rowData.path) {
+      try {
+        const signed_url = await getGDSPreSignedUrl(rowData.id, {
+          headers: {
+            'Content-Disposition': isRequestInlineContentDisposition(filetype)
+              ? 'inline'
+              : 'attachment',
+            'Content-Type': mime.getType(rowData.path),
+          },
+        });
+        window.open(signed_url, '_blank');
+      } catch (e) {
+        setBlockedPanel(false);
+        const msg = (e as Error).message;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        toast.current.show({
+          severity: 'error',
+          summary: 'Invalid URL',
+          detail: msg,
+        });
+        // throw e;
+      }
+    }
+    if (rowData.key) {
+      try {
+        const signed_url = await getS3PreSignedUrl(rowData.id);
+        window.open(signed_url, '_blank');
+      } catch (e) {
+        setBlockedPanel(false);
+        const msg = (e as Error).message;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        toast.current.show({
+          severity: 'error',
+          summary: 'Invalid URL',
+          detail: msg,
+        });
+        // throw e;
+      }
+    }
+    setBlockedPanel(false);
+  };
+
+  if (filename.endsWith('html') || filename.endsWith('png') || filename.endsWith('pdf')) {
+    return (
+      <>
+        <Toast ref={toast} position='bottom-left' />
+        <BlockUI
+          blocked={blockedPanel}
+          template={<i className='pi pi-spin pi-spinner' style={{ fontSize: '2em' }} />}>
+          <Button className='p-button-link' onClick={() => handleOpenInBrowser(rowData)}>
+            {filename}
+          </Button>
+        </BlockUI>
+      </>
+    );
+  }
 
   return <div className='white-space-nowrap'>{filename}</div>;
 };
@@ -119,6 +192,60 @@ const previewGDSTemplate = (rowData: GDSRow) => {
   );
 };
 
+const downloadGDSTemplate = (rowData: GDSRow) => {
+  /**
+   * For now download option is the special case that only offer within Analysis Results summary panel.
+   * Whether we extend this to S3 or elsewhere is T.B.D  ~victor
+   */
+  const toast = useRef(null);
+  const [blockedPanel, setBlockedPanel] = useState<boolean>(false);
+  const filename = rowData.path.split('/').pop() ?? rowData.path;
+  // const fileSizeInBytes = rowData.size_in_bytes;
+  const filetype = filename.split('.').pop();
+  const allowFileTypes = ['gz', 'maf', ...DATA_TYPE_SUPPORTED];
+  const allowDownload = allowFileTypes.includes(filetype as string);
+
+  const handleDownload = async (rowData: GDSRow) => {
+    setBlockedPanel(true);
+    if (rowData.path) {
+      try {
+        const signed_url = await getGDSPreSignedUrl(rowData.id);
+        window.open(signed_url, '_blank');
+      } catch (e) {
+        setBlockedPanel(false);
+        const msg = (e as Error).message;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        toast.current.show({
+          severity: 'error',
+          summary: 'Invalid URL',
+          detail: msg,
+        });
+        // throw e;
+      }
+    }
+    setBlockedPanel(false);
+  };
+
+  return (
+    <>
+      {allowDownload && (
+        <>
+          <Toast ref={toast} position='bottom-left' />
+          <BlockUI
+            blocked={blockedPanel}
+            template={<i className='pi pi-spin pi-spinner' style={{ fontSize: '2em' }} />}>
+            <div
+              className='cursor-pointer pi pi-download'
+              onClick={() => handleDownload(rowData)}
+            />
+          </BlockUI>
+        </>
+      )}
+    </>
+  );
+};
+
 function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
   const { title, data } = prop;
   return (
@@ -130,6 +257,7 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
         tableClassName={data.length == 0 ? 'hidden' : ''}>
         {/* Column field determined by the prefix of body Template */}
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
+        <Column body={downloadGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={previewGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={actionGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={fileSizeGDSTemplate} headerStyle={{ display: 'none' }} />
@@ -166,7 +294,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
   const { isFetching, isLoading, data } = usePortalSubjectDataAPI(subjectId);
 
   if (isLoading || isFetching) {
-    return <CircularLoaderWithText />;
+    return <CircularLoaderWithText text='Fetching data, please wait...' />;
   }
 
   let groupedData;
@@ -189,9 +317,11 @@ function AnalysisResultsPanel({ subjectId }: Props) {
         <TabPanel header='WTS'>
           <AnalysisResultGDSTable title='rnasum report' data={groupedData.wtsRnasum} />
           <AnalysisResultGDSTable title='qc report' data={groupedData.wtsMultiqc} />
+          <AnalysisResultGDSTable title='fusions report' data={groupedData.wtsFusionsIca} />
           <AnalysisResultGDSTable title='bam' data={groupedData.wtsBamsIca} />
         </TabPanel>
         <TabPanel header='TSO500'>
+          <AnalysisResultGDSTable title='tsv' data={groupedData.tsoCtdnaTsv} />
           <AnalysisResultGDSTable title='vcf' data={groupedData.tsoCtdnaVcfs} />
           <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
         </TabPanel>
@@ -209,6 +339,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
         <TabPanel header='WTS (bcbio)'>
           <AnalysisResultS3Table title='rnasum report' data={groupedData.rnasum} />
           <AnalysisResultS3Table title='qc report' data={groupedData.wtsQc} />
+          <AnalysisResultS3Table title='fusions report' data={groupedData.wtsFusions} />
           <AnalysisResultS3Table title='bam' data={groupedData.wtsBams} />
         </TabPanel>
       </TabView>
@@ -220,90 +351,80 @@ function AnalysisResultsPanel({ subjectId }: Props) {
 
 export default AnalysisResultsPanel;
 
-function groupResultsData(
-  results_s3: Record<string, string>[],
-  results_gds: Record<string, string>[]
-) {
-  const wgs = results_s3.filter((r: Record<string, string>) => r.key.includes('WGS/'));
-  const wts = results_s3.filter((r: Record<string, string>) => r.key.includes('WTS/'));
-  const bams = wgs.filter((r: Record<string, string>) => r.key.endsWith('bam'));
-  const vcfs = wgs.filter(
-    (r: Record<string, string>) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf')
-  );
-  const circos = wgs.filter((r: Record<string, string>) => r.key.endsWith('png'));
-  const pcgr = wgs.filter((r: Record<string, string>) => r.key.endsWith('pcgr.html'));
-  const cpsr = wgs.filter((r: Record<string, string>) => r.key.endsWith('cpsr.html'));
+function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
+  const wgs = results_s3.filter((r) => r.key.includes('WGS/'));
+  const wts = results_s3.filter((r) => r.key.includes('WTS/'));
+  const bams = wgs.filter((r) => r.key.endsWith('bam'));
+  const vcfs = wgs.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf'));
+  const circos = wgs.filter((r) => r.key.endsWith('png'));
+  const pcgr = wgs.filter((r) => r.key.endsWith('pcgr.html'));
+  const cpsr = wgs.filter((r) => r.key.endsWith('cpsr.html'));
   const multiqc = wgs.filter(
-    (r: Record<string, string>) =>
-      r.key.includes('umccrised') && r.key.endsWith('multiqc_report.html')
+    (r) => r.key.includes('umccrised') && r.key.endsWith('multiqc_report.html')
   );
   const cancer = wgs.filter(
-    (r: Record<string, string>) =>
-      r.key.includes('umccrised') && r.key.endsWith('cancer_report.html')
+    (r) => r.key.includes('umccrised') && r.key.endsWith('cancer_report.html')
   );
-  const coverage = wgs.filter(
-    (r: Record<string, string>) => r.key.includes('cacao') && r.key.endsWith('html')
-  );
+  const coverage = wgs.filter((r) => r.key.includes('cacao') && r.key.endsWith('html'));
   const gplReport = wgs.filter(
-    (r: Record<string, string>) =>
-      r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
+    (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
   );
-  const wtsBams = wts.filter((r: Record<string, string>) => r.key.endsWith('bam'));
-  const wtsQc = wts.filter((r: Record<string, string>) => r.key.endsWith('multiqc_report.html'));
-  const rnasum = wts.filter((r: Record<string, string>) => r.key.endsWith('RNAseq_report.html'));
+  const wtsBams = wts.filter((r) => r.key.endsWith('bam'));
+  const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
+  const wtsFusions = wts.filter((r) => r.key.endsWith('fusions.pdf'));
+  const rnasum = wts.filter((r) => r.key.endsWith('RNAseq_report.html'));
 
   // gds ICA
-
   const wgsBams = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('wgs_tumor_normal') && r.path.endsWith('bam')
+    (r) => r.path.includes('wgs_tumor_normal') && r.path.endsWith('bam')
   );
   const wgsVcfs = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('umccrise') && (r.path.endsWith('vcf.gz') || r.path.endsWith('.maf'))
+    (r) =>
+      (r.path.includes('umccrise') || r.path.includes('wgs_tumor_normal')) &&
+      (r.path.endsWith('vcf.gz') || r.path.endsWith('.maf'))
   );
   const wgsCircos = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('umccrise') && r.path.endsWith('png')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('png')
   );
   const wgsPcgr = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('umccrise') && r.path.endsWith('pcgr.html')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('pcgr.html')
   );
   const wgsCpsr = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('umccrise') && r.path.endsWith('cpsr.html')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('cpsr.html')
   );
   const wgsMultiqc = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('umccrise') && r.path.endsWith('multiqc_report.html')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('multiqc_report.html')
   );
   const wgsCancer = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('umccrise') && r.path.endsWith('cancer_report.html')
+    (r) => r.path.includes('umccrise') && r.path.endsWith('cancer_report.html')
   );
   const wgsCoverage = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('cacao') && r.path.endsWith('html')
+    (r) => r.path.includes('cacao') && r.path.endsWith('html')
   );
 
   const wgsGpl = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('gridss_purple_linx') && r.path.endsWith('linx.html')
+    (r) => r.path.includes('gridss_purple_linx') && r.path.endsWith('linx.html')
   );
 
   const wtsBamsIca = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('wts_tumor_only') && r.path.endsWith('bam')
+    (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('bam')
   );
   const wtsMultiqc = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('wts_tumor_only') && r.path.endsWith('multiqc.html')
+    (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('multiqc.html')
   );
-  const wtsRnasum = results_gds.filter((r: Record<string, string>) =>
-    r.path.endsWith('RNAseq_report.html')
+  const wtsFusionsIca = results_gds.filter(
+    (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('fusions.pdf')
   );
+  const wtsRnasum = results_gds.filter((r) => r.path.endsWith('RNAseq_report.html'));
 
   const tsoCtdnaBams = results_gds.filter(
-    (r: Record<string, string>) => r.path.includes('tso_ctdna') && r.path.endsWith('bam')
+    (r) => r.path.includes('tso_ctdna') && r.path.endsWith('bam')
   );
   const tsoCtdnaVcfs = results_gds.filter(
-    (r: Record<string, string>) =>
-      r.path.includes('tso_ctdna') && (r.path.endsWith('vcf') || r.path.endsWith('vcf.gz'))
+    (r) => r.path.includes('tso_ctdna') && (r.path.endsWith('vcf') || r.path.endsWith('vcf.gz'))
+  );
+  const tsoCtdnaTsv = results_gds.filter(
+    (r) => r.path.includes('tso_ctdna') && r.path.endsWith('tsv')
   );
 
   return {
@@ -320,6 +441,7 @@ function groupResultsData(
     gplReport: gplReport,
     wtsBams: wtsBams,
     wtsQc: wtsQc,
+    wtsFusions: wtsFusions,
     rnasum: rnasum,
     // Gds
     wgsBams: wgsBams,
@@ -333,8 +455,10 @@ function groupResultsData(
     wgsGpl: wgsGpl,
     wtsBamsIca: wtsBamsIca,
     wtsMultiqc: wtsMultiqc,
+    wtsFusionsIca: wtsFusionsIca,
     wtsRnasum: wtsRnasum,
     tsoCtdnaBams: tsoCtdnaBams,
     tsoCtdnaVcfs: tsoCtdnaVcfs,
+    tsoCtdnaTsv: tsoCtdnaTsv,
   };
 }

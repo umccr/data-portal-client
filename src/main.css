@@ -18,3 +18,7 @@ code {
 * {
   font-size: 14px;
 }
+
+.p-galleria .p-galleria-item-nav {
+  background-color: var(--primary-900) !important;
+}

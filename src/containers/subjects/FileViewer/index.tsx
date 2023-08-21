@@ -129,14 +129,14 @@ function FileViewer({ subjectId }: Props) {
       </div>
       <div id='body-display' className='mt-5 h-full'>
         {fileList.length == 0 && s3QueryRes.isLoading ? (
-          <CircularLoaderWithText />
+          <CircularLoaderWithText text={`Fetching data, please wait...`} />
         ) : fileList.length == 0 ? (
           <div className='flex align-items-center justify-content-center'>No Data</div>
         ) : (
           <Splitter style={{ height: 'calc(100vh - 21rem)' }}>
             <SplitterPanel className='flex align-items-start justify-content-start overflow-x-auto overflow-y-auto'>
               <div className='flex flex-column w-full'>
-                <div className='bg-blue-50 font-bold text-2xl p-3'>Filename</div>
+                <div className='font-bold text-2xl p-3'>Filename</div>
                 {fileList.map((item, index) => {
                   const filename = item.key.split('/').pop();
                   const isSelected = selectedFile && selectedFile.id === item.id;

@@ -8,7 +8,7 @@ import { GDSRow } from './gds';
 
 export type SubjectApiRes = {
   id: string;
-  lims: Record<string, string | number | boolean | null>;
+  lims: Record<string, string | number | boolean | null>[];
   features: string;
   results: S3Row[];
   results_gds: GDSRow[];
@@ -16,7 +16,7 @@ export type SubjectApiRes = {
 export function usePortalSubjectDataAPI(subjectId: string) {
   return useQuery(
     ['portal-subject', subjectId],
-    async () => await API.get('portal', `/subjects/${subjectId}`, {}),
+    async (): Promise<SubjectApiRes> => await API.get('portal', `/subjects/${subjectId}`, {}),
     {
       staleTime: Infinity,
     }

@@ -33,3 +33,13 @@ export function usePortalLimsAPI(apiConfig: Record<string, any>) {
     }
   );
 }
+
+export function usePortalLimsByAggregateCount(apiConfig: Record<string, any>) {
+  return useQuery(
+    ['portal-lims', apiConfig],
+    async () => await API.get('portal', `/lims/by_aggregate_count`, apiConfig),
+    {
+      staleTime: Infinity,
+    }
+  );
+}

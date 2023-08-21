@@ -25,7 +25,7 @@ function SubjectRoutes() {
           <Route path='subject-data' element={<SubjectDataPage />} />
           <Route path='igv' element={<SubjectIGVPage />} />
           <Route path='file-viewer' element={<SubjectFileViewerPage />} />
-          <Route path='launch-pad' element={<SubjectLaunchPad />} />
+          <Route path='launch-pad/*' element={<SubjectLaunchPad />} />
         </Route>
       </Route>
     </RouterRoutes>

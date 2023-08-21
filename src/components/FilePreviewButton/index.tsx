@@ -3,11 +3,13 @@ import { Dialog } from 'primereact/dialog';
 import CircularLoaderWithText from '../CircularLoaderWithText';
 import ViewPresignedUrl, {
   DATA_TYPE_SUPPORTED,
-  HTML_FILETYPE_LIST,
+  IFRAME_FILETYPE_LIST,
   IMAGE_FILETYPE_LIST,
+  isRequestInlineContentDisposition,
 } from '../ViewPresignedUrl';
 import { usePortalGDSPresignAPI } from '../../api/gds';
 import { usePortalS3PresignAPI } from '../../api/s3';
+import mime from 'mime';
 
 type FilePreviewButtonProps = {
   filename: string;
@@ -31,7 +33,7 @@ export default function FilePreviewButton(props: FilePreviewButtonProps) {
   const isCorsOriginBlock =
     type == 's3' &&
     !IMAGE_FILETYPE_LIST.includes(filetype) &&
-    !HTML_FILETYPE_LIST.includes(filetype);
+    !IFRAME_FILETYPE_LIST.includes(filetype);
 
   const isFileSizeAcceptable = fileSizeInBytes > 60000000;
   const isDataTypeSupported = !DATA_TYPE_SUPPORTED.includes(filetype);
@@ -77,11 +79,18 @@ type FilePreviewDialogProps = FilePreviewButtonProps & {
 };
 function FilePreviewDialog(props: FilePreviewDialogProps) {
   const { filename, id, type, handleDialogClose } = props;
+  const split_path = filename.split('.');
+  const filetype = split_path[split_path.length - 1].toLowerCase();
 
   let portalPresignedUrlRes;
   if (type == 'gds') {
     portalPresignedUrlRes = usePortalGDSPresignAPI(id, {
-      headers: { 'Content-Disposition': 'inline' },
+      headers: {
+        'Content-Disposition': isRequestInlineContentDisposition(filetype)
+          ? 'inline'
+          : 'attachment',
+        'Content-Type': mime.getType(filename),
+      },
     });
   } else {
     portalPresignedUrlRes = usePortalS3PresignAPI(id);
@@ -95,7 +104,7 @@ function FilePreviewDialog(props: FilePreviewDialogProps) {
       style={{ width: '75vw', boxSizing: 'border-box', border: 'solid var(--surface-600) 1px' }}
       visible={true}
       onHide={handleDialogClose}
-      contentStyle={{ minHeight: '5rem', maxHeight: '75vh' }}
+      contentStyle={{ minHeight: '10rem', maxHeight: '75vh' }}
       contentClassName='relative p-0 surface-400 flex align-items-center justify-content-center'>
       {portalPresignedUrlRes.data ? (
         <div className='w-full p-3' style={{ height: '75vh' }}>

@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
+import React, { useCallback, useEffect, useState } from 'react';
 import DataTableWrapper, {
+  convertPaginationEventToDjangoQueryParams,
+  djangoToTablePaginationFormat,
   PaginationProps,
   paginationPropsInitValue,
-  djangoToTablePaginationFormat,
-  convertPaginationEventToDjangoQueryParams,
 } from '../../../components/DataTableWrapper';
 import { useToastContext } from '../../../providers/ToastProvider';
 import { ColumnProps } from 'primereact/column';
@@ -13,16 +12,27 @@ import moment from 'moment';
 import DataActionButton from '../../utils/DataActionButton';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import { S3Row, usePortalS3API } from '../../../api/s3';
-import DataSearchFilterButton from '../../../components/DataSearchFilterButton';
+import { InputText } from 'primereact/inputtext';
+import PresetButton from '../../../components/search/PresetButton';
 
-type Props = { defaultQueryParam: { search?: string } & Record<string, string | number> };
+type Props = {
+  defaultQueryParam: { search?: string } & Record<string, string | number>;
+  chipData?: Record<string, string | number>[];
+};
 
-function S3DataTable({ defaultQueryParam }: Props) {
+function S3DataTable({ defaultQueryParam, chipData }: Props) {
   const { toastShow } = useToastContext();
 
   // Search
   const defaultSearch: string | undefined = defaultQueryParam['search'];
   const [searchField, setSearchField] = useState<string>(defaultSearch ? defaultSearch : '');
+  const [searchInput, setSearchInput] = useState<string>(defaultSearch ? defaultSearch : '');
+
+  const handleSearchEnter = (event: { key: string }) => {
+    if (event.key === 'Enter') {
+      setSearchField(searchInput);
+    }
+  };
 
   // Pagination Properties
   let paginationProps: PaginationProps = paginationPropsInitValue;
@@ -62,24 +72,36 @@ function S3DataTable({ defaultQueryParam }: Props) {
     paginationProps = djangoToTablePaginationFormat(data.pagination);
   }
 
+  const handlePresetButtonClicked = useCallback(
+    (keyword: string) => {
+      setSearchField(keyword);
+      setSearchInput(keyword);
+    },
+    [chipData]
+  );
+
   return (
     <>
-      <DataSearchFilterButton
-        currentFilter={searchField}
-        handleFilterChange={(s: string) => setSearchField(s)}
+      {chipData && <PresetButton chipData={chipData} handleClick={handlePresetButtonClicked} />}
+      <div className='w-full pb-1'>
+        <span className='lg:w-4 p-input-icon-left'>
+          <i className='pi pi-search' />
+          <InputText
+            className='w-full p-inputtext'
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder='Search'
+            onKeyDown={handleSearchEnter}
+          />
+        </span>
+      </div>
+      <DataTableWrapper
+        isLoading={isFetching}
+        columns={columnList}
+        dataTableValue={subjectDataList}
+        paginationProps={paginationProps}
+        handlePaginationPropsChange={handleTablePaginationPropChange}
       />
-      <div className={isFetching || isLoading ? '' : 'hidden'}>
-        <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
-      </div>
-      <div className={isFetching || isLoading ? 'hidden' : ''}>
-        <DataTableWrapper
-          isLoading={isFetching}
-          columns={columnList}
-          dataTableValue={subjectDataList}
-          paginationProps={paginationProps}
-          handlePaginationPropsChange={handleTablePaginationPropChange}
-        />
-      </div>
     </>
   );
 }
@@ -108,7 +130,7 @@ for (const column of column_to_display) {
     field: column,
     alignHeader: 'left' as const,
     header: (
-      <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
+      <p className='w-2 uppercase text-left font-bold text-color white-space-nowrap'>
         {showDisplayText(column)}
       </p>
     ),

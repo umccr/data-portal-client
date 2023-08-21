@@ -1,7 +1,3 @@
-.__json-pretty__{
-  margin-top: 0 !important
-}
-
 #toggle-table-view .p-selectbutton {
   border-color: var(--surface-500) !important;
   background: var(--surface-500) !important;
@@ -13,5 +9,5 @@
 }
 
 #toggle-table-view .p-button:focus {
-  box-shadow: var(--surface-500) !important; 
+  box-shadow: var(--surface-500) !important;
 }

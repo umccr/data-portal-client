@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ListBox, ListBoxChangeParams } from 'primereact/listbox';
 
 const sidebarMapping = [
-  { postfixPath: 'overview', label: 'Overview' },
-  { postfixPath: 'run-data', label: 'Run Data' },
+  // { postfixPath: 'overview', label: 'Overview' },
+  { postfixPath: 'primary-data', label: 'Primary Data' },
   { postfixPath: 'lims', label: 'LIMS' },
 ];
 
@@ -34,7 +34,7 @@ function RunSideBar() {
       <div
         id='subject-sidebar-title'
         className='cursor-pointer font-bold text-3xl border-bottom-1 border-gray-300'
-        style={{ padding: '0.5rem 0 1.5rem' }}>
+        style={{ padding: '1.5rem 1.5rem 1.5rem' }}>
         <a href={`../`} style={{ all: 'unset' }}>
           Run
         </a>

@@ -58,7 +58,7 @@ function DataTableWrapper(props: DataTableWrapperProps) {
     additionalDataTableProps['first'] = firstIndexNumberAppearOnCurrentTable;
     additionalDataTableProps['rows'] = currentNumberOfRows;
     additionalDataTableProps['totalRecords'] = totalNumberOfItems;
-    additionalDataTableProps['rowsPerPageOptions'] = [50, 100, 200];
+    additionalDataTableProps['rowsPerPageOptions'] = [20, 50, 100, 200];
     additionalDataTableProps['onPage'] = handlePaginationPropsChange;
     additionalDataTableProps['paginatorTemplate'] =
       'CurrentPageReport RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink';
@@ -101,7 +101,7 @@ export default DataTableWrapper;
 export const InfoDialogColumnProps: ColumnProps = {
   alignHeader: 'center' as const,
   header: (
-    <p className='capitalize text-center font-bold text-color white-space-nowrap'>
+    <p className='uppercase text-center font-bold text-color white-space-nowrap'>
       {showDisplayText('info')}
     </p>
   ),
@@ -149,7 +149,7 @@ export const InfoDialogColumnProps: ColumnProps = {
  */
 export const paginationPropsInitValue: PaginationProps = {
   firstIndexNumberAppearOnCurrentTable: 0,
-  currentNumberOfRows: 50,
+  currentNumberOfRows: 20,
   totalNumberOfItems: 0, // Must set to 0, or will cause unwanted pagination clicks
 };
 

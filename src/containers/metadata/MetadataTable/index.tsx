@@ -57,8 +57,10 @@ function MetadataTable() {
   type ObjKeyType = { [key: string]: string | number };
   let metadataDataList: ObjKeyType[] = [];
   const { isFetching, isLoading, isError, data } = usePortalMetadataAPI({
-    queryStringParameters: {
-      ...apiQueryParameter,
+    apiConfig: {
+      queryStringParameters: {
+        ...apiQueryParameter,
+      },
     },
   });
 
@@ -81,16 +83,20 @@ function MetadataTable() {
    * TABLE COLUMN PROPERTIES
    */
   const textBodyTemplate = (text: string | number | null): React.ReactNode => {
-    return <div>{text}</div>;
+    return <>{text}</>;
   };
   const column_to_display: string[] = [
     'subject_id',
-    'sample_id',
     'library_id',
-    'external_subject_id',
+    'sample_id',
     'external_sample_id',
-    'type',
+    'external_subject_id',
     'phenotype',
+    'type',
+    'assay',
+    'source',
+    'workflow',
+    'project_owner',
     'project_name',
   ];
 
@@ -106,7 +112,7 @@ function MetadataTable() {
       field: column,
       alignHeader: 'left' as const,
       header: (
-        <p className='w-2 capitalize text-left font-bold text-color white-space-nowrap'>
+        <p className='w-2 uppercase text-left font-bold text-color white-space-nowrap'>
           {showDisplayText(column)}
         </p>
       ),
@@ -136,15 +142,14 @@ function MetadataTable() {
   return (
     <Card className='p-0'>
       <div className={isFetching || isLoading ? '' : 'hidden'}>
-        <CircularLoaderWithText text='Please wait, we are fetching data from the portal' />
+        <CircularLoaderWithText text='Fetching data, please wait...' />
       </div>
       <div className={isFetching || isLoading ? 'hidden' : ''}>
-        <div className='flex justify-content-between pb-4'>
-          <div className='inline font-bold text-3xl flex align-items-center'>Metadata Table</div>
-          <span className='p-input-icon-left'>
+        <div className='w-full flex justify-content-between pb-4'>
+          <span className='w-3 p-input-icon-left'>
             <i className='pi pi-search' />
             <InputText
-              className='p-inputtext-sm'
+              className='w-full p-inputtext'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder='Search'

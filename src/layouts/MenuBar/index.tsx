@@ -60,41 +60,41 @@ function MenuBar() {
       className:
         'text-xl text-black-alpha-90 font-semibold p-button-secondary p-button-text shadow-none',
     },
-    {
-      label: 'Subjects',
-      command: () => {
-        navigate('/subjects');
-      },
-    },
-    {
-      label: 'Metadata',
-      command: () => {
-        navigate('/metadata');
-      },
-    },
-    // Will hide LIMS endpoint from menubar to test if it is still required.
+    // TODO: let's hide these for now ~victor
+    // {
+    //   label: 'Subjects',
+    //   command: () => {
+    //     navigate('/subjects');
+    //   },
+    // },
+    // {
+    //   label: 'Metadata',
+    //   command: () => {
+    //     navigate('/metadata');
+    //   },
+    // },
     // {
     //   label: 'LIMS',
     //   command: () => {
     //     navigate('/lims');
     //   },
     // },
-    {
-      label: 'Runs',
-      command: () => {
-        navigate('/runs');
-      },
-    },
-    {
-      label: 'Search',
-      command: () => {
-        navigate('/search');
-      },
-    },
+    // {
+    //   label: 'Runs',
+    //   command: () => {
+    //     navigate('/runs');
+    //   },
+    // },
+    // {
+    //   label: 'Search',
+    //   command: () => {
+    //     navigate('/search');
+    //   },
+    // },
   ];
   return (
     <Menubar
-      className='fixed p-0 w-full border-noround border-none bg-blue-800 h-3rem top-0'
+      className='fixed p-0 w-full border-noround border-none bg-primary-800 h-3rem top-0'
       style={{ zIndex: 2 }}
       model={items}
       end={<AccountMenu />}

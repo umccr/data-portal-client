@@ -27,12 +27,6 @@ Amplify.configure({
           };
         },
       },
-      {
-        name: 'gpl',
-        endpoint: config.gpl.URL,
-        region: config.gpl.REGION,
-        service: config.gpl.SERVICE,
-      },
     ],
   },
 });

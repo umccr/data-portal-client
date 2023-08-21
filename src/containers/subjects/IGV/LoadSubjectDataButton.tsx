@@ -93,11 +93,11 @@ function LoadSubjectDataButton({
           label='Cancel'
           icon='pi pi-times'
           onClick={() => setIsLoadDialogOpen((prev) => !prev)}
-          className='p-button-text text-blue-800'
+          className='p-button-secondary'
         />
         <Button
           disabled={isCustomLoading || isLoading || !data}
-          className='bg-blue-800'
+          className='bg-primary'
           label='Load'
           icon='pi pi-cloud-upload'
           onClick={() => saveIgvDataSelection()}
@@ -145,7 +145,7 @@ function LoadSubjectDataButton({
       <Dialog
         header={`${subjectId} - Select BAM and/or VCF`}
         visible={isLoadDialogOpen}
-        className='w-11'
+        className='w-8'
         draggable={false}
         footer={<FooterContent />}
         onHide={() => setIsLoadDialogOpen((prev) => !prev)}>
@@ -158,7 +158,7 @@ function LoadSubjectDataButton({
 
       <Button
         onClick={openDialog}
-        className='m-1 bg-blue-800 border-blue-800'
+        className='m-1 bg-primary'
         label='OPEN'
         icon='pi pi-folder-open'
       />

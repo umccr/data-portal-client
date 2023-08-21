@@ -117,7 +117,7 @@ function SignInPage() {
           setUserLink(randoms[0].user.links.html);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         // console.log('fetch error occurred: ', err);
         setImageUrl('iStock-529081597-2.jpg');
       });

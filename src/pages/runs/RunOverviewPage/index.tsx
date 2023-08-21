@@ -1,3 +1,5 @@
+/* TODO marking this component for refactor - need reflow UI/UX presentation story ~victor */
+
 import React from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { Panel } from 'primereact/panel';
