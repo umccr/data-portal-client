@@ -153,8 +153,6 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
           className='border-1 border-200'
           size='small'
           showGridlines
-          autoLayout
-          responsiveLayout='scroll'
           value={metadataUseQueryRes.data?.results ?? []}
           dataKey='id'>
           {metadataHeaderToDisplay.map((header, idx) => (
@@ -335,7 +333,7 @@ const DisplayFastqListRow = ({ title, fastqListRow = [] }: DisplayFastqListRowPr
   return (
     <div className='w-full'>
       <div className='font-bold pb-2'>{title}</div>
-      <DataTable autoLayout responsiveLayout='scroll' value={flatFastqRow}>
+      <DataTable value={flatFastqRow}>
         {fastqHeaderToDisplay.map((header, idx) => (
           <Column
             key={idx}

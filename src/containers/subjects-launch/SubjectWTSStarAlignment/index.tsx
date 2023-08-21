@@ -166,8 +166,6 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
           className='border-1 border-200'
           size='small'
           showGridlines
-          autoLayout
-          responsiveLayout='scroll'
           value={metadata?.results ?? []}
           dataKey='id'>
           {metadataHeaderToDisplay.map((header, idx) => (

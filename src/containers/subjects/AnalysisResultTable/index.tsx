@@ -273,8 +273,6 @@ function AnalysisResultS3Table(prop: AnalysisResultGDSTableProps) {
     <div>
       <DataTable
         value={data}
-        autoLayout
-        responsiveLayout='scroll'
         header={<div className='uppercase'>{title}</div>}
         tableClassName={data.length == 0 ? 'hidden' : ''}>
         {/* Column field determined by the prefix of body Template */}

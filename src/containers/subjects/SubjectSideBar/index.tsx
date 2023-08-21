@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ListBox, ListBoxChangeParams } from 'primereact/listbox';
+import { ListBox, ListBoxChangeEvent } from 'primereact/listbox';
 
 const sidebarMapping = [
   { postfixPath: 'overview', label: 'Overview' },
@@ -14,7 +14,7 @@ function SubjectSideBar() {
   const selectedPage = findPostfixPath();
   const navigate = useNavigate();
 
-  const handleOnChangeListPage = (e: ListBoxChangeParams) => {
+  const handleOnChangeListPage = (e: ListBoxChangeEvent) => {
     const sidebarObject = e.value; // Possibility of null when clicked the current page
     if (sidebarObject) {
       navigate(`${sidebarObject.postfixPath}`);
