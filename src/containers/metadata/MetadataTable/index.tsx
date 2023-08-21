@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card } from 'primereact/card';
 import { ColumnProps } from 'primereact/column';
 import { Link } from 'react-router-dom';
-import { DataTablePFSEvent } from 'primereact/datatable';
+import { DataTableStateEvent } from 'primereact/datatable';
 
 // Custom component
 import { useToastContext } from '../../../providers/ToastProvider';
@@ -45,7 +45,7 @@ function MetadataTable() {
 
   // Sorting mechanism
   const sorting = convertDjangoSortParamToDataTableProp(apiQueryParameter);
-  const handleTableSortPropChange = (event: DataTablePFSEvent) => {
+  const handleTableSortPropChange = (event: DataTableStateEvent) => {
     const djangoSortingQuery = convertDjangoStateToDjangoQuery({
       sortOrder: event.sortOrder,
       sortField: event.sortField,

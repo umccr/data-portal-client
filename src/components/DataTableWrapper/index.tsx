@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  DataTable,
-  DataTableProps,
-  DataTablePFSEvent,
-  DataTableSortOrderType,
-} from 'primereact/datatable';
+import { DataTable, DataTableProps, DataTableStateEvent } from 'primereact/datatable';
 import { Column, ColumnProps } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
@@ -25,13 +20,13 @@ export type PaginationProps = {
 type DataTableWrapperProps = {
   columns: ColumnProps[];
   isLoading: boolean;
-  dataTableValue: unknown[];
-  overrideDataTableProps?: DataTableProps;
+  dataTableValue: Record<string, any>[];
+  overrideDataTableProps?: DataTableProps<Record<string, any>[]>;
   paginationProps?: PaginationProps;
   handlePaginationPropsChange?: (event: { [key: string]: number }) => void;
   sortField?: string;
-  sortOrder?: DataTableSortOrderType;
-  onSort?: (event: DataTablePFSEvent) => void;
+  sortOrder?: 0 | 1 | -1 | null;
+  onSort?: (event: DataTableStateEvent) => void;
 };
 
 function DataTableWrapper(props: DataTableWrapperProps) {
@@ -47,7 +42,8 @@ function DataTableWrapper(props: DataTableWrapperProps) {
     onSort,
   } = props;
 
-  const additionalDataTableProps = { ...overrideDataTableProps };
+  const additionalDataTableProps = overrideDataTableProps ? { ...overrideDataTableProps } : {};
+
   // Pagination could be undefined (if not needed or don't want it)
   // This will guard if pagination props exist and could be mounter to the UI
   if (paginationProps && handlePaginationPropsChange) {
@@ -79,7 +75,6 @@ function DataTableWrapper(props: DataTableWrapperProps) {
       loading={isLoading}
       rowHover
       size='small'
-      responsiveLayout='scroll'
       className='ui-datatable-hor-scroll'
       emptyMessage='No Data found!'
       resizableColumns
@@ -195,19 +190,19 @@ export const convertPaginationEventToDjangoQueryParams = (event: { [key: string]
 /**
  * Django to Data Table Sorting Props
  */
-export type djangoSortingFormat = {
-  sortOrder: DataTableSortOrderType;
+export type DjangoSortingFormat = {
+  sortOrder: 0 | 1 | -1 | null | undefined;
   sortField: string;
 };
-export function convertDjangoStateToDjangoQuery(state: djangoSortingFormat) {
+export function convertDjangoStateToDjangoQuery(state: DjangoSortingFormat) {
   const ordering = state.sortOrder == -1 ? '-' : '';
   return {
     ordering: `${ordering}${state.sortField}`,
   };
 }
-type queryParamDjango = { ordering?: string } & Record<string, string | number>;
+type QueryParamDjango = { ordering?: string } & Record<string, string | number>;
 export function convertDjangoSortParamToDataTableProp(
-  queryParam: queryParamDjango
+  queryParam: QueryParamDjango
 ): Record<string, any> {
   const ordering = queryParam.ordering ?? '-id';
   const sortOrder = ordering.startsWith('-') ? -1 : 1;

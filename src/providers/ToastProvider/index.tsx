@@ -1,11 +1,11 @@
 import React, { useRef, createContext, useContext, useCallback } from 'react';
-import { Toast, ToastMessageType } from 'primereact/toast';
+import { Toast, ToastMessage } from 'primereact/toast';
 
 /**
  * Create ToastContext
  */
 const ToastContext = createContext<{
-  toastShow: (m: ToastMessageType) => void;
+  toastShow: (m: ToastMessage) => void;
 }>({
   toastShow: () => undefined,
 });
@@ -14,7 +14,7 @@ type Props = { children: React.ReactNode };
 function ToastProvider(props: Props) {
   const toastRef = useRef<Toast>(null);
 
-  const toastShow = useCallback((m: ToastMessageType) => toastRef.current?.show(m), []);
+  const toastShow = useCallback((m: ToastMessage) => toastRef.current?.show(m), []);
   return (
     <>
       <Toast ref={toastRef} position='bottom-left' className='w-6' style={{ maxWidth: '1000px' }} />
