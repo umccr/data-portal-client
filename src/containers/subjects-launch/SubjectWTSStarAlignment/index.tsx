@@ -1,39 +1,20 @@
 import React, { useState } from 'react';
 import { useMutation } from 'react-query';
 import { isEqual } from 'lodash';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
 import { RadioButton } from 'primereact/radiobutton';
 
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
-import StyledJsonPretty from '../../../components/StyledJsonPretty';
 
 import { invokeWTSSAWorkflow, StarAlignmentPayload } from './aws';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { FastqRow, usePortalFastqAPI } from '../../../api/fastq';
-import { usePortalMetadataAPI } from '../../../api/metadata';
 import JSONToTable from '../../../components/JSONToTable';
-
-const metadataHeaderToDisplay: string[] = [
-  'subject_id',
-  'sample_id',
-  'library_id',
-  'external_subject_id',
-  'external_sample_id',
-  'phenotype',
-  'type',
-  'assay',
-  'source',
-  'project_name',
-  'project_owner',
-];
+import ConfirmationDialog from '../utils/ConfirmationDialog';
+import SubjectMetadataTable from '../SubjectMetadata';
 
 type Props = { subjectId: string };
 export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
-
   const [input, setInput] = useState<StarAlignmentPayload | null>(null);
 
   // Find out the associated LibraryId
@@ -63,30 +44,16 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
     },
   });
 
-  // The function to trigger the workflow
-  const {
-    isLoading: isLoadingMetadata,
-    isError: isErrorMetadata,
-    data: metadata,
-  } = usePortalMetadataAPI({
-    apiConfig: {
-      queryStringParameters: {
-        rowsPerPage: 1000,
-        subject_id: subjectId,
-      },
-    },
-  });
-
   const workflowTriggerRes = useMutation(
     ['wts-sa-invoke', input],
-    async (input: StarAlignmentPayload) => {
-      await invokeWTSSAWorkflow(input);
+    async (input: Record<string, string | number>) => {
+      await invokeWTSSAWorkflow(input as StarAlignmentPayload);
     },
     {}
   );
 
   // LOADING components return
-  const isLoading = isLoadingMetadata || isLoadingFastqData || isLoadingSubjectData;
+  const isLoading = isLoadingFastqData || isLoadingSubjectData;
   if (isLoading) {
     return <CircularLoaderWithText text={`Fetching FASTQs for ${subjectId}`} />;
   }
@@ -99,7 +66,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
   }
 
   // ERROR components return
-  const isLoadingInputError = isErrorMetadata || isErrorFastqData || isErrorSubjectData;
+  const isLoadingInputError = isErrorFastqData || isErrorSubjectData;
   if (isLoadingInputError) {
     return (
       <div className='mt-3 text-center'>
@@ -159,27 +126,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
         {`.`}
       </div>
 
-      <h5>Lab Metadata Table</h5>
-      <div className='mb-3'>{`This is just an additional metadata table to help you select relevant FASTQs.`}</div>
-      <div className='w-full'>
-        <DataTable
-          className='border-1 border-200'
-          size='small'
-          showGridlines
-          autoLayout
-          responsiveLayout='scroll'
-          value={metadata?.results ?? []}
-          dataKey='id'>
-          {metadataHeaderToDisplay.map((header, idx) => (
-            <Column
-              key={idx}
-              field={header}
-              header={header.replaceAll('_', ' ')}
-              headerClassName='uppercase surface-100'
-            />
-          ))}
-        </DataTable>
-      </div>
+      <SubjectMetadataTable subjectId={subjectId} />
 
       <h5>Select the FASTQ for the Star Align input</h5>
       {(fastqData?.pagination.count == 0 || !fastqData) && <div>No FASTQ Pairing Found</div>}
@@ -208,54 +155,23 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
       {input && (
         <>
           <div className='w-full mt-5 text-center'>
-            <Dialog
-              style={{ width: '75vw' }}
-              visible={isConfirmDialogOpen}
-              onHide={() => setIsConfirmDialogOpen(false)}
-              draggable={false}
-              footer={
-                <span>
-                  <Button
-                    label='Cancel'
-                    className='p-button-secondary'
-                    onClick={() => setIsConfirmDialogOpen(false)}
-                  />
-                  <Button
-                    label='Launch'
-                    className='p-button-raised p-button-primary'
-                    onClick={() => {
-                      workflowTriggerRes.mutate(input);
-                      setIsConfirmDialogOpen(false);
-                    }}
-                  />
-                </span>
-              }
-              header='Whole-Genome Sequencing Tumor-Normal (WGS T/N) Launch Confirmation'
-              headerClassName='border-bottom-1'
-              contentClassName='w-full'>
-              <div className='w-full'>
-                <div>Please confirm the following JSON before launching the workflow.</div>
-                <br />
-                <div>
-                  You can check the details on{' '}
-                  <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
-                    umccr/nextflow-stack (dev)
-                  </a>
-                  .
+            <ConfirmationDialog
+              header='Oncoanalyser Launch Confirmation'
+              payload={input}
+              onConfirm={workflowTriggerRes.mutate}
+              descriptionElement={
+                <div className='w-full'>
+                  <div>Please confirm the following JSON before launching the workflow.</div>
+                  <br />
+                  <div>
+                    You can check the details on{' '}
+                    <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
+                      umccr/nextflow-stack (dev)
+                    </a>
+                    .
+                  </div>
                 </div>
-                <StyledJsonPretty
-                  wrapperClassName='border-solid border-round-md p-3 mt-3'
-                  data={input}
-                />
-              </div>
-            </Dialog>
-            <Button
-              className='p-button-info p-button-raised bg-primary w-24rem'
-              disabled={!input}
-              onClick={() => setIsConfirmDialogOpen(true)}
-              label='Next'
-              iconPos='right'
-              icon='pi pi-chevron-right'
+              }
             />
           </div>
         </>

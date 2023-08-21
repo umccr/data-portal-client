@@ -11,23 +11,9 @@ import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import StyledJsonPretty from '../../../components/StyledJsonPretty';
 
 import './index.css';
-import { usePortalMetadataAPI } from '../../../api/metadata';
 import { invokeWGSTNWorkflow } from './aws';
 import { FastqRow, FASTQPairingPayload, usePortalSubjectParingAPI } from '../../../api/pairing';
-
-const metadataHeaderToDisplay: string[] = [
-  'subject_id',
-  'sample_id',
-  'library_id',
-  'external_subject_id',
-  'external_sample_id',
-  'phenotype',
-  'type',
-  'assay',
-  'source',
-  'project_name',
-  'project_owner',
-];
+import SubjectMetadataTable from '../SubjectMetadata';
 
 type Props = { subjectId: string };
 export default function SubjectWGSTNLaunch({ subjectId }: Props) {
@@ -53,18 +39,6 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
     },
   });
 
-  const metadataUseQueryRes = usePortalMetadataAPI({
-    apiConfig: {
-      queryStringParameters: {
-        workflow: ['clinical', 'research'],
-        phenotype: ['tumor', 'normal'],
-        subject_id: subjectId,
-        type: 'wgs',
-        rowsPerPage: 1000,
-      },
-    },
-  });
-
   // Setting default value for obvious options (Only 1 options available)
   useEffect(() => {
     if (pairingOptions.data?.length == 1) {
@@ -73,7 +47,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
   }, [pairingOptions.data]);
 
   // ERROR components return
-  if (pairingOptions.isError || metadataUseQueryRes.isError) {
+  if (pairingOptions.isError) {
     return (
       <div className='mt-3 text-center'>
         <Button
@@ -102,7 +76,7 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
   }
 
   // LOADING components return
-  if (pairingOptions.isLoading || metadataUseQueryRes.isLoading) {
+  if (pairingOptions.isLoading) {
     return <CircularLoaderWithText text={`Fetching FASTQs for ${subjectId}`} />;
   }
   if (workflowTriggerRes.isLoading) {
@@ -146,27 +120,14 @@ export default function SubjectWGSTNLaunch({ subjectId }: Props) {
         {`.`}
       </div>
 
-      <h5>Lab Metadata Table</h5>
-      <div className='mb-3'>{`This is just an additional metadata table to help you select relevant FASTQs.`}</div>
-      <div className='w-full'>
-        <DataTable
-          className='border-1 border-200'
-          size='small'
-          showGridlines
-          autoLayout
-          responsiveLayout='scroll'
-          value={metadataUseQueryRes.data?.results ?? []}
-          dataKey='id'>
-          {metadataHeaderToDisplay.map((header, idx) => (
-            <Column
-              key={idx}
-              field={header}
-              header={header.replaceAll('_', ' ')}
-              headerClassName='uppercase surface-100'
-            />
-          ))}
-        </DataTable>
-      </div>
+      <SubjectMetadataTable
+        subjectId={subjectId}
+        queryStringParameter={{
+          workflow: ['clinical', 'research'],
+          phenotype: ['tumor', 'normal'],
+          type: 'wgs',
+        }}
+      />
 
       <h5>Select Appropriate FASTQ Pairing</h5>
       {(pairingOptions.data?.length == 0 || !pairingOptions.data) && (

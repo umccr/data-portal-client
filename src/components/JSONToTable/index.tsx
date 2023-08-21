@@ -2,23 +2,23 @@ import React from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-type ObjectType = { [key: string]: (string | number | boolean | null) | (string | number)[] };
+type ObjectType = Record<
+  string,
+  (string | number | boolean | null) | (string | number)[] | JSX.Element
+>;
 
 type Props = {
   objData: ObjectType;
-  customDivMapping?: {
-    [key: string]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
-  };
 };
 
 // Type for Data Table show
 type rowDataType = {
   key: string;
-  value: string | number | (string | number)[];
+  value: string | number | (string | number)[] | JSX.Element;
 };
 
 function JSONToTable(props: Props) {
-  const { objData, customDivMapping } = props;
+  const { objData } = props;
 
   const fieldArray = convertObjToKeyValueArray(objData);
 
@@ -27,35 +27,27 @@ function JSONToTable(props: Props) {
     return <div className='font-semibold uppercase white-space-nowrap'>{rowData.key}</div>;
   };
   const valTemplate = (rowData: rowDataType) => {
-    const key = rowData.key;
-
-    // Additional props could be passed. UseCase: Could allow specific text to have hyperlink
-    let additionalDivProps = {};
-    if (customDivMapping) {
-      if (customDivMapping[key]) {
-        additionalDivProps = { ...customDivMapping[key] };
-      }
-    }
-
     if (Array.isArray(rowData.value)) {
       return (
         <>
           {rowData.value.map((item, index) => {
             return (
-              <div key={index} id={index.toString()} {...additionalDivProps}>
+              <div key={index} id={index.toString()}>
                 {item}
               </div>
             );
           })}
         </>
       );
+    } else if (typeof rowData.value === 'string' || typeof rowData.value === 'number') {
+      return <div>{rowData.value}</div>;
     } else {
-      return <div {...additionalDivProps}>{rowData.value}</div>;
+      return rowData.value;
     }
   };
 
   return (
-    <DataTable value={fieldArray} responsiveLayout='scroll'>
+    <DataTable className='w-full' value={fieldArray} responsiveLayout='scroll'>
       <Column
         headerStyle={{ display: 'none' }}
         style={{ padding: '0.5rem 1rem' }}
