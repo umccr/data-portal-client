@@ -159,11 +159,18 @@ async function checkGPLTriggerAllow(subjectData: SubjectApiRes): Promise<GplLaun
     return gplCheck;
   }
 
-  // Check if Subject has FPPE
-  const filterFPPE = limsResults.filter((r) => r.source == 'FFPE');
-  if (Array.isArray(filterFPPE) && filterFPPE.length) {
+  // Check if only 1 tumor sample exist
+  const tumorSamples = limsResults.filter((l) => l.phenotype == 'tumor');
+  if (tumorSamples.length > 1) {
     gplCheck.isGplLaunchAllowed = false;
-    gplCheck.message = `Subject has FPPE source found. GPL doesn't with FPPE sample.`;
+    gplCheck.message = `There are more than 1 tumor sample exist within this subject.`;
+    return gplCheck;
+  }
+
+  // Check if tumor sample is not FFPE
+  if (tumorSamples.find((l) => l.source == 'FFPE')) {
+    gplCheck.isGplLaunchAllowed = false;
+    gplCheck.message = `Tumor sample in this subject has a FFPE source. GPL doesn't work with FFPE tumor sample.`;
     return gplCheck;
   }
 
