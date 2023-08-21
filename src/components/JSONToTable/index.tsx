@@ -55,7 +55,7 @@ function JSONToTable(props: Props) {
   };
 
   return (
-    <DataTable value={fieldArray} responsiveLayout='scroll'>
+    <DataTable value={fieldArray}>
       <Column
         headerStyle={{ display: 'none' }}
         style={{ padding: '0.5rem 1rem' }}

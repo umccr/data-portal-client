@@ -69,8 +69,7 @@ export default function GeneratePresignedDialog(props: GeneratePresignedDialogPr
                 value: expiresIn,
               },
               { key: 'URL', value: data },
-            ]}
-            responsiveLayout='scroll'>
+            ]}>
             <Column headerStyle={{ display: 'none' }} field='key' body={keyTemplate} />
             <Column headerStyle={{ display: 'none' }} field='value' />
           </DataTable>
