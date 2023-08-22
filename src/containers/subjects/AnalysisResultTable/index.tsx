@@ -312,7 +312,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
           <AnalysisResultGDSTable title='circos plot' data={groupedData.wgsCircos} />
         </TabPanel>
         <TabPanel header='WTS'>
-          <AnalysisResultGDSTable title='rnasum report' data={groupedData.wtsRnasum} />
+          <AnalysisResultGDSTable title='rnasum report' data={groupedData.wtsRNAsum} />
           <AnalysisResultGDSTable title='qc report' data={groupedData.wtsMultiqc} />
           <AnalysisResultGDSTable title='fusions report' data={groupedData.wtsFusionsIca} />
           <AnalysisResultGDSTable title='bam' data={groupedData.wtsBamsIca} />
@@ -412,7 +412,7 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
   const wtsFusionsIca = results_gds.filter(
     (r) => r.path.includes('wts_tumor_only') && r.path.endsWith('fusions.pdf')
   );
-  const wtsRnasum = results_gds.filter((r) => r.path.endsWith('RNAseq_report.html'));
+  const wtsRNAsum = results_gds.filter((r) => r.path.endsWith('RNAseq_report.html'));
 
   const tsoCtdnaBams = results_gds.filter(
     (r) => r.path.includes('tso_ctdna') && r.path.endsWith('bam')
@@ -453,7 +453,7 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
     wtsBamsIca: wtsBamsIca,
     wtsMultiqc: wtsMultiqc,
     wtsFusionsIca: wtsFusionsIca,
-    wtsRnasum: wtsRnasum,
+    wtsRNAsum: wtsRNAsum,
     tsoCtdnaBams: tsoCtdnaBams,
     tsoCtdnaVcfs: tsoCtdnaVcfs,
     tsoCtdnaTsv: tsoCtdnaTsv,
