@@ -28,7 +28,7 @@ type Props = {
   subjectId: string;
 };
 
-function SubjectRNAsumTrigger({ subjectId }: Props) {
+export default function SubjectRNAsumLaunch({ subjectId }: Props) {
   const [input, setInput] = useState<RNAsumPayload | null>(null);
   const [isRNAsumTableShow, setIsRNAsumTableShow] = useState<boolean>(false);
 
@@ -225,8 +225,6 @@ function SubjectRNAsumTrigger({ subjectId }: Props) {
     </div>
   );
 }
-
-export default SubjectRNAsumTrigger;
 
 /**
  * Helper functions
