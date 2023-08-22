@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useMutation } from 'react-query';
 import { Button } from 'primereact/button';
-import { ConfirmDialog } from 'primereact/confirmdialog';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { Dropdown } from 'primereact/dropdown';
 import DataTableWrapper from '../../../components/DataTableWrapper';
 import { InputSwitch } from 'primereact/inputswitch';
+import ConfirmationDialog from '../utils/ConfirmationDialog';
 import {
   PRIMARY_DATASETS_OPTION,
   EXTENDED_DATASETS_OPTION,
@@ -28,12 +28,9 @@ type Props = {
   subjectId: string;
 };
 
-function SubjectRNASumLaunch({ subjectId }: Props) {
+function SubjectrnaSumTrigger({ subjectId }: Props) {
   const [input, setInput] = useState<RNAsumPayload | null>(null);
   const [isRnasumTableShow, setIsRnasumTableShow] = useState<boolean>(false);
-
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
-  const [isLaunch, setIsLaunch] = useState<boolean>(false);
 
   const columnList = [
     { header: 'Project', field: 'project' },
@@ -44,18 +41,13 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
 
   // Eligibility of RNAsum trigger check
   const subjectData = usePortalSubjectDataAPI(subjectId);
-  const rnaSumCheckData: RNASumLaunchCheckType | undefined = checkRnasumTriggerAllow(
+  const rnaSumCheckData: rnaSumTriggerCheckType | undefined = checkRnasumTriggerAllow(
     subjectData.data?.results_gds ?? []
   );
 
-  const rnaSumLaunch = useQuery(
+  const rnaSumTrigger = useMutation(
     ['rnasum-invoke', input],
-    async () => {
-      if (input) await invokeRNAsumWorkflow(input);
-    },
-    {
-      enabled: isLaunch && !!input,
-    }
+    async (payload: RNAsumPayload) => await invokeRNAsumWorkflow(payload)
   );
 
   // ERROR components return
@@ -71,7 +63,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
       </div>
     );
   }
-  if (rnaSumLaunch.isError) {
+  if (rnaSumTrigger.isError) {
     return (
       <div className='mt-3 text-center'>
         <Button
@@ -81,7 +73,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
         />
         <div className='mt-3'>{`Something went wrong on launching RNAsum!`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
-          {JSON.stringify(rnaSumLaunch.error, null, 2)}
+          {JSON.stringify(rnaSumTrigger.error, Object.getOwnPropertyNames(rnaSumTrigger.error), 2)}
         </pre>
       </div>
     );
@@ -93,12 +85,12 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
       <CircularLoaderWithText text='Please wait. We are checking if RNAsum trigger is available for this subject.' />
     );
   }
-  if (rnaSumLaunch.isLoading) {
+  if (rnaSumTrigger.isLoading) {
     return <CircularLoaderWithText text='Launching RNAsum report.' />;
   }
 
   // SUCCESS COMPONENT RETURN
-  if (rnaSumLaunch.isSuccess) {
+  if (rnaSumTrigger.isSuccess) {
     return (
       <div className='mt-3 text-center'>
         <Button
@@ -113,7 +105,7 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
   }
 
   // RNAsum not allowed
-  if (!rnaSumCheckData.isRNASumLaunchAllowed) {
+  if (!rnaSumCheckData.isrnaSumTriggerAllowed) {
     return (
       <div>
         <div className='text-2xl font-medium mb-4'>
@@ -182,79 +174,66 @@ function SubjectRNASumLaunch({ subjectId }: Props) {
       </div>
 
       <div className={'grid'}>
-        {isRnasumTableShow ? (
-          <div className='col-6'>
-            <DataTableWrapper
-              dataTableValue={ALL_DATASETS_OPTION}
-              columns={columnList}
-              isLoading={false}
-              overrideDataTableProps={{
-                selectionMode: 'single',
-                onSelectionChange: (
-                  e: DataTableSelectionSingleChangeEvent<typeof ALL_DATASETS_OPTION>
-                ) => {
-                  setInput({ subject_id: subjectId, dataset: e.value.project });
-                },
-                scrollable: true,
-                scrollHeight: '450px',
-              }}
-            />
-            <div>
-              <p className='text-sm'>*Click on row to select the dataset</p>
+        {isRnasumTableShow && (
+          <>
+            <div className={'col-2'} />
+            <div className='mt-3'>
+              <DataTableWrapper
+                dataTableValue={ALL_DATASETS_OPTION}
+                columns={columnList}
+                isLoading={false}
+                overrideDataTableProps={{
+                  selectionMode: 'single',
+                  onSelectionChange: (
+                    e: DataTableSelectionSingleChangeEvent<typeof ALL_DATASETS_OPTION>
+                  ) => {
+                    setInput({ subject_id: subjectId, dataset: e.value.project });
+                  },
+                  scrollable: true,
+                  scrollHeight: '450px',
+                }}
+              />
+              <div>
+                <p className='text-sm'>*Click on row to select the dataset</p>
+              </div>
             </div>
-          </div>
-        ) : (
-          <></>
+          </>
         )}
       </div>
 
-      <div className='w-full mt-5'>
-        <Button
-          disabled={!input}
-          onClick={() => setIsConfirmDialogOpen(true)}
-          label='Next'
-          iconPos='right'
-          icon='pi pi-chevron-right'
-          className='p-button-info p-button-raised bg-primary w-24rem'
-        />
-      </div>
-
       {/* CONFIRMATION DIALOG */}
-      <ConfirmDialog
-        draggable={false}
-        visible={isConfirmDialogOpen}
+      <ConfirmationDialog
         header='RNAsum Launch Confirmation'
-        message={
-          <div className=''>
-            <div>Please confirm the payload before you launch</div>
-            <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
-              {JSON.stringify(input, null, 2)}
-            </pre>
+        payload={input}
+        onConfirm={rnaSumTrigger.mutate}
+        descriptionElement={
+          <div className='w-full'>
+            <div>Please confirm the following JSON before launching the workflow.</div>
+            <br />
+            <div>
+              You can check the details on{' '}
+              <a
+                target={`_blank`}
+                href='https://github.com/umccr/data-portal-apis/blob/dev/docs/pipeline/automation/rnasum.md'>
+                umccr/data-portal-apis
+              </a>
+              .
+            </div>
           </div>
         }
-        acceptLabel='Launch'
-        rejectLabel='Cancel'
-        acceptClassName='p-button-raised p-button-primary'
-        rejectClassName='p-button-secondary'
-        accept={() => {
-          setIsLaunch(true);
-          setIsConfirmDialogOpen(false);
-        }}
-        reject={() => setIsConfirmDialogOpen(false)}
-        onHide={() => setIsConfirmDialogOpen(false)}
       />
     </div>
   );
 }
 
-export default SubjectRNASumLaunch;
+export default SubjectrnaSumTrigger;
 
 /**
  * Helper functions
  */
 
-type RNASumLaunchCheckType = {
-  isRNASumLaunchAllowed: boolean;
+type rnaSumTriggerCheckType = {
+  isrnaSumTriggerAllowed: boolean;
   message?: string;
   additionalJSXComponent?: JSX.Element;
 };
@@ -269,19 +248,19 @@ function groupSubjectGdsResult(results_gds: GDSRow[]) {
     ),
   };
 }
-function checkRnasumTriggerAllow(gdsResult: GDSRow[]): RNASumLaunchCheckType {
-  const rnasumCheck: RNASumLaunchCheckType = { isRNASumLaunchAllowed: true };
+function checkRnasumTriggerAllow(gdsResult: GDSRow[]): rnaSumTriggerCheckType {
+  const rnasumCheck: rnaSumTriggerCheckType = { isrnaSumTriggerAllowed: true };
 
   const rnasumInputData = groupSubjectGdsResult(gdsResult);
 
   if (rnasumInputData.wtsBamsIca.length < 1) {
-    rnasumCheck.isRNASumLaunchAllowed = false;
+    rnasumCheck.isrnaSumTriggerAllowed = false;
     rnasumCheck.message = `No transcriptome workflow output found for the Subject.`;
     return rnasumCheck;
   }
 
   if (rnasumInputData.wgsCancer.length < 1) {
-    rnasumCheck.isRNASumLaunchAllowed = false;
+    rnasumCheck.isrnaSumTriggerAllowed = false;
     rnasumCheck.message = `No umccrise workflow output found for the Subject.`;
     return rnasumCheck;
   }

@@ -16,6 +16,7 @@ export type GPLSamplePayload = {
 
 export const invokeGPL = async (payload: GPLSubjectPayload | GPLSamplePayload) => {
   const currentCredentials = await Auth.currentCredentials();
+
   const lambdaClient = new LambdaClient({
     region: REGION,
     credentials: currentCredentials,

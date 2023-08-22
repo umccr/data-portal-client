@@ -5,8 +5,8 @@ import StyledJsonPretty from '../../../components/StyledJsonPretty';
 
 type Props = {
   header: string;
-  onConfirm: (p: Record<string, string | number>) => void;
-  payload: Record<string, string | number>;
+  onConfirm: (p: any) => void;
+  payload: any;
   descriptionElement: React.ReactNode;
 };
 
@@ -14,7 +14,7 @@ function ConfirmationDialog({ header, payload, onConfirm, descriptionElement }: 
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
 
   return (
-    <>
+    <div className='w-full mt-5 text-center'>
       <Dialog
         style={{ width: '75vw' }}
         visible={isConfirmDialogOpen}
@@ -56,7 +56,7 @@ function ConfirmationDialog({ header, payload, onConfirm, descriptionElement }: 
         iconPos='right'
         icon='pi pi-chevron-right'
       />
-    </>
+    </div>
   );
 }
 

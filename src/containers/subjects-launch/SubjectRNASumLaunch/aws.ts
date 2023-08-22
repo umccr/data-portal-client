@@ -13,6 +13,7 @@ export type RNAsumPayload = {
 };
 export const invokeRNAsumWorkflow = async (payload: RNAsumPayload) => {
   const currentCredentials = await Auth.currentCredentials();
+
   const lambdaClient = new LambdaClient({
     region: REGION,
     credentials: currentCredentials,

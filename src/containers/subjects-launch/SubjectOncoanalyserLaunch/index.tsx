@@ -64,7 +64,11 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
         />
         <div className='mt-3'>{`Error launching WTS Star Alignment workflow`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
-          {JSON.stringify(oncoanalyserTrigger.error, null, 2)}
+          {JSON.stringify(
+            oncoanalyserTrigger.error,
+            Object.getOwnPropertyNames(oncoanalyserTrigger.error),
+            2
+          )}
         </pre>
       </div>
     );
@@ -127,28 +131,24 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
             </>
           )}
           {payload && oncoanalyserInputMode && (
-            <>
-              <div className='w-full mt-5 text-center'>
-                <ConfirmationDialog
-                  header='Oncoanalyser Launch Confirmation'
-                  payload={{ subject_id: subjectId, mode: oncoanalyserInputMode, ...payload }}
-                  onConfirm={oncoanalyserTrigger.mutate}
-                  descriptionElement={
-                    <div className='w-full'>
-                      <div>Please confirm the following JSON before launching the workflow.</div>
-                      <br />
-                      <div>
-                        You can check the details on{' '}
-                        <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
-                          umccr/nextflow-stack (dev)
-                        </a>
-                        .
-                      </div>
-                    </div>
-                  }
-                />
-              </div>
-            </>
+            <ConfirmationDialog
+              header='Oncoanalyser Launch Confirmation'
+              payload={{ subject_id: subjectId, mode: oncoanalyserInputMode, ...payload }}
+              onConfirm={oncoanalyserTrigger.mutate}
+              descriptionElement={
+                <div className='w-full'>
+                  <div>Please confirm the following JSON before launching the workflow.</div>
+                  <br />
+                  <div>
+                    You can check the details on{' '}
+                    <a target={`_blank`} href='https://github.com/umccr/nextflow-stack/pull/29'>
+                      umccr/nextflow-stack (dev)
+                    </a>
+                    .
+                  </div>
+                </div>
+              }
+            />
           )}
         </>
       )}

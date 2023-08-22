@@ -1,20 +1,16 @@
-import React, { useState } from 'react';
-import { useQuery } from 'react-query';
+import React from 'react';
+import { useMutation, useQuery } from 'react-query';
 import { Button } from 'primereact/button';
-import { ConfirmDialog } from 'primereact/confirmdialog';
 
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import JSONToTable from '../../../components/JSONToTable';
-import { usePortalSubjectDataAPI } from '../../../api/subject';
-import { GDSRow } from '../../../api/gds';
+import { SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
 import { invokeGPL } from './aws';
 import { Message } from 'primereact/message';
+import ConfirmationDialog from '../utils/ConfirmationDialog';
 
 type Props = { subjectId: string };
 function SubjectGPLLaunch({ subjectId }: Props) {
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<boolean>(false);
-  const [isLaunch, setIsLaunch] = useState<boolean>(false);
-
   // Eligibility of GPL trigger check
   const subjectApiQuery = usePortalSubjectDataAPI(subjectId);
   const subjectApiData = subjectApiQuery.data;
@@ -22,32 +18,28 @@ function SubjectGPLLaunch({ subjectId }: Props) {
   const gplLaunchCheckQuery = useQuery(
     ['checkGPLTriggerAllow', subjectId],
     async () => {
-      if (subjectApiData) return await checkGPLTriggerAllow(subjectApiData.results_gds);
+      if (subjectApiData) return await checkGPLTriggerAllow(subjectApiData);
     },
     {
       enabled: !!subjectApiData,
     }
   );
   const gplLaunchCheckData: GplLaunchCheckType | undefined = gplLaunchCheckQuery.data;
-
-  const gplLaunch = useQuery(
+  const gplTrigger = useMutation(
     ['gpl-invoke', subjectId],
-    async () => await invokeGPL({ subject_id: subjectId }),
-    {
-      enabled: isLaunch,
-    }
+    async (payload: { subject_id: string }) => await invokeGPL(payload)
   );
 
   // LOADING COMPONENT RETURN
   if (subjectApiQuery.isLoading) {
     return <CircularLoaderWithText text='Checking GPL report trigger. Please wait...' />;
   }
-  if (gplLaunch.isLoading) {
+  if (gplTrigger.isLoading) {
     return <CircularLoaderWithText text='Launching GPL report' />;
   }
 
   // ERROR components return
-  if (gplLaunch.isError) {
+  if (gplTrigger.isError) {
     return (
       <div className='mt-3 text-center'>
         <Button
@@ -57,14 +49,14 @@ function SubjectGPLLaunch({ subjectId }: Props) {
         />
         <div className='mt-3'>{`Something went wrong on launching RNAsum!`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
-          {JSON.stringify(gplLaunch.error, null, 2)}
+          {JSON.stringify(gplTrigger.error, Object.getOwnPropertyNames(gplTrigger.error), 2)}
         </pre>
       </div>
     );
   }
 
   // SUCCESS COMPONENT RETURN
-  if (gplLaunch.isSuccess) {
+  if (gplTrigger.isSuccess) {
     return (
       <div className='mt-3 text-center'>
         <Button
@@ -113,39 +105,25 @@ function SubjectGPLLaunch({ subjectId }: Props) {
         </a>
       </div>
 
-      <div className='w-full mt-5'>
-        <Button
-          onClick={() => setIsConfirmDialogOpen(true)}
-          label='Next'
-          className='p-button-info p-button-raised bg-primary w-24rem'
-          iconPos='right'
-          icon='pi pi-chevron-right'
-        />
-      </div>
-
-      {/* CONFIRMATION DIALOG */}
-      <ConfirmDialog
-        draggable={false}
-        visible={isConfirmDialogOpen}
+      <ConfirmationDialog
         header='GPL Launch Confirmation'
-        message={
-          <div className=''>
-            <div>Please confirm the payload before you launch</div>
-            <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
-              {JSON.stringify({ subject_id: subjectId }, null, 2)}
-            </pre>
+        payload={{ subject_id: subjectId }}
+        onConfirm={gplTrigger.mutate}
+        descriptionElement={
+          <div className='w-full'>
+            <div>Please confirm the following JSON before launching the workflow.</div>
+            <br />
+            <div>
+              You can check the details on{' '}
+              <a
+                target={`_blank`}
+                href='https://github.com/umccr/gridss-purple-linx-nf/tree/main/deployment#usage'>
+                umccr/gridss-purple-linx-nf
+              </a>
+              .
+            </div>
           </div>
         }
-        acceptLabel='Launch'
-        rejectLabel='Cancel'
-        acceptClassName='p-button-raised p-button-primary'
-        rejectClassName='p-button-secondary'
-        accept={() => {
-          setIsLaunch(true);
-          setIsConfirmDialogOpen(false);
-        }}
-        reject={() => setIsConfirmDialogOpen(false)}
-        onHide={() => setIsConfirmDialogOpen(false)}
       />
     </div>
   );
@@ -163,7 +141,10 @@ type GplLaunchCheckType = {
   additionalJSXComponent?: JSX.Element;
 };
 
-async function checkGPLTriggerAllow(gdsResults: GDSRow[]): Promise<GplLaunchCheckType> {
+async function checkGPLTriggerAllow(subjectData: SubjectApiRes): Promise<GplLaunchCheckType> {
+  const gdsResults = subjectData.results_gds;
+  const limsResults = subjectData.lims;
+
   const gplCheck: GplLaunchCheckType = { isGplLaunchAllowed: true };
 
   // Check if GPL report had exist in bucket
@@ -175,6 +156,21 @@ async function checkGPLTriggerAllow(gdsResults: GDSRow[]): Promise<GplLaunchChec
     gplCheck.message =
       'Existing LINX report found. Please navigate Subject Overview page for download.';
     gplCheck.additionalJSXComponent = <JSONToTable objData={gplReport[0]} />;
+    return gplCheck;
+  }
+
+  // Check if only 1 tumor sample exist
+  const tumorSamples = limsResults.filter((l) => l.phenotype == 'tumor');
+  if (tumorSamples.length > 1) {
+    gplCheck.isGplLaunchAllowed = false;
+    gplCheck.message = `There are more than 1 tumor sample exist within this subject.`;
+    return gplCheck;
+  }
+
+  // Check if tumor sample is not FFPE
+  if (tumorSamples.find((l) => l.source == 'FFPE')) {
+    gplCheck.isGplLaunchAllowed = false;
+    gplCheck.message = `Tumor sample in this subject has a FFPE source. GPL doesn't work with FFPE tumor sample.`;
     return gplCheck;
   }
 
