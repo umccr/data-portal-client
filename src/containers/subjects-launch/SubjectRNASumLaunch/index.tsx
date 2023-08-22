@@ -41,11 +41,11 @@ function SubjectRNAsumTrigger({ subjectId }: Props) {
 
   // Eligibility of RNAsum trigger check
   const subjectData = usePortalSubjectDataAPI(subjectId);
-  const RNAsumCheckData: RNAsumTriggerCheckType | undefined = checkRNAsumTriggerAllow(
+  const rnasumCheckData: RNAsumTriggerCheckType | undefined = checkRNAsumTriggerAllow(
     subjectData.data?.results_gds ?? []
   );
 
-  const RNAsumTrigger = useMutation(
+  const rnasumTrigger = useMutation(
     ['rnasum-invoke', input],
     async (payload: RNAsumPayload) => await invokeRNAsumWorkflow(payload)
   );
@@ -63,7 +63,7 @@ function SubjectRNAsumTrigger({ subjectId }: Props) {
       </div>
     );
   }
-  if (RNAsumTrigger.isError) {
+  if (rnasumTrigger.isError) {
     return (
       <div className='mt-3 text-center'>
         <Button
@@ -73,24 +73,24 @@ function SubjectRNAsumTrigger({ subjectId }: Props) {
         />
         <div className='mt-3'>{`Something went wrong on launching RNAsum!`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
-          {JSON.stringify(RNAsumTrigger.error, Object.getOwnPropertyNames(RNAsumTrigger.error), 2)}
+          {JSON.stringify(rnasumTrigger.error, Object.getOwnPropertyNames(rnasumTrigger.error), 2)}
         </pre>
       </div>
     );
   }
 
   // LOADER COMPONENT RETURN
-  if (subjectData.isLoading || subjectData.isLoading || !RNAsumCheckData) {
+  if (subjectData.isLoading || subjectData.isLoading || !rnasumCheckData) {
     return (
       <CircularLoaderWithText text='Please wait. We are checking if RNAsum trigger is available for this subject.' />
     );
   }
-  if (RNAsumTrigger.isLoading) {
+  if (rnasumTrigger.isLoading) {
     return <CircularLoaderWithText text='Launching RNAsum report.' />;
   }
 
   // SUCCESS COMPONENT RETURN
-  if (RNAsumTrigger.isSuccess) {
+  if (rnasumTrigger.isSuccess) {
     return (
       <div className='mt-3 text-center'>
         <Button
@@ -105,15 +105,15 @@ function SubjectRNAsumTrigger({ subjectId }: Props) {
   }
 
   // RNAsum not allowed
-  if (!RNAsumCheckData.isRNAsumTriggerAllowed) {
+  if (!rnasumCheckData.isRNAsumTriggerAllowed) {
     return (
       <div>
         <div className='text-2xl font-medium mb-4'>
           {subjectId} - Unable to trigger RNAsum for this subject
         </div>
-        {RNAsumCheckData.message ? <div>{RNAsumCheckData.message}</div> : <></>}
-        {RNAsumCheckData.additionalJSXComponent ? (
-          <div className='mt-5'>{RNAsumCheckData.additionalJSXComponent}</div>
+        {rnasumCheckData.message ? <div>{rnasumCheckData.message}</div> : <></>}
+        {rnasumCheckData.additionalJSXComponent ? (
+          <div className='mt-5'>{rnasumCheckData.additionalJSXComponent}</div>
         ) : (
           <></>
         )}
@@ -205,7 +205,7 @@ function SubjectRNAsumTrigger({ subjectId }: Props) {
       <ConfirmationDialog
         header='RNAsum Launch Confirmation'
         payload={input}
-        onConfirm={RNAsumTrigger.mutate}
+        onConfirm={rnasumTrigger.mutate}
         descriptionElement={
           <div className='w-full'>
             <div>Please confirm the following JSON before launching the workflow.</div>
