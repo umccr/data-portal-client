@@ -61,7 +61,7 @@ const styles = (theme) => ({
     // ...theme.mixins.toolbar,
   },
   drawerPaper: {
-    top: '4.5rem',
+    top: '3rem',
     width: drawerWidth,
   },
   content: {

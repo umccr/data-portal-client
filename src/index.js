@@ -95,12 +95,11 @@ const theme = createTheme({
 
 ReactDOM.render(
   <Provider store={store}>
-    <Alert
-      severity='error'
-      style={{ position: 'fixed', width: '100%', zIndex: 10, alignItems: 'center' }}>
-      <AlertTitle>We are moving!</AlertTitle>
-      {`Please head up to our new portal version at `}
-      <a href='https://portal.umccr.org/'>https://portal.umccr.org/</a>
+    <Alert severity='error' style={{ position: 'fixed', width: '100%', zIndex: 10 }}>
+      <AlertTitle>
+        We are moving! {`Please use the new portal at `}
+        <a href='https://portal.umccr.org'>https://portal.umccr.org</a>
+      </AlertTitle>
     </Alert>
     <Router>
       <MuiThemeProvider theme={theme}>
