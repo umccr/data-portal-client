@@ -11,6 +11,7 @@ import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import reducer from './reducers';
 import { createTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { Alert, AlertTitle } from '@material-ui/lab';
 
 Amplify.configure({
   Auth: {
@@ -94,6 +95,12 @@ const theme = createTheme({
 
 ReactDOM.render(
   <Provider store={store}>
+    <Alert severity='error' style={{ position: 'fixed', width: '100%', zIndex: 10 }}>
+      <AlertTitle>
+        We are moving! {`Please use the new portal at `}
+        <a href='https://portal.umccr.org'>https://portal.umccr.org</a>
+      </AlertTitle>
+    </Alert>
     <Router>
       <MuiThemeProvider theme={theme}>
         <App />

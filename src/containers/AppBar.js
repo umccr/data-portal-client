@@ -546,7 +546,7 @@ class AppBar extends Component {
 
     return (
       <Fragment>
-        <DefaultAppBar position='fixed' className={classes.appBar}>
+        <DefaultAppBar position='fixed' style={{ top: '3rem' }} className={classes.appBar}>
           <Toolbar>
             <IconButton
               color='inherit'
