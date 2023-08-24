@@ -88,7 +88,6 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
       </div>
     );
   }
-  console.log('subjectdata', subjectData);
   return (
     <div>
       <div className='text-2xl font-medium mb-4'>{subjectId} - Oncoanalyser</div>
