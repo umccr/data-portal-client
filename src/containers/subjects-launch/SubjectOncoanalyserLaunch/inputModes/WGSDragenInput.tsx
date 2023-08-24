@@ -3,7 +3,7 @@ import { SubjectApiRes } from '../../../../api/subject';
 import { Dropdown } from 'primereact/dropdown';
 import { isEqual } from 'lodash';
 import { RadioButton } from 'primereact/radiobutton';
-import { InputText } from 'primereact/inputtext';
+import JSONToTable from '../../../../components/JSONToTable';
 
 export type WGSInput = {
   tumor_wgs_sample_id: string;
@@ -44,6 +44,7 @@ export default function WGSDragenInput({ subjectData, onWGSPayloadChange }: Prop
   return (
     <div>
       <h5>Tumor WGS</h5>
+      <label className='block my-3'>Select a tumor sample</label>
       <div className='flex flex-wrap gap-3'>
         {tumorLims.map((d, idx) => {
           const isSelected = isEqual(
@@ -57,10 +58,10 @@ export default function WGSDragenInput({ subjectData, onWGSPayloadChange }: Prop
             }
           );
           let divClassName =
-            'flex align-items-center mb-4 p-3 cursor-pointer border-round-xl border-solid border-1 border-300';
+            'flex align-items-center mb-4 p-3 cursor-pointer border-round-xl border-solid border-1 border-300 shadow-1';
 
           if (isSelected) {
-            divClassName += ` surface-400`;
+            divClassName += ` shadow-5 border-900`;
           }
 
           return (
@@ -75,31 +76,23 @@ export default function WGSDragenInput({ subjectData, onWGSPayloadChange }: Prop
                 }))
               }>
               <RadioButton className='mr-3 ' checked={isSelected} />
-              <div className='flex overflow-hidden gap-4'>
-                <div>
-                  <label className='block'>Sample Id</label>
-                  <InputText value={d.sample_id} className='block' />
-                </div>
-                <div>
-                  <label className='block'>Library Id</label>
-                  <InputText value={d.library_id} className='block' />
-                </div>
-              </div>
+              <JSONToTable objData={{ 'Sample Id': d.sample_id, 'Library Id': d.library_id }} />
             </div>
           );
         })}
       </div>
       <div>
-        <label className='block'>BAM Path</label>
+        <label className='block my-3'>Select the BAM path for tumor sample</label>
         <Dropdown
           value={wgsInput.tumor_wgs_bam}
           onChange={(e) => setWgsInput((p) => ({ ...p, tumor_wgs_bam: e.value }))}
-          options={gdsData.map((v) => v.path)}
+          options={gdsData.filter((v) => v.path.endsWith('tumor.bam')).map((v) => v.path)}
           className='w-full'
         />
       </div>
 
       <h5>Normal WGS</h5>
+      <label className='block my-3'>Select a normal sample</label>
       <div className='flex flex-wrap gap-3'>
         {normalLims.map((d, idx) => {
           const isSelected = isEqual(
@@ -116,7 +109,7 @@ export default function WGSDragenInput({ subjectData, onWGSPayloadChange }: Prop
             'flex flex-row align-items-center mb-4 p-3 cursor-pointer border-round-xl border-solid border-1 border-300';
 
           if (isSelected) {
-            divClassName += ` surface-400`;
+            divClassName += ` shadow-5 border-900`;
           }
 
           return (
@@ -131,28 +124,17 @@ export default function WGSDragenInput({ subjectData, onWGSPayloadChange }: Prop
                 }))
               }>
               <RadioButton className='mr-3 ' checked={isSelected} />
-              <div className='flex flex-column overflow-hidden gap-4'>
-                <div className='flex flex-row overflow-hidden gap-4'>
-                  <div>
-                    <label className='block'>Sample Id</label>
-                    <InputText value={d.sample_id} className='block' />
-                  </div>
-                  <div>
-                    <label className='block'>Library Id</label>
-                    <InputText value={d.library_id} className='block' />
-                  </div>
-                </div>
-              </div>
+              <JSONToTable objData={{ 'Sample Id': d.sample_id, 'Library Id': d.library_id }} />
             </div>
           );
         })}
       </div>
       <div>
-        <label className='block'>BAM Path</label>
+        <label className='block my-3'>Select the BAM path for normal sample</label>
         <Dropdown
           value={wgsInput.normal_wgs_bam}
           onChange={(e) => setWgsInput((p) => ({ ...p, normal_wgs_bam: e.value }))}
-          options={gdsData.map((v) => v.path)}
+          options={gdsData.filter((v) => v.path.endsWith('normal.bam')).map((v) => v.path)}
           className='w-full'
         />
       </div>

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Dropdown } from 'primereact/dropdown';
 import { useMutation } from 'react-query';
 
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
@@ -11,6 +10,7 @@ import WGSDragenInput, { WGSInput } from './inputModes/WGSDragenInput';
 import WTSStarAlignInput, { WTSInput } from './inputModes/WTSStarAlignInput';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import { Button } from 'primereact/button';
+import { TabPanel, TabView } from 'primereact/tabview';
 
 export enum OncoanalyserEnum {
   WGS = 'wgs',
@@ -20,12 +20,12 @@ export enum OncoanalyserEnum {
   // WGTS_EXISTING_WTS = 'wgts_existing_wts',
   // WGTS_EXISTING_BOTH = 'wgts_existing_both',
 }
+const oncoanalyserList = Object.values(OncoanalyserEnum);
 
 type Props = { subjectId: string };
 export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
-  const [oncoanalyserInputMode, setOncoanalyserInputMode] = useState<OncoanalyserEnum | null>(
-    OncoanalyserEnum.WTS
-  );
+  const [activeIndex, setActiveIndex] = useState(0);
+  const oncoanalyserInputMode = oncoanalyserList[activeIndex];
 
   const { isLoading: isLoadingSubject, data: subjectData } = usePortalSubjectDataAPI(subjectId);
 
@@ -93,43 +93,38 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
     <div>
       <div className='text-2xl font-medium mb-4'>{subjectId} - Oncoanalyser</div>
       <OncoanalyserDescription subjectId={subjectId} />
-      <SubjectMetadataTable subjectId={subjectId} />
+      <SubjectMetadataTable
+        subjectId={subjectId}
+        queryStringParameter={{
+          type: ['wgs', 'wts'],
+        }}
+      />
+
+      <h5>Oncoanalyser Payload Selection</h5>
       {isLoadingSubject ? (
         <CircularLoaderWithText text={`Loading subject data`} />
       ) : !subjectData ? (
         <>No data found</>
       ) : (
-        <>
-          <h5>Oncoanalyser Mode</h5>
-          <div className='w-full' style={{ cursor: 'not-allowed' }}>
-            <Dropdown
-              value={oncoanalyserInputMode}
-              onChange={(e) => {
-                setOncoanalyserInputMode(e.value);
-                setPayload({});
-              }}
-              options={Object.values(OncoanalyserEnum)}
-              className='w-full'
-            />
-          </div>
-          {oncoanalyserInputMode && (
-            <>
-              {[
-                OncoanalyserEnum.WGS,
-                OncoanalyserEnum.WGTS,
-                // OncoanalyserEnum.WGTS_EXISTING_WTS,
-              ].includes(oncoanalyserInputMode) && (
-                <WGSDragenInput subjectData={subjectData} onWGSPayloadChange={onPayloadChange} />
-              )}
-              {[
-                OncoanalyserEnum.WTS,
-                OncoanalyserEnum.WGTS,
-                // OncoanalyserEnum.WGTS_EXISTING_WGS,
-              ].includes(oncoanalyserInputMode) && (
-                <WTSStarAlignInput subjectData={subjectData} onWTSPayloadChange={onPayloadChange} />
-              )}
-            </>
-          )}
+        <div className='border-round-md border-1 border-500 pb-5'>
+          <TabView
+            activeIndex={activeIndex}
+            onTabChange={(e) => {
+              setPayload({});
+              setActiveIndex(e.index);
+            }}>
+            <TabPanel header={OncoanalyserEnum.WGS}>
+              <WGSDragenInput subjectData={subjectData} onWGSPayloadChange={onPayloadChange} />
+            </TabPanel>
+            <TabPanel header={OncoanalyserEnum.WTS}>
+              <WTSStarAlignInput subjectData={subjectData} onWTSPayloadChange={onPayloadChange} />
+            </TabPanel>
+            <TabPanel header={OncoanalyserEnum.WGTS}>
+              <WGSDragenInput subjectData={subjectData} onWGSPayloadChange={onPayloadChange} />
+              <WTSStarAlignInput subjectData={subjectData} onWTSPayloadChange={onPayloadChange} />
+            </TabPanel>
+          </TabView>
+
           {payload && oncoanalyserInputMode && (
             <ConfirmationDialog
               header='Oncoanalyser Launch Confirmation'
@@ -150,7 +145,7 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
               }
             />
           )}
-        </>
+        </div>
       )}
     </div>
   );
@@ -163,8 +158,8 @@ const OncoanalyserDescription = ({ subjectId }: { subjectId: string }) => (
   <>
     <h5 className='mt-0'>Description</h5>
     <div>
-      {`This page should be able to launch the Oncoanalyser workflow for SubjectId "${subjectId}". 
-        Oncoanalyser can be triggered with 6 modes/payloads depending on whether WTS (Star Alignment) 
+      {`This page should able to launch the Oncoanalyser workflow for SubjectId "${subjectId}". 
+        Oncoanalyser can be triggered with different modes/payloads depending on whether WTS (Star Alignment) 
         and WGS data are present, or if Oncoanalyser has run on each WTS/WGS individually. 
         The combination are described as follows:`}
       <ul className='list-disc block'>
@@ -180,7 +175,7 @@ const OncoanalyserDescription = ({ subjectId }: { subjectId: string }) => (
           <b>{'wgts: '}</b>
           {'Both WGS and WTS (Star Alignment) data present.'}
         </li>
-        <li className='my-1'>
+        {/* <li className='my-1'>
           <b>{'[WIP] wgts_existing_wgs: '}</b>
           {'WTS (Star Alignment) with existing WGS Oncoanalyser output.'}
         </li>
@@ -191,9 +186,9 @@ const OncoanalyserDescription = ({ subjectId }: { subjectId: string }) => (
         <li className='my-1'>
           <b>{'[WIP] wgts_existing_both: '}</b>
           {'Both WGS and WTS Oncoanalyser output.'}
-        </li>
+        </li> */}
       </ul>
-      {`The following will interface will construct the relevant payload and invoke the Oncoanalyser lambda described at `}
+      {`The following interface will construct the relevant payload and invoke the Oncoanalyser lambda described at `}
       <a target={`_blank`} href='https://github.com/umccr/nextflow-stack#oncoanalyser'>
         umccr/nextflow-stack
       </a>

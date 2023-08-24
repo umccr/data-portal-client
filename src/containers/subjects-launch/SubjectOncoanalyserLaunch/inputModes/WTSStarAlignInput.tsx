@@ -3,7 +3,7 @@ import { SubjectApiRes } from '../../../../api/subject';
 import { Dropdown } from 'primereact/dropdown';
 import { isEqual } from 'lodash';
 import { RadioButton } from 'primereact/radiobutton';
-import { InputText } from 'primereact/inputtext';
+import JSONToTable from '../../../../components/JSONToTable';
 
 export type WTSInput = {
   tumor_wts_sample_id: string;
@@ -32,6 +32,7 @@ export default function WTSStarAlignInput({ subjectData, onWTSPayloadChange }: P
   return (
     <div>
       <h5>Tumor WTS</h5>
+      <label className='block my-3'>Select a tumor sample</label>
       <div className='flex flex-wrap gap-3'>
         {limsData.map((d, idx) => {
           const isSelected = isEqual(
@@ -48,7 +49,7 @@ export default function WTSStarAlignInput({ subjectData, onWTSPayloadChange }: P
             'flex align-items-center mb-4 p-3 cursor-pointer border-round-xl border-solid border-1 border-300';
 
           if (isSelected) {
-            divClassName += ` surface-400`;
+            divClassName += ` shadow-5 border-900`;
           }
 
           return (
@@ -63,22 +64,13 @@ export default function WTSStarAlignInput({ subjectData, onWTSPayloadChange }: P
                 }))
               }>
               <RadioButton className='mr-3 ' checked={isSelected} />
-              <div className='flex overflow-hidden gap-4'>
-                <div>
-                  <label className='block'>Sample Id</label>
-                  <InputText value={d.sample_id} className='block' />
-                </div>
-                <div>
-                  <label className='block'>Library Id</label>
-                  <InputText value={d.library_id} className='block' />
-                </div>
-              </div>
+              <JSONToTable objData={{ 'Sample Id': d.sample_id, 'Library Id': d.library_id }} />
             </div>
           );
         })}
       </div>
       <div>
-        <label className='block'>BAM Path</label>
+        <label className='block my-3'>Select the BAM path for tumor sample</label>
         <Dropdown
           value={wtsInput.tumor_wts_bam}
           onChange={(e) => setWgsInput((p) => ({ ...p, tumor_wts_bam: e.value }))}
