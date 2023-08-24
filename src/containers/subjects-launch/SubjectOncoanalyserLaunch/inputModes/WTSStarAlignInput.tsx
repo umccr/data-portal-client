@@ -74,7 +74,7 @@ export default function WTSStarAlignInput({ subjectData, onWTSPayloadChange }: P
         <Dropdown
           value={wtsInput.tumor_wts_bam}
           onChange={(e) => setWgsInput((p) => ({ ...p, tumor_wts_bam: e.value }))}
-          options={wtsStarAlignData.map((v) => v.key)}
+          options={wtsStarAlignData.filter((v) => v.key.endsWith('tumor.bam')).map((v) => v.key)}
           className='w-full'
         />
       </div>

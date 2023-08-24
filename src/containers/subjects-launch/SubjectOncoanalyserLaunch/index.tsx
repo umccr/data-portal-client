@@ -88,7 +88,7 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
       </div>
     );
   }
-
+  console.log('subjectdata', subjectData);
   return (
     <div>
       <div className='text-2xl font-medium mb-4'>{subjectId} - Oncoanalyser</div>
@@ -103,7 +103,10 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
       <h5>Oncoanalyser Payload Selection</h5>
       {isLoadingSubject ? (
         <CircularLoaderWithText text={`Loading subject data`} />
-      ) : !subjectData ? (
+      ) : !subjectData ||
+        (subjectData.lims.length == 0 &&
+          subjectData.results.length == 0 &&
+          subjectData.results_gds.length == 0) ? (
         <>No data found</>
       ) : (
         <div className='border-round-md border-1 border-500 pb-5'>
