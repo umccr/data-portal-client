@@ -14,11 +14,12 @@ const COLUMN_TO_DISPLAY = [
   'library_id',
   'sample_id',
   'external_sample_id',
+  'workflow',
+  'illumina_id',
   'phenotype',
   'type',
   'assay',
   'source',
-  'override_cycles',
 ];
 
 type ObjectStringValType = Record<string, string | number | boolean | null>;
