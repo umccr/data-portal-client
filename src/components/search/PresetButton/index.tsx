@@ -20,6 +20,7 @@ export default function PresetButton({ chipData = [], handleClick }: Props) {
         {chipData.map((data) => {
           return (
             <Button
+              outlined
               key={data.key as number}
               label={data.label as string}
               onClick={handleChipClick(data)}

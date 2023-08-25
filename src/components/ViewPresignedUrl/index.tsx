@@ -4,11 +4,9 @@ import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../CircularLoaderWithText';
 import StyledJsonPretty from '../StyledJsonPretty';
 
-import { SelectButton } from 'primereact/selectbutton';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-
-import './index.css';
+import { Checkbox } from 'primereact/checkbox';
 
 export const IMAGE_FILETYPE_LIST: string[] = ['png', 'jpg', 'jpeg'];
 export const IFRAME_FILETYPE_LIST: string[] = ['html', 'pdf'];
@@ -136,16 +134,16 @@ export default function ViewPresignedUrl({ presingedUrl }: Props) {
     const rowNumTemplate = (_: string, prop: { rowIndex: number }) => {
       return <pre className='m-0'>{prop.rowIndex + 2} </pre>;
     };
-    const options = ['Table', 'Raw'];
     return (
       <div className='w-full h-full flex flex-column'>
-        <SelectButton
-          id='toggle-table-view'
-          className='pb-2'
-          value={isPrettifyPreview ? 'Table' : 'Raw'}
-          onChange={(e) => setIsPrettifyPreview(e.value == 'Table' ? true : false)}
-          options={options}
-        />
+        <div className='mb-2 flex align-items-center'>
+          <Checkbox
+            className='ml-1'
+            checked={isPrettifyPreview}
+            onChange={() => setIsPrettifyPreview((p) => !p)}
+          />
+          <div className='ml-2'>Table View</div>
+        </div>
 
         {isPrettifyPreview ? (
           <DataTable

@@ -10,6 +10,20 @@
   border-radius: 50% !important;
 }
 
+.p-paginator .p-paginator-current {
+  background-color: transparent !important;
+  border: 0 none !important;
+  color: #6c757d !important;
+  min-width: 3rem !important;
+  height: 3rem !important;
+  margin: 0.143rem !important;
+  padding: 0 0.5rem !important;
+}
+
+.p-paginator-pages button {
+  margin: 0.1rem !important;
+}
+
 .ui-datatable-hor-scroll .ui-datatable-tablewrapper,
 .scrolling-div .ui-datatable-tablewrapper {
   overflow: auto;
