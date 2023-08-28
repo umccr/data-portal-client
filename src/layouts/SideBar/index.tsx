@@ -22,24 +22,30 @@ function SideBar({ sideBarElement, mainPageElement }: sideBarProps) {
         {isDrawerOpen ? (
           <>
             <Button
+              text
+              rounded
+              size='large'
+              severity='secondary'
               onClick={handleIsDrawerOpenChange}
               icon={openCloseIcon}
-              className='p-button-rounded p-button-secondary p-button-text absolute'
-              style={{ top: '1rem', right: '1rem' }}
+              className='absolute'
+              style={{ top: '1.5rem', right: '1rem' }}
               aria-label='Cancel'
             />
             {sideBarElement}
           </>
         ) : (
-          <>
-            <Button
-              onClick={handleIsDrawerOpenChange}
-              icon={openCloseIcon}
-              className='top-0 right-0 p-button-rounded p-button-secondary p-button-text absolute'
-              aria-label='Cancel'
-            />
-            {sideBarElement}
-          </>
+          <Button
+            text
+            rounded
+            size='large'
+            severity='secondary'
+            onClick={handleIsDrawerOpenChange}
+            icon={openCloseIcon}
+            className='right-0 absolute'
+            style={{ top: '1.5rem' }}
+            aria-label='Cancel'
+          />
         )}
       </div>
       <div className='layout-main-container'>

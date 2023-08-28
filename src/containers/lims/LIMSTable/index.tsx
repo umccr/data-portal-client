@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext';
 import SideBar from '../../../layouts/SideBar';
 import LimsSideBar from '../LimsSideBar';
+import { Card } from 'primereact/card';
 
 type Props = {
   defaultQueryParam?: Record<string, string[] | number[]>;
@@ -171,9 +172,9 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
 
   const renderTableOnly = () => {
     return (
-      <div>
+      <Card>
         <div className='w-full pb-4'>
-          <span className='lg:w-4 p-input-icon-left'>
+          <span className='w-full p-input-icon-left'>
             <i className='pi pi-search' />
             <InputText
               className='w-full p-inputtext'
@@ -194,7 +195,7 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
           paginationProps={paginationProps}
           handlePaginationPropsChange={handleTablePaginationPropChange}
         />
-      </div>
+      </Card>
     );
   };
 

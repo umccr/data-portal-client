@@ -47,7 +47,9 @@ function SubjectFeatureTable(props: Props) {
     const filename = new URL(item).pathname.split('/').pop();
     return (
       <React.Fragment>
-        <div className='flex flex-wrap align-items-center justify-content-center'>
+        <div
+          style={{ overflowWrap: 'anywhere' }}
+          className='flex flex-wrap align-items-center justify-content-center'>
           <h4 className='mb-1'>{filename}</h4>
         </div>
       </React.Fragment>

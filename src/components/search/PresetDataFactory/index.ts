@@ -1,5 +1,5 @@
 export class PresetDataFactory {
-  private static chipStyle: string | number = 'surface-600';
+  private static chipStyle: string | number = '';
 
   /**
    * Well-known files of interest patterns for primary data stage from SequenceRun and BCL_CONVERT output

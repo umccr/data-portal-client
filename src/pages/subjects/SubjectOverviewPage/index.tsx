@@ -18,22 +18,28 @@ function SubjectOverviewPage() {
   return (
     <div className={'grid'}>
       <div className={'col-12 lg:col-4'}>
-        <Panel className='mb-3 mr-3 inline-block vertical-align-top w-12' header='Overview'>
+        <Panel
+          className='border-1 border-400 border-round-md mb-3 mr-3 inline-block vertical-align-top w-12'
+          header='Overview'>
           <SubjectOverviewTable subjectId={subjectId} />
         </Panel>
-        <Panel header={'Feature'} toggleable={true} style={{ marginTop: '1em' }}>
+        <Panel
+          className='border-1 border-400 border-round-md '
+          header={'Feature'}
+          toggleable={true}
+          style={{ marginTop: '1em' }}>
           <SubjectFeatureTable subjectId={subjectId} />
         </Panel>
       </div>
       <div className={'col-12 lg:col-8'}>
         <Panel
-          className='mb-3 mr-3 inline-block vertical-align-top w-12'
+          className='border-1 border-400 border-round-md mb-3 mr-3 inline-block vertical-align-top w-12'
           header='Sample Information'
           toggleable>
           <SampleInformationTable subjectId={subjectId} />
         </Panel>
         <Panel
-          className='mb-3 mr-3 inline-block vertical-align-top w-12'
+          className='border-1 border-400 border-round-md mb-3 mr-3 inline-block vertical-align-top w-12'
           header='Analysis Results'
           toggleable>
           <AnalysisResultsTable subjectId={subjectId} />
