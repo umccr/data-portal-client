@@ -7,8 +7,8 @@ import { Button } from 'primereact/button';
 import SubjectGPLLaunch from '../../../containers/subjects-launch/SubjectGPLLaunch';
 import SubjectRNAsumLaunch from '../../../containers/subjects-launch/SubjectRNAsumLaunch';
 import SubjectWGSTNLaunch from '../../../containers/subjects-launch/SubjectWGSTNLaunch';
-import SubjectLaunchStarAlign from '../../../containers/subjects-launch/SubjectWTSStarAlignment';
-import SubjectLaunchOncoanalyser from '../../../containers/subjects-launch/SubjectOncoanalyserLaunch';
+// import SubjectLaunchStarAlign from '../../../containers/subjects-launch/SubjectWTSStarAlignment';
+// import SubjectLaunchOncoanalyser from '../../../containers/subjects-launch/SubjectOncoanalyserLaunch';
 
 export enum launchPadOptions {
   NONE = '',
@@ -51,11 +51,11 @@ export default function SubjectLaunchPad() {
               <SubjectRNAsumLaunch subjectId={subjectId} />
             ) : lastPath == launchPadOptions.WGS_TN ? (
               <SubjectWGSTNLaunch subjectId={subjectId} />
-            ) : lastPath == launchPadOptions.STAR_ALIGN ? (
-              <SubjectLaunchStarAlign subjectId={subjectId} />
-            ) : lastPath == launchPadOptions.ONCOANALYSER ? (
-              <SubjectLaunchOncoanalyser subjectId={subjectId} />
             ) : (
+              // ) : lastPath == launchPadOptions.STAR_ALIGN ? (
+              //   <SubjectLaunchStarAlign subjectId={subjectId} />
+              // ) : lastPath == launchPadOptions.ONCOANALYSER ? (
+              //   <SubjectLaunchOncoanalyser subjectId={subjectId} />
               <div className='h-full'>
                 <div className='text-2xl font-medium mb-4'>{subjectId} - Report trigger</div>
 
