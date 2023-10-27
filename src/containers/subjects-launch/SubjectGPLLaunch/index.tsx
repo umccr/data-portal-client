@@ -47,7 +47,7 @@ function SubjectGPLLaunch({ subjectId }: Props) {
           className='p-button-rounded p-button-danger bg-red-500 cursor-auto'
           aria-label='Cancel'
         />
-        <div className='mt-3'>{`Something went wrong on launching RNAsum!`}</div>
+        <div className='mt-3'>{`Something went wrong on launching GPL!`}</div>
         <pre className='mt-3 p-3 text-left overflow-auto surface-200 '>
           {JSON.stringify(gplTrigger.error, Object.getOwnPropertyNames(gplTrigger.error), 2)}
         </pre>

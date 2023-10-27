@@ -29,8 +29,10 @@ export default function SubjectLaunchPad() {
     { key: launchPadOptions.GPL, label: 'GRIDSS PURPLE LINX (GPL)' },
     { key: launchPadOptions.RNASUM, label: 'RNAsum' },
     { key: launchPadOptions.WGS_TN, label: 'Whole-Genome Sequencing Tumor-Normal (WGS T/N)' },
-    { key: launchPadOptions.STAR_ALIGN, label: 'Whole Transcriptome Sequencing Star Alignment' },
-    { key: launchPadOptions.ONCOANALYSER, label: 'Oncoanalyser' },
+    // TODO de-scope from Ocicat release and let temporary hide them for now
+    //  https://trello.com/c/W0EjvUg6/1561-implement-oncoanalyser-trigger-in-portal-launch-pad
+    // { key: launchPadOptions.STAR_ALIGN, label: 'Whole Transcriptome Sequencing Star Alignment' },
+    // { key: launchPadOptions.ONCOANALYSER, label: 'Oncoanalyser' },
   ];
   const location = useLocation();
   const navigate = useNavigate();
