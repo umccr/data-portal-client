@@ -12,6 +12,7 @@ import { FastqRow, usePortalFastqAPI } from '../../../api/fastq';
 import JSONToTable from '../../../components/JSONToTable';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import SubjectMetadataTable from '../SubjectMetadata';
+import { Message } from 'primereact/message';
 
 type Props = { subjectId: string };
 export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
@@ -116,6 +117,17 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
 
   return (
     <div>
+      {/* TODO https://trello.com/c/W0EjvUg6/1561-implement-oncoanalyser-trigger-in-portal-launch-pad */}
+      <Message
+        severity='warn'
+        text='Warning Message: THIS IS EXPERIMENTAL FEATURE. PLEASE DO NOT ATTEMPT UNLESS OTHERWISE ADIVCE.'
+        className='border-primary w-full justify-content-start'
+        style={{
+          border: 'solid #696cff',
+          borderWidth: '0 0 0 6px',
+          color: '#696cff',
+        }}
+      />
       <div className='text-2xl font-medium mb-4'>
         {subjectId} - Whole Transcriptome Sequencing Star Alignment Launch
       </div>

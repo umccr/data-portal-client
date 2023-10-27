@@ -11,6 +11,7 @@ import WGSDragenInput, { WGSInput } from './inputModes/WGSDragenInput';
 import WTSStarAlignInput, { WTSInput } from './inputModes/WTSStarAlignInput';
 import ConfirmationDialog from '../utils/ConfirmationDialog';
 import { Button } from 'primereact/button';
+import { Message } from 'primereact/message';
 
 export enum OncoanalyserEnum {
   WGS = 'wgs',
@@ -91,6 +92,17 @@ export default function SubjectLaunchOncoanalyser({ subjectId }: Props) {
 
   return (
     <div>
+      {/* TODO https://trello.com/c/W0EjvUg6/1561-implement-oncoanalyser-trigger-in-portal-launch-pad */}
+      <Message
+        severity='warn'
+        text='Warning Message: THIS IS EXPERIMENTAL FEATURE. PLEASE DO NOT ATTEMPT UNLESS OTHERWISE ADIVCE.'
+        className='border-primary w-full justify-content-start'
+        style={{
+          border: 'solid #696cff',
+          borderWidth: '0 0 0 6px',
+          color: '#696cff',
+        }}
+      />
       <div className='text-2xl font-medium mb-4'>{subjectId} - Oncoanalyser</div>
       <OncoanalyserDescription subjectId={subjectId} />
       <SubjectMetadataTable subjectId={subjectId} />

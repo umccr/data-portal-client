@@ -7,8 +7,8 @@ import { Button } from 'primereact/button';
 import SubjectGPLLaunch from '../../../containers/subjects-launch/SubjectGPLLaunch';
 import SubjectRNAsumLaunch from '../../../containers/subjects-launch/SubjectRNAsumLaunch';
 import SubjectWGSTNLaunch from '../../../containers/subjects-launch/SubjectWGSTNLaunch';
-import SubjectLaunchStarAlign from '../../../containers/subjects-launch/SubjectWTSStarAlignment';
-import SubjectLaunchOncoanalyser from '../../../containers/subjects-launch/SubjectOncoanalyserLaunch';
+// import SubjectLaunchStarAlign from '../../../containers/subjects-launch/SubjectWTSStarAlignment';
+// import SubjectLaunchOncoanalyser from '../../../containers/subjects-launch/SubjectOncoanalyserLaunch';
 
 export enum launchPadOptions {
   NONE = '',
@@ -29,8 +29,10 @@ export default function SubjectLaunchPad() {
     { key: launchPadOptions.GPL, label: 'GRIDSS PURPLE LINX (GPL)' },
     { key: launchPadOptions.RNASUM, label: 'RNAsum' },
     { key: launchPadOptions.WGS_TN, label: 'Whole-Genome Sequencing Tumor-Normal (WGS T/N)' },
-    { key: launchPadOptions.STAR_ALIGN, label: 'Whole Transcriptome Sequencing Star Alignment' },
-    { key: launchPadOptions.ONCOANALYSER, label: 'Oncoanalyser' },
+    // TODO de-scope from Ocicat release and let temporary hide them for now
+    //  https://trello.com/c/W0EjvUg6/1561-implement-oncoanalyser-trigger-in-portal-launch-pad
+    // { key: launchPadOptions.STAR_ALIGN, label: 'Whole Transcriptome Sequencing Star Alignment' },
+    // { key: launchPadOptions.ONCOANALYSER, label: 'Oncoanalyser' },
   ];
   const location = useLocation();
   const navigate = useNavigate();
@@ -49,11 +51,11 @@ export default function SubjectLaunchPad() {
               <SubjectRNAsumLaunch subjectId={subjectId} />
             ) : lastPath == launchPadOptions.WGS_TN ? (
               <SubjectWGSTNLaunch subjectId={subjectId} />
-            ) : lastPath == launchPadOptions.STAR_ALIGN ? (
-              <SubjectLaunchStarAlign subjectId={subjectId} />
-            ) : lastPath == launchPadOptions.ONCOANALYSER ? (
-              <SubjectLaunchOncoanalyser subjectId={subjectId} />
             ) : (
+              // ) : lastPath == launchPadOptions.STAR_ALIGN ? (
+              //   <SubjectLaunchStarAlign subjectId={subjectId} />
+              // ) : lastPath == launchPadOptions.ONCOANALYSER ? (
+              //   <SubjectLaunchOncoanalyser subjectId={subjectId} />
               <div className='h-full'>
                 <div className='text-2xl font-medium mb-4'>{subjectId} - Report trigger</div>
 
