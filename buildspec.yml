@@ -2,7 +2,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 14
+      nodejs: 18
 #      python: 3.9
     commands:
 #      - pip install detect-secrets pre-commit
