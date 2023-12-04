@@ -159,8 +159,8 @@ async function checkGPLTriggerAllow(subjectData: SubjectApiRes): Promise<GplLaun
     return gplCheck;
   }
 
-  // Check if only 1 tumor sample exist
-  const tumorSamples = limsResults.filter((l) => l.phenotype == 'tumor');
+  // Check if ONLY 1 tumor with WGS type sample exist
+  const tumorSamples = limsResults.filter((l) => l.phenotype == 'tumor' && l.type == 'WGS');
   if (tumorSamples.length > 1) {
     gplCheck.isGplLaunchAllowed = false;
     gplCheck.message = `There are more than 1 tumor sample exist within this subject.`;

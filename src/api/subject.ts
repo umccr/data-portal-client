@@ -10,7 +10,7 @@ import { LimsRow } from './lims';
 export type SubjectApiRes = {
   id: string;
   lims: LimsRow[];
-  features: string;
+  features: string[];
   results: S3Row[];
   results_gds: GDSRow[];
 };
