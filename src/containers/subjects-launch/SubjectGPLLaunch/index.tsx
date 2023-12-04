@@ -160,15 +160,15 @@ async function checkGPLTriggerAllow(subjectData: SubjectApiRes): Promise<GplLaun
   }
 
   // Check if ONLY 1 tumor with WGS type sample exist
-  const tumorSamples = limsResults.filter((l) => l.phenotype == 'tumor' && l.type == 'WGS');
-  if (tumorSamples.length > 1) {
+  const wgsTumorSamples = limsResults.filter((l) => l.phenotype == 'tumor' && l.type == 'WGS');
+  if (wgsTumorSamples.length > 1) {
     gplCheck.isGplLaunchAllowed = false;
     gplCheck.message = `There are more than 1 tumor sample exist within this subject.`;
     return gplCheck;
   }
 
   // Check if tumor sample is not FFPE
-  if (tumorSamples.find((l) => l.source == 'FFPE')) {
+  if (wgsTumorSamples.find((l) => l.source == 'FFPE')) {
     gplCheck.isGplLaunchAllowed = false;
     gplCheck.message = `Tumor sample in this subject has a FFPE source. GPL doesn't work with FFPE tumor sample.`;
     return gplCheck;
