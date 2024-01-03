@@ -2,7 +2,7 @@ import config from '../../../config';
 import { getBaseNameFromKey } from '../../../api/utils';
 import { constructGDSUrl } from '../../../api/gds';
 import igv, { IGVBrowser, ITrack } from 'igv';
-import { API } from '@aws-amplify/api';
+import { post } from 'aws-amplify/api';
 import genomes from './genomes';
 
 /**
@@ -79,16 +79,21 @@ export const convertGdsRowToIgvTrack = async (
   } else if (path.endsWith('cram')) {
     idxFilePath = path + '.crai';
   } else {
-    console.log('No index file for this file');
+    console.debug('No index file for this file');
     return;
   }
 
   const fileGdsUrl = constructGDSUrl({ volume_name: volume_name, path: path });
   const idxFileGdsUrl = constructGDSUrl({ volume_name: volume_name, path: idxFilePath });
 
-  const { signed_urls } = await API.post('portal', `/presign`, {
-    body: [fileGdsUrl, idxFileGdsUrl],
-  });
+  const response = await post({
+    apiName: 'portal',
+    path: `/presign`,
+    options: {
+      body: [fileGdsUrl, idxFileGdsUrl],
+    },
+  }).response;
+  const { signed_urls } = (await response.body.json()) as any;
 
   // Find which presign is which
   let filePresignUrl = '';

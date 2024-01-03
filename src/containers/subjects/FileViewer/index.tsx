@@ -9,13 +9,7 @@ import './index.css';
 import { useToastContext } from '../../../providers/ToastProvider';
 import ViewPresignedUrl from '../../../components/ViewPresignedUrl';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
-import {
-  usePortalS3API,
-  S3ApiData,
-  S3Row,
-  usePortalS3PresignAPI,
-  PresignApiData,
-} from '../../../api/s3';
+import { usePortalS3API, S3Row, usePortalS3PresignAPI, PresignApiData } from '../../../api/s3';
 
 // CONSTANT
 type pipelineOptionType = {
@@ -72,9 +66,9 @@ function FileViewer({ subjectId }: Props) {
   });
 
   const s3QueryRes = usePortalS3API({
-    queryStringParameters: { ...apiQueryParameter },
+    queryParams: { ...apiQueryParameter },
   });
-  const s3Data: S3ApiData = s3QueryRes.data;
+  const s3Data = s3QueryRes.data;
 
   useEffect(() => {
     if (s3QueryRes.isError) {
@@ -106,7 +100,7 @@ function FileViewer({ subjectId }: Props) {
   const fetchPresignedData: PresignApiData | undefined = fetchPresignedRes.data;
 
   const paginateNext = () => {
-    const nextLink = s3Data.links.next;
+    const nextLink = s3Data?.links.next;
     if (nextLink) {
       const searchParamsObj = new URLSearchParams(nextLink);
       setApiQueryParameter(Object.fromEntries(searchParamsObj));

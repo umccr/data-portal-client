@@ -19,8 +19,8 @@ import {
   RequiredS3RowType,
   RequiredGDSRowType,
 } from './utils';
-import { useUserContext } from '../../../providers/UserProvider';
 import LoadCustomTrackDataButton from './LoadCustomTrackDataButton';
+import { getJwtToken } from '../../../utils/signer';
 
 const toolbarGenomeList = [
   { label: 'hg38', value: 'hg38' },
@@ -36,15 +36,13 @@ export type LoadSubjectDataType = {
 
 type Props = { subjectId: string };
 function IGV({ subjectId }: Props) {
-  const cognitoUser = useUserContext().user;
-
   // IGV init
   const igv = useQuery(
     ['initIGV', subjectId],
     () =>
       initIgv({
         initRefGenome: refGenome,
-        oAuthToken: cognitoUser.getSignInUserSession().getIdToken().getJwtToken(),
+        oAuthToken: getJwtToken().toString(),
       }),
     {
       refetchOnMount: true,

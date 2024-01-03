@@ -1,4 +1,4 @@
-import { API } from '@aws-amplify/api';
+import { get } from '@aws-amplify/api';
 import { useQuery } from 'react-query';
 import { DjangoRestApiResponse } from './utils';
 
@@ -23,7 +23,10 @@ export function usePortalS3API(
 ) {
   return useQuery(
     ['portal-s3', apiConfig],
-    async () => await API.get('portal', `/s3/`, apiConfig),
+    async (): Promise<S3ApiData> => {
+      const response = await get({ apiName: 'portal', path: `/s3/`, options: apiConfig }).response;
+      return (await response.body.json()) as S3ApiData;
+    },
     {
       staleTime: Infinity,
       ...useQueryOption,
@@ -38,7 +41,13 @@ export type PresignApiData = {
 export function usePortalS3PresignAPI(s3Id?: string | number) {
   return useQuery(
     ['portal-s3-presign', s3Id],
-    async (): Promise<PresignApiData> => await API.get('portal', `/s3/${s3Id}/presign`, {}),
+    async (): Promise<PresignApiData> => {
+      const response = await get({
+        apiName: 'portal',
+        path: `/s3/${s3Id}/presign`,
+      }).response;
+      return (await response.body.json()) as PresignApiData;
+    },
     {
       staleTime: 60 * 60 * 1000, // 1hour,
       enabled: !!s3Id,
@@ -54,7 +63,12 @@ export enum S3StatusData {
   ERROR = 'error',
 }
 export async function getS3Status(s3Id: string | number): Promise<S3StatusData> {
-  const data = await API.get('portal', `/s3/${s3Id}/status`, {});
+  const response = await get({
+    apiName: 'portal',
+    path: `/s3/${s3Id}/status`,
+  }).response;
+  const data = (await response.body.json()) as any;
+
   const { head_object } = data;
   if (head_object) {
     // NOTE: head_object contains S3 API response as described follows
@@ -99,7 +113,12 @@ export function usePortalS3StatusAPI(s3Id?: string | number) {
 }
 
 export async function getS3PreSignedUrl(id: number) {
-  const { error, signed_url } = await API.get('portal', `/s3/${id}/presign`, {});
+  const response = await get({
+    apiName: 'portal',
+    path: `/s3/${id}/presign`,
+  }).response;
+  const { error, signed_url } = (await response.body.json()) as any;
+
   if (error) {
     throw Error('Unable to get PreSigned URL');
   }

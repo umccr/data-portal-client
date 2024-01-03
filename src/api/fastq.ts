@@ -1,4 +1,4 @@
-import { API } from '@aws-amplify/api';
+import { get } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
 import { DjangoRestApiResponse } from './utils';
 
@@ -30,8 +30,14 @@ export function usePortalFastqAPI({
 }: UsePortalFastqAPIProps) {
   return useQuery(
     ['portal-fastq', additionalPath, apiConfig],
-    async (): Promise<FastqApiRes> =>
-      await API.get('portal', `/fastq/${additionalPath}`, apiConfig),
+    async (): Promise<FastqApiRes> => {
+      const response = await get({
+        apiName: 'portal',
+        path: `/fastq/${additionalPath}`,
+        options: apiConfig,
+      }).response;
+      return (await response.body.json()) as FastqApiRes;
+    },
     {
       staleTime: Infinity,
       ...useQueryOption,

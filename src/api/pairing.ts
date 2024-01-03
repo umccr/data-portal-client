@@ -1,4 +1,4 @@
-import { API } from '@aws-amplify/api';
+import { post } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
 
 /**
@@ -36,8 +36,15 @@ type UsePortalSubjectParingAPIProps = {
 export function usePortalSubjectParingAPI({ apiConfig }: UsePortalSubjectParingAPIProps) {
   return useQuery(
     ['portal-fastq', apiConfig],
-    async (): Promise<FASTQPairingPayload[]> =>
-      await API.post('portal', `/pairing/by_subjects/`, apiConfig),
+
+    async (): Promise<FASTQPairingPayload[]> => {
+      const response = await post({
+        apiName: 'portal',
+        path: `/pairing/by_subjects/`,
+        options: apiConfig,
+      }).response;
+      return (await response.body.json()) as FASTQPairingPayload[];
+    },
     {
       staleTime: Infinity,
     }

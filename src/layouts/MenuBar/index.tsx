@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Auth } from '@aws-amplify/auth';
+import { signOut } from 'aws-amplify/auth';
 import { Menubar } from 'primereact/menubar';
 import { Menu } from 'primereact/menu';
 import { Button } from 'primereact/button';
@@ -32,17 +32,19 @@ const AccountMenu = () => {
     },
     {
       label: 'Sign Out',
-      command: () => Auth.signOut(),
+      command: () => signOut(),
     },
   ];
 
   return (
     <>
-      <TokenDialog isOpen={isTokenDialogOpen} handleIsOpen={handleIsTokenDialogChange} />
+      {isTokenDialogOpen && (
+        <TokenDialog isOpen={isTokenDialogOpen} handleIsOpen={handleIsTokenDialogChange} />
+      )}
       <Menu model={accountMenuItems} popup ref={accountMenuRef} id='accountMenuPopup' />
       <Button
         className='p-button-secondary p-button-text shadow-none text-white'
-        label={userInformation.attributes.email}
+        label={userInformation.email}
         onClick={(event) => handleAccountMenuClick(event)}
       />
     </>
@@ -98,6 +100,7 @@ function MenuBar() {
       style={{ zIndex: 2 }}
       model={items}
       end={<AccountMenu />}
+      menuIcon={<i className='pi pi-bars' />}
     />
   );
 }

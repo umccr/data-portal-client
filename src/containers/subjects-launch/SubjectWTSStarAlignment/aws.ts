@@ -1,4 +1,4 @@
-import { Auth } from '@aws-amplify/auth';
+import { fetchAuthSession } from '@aws-amplify/auth';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { REGION } from '../../../config';
 
@@ -14,7 +14,7 @@ export type StarAlignmentPayload = {
 };
 
 export const invokeWTSSAWorkflow = async (payload: StarAlignmentPayload) => {
-  const currentCredentials = await Auth.currentCredentials();
+  const currentCredentials = (await fetchAuthSession()).credentials;
   const lambdaClient = new LambdaClient({
     region: REGION,
     credentials: currentCredentials,

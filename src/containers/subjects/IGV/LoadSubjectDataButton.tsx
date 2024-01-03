@@ -60,7 +60,7 @@ function LoadSubjectDataButton({
         unavailableSelection.push(s3Row.key);
       }
     }
-    console.log(unavailableSelection.join('\n'));
+
     if (unavailableSelection.length) {
       toastShow({
         severity: 'warn',

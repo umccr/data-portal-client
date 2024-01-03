@@ -28,7 +28,7 @@ function SubjectMetadataTable({ subjectId, queryStringParameter }: Props) {
   // The function to trigger the workflow
   const { isLoading, isError, data } = usePortalMetadataAPI({
     apiConfig: {
-      queryStringParameters: {
+      queryParams: {
         rowsPerPage: 1000,
         subject_id: subjectId,
         ...queryStringParameter,

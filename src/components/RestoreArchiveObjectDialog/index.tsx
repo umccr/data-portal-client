@@ -8,7 +8,7 @@ import { useMutation, useQuery } from 'react-query';
 import { getS3Status, S3StatusData } from '../../api/s3';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
-import { API } from '@aws-amplify/api';
+import { post } from '@aws-amplify/api';
 import { useUserContext } from '../../providers/UserProvider';
 
 /**
@@ -28,15 +28,25 @@ export default function RestoreArchiveObjectDialog(props: RestoreArchiveObjectDi
 
   const restoreS3Mutate = useMutation({
     mutationFn: async (id: number) => {
+      if (!userInformation.email) {
+        throw new Error('Unauthorised user');
+      }
+
       const init = {
         headers: { 'Content-Type': 'application/json' },
         body: {
-          email: userInformation.attributes.email,
+          email: userInformation.email,
           days: 7,
           tier: 'Bulk',
         },
       };
-      return await API.post('portal', `/s3/${id}/restore`, init);
+
+      const response = await post({
+        apiName: 'portal',
+        path: `/s3/${id}/restore`,
+        options: init,
+      }).response;
+      return (await response.body.json()) as any;
     },
     mutationKey: [id],
     onError: () => {

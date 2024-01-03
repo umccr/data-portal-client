@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Dialog } from 'primereact/dialog';
-import { useUserContext } from '../../../providers/UserProvider';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
-
+import { fetchAuthSession } from 'aws-amplify/auth';
 import moment from 'moment';
 
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 
 import './index.css';
+import { getJwtToken } from '../../../utils/signer';
 
 type Props = {
   isOpen: boolean;
@@ -41,33 +41,26 @@ function TokenDialog(props: Props) {
   const { isOpen, handleIsOpen } = props;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [JWTData, setJWTData] = useState<JWTTokenProps>({ token: '', expires: '' });
-  const cognitoUser = useUserContext().user;
 
   // Fetch new JWT Token
   useEffect(() => {
     let cancel = false;
     const fetchingNewToken = async () => {
-      const currentSession = cognitoUser.getSignInUserSession();
+      setIsLoading(true);
 
-      // Refresh token to get new JWT
-      // Ref (UseCase 32): https://www.npmjs.com/package/amazon-cognito-identity-js
-      const refreshToken = currentSession.getRefreshToken();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      cognitoUser.refreshSession(refreshToken, (err: any, session: any) => {
-        if (err) {
-          console.log('Something went wrong');
-        }
-        const { idToken } = session;
+      // Force refresh to get brand new token
+      await fetchAuthSession({ forceRefresh: true });
 
-        if (cancel) return;
+      const token = await getJwtToken();
+      if (!token) throw new Error('');
 
-        setIsLoading(false);
-        setJWTData({
-          token: idToken.getJwtToken(),
-          expires: idToken.getExpiration(),
-        });
-      });
       if (cancel) return;
+      setIsLoading(false);
+      setJWTData({
+        token: token.toString(),
+        expires: token.payload.exp?.toString() ?? '',
+      });
+      setIsLoading(false);
     };
 
     fetchingNewToken();
@@ -87,12 +80,6 @@ function TokenDialog(props: Props) {
 
   return (
     <>
-      <Toast
-        ref={toast}
-        position='top-center'
-        className='opacity-100 w-6'
-        style={{ maxWidth: '1000px' }}
-      />
       <Dialog
         header='Token'
         visible={isOpen}
@@ -100,6 +87,12 @@ function TokenDialog(props: Props) {
         draggable={false}
         resizable={false}
         onHide={() => handleIsOpen(false)}>
+        <Toast
+          ref={toast}
+          position='top-center'
+          className='opacity-100 w-6'
+          style={{ maxWidth: '1000px' }}
+        />
         {isLoading ? (
           <CircularLoaderWithText text='Fetching new token ...' />
         ) : (

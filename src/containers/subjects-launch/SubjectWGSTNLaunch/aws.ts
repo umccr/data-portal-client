@@ -1,4 +1,4 @@
-import { Auth } from '@aws-amplify/auth';
+import { fetchAuthSession } from '@aws-amplify/auth';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { FASTQPairingPayload } from '../../../api/pairing';
 import { LAMBDA_PREFIX, REGION } from '../../../config';
@@ -9,7 +9,7 @@ const WGS_TN_WF_LAMBDA_NAME = 'tumor_normal';
  */
 
 export const invokeWGSTNWorkflow = async (payload: FASTQPairingPayload) => {
-  const currentCredentials = await Auth.currentCredentials();
+  const currentCredentials = (await fetchAuthSession()).credentials;
   const lambdaClient = new LambdaClient({
     region: REGION,
     credentials: currentCredentials,

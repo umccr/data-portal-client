@@ -11,7 +11,7 @@ import OpenIGVDesktopDialog from '../../../components/OpenInIgvDialog';
 import { IFRAME_FILETYPE_LIST, IMAGE_FILETYPE_LIST } from '../../../components/ViewPresignedUrl';
 import { OpenInNewTab } from '../../../components/OpenInNewTab';
 
-export enum DataAction {
+enum DataAction {
   NONE,
   COPY_URI,
   GENERATE_PRESIGN,

@@ -37,7 +37,7 @@ function LimsSideBar({ handleApply }: Props) {
   const metaSources: Record<string, string | number>[] = [];
 
   const { isFetching, isLoading, isError, data } = usePortalLimsByAggregateCount({
-    queryStringParameters: {
+    queryParams: {
       fields: 'all',
     },
   });
@@ -55,7 +55,6 @@ function LimsSideBar({ handleApply }: Props) {
 
   if (data && !isFetching && !isLoading) {
     const { assay, phenotype, project_name, project_owner, source, type, workflow } = data;
-
     for (const w of workflow) {
       if (w.workflow == null) {
         continue;

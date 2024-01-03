@@ -18,10 +18,10 @@ function RunOverviewTable({ runId }: Props) {
 
   const [inputRunId, setInputRunId] = useState<string>(runId);
   const runsQuery = usePortalRunsAPI({
-    queryStringParameters: { rowsPerPage: 250 },
+    queryParams: { rowsPerPage: 250 },
   });
   const sequenceQuery = usePortalSequenceAPI({
-    queryStringParameters: { instrument_run_id: runId },
+    queryParams: { instrument_run_id: runId },
   });
 
   useEffect(() => {

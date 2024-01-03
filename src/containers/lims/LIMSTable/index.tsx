@@ -14,7 +14,7 @@ import DataTableWrapper, {
   PaginationProps,
   paginationPropsInitValue,
 } from '../../../components/DataTableWrapper';
-import { usePortalLimsAPI } from '../../../api/lims';
+import { LimsRow, usePortalLimsAPI } from '../../../api/lims';
 import { Link } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext';
 import SideBar from '../../../layouts/SideBar';
@@ -60,10 +60,9 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
   };
 
   // Data states
-  type ObjKeyType = { [key: string]: string | number };
-  let limsDataList: ObjKeyType[] = [];
+  let limsDataList: LimsRow[] = [];
   const { isFetching, isLoading, isError, data } = usePortalLimsAPI({
-    queryStringParameters: {
+    queryParams: {
       ...apiQueryParameter,
     },
   });

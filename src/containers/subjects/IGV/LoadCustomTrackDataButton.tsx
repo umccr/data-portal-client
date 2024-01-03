@@ -46,7 +46,7 @@ function LoadCustomTrackDataButton({
   // GDS Row checking (portal must exist to use this)
   const gdsApiRes = usePortalGDSAPI(
     {
-      queryStringParameters: {
+      queryParams: {
         search: `${path}$`,
       },
     },
