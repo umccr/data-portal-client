@@ -1,16 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Auth, CognitoUser } from '@aws-amplify/auth';
+import { fetchUserAttributes, FetchUserAttributesOutput } from '@aws-amplify/auth';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
 
-/**
- * Create UserContext
- */
-type UserContextType = {
-  isAuth: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  user: CognitoUser | any;
-};
-const UserContext = createContext<UserContextType>({ isAuth: false, user: {} });
+const UserContext = createContext<{ isAuth: boolean; user: FetchUserAttributesOutput }>({
+  isAuth: false,
+  user: {},
+});
 
 /**
  * Create UserProvider
@@ -28,8 +23,8 @@ function UserProvider(props: Props): React.ReactElement {
       setIsAuthenticating(true);
       let newStatePlaceholder = {};
       try {
-        const authenticatedUser = await Auth.currentAuthenticatedUser();
-        newStatePlaceholder = { isAuth: true, user: authenticatedUser };
+        const userAttribute = await fetchUserAttributes();
+        newStatePlaceholder = { isAuth: true, user: userAttribute };
       } catch (e) {
         newStatePlaceholder = { isAuth: false };
       }
@@ -37,6 +32,7 @@ function UserProvider(props: Props): React.ReactElement {
       setUser((prev) => ({ ...prev, ...newStatePlaceholder }));
       setIsAuthenticating(false);
     };
+
     authenticatingUser();
     return () => {
       cancel = true;

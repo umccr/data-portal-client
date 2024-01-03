@@ -12,7 +12,7 @@ function RunOverviewPage() {
 
   const runsQuery = usePortalRunsAPI(
     {
-      queryStringParameters: { rowsPerPage: 250 }, // TODO: make it dynamic or load more
+      queryParams: { rowsPerPage: 250 }, // TODO: make it dynamic or load more
     },
     { enabled: !runId }
   );

@@ -50,7 +50,7 @@ function GDSDataTable({ defaultQueryParam, chipData }: Props) {
   let runDataList: Record<string, string | number>[] = [];
 
   const { isFetching, isLoading, isError, data } = usePortalGDSAPI({
-    queryStringParameters: {
+    queryParams: {
       ...apiQueryParameter,
       search: searchField,
     },

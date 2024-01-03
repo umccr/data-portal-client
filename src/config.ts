@@ -21,14 +21,18 @@ const config = {
     IDENTITY_POOL_ID: import.meta.env.VITE_COG_IDENTITY_POOL_ID,
     OAUTH: {
       domain: OAUTH_DOMAIN,
-      scope: ['email', 'openid', 'aws.cognito.signin.user.admin', 'profile'],
-      redirectSignIn: IS_LOCAL
-        ? import.meta.env.VITE_OAUTH_REDIRECT_IN_LOCAL
-        : import.meta.env.VITE_OAUTH_REDIRECT_IN_STAGE,
-      redirectSignOut: IS_LOCAL
-        ? import.meta.env.VITE_OAUTH_REDIRECT_OUT_LOCAL
-        : import.meta.env.VITE_OAUTH_REDIRECT_OUT_STAGE,
-      responseType: 'code',
+      scopes: ['email', 'openid', 'aws.cognito.signin.user.admin', 'profile'],
+      redirectSignIn: [
+        IS_LOCAL
+          ? import.meta.env.VITE_OAUTH_REDIRECT_IN_LOCAL
+          : import.meta.env.VITE_OAUTH_REDIRECT_IN_STAGE,
+      ],
+      redirectSignOut: [
+        IS_LOCAL
+          ? import.meta.env.VITE_OAUTH_REDIRECT_OUT_LOCAL
+          : import.meta.env.VITE_OAUTH_REDIRECT_OUT_STAGE,
+      ],
+      responseType: 'code' as const,
     },
   },
   htsget: {

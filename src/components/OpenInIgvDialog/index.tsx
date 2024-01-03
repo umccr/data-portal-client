@@ -8,7 +8,7 @@ import { getS3Status, S3StatusData } from '../../api/s3';
 import { constructGDSUrl } from '../../api/gds';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
-import { API } from '@aws-amplify/api';
+import { post } from 'aws-amplify/api';
 
 type OpenIGVDesktopDialogType = {
   handleClose: () => void;
@@ -160,9 +160,15 @@ const constructGDSLocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKe
   // GDS
   const fileGdsUrl = constructGDSUrl({ volume_name: bucketOrVolume, path: pathOrKey });
   const idxFileGdsUrl = constructGDSUrl({ volume_name: bucketOrVolume, path: idxFilePath });
-  const { signed_urls } = await API.post('portal', `/presign`, {
-    body: [fileGdsUrl, idxFileGdsUrl],
-  });
+
+  const response = await post({
+    apiName: 'portal',
+    path: `/presign`,
+    options: {
+      body: [fileGdsUrl, idxFileGdsUrl],
+    },
+  }).response;
+  const { signed_urls } = (await response.body.json()) as any;
 
   // Find which presign is which
   for (const signed_url of signed_urls) {

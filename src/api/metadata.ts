@@ -1,4 +1,4 @@
-import { API } from '@aws-amplify/api';
+import { get } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
 import { DjangoRestApiResponse } from './utils';
 
@@ -34,8 +34,14 @@ export function usePortalMetadataAPI({
 }: usePortalMetadataAPIProps) {
   return useQuery(
     ['portal-metadata', apiConfig],
-    async (): Promise<MetadataApiRes> =>
-      await API.get('portal', `/metadata/${additionalPath}`, apiConfig),
+    async (): Promise<MetadataApiRes> => {
+      const response = await get({
+        apiName: 'portal',
+        path: `/metadata/${additionalPath}`,
+        options: apiConfig,
+      }).response;
+      return (await response.body.json()) as MetadataApiRes;
+    },
     {
       staleTime: Infinity,
     }

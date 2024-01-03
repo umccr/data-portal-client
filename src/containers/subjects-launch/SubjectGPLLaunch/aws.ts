@@ -1,4 +1,4 @@
-import { Auth } from '@aws-amplify/auth';
+import { fetchAuthSession } from '@aws-amplify/auth';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { REGION } from '../../../config';
 
@@ -15,7 +15,7 @@ export type GPLSamplePayload = {
 };
 
 export const invokeGPL = async (payload: GPLSubjectPayload | GPLSamplePayload) => {
-  const currentCredentials = await Auth.currentCredentials();
+  const currentCredentials = (await fetchAuthSession()).credentials;
 
   const lambdaClient = new LambdaClient({
     region: REGION,

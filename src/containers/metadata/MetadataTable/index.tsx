@@ -16,7 +16,7 @@ import DataTableWrapper, {
   InfoDialogColumnProps,
   convertDjangoSortParamToDataTableProp,
 } from '../../../components/DataTableWrapper';
-import { usePortalMetadataAPI } from '../../../api/metadata';
+import { MetadataRow, usePortalMetadataAPI } from '../../../api/metadata';
 import './index.css';
 import { InputText } from 'primereact/inputtext';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
@@ -54,11 +54,10 @@ function MetadataTable() {
   };
 
   // Data states
-  type ObjKeyType = { [key: string]: string | number };
-  let metadataDataList: ObjKeyType[] = [];
+  let metadataDataList: MetadataRow[] = [];
   const { isFetching, isLoading, isError, data } = usePortalMetadataAPI({
     apiConfig: {
-      queryStringParameters: {
+      queryParams: {
         ...apiQueryParameter,
       },
     },

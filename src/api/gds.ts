@@ -1,4 +1,4 @@
-import { API } from '@aws-amplify/api';
+import { get } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
 import { DjangoRestApiResponse } from './utils';
 
@@ -39,7 +39,10 @@ export function usePortalGDSAPI(
 ) {
   return useQuery(
     ['portal-gds', apiConfig],
-    async () => await API.get('portal', `/gds/`, apiConfig),
+    async (): Promise<any> => {
+      const response = await get({ apiName: 'portal', path: `/gds`, options: apiConfig }).response;
+      return (await response.body.json()) as any;
+    },
     {
       staleTime: Infinity,
       ...useQueryOption,
@@ -54,8 +57,14 @@ export type PresignApiData = {
 export function usePortalGDSPresignAPI(gdsId?: string | number, apiConfig?: Record<string, any>) {
   return useQuery(
     ['portal-gds-presign', gdsId, apiConfig],
-    async (): Promise<PresignApiData> =>
-      await API.get('portal', `/gds/${gdsId}/presign`, { ...apiConfig }),
+    async (): Promise<PresignApiData> => {
+      const response = await get({
+        apiName: 'portal',
+        path: `/gds/${gdsId}/presign`,
+        options: apiConfig,
+      }).response;
+      return (await response.body.json()) as PresignApiData;
+    },
     {
       staleTime: 60 * 60 * 1000, // 1hour,
       enabled: !!gdsId,
@@ -79,7 +88,9 @@ export function usePortalGDSPresignAPI(gdsId?: string | number, apiConfig?: Reco
  * @returns
  */
 export async function getGDSPreSignedUrl(id: number, apiConfig?: Record<string, any>) {
-  const { error, signed_url } = await API.get('portal', `/gds/${id}/presign`, { ...apiConfig });
+  const response = await get({ apiName: 'portal', path: `/gds/${id}/presign`, options: apiConfig })
+    .response;
+  const { error, signed_url } = (await response.body.json()) as any;
   if (error) {
     throw Error('Unable to get PreSigned URL');
   }

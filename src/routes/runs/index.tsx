@@ -13,7 +13,7 @@ function RunRoutes() {
   return (
     <RouterRoutes>
       <Route path='/'>
-        <Route index element={<RunDataPage />} />
+        <Route index element={<Navigate to={'/'} replace={true} />} />
         <Route path=':runId' element={<RunPageLayout />}>
           <Route index element={<Navigate to='primary-data' />} />
           <Route path='overview' element={<RunOverviewPage />} />

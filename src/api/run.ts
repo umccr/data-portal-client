@@ -1,7 +1,7 @@
 /* TODO marking this component for deprecation at some point  ~victor */
 //  https://github.com/umccr/data-portal-apis/issues/559
 
-import { API } from '@aws-amplify/api';
+import { get } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
 
 /**
@@ -14,7 +14,11 @@ export function usePortalRunsAPI(
 ) {
   return useQuery(
     ['portal-runs', apiConfig],
-    async () => await API.get('portal', `/runs/`, apiConfig),
+    async (): Promise<any> => {
+      const response = await get({ apiName: 'portal', path: `/runs/`, options: apiConfig })
+        .response;
+      return (await response.body.json()) as any;
+    },
     {
       staleTime: Infinity,
       ...useQueryOption,

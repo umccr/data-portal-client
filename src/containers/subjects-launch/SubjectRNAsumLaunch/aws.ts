@@ -1,4 +1,4 @@
-import { Auth } from '@aws-amplify/auth';
+import { fetchAuthSession } from '@aws-amplify/auth';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { LAMBDA_PREFIX, REGION } from '../../../config';
 
@@ -12,7 +12,7 @@ export type RNAsumPayload = {
   dataset: string;
 };
 export const invokeRNAsumWorkflow = async (payload: RNAsumPayload) => {
-  const currentCredentials = await Auth.currentCredentials();
+  const currentCredentials = (await fetchAuthSession()).credentials;
 
   const lambdaClient = new LambdaClient({
     region: REGION,

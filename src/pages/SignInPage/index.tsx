@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Auth, CognitoHostedUIIdentityProvider } from '@aws-amplify/auth';
+import { signInWithRedirect } from 'aws-amplify/auth';
 import { Navigate } from 'react-router-dom';
 import { useUserContext } from '../../providers/UserProvider';
 import { Card } from 'primereact/card';
@@ -32,8 +32,8 @@ function SignInContainer() {
   const loggingIn = () => {
     setIsLoading(true);
 
-    // Auth.federatedSignIn will redirect out from page (Not expecting to setIsLoading(false))
-    Auth.federatedSignIn({ provider: CognitoHostedUIIdentityProvider.Google });
+    // signInWithRedirect() will redirect out from page (Not expecting to setIsLoading(false))
+    signInWithRedirect({ provider: 'Google' });
   };
 
   const header = (

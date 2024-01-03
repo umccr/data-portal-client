@@ -50,7 +50,7 @@ function S3DataTable({ defaultQueryParam, chipData }: Props) {
   let subjectDataList: Record<string, string | number>[] = [];
 
   const { isFetching, isLoading, isError, data } = usePortalS3API({
-    queryStringParameters: {
+    queryParams: {
       ...apiQueryParameter,
       search: searchField,
     },

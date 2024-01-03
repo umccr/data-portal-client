@@ -35,7 +35,7 @@ export default function SubjectLaunchWTSStarAlignment({ subjectId }: Props) {
     data: fastqData,
   } = usePortalFastqAPI({
     apiConfig: {
-      queryStringParameters: {
+      queryParams: {
         rowsPerPage: 1000,
         rglb: listOfLibrary,
       },

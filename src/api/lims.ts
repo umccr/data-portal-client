@@ -1,4 +1,4 @@
-import { API } from '@aws-amplify/api';
+import { get } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
 import { DjangoRestApiResponse } from './utils';
 
@@ -28,7 +28,11 @@ export type LimsApiRes = DjangoRestApiResponse & { results: LimsRow[] };
 export function usePortalLimsAPI(apiConfig: Record<string, any>) {
   return useQuery(
     ['portal-lims', apiConfig],
-    async () => await API.get('portal', `/lims/`, apiConfig),
+    async (): Promise<LimsApiRes> => {
+      const response = await get({ apiName: 'portal', path: `/lims/`, options: apiConfig })
+        .response;
+      return (await response.body.json()) as LimsApiRes;
+    },
     {
       staleTime: Infinity,
     }
@@ -38,7 +42,14 @@ export function usePortalLimsAPI(apiConfig: Record<string, any>) {
 export function usePortalLimsByAggregateCount(apiConfig: Record<string, any>) {
   return useQuery(
     ['portal-lims', apiConfig],
-    async () => await API.get('portal', `/lims/by_aggregate_count`, apiConfig),
+    async (): Promise<any> => {
+      const response = await get({
+        apiName: 'portal',
+        path: `/lims/by_aggregate_count`,
+        options: apiConfig,
+      }).response;
+      return (await response.body.json()) as any;
+    },
     {
       staleTime: Infinity,
     }

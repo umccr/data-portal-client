@@ -48,13 +48,14 @@ function SubjectListTable() {
   });
 
   const { isFetching, isLoading, isError, data } = usePortalSubjectAPI({
-    queryStringParameters: {
+    queryParams: {
       ...apiQueryParameter,
     },
   });
+  const subjectData = data?.results;
 
-  if (data && !isFetching && !isLoading) {
-    subjectList = convertListOfSubjectToSubjectObject(data.results);
+  if (subjectData && !isFetching && !isLoading) {
+    subjectList = convertListOfSubjectToSubjectObject(subjectData);
     paginationProps = djangoToTablePaginationFormat(data.pagination);
   }
 
