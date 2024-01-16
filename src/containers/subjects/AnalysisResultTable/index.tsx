@@ -296,7 +296,11 @@ function AnalysisResultsPanel({ subjectId }: Props) {
 
   let groupedData;
   if (data) {
-    groupedData = groupResultsData(data.results, data.results_gds);
+    groupedData = groupResultsData({
+      results_gds: data.results_gds,
+      results_s3: data.results,
+      results_sash: data.results_sash,
+    });
 
     return (
       <TabView renderActiveOnly>
@@ -339,6 +343,15 @@ function AnalysisResultsPanel({ subjectId }: Props) {
           <AnalysisResultS3Table title='fusions report' data={groupedData.wtsFusions} />
           <AnalysisResultS3Table title='bam' data={groupedData.wtsBams} />
         </TabPanel>
+        <TabPanel header='WGS (sash)'>
+          <AnalysisResultS3Table title='cancer report' data={groupedData.sash.cancer} />
+          <AnalysisResultS3Table title='pcgr' data={groupedData.sash.pcgr} />
+          <AnalysisResultS3Table title='cpsr' data={groupedData.sash.cpsr} />
+          <AnalysisResultS3Table title='linx report' data={groupedData.sash.linx} />
+          <AnalysisResultS3Table title='vcf' data={groupedData.sash.vcfs} />
+          <AnalysisResultGDSTable title='bam' data={groupedData.sash.bams} />
+          <AnalysisResultS3Table title='circos plot' data={groupedData.sash.circos} />
+        </TabPanel>
       </TabView>
     );
   }
@@ -348,9 +361,19 @@ function AnalysisResultsPanel({ subjectId }: Props) {
 
 export default AnalysisResultsPanel;
 
-function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
+function groupResultsData({
+  results_s3,
+  results_gds,
+  results_sash,
+}: {
+  results_s3: S3Row[];
+  results_gds: GDSRow[];
+  results_sash: S3Row[];
+}) {
   const wgs = results_s3.filter((r) => r.key.includes('WGS/'));
   const wts = results_s3.filter((r) => r.key.includes('WTS/'));
+
+  // WGS
   const bams = wgs.filter((r) => r.key.endsWith('bam'));
   const vcfs = wgs.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf'));
   const circos = wgs.filter((r) => r.key.endsWith('png'));
@@ -366,6 +389,8 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
   const gplReport = wgs.filter(
     (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
   );
+
+  // WTS
   const wtsBams = wts.filter((r) => r.key.endsWith('bam'));
   const wtsQc = wts.filter((r) => r.key.endsWith('multiqc_report.html'));
   const wtsFusions = wts.filter((r) => r.key.endsWith('fusions.pdf'));
@@ -424,7 +449,20 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
     (r) => r.path.includes('tso_ctdna') && r.path.endsWith('tsv')
   );
 
+  // Sash results
+  const sashGrouped = {
+    bams: results_sash.filter((r) => r.key.endsWith('bam')),
+    vcfs: results_sash.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf')),
+    circos: results_sash.filter((r) => r.key.includes('circos') && r.key.endsWith('.png')),
+    pcgr: results_sash.filter((r) => r.key.endsWith('pcgr.html')),
+    cpsr: results_sash.filter((r) => r.key.endsWith('cpsr.html')),
+    multiqc: results_sash.filter((r) => r.key.endsWith('multiqc_report.html')),
+    cancer: results_sash.filter((r) => r.key.endsWith('cancer_report.html')),
+    linx: results_sash.filter((r) => r.key.endsWith('linx.html')),
+  };
+
   return {
+    // S3 - bcbio
     wgs: wgs,
     wts: wts,
     bams: bams,
@@ -440,6 +478,7 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
     wtsQc: wtsQc,
     wtsFusions: wtsFusions,
     rnasum: rnasum,
+
     // Gds
     wgsBams: wgsBams,
     wgsVcfs: wgsVcfs,
@@ -457,5 +496,8 @@ function groupResultsData(results_s3: S3Row[], results_gds: GDSRow[]) {
     tsoCtdnaBams: tsoCtdnaBams,
     tsoCtdnaVcfs: tsoCtdnaVcfs,
     tsoCtdnaTsv: tsoCtdnaTsv,
+
+    // S3 - Sash
+    sash: sashGrouped,
   };
 }
