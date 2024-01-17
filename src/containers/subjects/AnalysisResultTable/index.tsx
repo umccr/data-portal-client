@@ -18,6 +18,7 @@ import {
 } from '../../../components/ViewPresignedUrl';
 import { Toast } from 'primereact/toast';
 import mime from 'mime';
+import { Message } from 'primereact/message';
 
 // Creating Table
 type AnalysisResultGDSTableProps = {
@@ -303,7 +304,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
     });
 
     return (
-      <TabView renderActiveOnly>
+      <TabView renderActiveOnly panelContainerClassName='px-0'>
         <TabPanel header='WGS'>
           <AnalysisResultGDSTable title='cancer report' data={groupedData.wgsCancer} />
           <AnalysisResultGDSTable title='pcgr' data={groupedData.wgsPcgr} />
@@ -344,13 +345,22 @@ function AnalysisResultsPanel({ subjectId }: Props) {
           <AnalysisResultS3Table title='bam' data={groupedData.wtsBams} />
         </TabPanel>
         <TabPanel header='WGS (sash)'>
-          <AnalysisResultS3Table title='cancer report' data={groupedData.sash.cancer} />
-          <AnalysisResultS3Table title='pcgr' data={groupedData.sash.pcgr} />
-          <AnalysisResultS3Table title='cpsr' data={groupedData.sash.cpsr} />
-          <AnalysisResultS3Table title='linx report' data={groupedData.sash.linx} />
-          <AnalysisResultS3Table title='vcf' data={groupedData.sash.vcfs} />
-          <AnalysisResultGDSTable title='bam' data={groupedData.sash.bams} />
-          <AnalysisResultS3Table title='circos plot' data={groupedData.sash.circos} />
+          <div className='bg-yellow-100 p-3'>
+            <Message
+              className='w-full mb-3 bg-yellow-100'
+              severity='warn'
+              text='RESEARCH USE ONLY'
+              pt={{ text: { className: 'font-bold' } }}
+            />
+
+            <AnalysisResultS3Table title='cancer report' data={groupedData.sash.cancer} />
+            <AnalysisResultS3Table title='pcgr' data={groupedData.sash.pcgr} />
+            <AnalysisResultS3Table title='cpsr' data={groupedData.sash.cpsr} />
+            <AnalysisResultS3Table title='linx report' data={groupedData.sash.linx} />
+            <AnalysisResultS3Table title='vcf' data={groupedData.sash.vcfs} />
+            <AnalysisResultS3Table title='circos plot' data={groupedData.sash.circos} />
+            <AnalysisResultGDSTable title='bam' data={groupedData.sash.gdsWgsBams} />
+          </div>
         </TabPanel>
       </TabView>
     );
@@ -451,7 +461,9 @@ function groupResultsData({
 
   // Sash results
   const sashGrouped = {
-    bams: results_sash.filter((r) => r.key.endsWith('bam')),
+    // The input bam
+    gdsWgsBams: wgsBams,
+    // The rest of the output needed to show
     vcfs: results_sash.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf')),
     circos: results_sash.filter((r) => r.key.includes('circos') && r.key.endsWith('.png')),
     pcgr: results_sash.filter((r) => r.key.endsWith('pcgr.html')),
