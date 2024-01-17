@@ -23,7 +23,11 @@ import { Message } from 'primereact/message';
 // Creating Table
 type AnalysisResultGDSTableProps = {
   title: string;
-  data: Record<string, any>[];
+  data: GDSRow[];
+};
+type AnalysisResultS3TableProps = {
+  title: string;
+  data: S3Row[];
 };
 
 const filenameTemplate = (rowData: Record<string, any>) => {
@@ -267,7 +271,7 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
   );
 }
 
-function AnalysisResultS3Table(prop: AnalysisResultGDSTableProps) {
+function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
   const { title, data } = prop;
   return (
     <div>
@@ -353,6 +357,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
               pt={{ text: { className: 'font-bold' } }}
             />
 
+            <AnalysisResultS3Table title='qc report' data={groupedData.sash.multiqc} />
             <AnalysisResultS3Table title='cancer report' data={groupedData.sash.cancer} />
             <AnalysisResultS3Table title='pcgr' data={groupedData.sash.pcgr} />
             <AnalysisResultS3Table title='cpsr' data={groupedData.sash.cpsr} />
@@ -468,7 +473,7 @@ function groupResultsData({
     circos: results_sash.filter((r) => r.key.includes('circos') && r.key.endsWith('.png')),
     pcgr: results_sash.filter((r) => r.key.endsWith('pcgr.html')),
     cpsr: results_sash.filter((r) => r.key.endsWith('cpsr.html')),
-    multiqc: results_sash.filter((r) => r.key.endsWith('multiqc_report.html')),
+    multiqc: results_sash.filter((r) => r.key.includes('multiqc') && r.key.endsWith('.html')),
     cancer: results_sash.filter((r) => r.key.endsWith('cancer_report.html')),
     linx: results_sash.filter((r) => r.key.endsWith('linx.html')),
   };
