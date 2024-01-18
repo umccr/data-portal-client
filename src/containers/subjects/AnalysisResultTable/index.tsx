@@ -317,8 +317,8 @@ function AnalysisResultsPanel({ subjectId }: Props) {
           <AnalysisResultGDSTable title='qc report' data={groupedData.wgsMultiqc} />
           <AnalysisResultGDSTable title='coverage report' data={groupedData.wgsCoverage} />
           <AnalysisResultGDSTable title='vcf' data={groupedData.wgsVcfs} />
-          <AnalysisResultGDSTable title='bam' data={groupedData.wgsBams} />
           <AnalysisResultGDSTable title='circos plot' data={groupedData.wgsCircos} />
+          <AnalysisResultGDSTable title='bam' data={groupedData.wgsBams} />
         </TabPanel>
         <TabPanel header='WTS'>
           <AnalysisResultGDSTable title='rnasum report' data={groupedData.wtsRNAsum} />
@@ -339,8 +339,8 @@ function AnalysisResultsPanel({ subjectId }: Props) {
           <AnalysisResultS3Table title='qc report' data={groupedData.multiqc} />
           <AnalysisResultS3Table title='coverage report' data={groupedData.coverage} />
           <AnalysisResultS3Table title='vcf' data={groupedData.vcfs} />
-          <AnalysisResultS3Table title='bam' data={groupedData.bams} />
           <AnalysisResultS3Table title='circos plot' data={groupedData.circos} />
+          <AnalysisResultS3Table title='bam' data={groupedData.bams} />
         </TabPanel>
         <TabPanel header='WTS (bcbio)'>
           <AnalysisResultS3Table title='rnasum report' data={groupedData.rnasum} />
@@ -357,11 +357,11 @@ function AnalysisResultsPanel({ subjectId }: Props) {
               pt={{ text: { className: 'font-bold' } }}
             />
 
-            <AnalysisResultS3Table title='qc report' data={groupedData.sash.multiqc} />
             <AnalysisResultS3Table title='cancer report' data={groupedData.sash.cancer} />
             <AnalysisResultS3Table title='pcgr' data={groupedData.sash.pcgr} />
             <AnalysisResultS3Table title='cpsr' data={groupedData.sash.cpsr} />
             <AnalysisResultS3Table title='linx report' data={groupedData.sash.linx} />
+            <AnalysisResultS3Table title='qc report' data={groupedData.sash.multiqc} />
             <AnalysisResultS3Table title='vcf' data={groupedData.sash.vcfs} />
             <AnalysisResultS3Table title='circos plot' data={groupedData.sash.circos} />
             <AnalysisResultGDSTable title='bam' data={groupedData.sash.gdsWgsBams} />
