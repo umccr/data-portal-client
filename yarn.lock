@@ -3810,7 +3810,7 @@ __metadata:
     prettier: "npm:^3.2.4"
     primeflex: "npm:^3.3.1"
     primeicons: "npm:^6.0.1"
-    primereact: "npm:^10.3.2"
+    primereact: "npm:10.2.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-json-pretty: "npm:^2.2.0"
@@ -5890,9 +5890,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"primereact@npm:^10.3.2":
-  version: 10.3.2
-  resolution: "primereact@npm:10.3.2"
+"primereact@npm:10.2.1":
+  version: 10.2.1
+  resolution: "primereact@npm:10.2.1"
   dependencies:
     "@types/react-transition-group": "npm:^4.4.1"
     react-transition-group: "npm:^4.4.1"
@@ -5903,7 +5903,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: d032d01a94f223e11dea8622ce379f01ce5ca2052afe01d52c405f61641fc49e980831c94086097ad6b7da9d1a11309a0ca7436c51194722d8203053ef91562c
+  checksum: a49cb830c3cabdc3603f3926978605fcd1e2c228a22ec5b62f26edffb7fcecccc1204ca617f1432efd0e5d2110611d5f2cc8aa70a7f3e7f8de9ac1ce69a1e118
   languageName: node
   linkType: hard
 
