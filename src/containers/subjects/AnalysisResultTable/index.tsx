@@ -197,24 +197,48 @@ const previewGDSTemplate = (rowData: GDSRow) => {
   );
 };
 
+// An adapter for GDS and S3 row before passing in through the download template
 const downloadGDSTemplate = (rowData: GDSRow) => {
+  return downloadTemplate({
+    id: rowData.id,
+    keyOrPath: rowData.path,
+    getPresignedUrl: getGDSPreSignedUrl,
+  });
+};
+const downloadS3Template = (rowData: S3Row) => {
+  return downloadTemplate({
+    id: rowData.id,
+    keyOrPath: rowData.key,
+    getPresignedUrl: getS3PreSignedUrl,
+  });
+};
+
+const downloadTemplate = ({
+  id,
+  keyOrPath,
+  getPresignedUrl,
+}: {
+  id: number;
+  keyOrPath: string;
+  getPresignedUrl: (id: number) => Promise<any>;
+}) => {
   /**
    * For now download option is the special case that only offer within Analysis Results summary panel.
    * Whether we extend this to S3 or elsewhere is T.B.D  ~victor
    */
   const toast = useRef(null);
   const [blockedPanel, setBlockedPanel] = useState<boolean>(false);
-  const filename = rowData.path.split('/').pop() ?? rowData.path;
+  const filename = keyOrPath.split('/').pop() ?? keyOrPath;
   // const fileSizeInBytes = rowData.size_in_bytes;
   const filetype = filename.split('.').pop();
   const allowFileTypes = ['gz', 'maf', ...DATA_TYPE_SUPPORTED];
   const allowDownload = allowFileTypes.includes(filetype as string);
 
-  const handleDownload = async (rowData: GDSRow) => {
+  const handleDownload = async () => {
     setBlockedPanel(true);
-    if (rowData.path) {
+    if (keyOrPath) {
       try {
-        const signed_url = await getGDSPreSignedUrl(rowData.id);
+        const signed_url = await getPresignedUrl(id);
         window.open(signed_url, '_blank');
       } catch (e) {
         setBlockedPanel(false);
@@ -240,10 +264,7 @@ const downloadGDSTemplate = (rowData: GDSRow) => {
           <BlockUI
             blocked={blockedPanel}
             template={<i className='pi pi-spin pi-spinner' style={{ fontSize: '2em' }} />}>
-            <div
-              className='cursor-pointer pi pi-download'
-              onClick={() => handleDownload(rowData)}
-            />
+            <div className='cursor-pointer pi pi-download' onClick={() => handleDownload()} />
           </BlockUI>
         </>
       )}
@@ -281,6 +302,7 @@ function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
         tableClassName={data.length == 0 ? 'hidden' : ''}>
         {/* Column field determined by the prefix of body Template */}
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
+        <Column body={downloadS3Template} headerStyle={{ display: 'none' }} />
         <Column body={previewS3Template} headerStyle={{ display: 'none' }} />
         <Column body={actionS3Template} headerStyle={{ display: 'none' }} />
         <Column body={fileSizeS3Template} headerStyle={{ display: 'none' }} />
