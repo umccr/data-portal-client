@@ -9,6 +9,7 @@ import { constructGDSUrl } from '../../api/gds';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
 import { post } from 'aws-amplify/api';
+import { useParams } from 'react-router-dom';
 
 type OpenIGVDesktopDialogType = {
   handleClose: () => void;
@@ -19,8 +20,11 @@ type OpenIGVDesktopDialogType = {
   type: 's3' | 'gds';
 };
 export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
+  const { subjectId } = useParams();
   const { toastShow } = useToastContext();
   const { id, bucketOrVolume, pathOrKey, type, handleClose, handleNeedRestore } = props;
+
+  if (!subjectId) return <div>No subject Id found!</div>;
 
   // Query data
   const gdsLocalIgvUrl = useQuery(
@@ -40,6 +44,7 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
       }
 
       return constructS3LocalIgvUrl({
+        subjectId: subjectId,
         bucketOrVolume: bucketOrVolume,
         pathOrKey: pathOrKey,
       });
@@ -187,10 +192,14 @@ const constructGDSLocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKe
   return `http://localhost:60151/load?index=${idx}&file=${enf}&name=${name}`;
 };
 
-const constructS3LocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKey: string }) => {
-  const { bucketOrVolume, pathOrKey } = props;
+const constructS3LocalIgvUrl = async (props: {
+  subjectId: string;
+  bucketOrVolume: string;
+  pathOrKey: string;
+}) => {
+  const { bucketOrVolume, pathOrKey, subjectId } = props;
 
-  const name = pathOrKey.split('/').pop() ?? pathOrKey;
+  const name = `${subjectId}-${pathOrKey.split('/').pop() ?? pathOrKey}`;
   const file = `s3://${bucketOrVolume + '/' + pathOrKey}`;
 
   return `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${name}`;

@@ -292,7 +292,7 @@ function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
 
 type Props = { subjectId: string };
 
-function AnalysisResultsPanel({ subjectId }: Props) {
+function AnalysisResultsTable({ subjectId }: Props) {
   const { isFetching, isLoading, data } = usePortalSubjectDataAPI(subjectId);
 
   if (isLoading || isFetching) {
@@ -374,7 +374,7 @@ function AnalysisResultsPanel({ subjectId }: Props) {
   return <div className='pi pi-exclamation-triangle text-xl' />;
 }
 
-export default AnalysisResultsPanel;
+export default AnalysisResultsTable;
 
 function groupResultsData({
   results_s3,
