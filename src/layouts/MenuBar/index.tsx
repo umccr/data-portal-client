@@ -59,8 +59,7 @@ function MenuBar() {
       command: () => {
         navigate('/');
       },
-      className:
-        'text-xl text-black-alpha-90 font-semibold p-button-secondary p-button-text shadow-none',
+      className: 'text-xl text-white font-semibold p-button-secondary p-button-text shadow-none',
     },
     // TODO: let's hide these for now ~victor
     // {

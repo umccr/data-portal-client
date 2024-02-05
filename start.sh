@@ -84,4 +84,4 @@ export VITE_OAUTH_REDIRECT_OUT_LOCAL=$oauth_redirect_out_local
 export VITE_UNSPLASH_CLIENT_ID=$unsplash_client_id
 env | grep VITE
 
-npx vite
+yarn run -B vite
