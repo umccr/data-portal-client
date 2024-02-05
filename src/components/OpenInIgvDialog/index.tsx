@@ -30,7 +30,11 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
   const gdsLocalIgvUrl = useQuery(
     ['gds-local-igv', bucketOrVolume, pathOrKey],
     async () =>
-      await constructGDSLocalIgvUrl({ bucketOrVolume: bucketOrVolume, pathOrKey: pathOrKey }),
+      await constructGDSLocalIgvUrl({
+        bucketOrVolume: bucketOrVolume,
+        pathOrKey: pathOrKey,
+        subjectId: subjectId,
+      }),
     { enabled: type == 'gds', retry: false }
   );
 
@@ -144,8 +148,12 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
   );
 }
 
-const constructGDSLocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKey: string }) => {
-  const { bucketOrVolume, pathOrKey } = props;
+const constructGDSLocalIgvUrl = async (props: {
+  subjectId: string;
+  bucketOrVolume: string;
+  pathOrKey: string;
+}) => {
+  const { bucketOrVolume, pathOrKey, subjectId } = props;
 
   let idxFilePath: string;
   if (pathOrKey.endsWith('bam')) {
@@ -188,7 +196,8 @@ const constructGDSLocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKe
 
   const idx = encodeURIComponent(idxFilePresignUrl);
   const enf = encodeURIComponent(filePresignUrl);
-  const name = pathOrKey.split('/').pop() ?? pathOrKey;
+  const name = `${subjectId}_${pathOrKey.split('/').pop() ?? pathOrKey}`;
+
   return `http://localhost:60151/load?index=${idx}&file=${enf}&name=${name}`;
 };
 
@@ -199,7 +208,7 @@ const constructS3LocalIgvUrl = async (props: {
 }) => {
   const { bucketOrVolume, pathOrKey, subjectId } = props;
 
-  const name = `${subjectId}-${pathOrKey.split('/').pop() ?? pathOrKey}`;
+  const name = `${subjectId}_${pathOrKey.split('/').pop() ?? pathOrKey}`;
   const file = `s3://${bucketOrVolume + '/' + pathOrKey}`;
 
   return `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${name}`;
