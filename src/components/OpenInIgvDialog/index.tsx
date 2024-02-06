@@ -30,7 +30,7 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
   // We wanted to show more info when opening in IGV desktop
   // Ref: https://umccr.slack.com/archives/CP356DDCH/p1707116441928299?thread_ts=1706583808.733149&cid=CP356DDCH
 
-  // Pulling data from usePortalSubjectDataAPI as this hook should cache if it was previously used
+  // Pulling data from usePortalSubjectDataAPI (this hook should cache if it was previously called)
   const {
     isError: subjectIsError,
     error: subjectError,
@@ -42,8 +42,6 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
     ['gds-local-igv', bucketOrVolume, pathOrKey],
     async () => {
       const igvName = constructIgvNameParameter({ pathOrKey, subjectData: subjectData! });
-
-      console.log('hello');
 
       return await constructGDSLocalIgvUrl({
         bucketOrVolume: bucketOrVolume,
@@ -90,6 +88,15 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
         severity: 'error',
         summary: 'Error on locating GDS URL.',
         detail: `${gdsLocalIgvUrl.error}`,
+        sticky: true,
+      });
+      handleClose();
+    }
+    if (subjectError && subjectIsError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Error on retrieving subject data.',
+        detail: `${subjectError}`,
         sticky: true,
       });
       handleClose();
@@ -250,43 +257,39 @@ const constructIgvNameParameter = ({
 }: {
   pathOrKey: string;
   subjectData: SubjectApiRes;
-}) => {
+}): string => {
+  const nameArray: string[] = [];
+
+  // From the subjectData lims data it will find he property defined (as the parameter) and
+  // find a match in the pathOrKey. It will return the matched key in array.
+  const findMatchingProperty = (propertyName: string) =>
+    subjectData.lims.reduce((acc, curr) => {
+      const value = curr[propertyName] as string;
+
+      // do not want value to appear twice at the return array
+      if (acc.includes(value)) {
+        return acc;
+      }
+
+      // find the matching value and push to the array
+      if (pathOrKey.toLowerCase().includes(value.toLowerCase())) {
+        acc.push(value);
+      }
+
+      return acc;
+    }, [] as Array<string>);
+
   // 1. subjectId
-  const subjectId = subjectData.id;
+  nameArray.push(subjectData.id);
 
   // 2. type
-  const type = subjectData.lims.reduce((acc, curr) => {
-    const value = curr.type;
-
-    if (acc.includes(value)) {
-      return acc;
-    }
-
-    if (pathOrKey.toLowerCase().includes(value.toLowerCase())) {
-      acc.push(value);
-    }
-    return acc;
-  }, [] as Array<string>);
-  const finalType = type.join('_');
+  nameArray.concat(findMatchingProperty('type'));
 
   // 3. libraryId
-  const libraryId = subjectData.lims.reduce((acc, curr) => {
-    const value = curr.library_id;
-
-    if (acc.includes(value)) {
-      return acc;
-    }
-
-    if (pathOrKey.toLowerCase().includes(value.toLowerCase())) {
-      acc.push(value);
-    }
-
-    return acc;
-  }, [] as Array<string>);
-  const finalLibraryId = libraryId.join('_');
+  nameArray.concat(findMatchingProperty('library_id'));
 
   // 4. sampleId + filetype
-  const sampleIdAndExt = pathOrKey.split('/').pop() ?? pathOrKey;
+  nameArray.concat(pathOrKey.split('/').pop() ?? pathOrKey);
 
-  return `${subjectId}_${finalType}_${finalLibraryId}_${sampleIdAndExt}`;
+  return nameArray.join('_');
 };
