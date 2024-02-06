@@ -10,6 +10,7 @@ import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
 import { post } from 'aws-amplify/api';
 import { useParams } from 'react-router-dom';
+import { SubjectApiRes, usePortalSubjectDataAPI } from '../../api/subject';
 
 type OpenIGVDesktopDialogType = {
   handleClose: () => void;
@@ -26,16 +27,31 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
 
   if (!subjectId) return <div>No subject Id found!</div>;
 
+  // We wanted to show more info when opening in IGV desktop
+  // Ref: https://umccr.slack.com/archives/CP356DDCH/p1707116441928299?thread_ts=1706583808.733149&cid=CP356DDCH
+
+  // Pulling data from usePortalSubjectDataAPI as this hook should cache if it was previously used
+  const {
+    isError: subjectIsError,
+    error: subjectError,
+    data: subjectData,
+  } = usePortalSubjectDataAPI(subjectId);
+
   // Query data
   const gdsLocalIgvUrl = useQuery(
     ['gds-local-igv', bucketOrVolume, pathOrKey],
-    async () =>
-      await constructGDSLocalIgvUrl({
+    async () => {
+      const igvName = constructIgvNameParameter({ pathOrKey, subjectData: subjectData! });
+
+      console.log('hello');
+
+      return await constructGDSLocalIgvUrl({
         bucketOrVolume: bucketOrVolume,
         pathOrKey: pathOrKey,
-        subjectId: subjectId,
-      }),
-    { enabled: type == 'gds', retry: false }
+        igvName: igvName,
+      });
+    },
+    { enabled: type == 'gds' && !!subjectData, retry: false }
   );
 
   const s3LocalIgvUrl = useQuery(
@@ -47,13 +63,15 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
         handleNeedRestore();
       }
 
+      const igvName = constructIgvNameParameter({ pathOrKey, subjectData: subjectData! });
+
       return constructS3LocalIgvUrl({
-        subjectId: subjectId,
+        igvName: igvName,
         bucketOrVolume: bucketOrVolume,
         pathOrKey: pathOrKey,
       });
     },
-    { enabled: type == 's3', retry: false }
+    { enabled: type == 's3' && !!subjectData, retry: false }
   );
 
   // IsError handling
@@ -76,7 +94,14 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
       });
       handleClose();
     }
-  }, [s3LocalIgvUrl.isError, s3LocalIgvUrl.error, gdsLocalIgvUrl.isError, gdsLocalIgvUrl.error]);
+  }, [
+    s3LocalIgvUrl.isError,
+    s3LocalIgvUrl.error,
+    gdsLocalIgvUrl.isError,
+    gdsLocalIgvUrl.error,
+    subjectError,
+    subjectIsError,
+  ]);
 
   useEffect(() => {
     let localIgvUrl: string;
@@ -149,11 +174,11 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
 }
 
 const constructGDSLocalIgvUrl = async (props: {
-  subjectId: string;
+  igvName: string;
   bucketOrVolume: string;
   pathOrKey: string;
 }) => {
-  const { bucketOrVolume, pathOrKey, subjectId } = props;
+  const { bucketOrVolume, pathOrKey, igvName } = props;
 
   let idxFilePath: string;
   if (pathOrKey.endsWith('bam')) {
@@ -196,20 +221,72 @@ const constructGDSLocalIgvUrl = async (props: {
 
   const idx = encodeURIComponent(idxFilePresignUrl);
   const enf = encodeURIComponent(filePresignUrl);
-  const name = `${subjectId}_${pathOrKey.split('/').pop() ?? pathOrKey}`;
 
-  return `http://localhost:60151/load?index=${idx}&file=${enf}&name=${name}`;
+  return `http://localhost:60151/load?index=${idx}&file=${enf}&name=${igvName}`;
 };
 
-const constructS3LocalIgvUrl = async (props: {
-  subjectId: string;
+const constructS3LocalIgvUrl = (props: {
+  igvName: string;
   bucketOrVolume: string;
   pathOrKey: string;
 }) => {
-  const { bucketOrVolume, pathOrKey, subjectId } = props;
+  const { bucketOrVolume, pathOrKey, igvName } = props;
 
-  const name = `${subjectId}_${pathOrKey.split('/').pop() ?? pathOrKey}`;
   const file = `s3://${bucketOrVolume + '/' + pathOrKey}`;
 
-  return `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${name}`;
+  return `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${igvName}`;
+};
+
+/**
+ * The desired outcome is to include libraryId, sampleId, type, and filetype
+ * Desired output: SBJ00000_WGS_L0000000_PRJ00000_tumor.bam
+ *
+ * To find the match of metadata for the specific key/path will iterate through the lims record
+ * @param props
+ */
+const constructIgvNameParameter = ({
+  subjectData,
+  pathOrKey,
+}: {
+  pathOrKey: string;
+  subjectData: SubjectApiRes;
+}) => {
+  // 1. subjectId
+  const subjectId = subjectData.id;
+
+  // 2. type
+  const type = subjectData.lims.reduce((acc, curr) => {
+    const value = curr.type;
+
+    if (acc.includes(value)) {
+      return acc;
+    }
+
+    if (pathOrKey.toLowerCase().includes(value.toLowerCase())) {
+      acc.push(value);
+    }
+    return acc;
+  }, [] as Array<string>);
+  const finalType = type.join('_');
+
+  // 3. libraryId
+  const libraryId = subjectData.lims.reduce((acc, curr) => {
+    const value = curr.library_id;
+
+    if (acc.includes(value)) {
+      return acc;
+    }
+
+    if (pathOrKey.toLowerCase().includes(value.toLowerCase())) {
+      acc.push(value);
+    }
+
+    return acc;
+  }, [] as Array<string>);
+  const finalLibraryId = libraryId.join('_');
+
+  // 4. sampleId + filetype
+  const sampleIdAndExt = pathOrKey.split('/').pop() ?? pathOrKey;
+
+  return `${subjectId}_${finalType}_${finalLibraryId}_${sampleIdAndExt}`;
 };
