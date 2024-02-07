@@ -282,13 +282,10 @@ export const constructIgvNameParameter = ({
   // 1. subjectId
   nameArray.push(subjectData.id);
 
-  // 2. type
-  nameArray.push(...findMatchingProperty('type'));
-
-  // 3. libraryId
+  // 2 libraryId
   nameArray.push(...findMatchingProperty('library_id'));
 
-  // 4. sampleId + filetype
+  // 3. sampleId + filetype
   nameArray.push(pathOrKey.split('/').pop() ?? pathOrKey);
 
   return nameArray.join('_');

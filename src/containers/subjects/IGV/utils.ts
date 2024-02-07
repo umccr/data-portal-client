@@ -28,14 +28,12 @@ export const initIgv = async (props: { initRefGenome: string; oAuthToken: string
 export type RequiredS3RowType = Pick<S3Row, 'key' | 'bucket'>;
 export const convertS3RowToHtsgetIgvTrack = ({
   s3Row,
-  subjectData,
+  igvName,
 }: {
   s3Row: RequiredS3RowType;
-  subjectData: SubjectApiRes;
+  igvName: string;
 }): ITrack => {
   const { key, bucket } = s3Row;
-
-  const igvName = constructIgvNameParameter({ pathOrKey: key, subjectData: subjectData });
 
   // we have umccr specific rule about how our htsget ids are constructed
   const id = bucket + '/' + key;
@@ -71,10 +69,10 @@ export const convertS3RowToHtsgetIgvTrack = ({
 export type RequiredGDSRowType = Pick<GDSRow, 'volume_name' | 'path'>;
 export const convertGdsRowToIgvTrack = async ({
   gdsRow,
-  subjectData,
+  igvName,
 }: {
   gdsRow: RequiredGDSRowType;
-  subjectData: SubjectApiRes;
+  igvName: string;
 }): Promise<igv.ITrack | undefined> => {
   const { volume_name, path } = gdsRow;
   // Find gds index path
@@ -114,7 +112,6 @@ export const convertGdsRowToIgvTrack = async ({
       idxFilePresignUrl = presigned_url;
     }
   }
-  const igvName = constructIgvNameParameter({ pathOrKey: path, subjectData: subjectData });
   if (path.endsWith('vcf') || path.endsWith('vcf.gz')) {
     return {
       type: 'variant',
