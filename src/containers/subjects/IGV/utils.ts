@@ -1,9 +1,11 @@
 import config from '../../../config';
-import { getBaseNameFromKey } from '../../../api/utils';
-import { constructGDSUrl } from '../../../api/gds';
+import { GDSRow, constructGDSUrl } from '../../../api/gds';
 import igv, { IGVBrowser, ITrack } from 'igv';
 import { post } from 'aws-amplify/api';
+import { constructIgvNameParameter } from '../../../components/OpenInIgvDialog';
 import genomes from './genomes';
+import { SubjectApiRes } from '../../../api/subject';
+import { S3Row } from '../../../api/s3';
 
 /**
  * IGV OPERATIONS
@@ -23,13 +25,17 @@ export const initIgv = async (props: { initRefGenome: string; oAuthToken: string
   return igvBrowser;
 };
 
-export type RequiredS3RowType = {
-  key: string;
-  bucket: string;
-} & Record<string, string | number>;
-export const convertS3RowToHtsgetIgvTrack = (s3row: RequiredS3RowType): ITrack => {
-  const { key, bucket } = s3row;
-  const baseName = getBaseNameFromKey(key);
+export type RequiredS3RowType = Pick<S3Row, 'key' | 'bucket'>;
+export const convertS3RowToHtsgetIgvTrack = ({
+  s3Row,
+  subjectData,
+}: {
+  s3Row: RequiredS3RowType;
+  subjectData: SubjectApiRes;
+}): ITrack => {
+  const { key, bucket } = s3Row;
+
+  const igvName = constructIgvNameParameter({ pathOrKey: key, subjectData: subjectData });
 
   // we have umccr specific rule about how our htsget ids are constructed
   const id = bucket + '/' + key;
@@ -42,7 +48,7 @@ export const convertS3RowToHtsgetIgvTrack = (s3row: RequiredS3RowType): ITrack =
       url: config.htsget.URL,
       endpoint: config.htsget.ENDPOINT_READS,
       id: id.replace('.bam', ''),
-      name: baseName,
+      name: igvName,
       removable: false,
     };
   } else if (key.endsWith('vcf') || key.endsWith('vcf.gz')) {
@@ -53,7 +59,7 @@ export const convertS3RowToHtsgetIgvTrack = (s3row: RequiredS3RowType): ITrack =
       url: config.htsget.URL,
       endpoint: config.htsget.ENDPOINT_VARIANTS,
       id: id.replace('.vcf', '').replace('.gz', ''),
-      name: baseName,
+      name: igvName,
       removable: false,
       visibilityWindow: -1,
     };
@@ -62,13 +68,14 @@ export const convertS3RowToHtsgetIgvTrack = (s3row: RequiredS3RowType): ITrack =
   }
 };
 
-export type RequiredGDSRowType = {
-  volume_name: string;
-  path: string;
-} & Record<string, string | number | boolean | null>;
-export const convertGdsRowToIgvTrack = async (
-  gdsRow: RequiredGDSRowType
-): Promise<igv.ITrack | undefined> => {
+export type RequiredGDSRowType = Pick<GDSRow, 'volume_name' | 'path'>;
+export const convertGdsRowToIgvTrack = async ({
+  gdsRow,
+  subjectData,
+}: {
+  gdsRow: RequiredGDSRowType;
+  subjectData: SubjectApiRes;
+}): Promise<igv.ITrack | undefined> => {
   const { volume_name, path } = gdsRow;
   // Find gds index path
   let idxFilePath: string;
@@ -107,8 +114,7 @@ export const convertGdsRowToIgvTrack = async (
       idxFilePresignUrl = presigned_url;
     }
   }
-
-  const baseName = getBaseNameFromKey(path);
+  const igvName = constructIgvNameParameter({ pathOrKey: path, subjectData: subjectData });
   if (path.endsWith('vcf') || path.endsWith('vcf.gz')) {
     return {
       type: 'variant',
@@ -117,7 +123,7 @@ export const convertGdsRowToIgvTrack = async (
       url: filePresignUrl,
       indexURL: idxFilePresignUrl,
       id: fileGdsUrl,
-      name: baseName,
+      name: igvName,
       removable: false,
       visibilityWindow: -1,
     };
@@ -129,7 +135,7 @@ export const convertGdsRowToIgvTrack = async (
       url: filePresignUrl,
       indexURL: idxFilePresignUrl,
       id: fileGdsUrl,
-      name: baseName,
+      name: igvName,
       removable: false,
     };
   } else if (path.endsWith('cram')) {
@@ -140,7 +146,7 @@ export const convertGdsRowToIgvTrack = async (
       url: filePresignUrl,
       indexURL: idxFilePresignUrl,
       id: fileGdsUrl,
-      name: baseName,
+      name: igvName,
       removable: false,
     };
   }

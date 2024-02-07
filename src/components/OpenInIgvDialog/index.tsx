@@ -27,9 +27,6 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
 
   if (!subjectId) return <div>No subject Id found!</div>;
 
-  // We wanted to show more info when opening in IGV desktop
-  // Ref: https://umccr.slack.com/archives/CP356DDCH/p1707116441928299?thread_ts=1706583808.733149&cid=CP356DDCH
-
   // Pulling data from usePortalSubjectDataAPI (this hook should cache if it was previously called)
   const {
     isError: subjectIsError,
@@ -245,13 +242,17 @@ const constructS3LocalIgvUrl = (props: {
 };
 
 /**
+ *
+ * We wanted to show more info in the name parameter when opening in IGV
+ * Ref: https://umccr.slack.com/archives/CP356DDCH/p1707116441928299?thread_ts=1706583808.733149&cid=CP356DDCH
+ *
  * The desired outcome is to include libraryId, sampleId, type, and filetype
  * Desired output: SBJ00000_WGS_L0000000_PRJ00000_tumor.bam
  *
  * To find the match of metadata for the specific key/path will iterate through the lims record
  * @param props
  */
-const constructIgvNameParameter = ({
+export const constructIgvNameParameter = ({
   subjectData,
   pathOrKey,
 }: {
@@ -260,7 +261,6 @@ const constructIgvNameParameter = ({
 }): string => {
   const nameArray: string[] = [];
 
-  // From the subjectData lims data it will find he property defined (as the parameter) and
   // find a match in the pathOrKey. It will return the matched key in array.
   const findMatchingProperty = (propertyName: string) =>
     subjectData.lims.reduce((acc, curr) => {
@@ -283,13 +283,14 @@ const constructIgvNameParameter = ({
   nameArray.push(subjectData.id);
 
   // 2. type
-  nameArray.concat(findMatchingProperty('type'));
+  nameArray.push(...findMatchingProperty('type'));
 
   // 3. libraryId
-  nameArray.concat(findMatchingProperty('library_id'));
+  nameArray.push(...findMatchingProperty('library_id'));
 
   // 4. sampleId + filetype
-  nameArray.concat(pathOrKey.split('/').pop() ?? pathOrKey);
+  nameArray.push(pathOrKey.split('/').pop() ?? pathOrKey);
+  console.log('nameArray', nameArray);
 
   return nameArray.join('_');
 };

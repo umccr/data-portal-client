@@ -1,11 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ITrack } from 'igv';
 import { useQuery } from 'react-query';
 import { ProgressBar } from 'primereact/progressbar';
-
 import { Button } from 'primereact/button';
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import { Toolbar } from 'primereact/toolbar';
+import { Dialog } from 'primereact/dialog';
+
 import LoadSubjectDataButton from './LoadSubjectDataButton';
 import { getBaseNameFromKey } from '../../../api/utils';
 import { GDSRow } from '../../../api/gds';
@@ -21,6 +22,9 @@ import {
 } from './utils';
 import LoadCustomTrackDataButton from './LoadCustomTrackDataButton';
 import { getJwtToken } from '../../../utils/signer';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
+import { SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
+import { useToastContext } from '../../../providers/ToastProvider';
 
 const toolbarGenomeList = [
   { label: 'hg38', value: 'hg38' },
@@ -36,6 +40,15 @@ export type LoadSubjectDataType = {
 
 type Props = { subjectId: string };
 function IGV({ subjectId }: Props) {
+  const { toastShow } = useToastContext();
+
+  const {
+    isLoading: isSubjectLoading,
+    isError: subjectIsError,
+    error: subjectError,
+    data: subjectData,
+  } = usePortalSubjectDataAPI(subjectId);
+
   // IGV init
   const igv = useQuery(
     ['initIGV', subjectId],
@@ -77,7 +90,11 @@ function IGV({ subjectId }: Props) {
       removeIgvLoadTrackFromName({ trackNameList: removalTrackNameList, igvBrowser: igvBrowser });
 
       // Find and *add* necessary current Track Data
-      const newIgvTrackList = await createNewIgvTrackList(igvSubjectTrackData, newChange);
+      const newIgvTrackList = await createNewIgvTrackList({
+        subjectData: subjectData!,
+        oldTrackData: igvSubjectTrackData,
+        newTrackData: newChange,
+      });
       await addIgvLoadTrackFromITrackList({
         iTrackList: newIgvTrackList,
         igvBrowser: igvBrowser,
@@ -86,7 +103,7 @@ function IGV({ subjectId }: Props) {
       // Save changes to current track data state
       setIgvSubjectTrackData(newChange);
     },
-    [igvBrowser, igvSubjectTrackData]
+    [igvBrowser, igvSubjectTrackData, subjectData]
   );
 
   // Custom State and Handler
@@ -95,7 +112,7 @@ function IGV({ subjectId }: Props) {
     async (s3Row: RequiredS3RowType) => {
       if (!igvBrowser) return;
 
-      const newCustomLoadTrack = convertS3RowToHtsgetIgvTrack(s3Row);
+      const newCustomLoadTrack = convertS3RowToHtsgetIgvTrack({ s3Row, subjectData: subjectData! });
       if (newCustomLoadTrack) {
         await addIgvLoadTrackFromITrackList({
           iTrackList: [newCustomLoadTrack],
@@ -106,14 +123,17 @@ function IGV({ subjectId }: Props) {
       const basename = getBaseNameFromKey(s3Row.key);
       setCustomTrackDataNameList((prev) => [...prev, basename]);
     },
-    [igvBrowser]
+    [igvBrowser, subjectData]
   );
 
   const handleCustomIgvGDSTrackDataChange = useCallback(
     async (gdsRow: RequiredGDSRowType) => {
       if (!igvBrowser) return;
 
-      const newCustomLoadTrack = await convertGdsRowToIgvTrack(gdsRow);
+      const newCustomLoadTrack = await convertGdsRowToIgvTrack({
+        gdsRow,
+        subjectData: subjectData!,
+      });
       if (newCustomLoadTrack) {
         await addIgvLoadTrackFromITrackList({
           iTrackList: [newCustomLoadTrack],
@@ -124,7 +144,7 @@ function IGV({ subjectId }: Props) {
       const basename = getBaseNameFromKey(gdsRow.path);
       setCustomTrackDataNameList((prev) => [...prev, basename]);
     },
-    [igvBrowser]
+    [igvBrowser, subjectData]
   );
 
   // Handle remove IGV trackdata
@@ -148,6 +168,18 @@ function IGV({ subjectId }: Props) {
       gdsRowList: [],
     });
   };
+
+  // IsError handling
+  useEffect(() => {
+    if (subjectError && subjectIsError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Error on retrieving subject data.',
+        detail: `${subjectError}`,
+        sticky: true,
+      });
+    }
+  }, [subjectError, subjectIsError]);
 
   const leftToolbarContents = (
     <>
@@ -196,8 +228,20 @@ function IGV({ subjectId }: Props) {
 
   return (
     <>
+      {(isSubjectLoading || !subjectData) && (
+        <Dialog
+          visible={true}
+          showHeader={false}
+          style={{ width: '50vw' }}
+          draggable={false}
+          resizable={false}
+          closable={false}
+          onHide={() => {}}>
+          <CircularLoaderWithText text='retrieving subject data' />
+        </Dialog>
+      )}
       <div className='bg-white'>
-        <Toolbar left={leftToolbarContents} right={rightContents} className='p-2' />
+        <Toolbar start={leftToolbarContents} end={rightContents} className='p-2' />
 
         {igv.isLoading && (
           <ProgressBar
@@ -271,10 +315,15 @@ const createRemovalIgvTrackNameList = (
  * @param newTrackData
  * @returns
  */
-const createNewIgvTrackList = async (
-  oldTrackData: LoadSubjectDataType,
-  newTrackData: LoadSubjectDataType
-): Promise<ITrack[]> => {
+const createNewIgvTrackList = async ({
+  subjectData,
+  oldTrackData,
+  newTrackData,
+}: {
+  subjectData: SubjectApiRes;
+  oldTrackData: LoadSubjectDataType;
+  newTrackData: LoadSubjectDataType;
+}): Promise<ITrack[]> => {
   const newIgvLoadTrackList: ITrack[] = [];
 
   // Find new IGV Track Data for S3
@@ -283,7 +332,7 @@ const createNewIgvTrackList = async (
     arrayB: oldTrackData.s3RowList,
   }) as unknown as S3Row[];
   for (const s3Row of newS3ObjectList) {
-    const newS3Itrack = convertS3RowToHtsgetIgvTrack(s3Row);
+    const newS3Itrack = convertS3RowToHtsgetIgvTrack({ s3Row, subjectData });
     if (newS3Itrack != null) newIgvLoadTrackList.push(newS3Itrack);
   }
 
@@ -293,7 +342,7 @@ const createNewIgvTrackList = async (
     arrayB: oldTrackData.gdsRowList,
   }) as unknown as GDSRow[];
   for (const gdsRow of newGdsObjectList) {
-    const newGdsTrack = await convertGdsRowToIgvTrack(gdsRow);
+    const newGdsTrack = await convertGdsRowToIgvTrack({ gdsRow, subjectData });
     if (newGdsTrack != null) newIgvLoadTrackList.push(newGdsTrack);
   }
   return newIgvLoadTrackList;
