@@ -247,7 +247,7 @@ const constructS3LocalIgvUrl = (props: {
  * Ref: https://umccr.slack.com/archives/CP356DDCH/p1707116441928299?thread_ts=1706583808.733149&cid=CP356DDCH
  *
  * The desired outcome is to include libraryId, sampleId, type, and filetype
- * Desired output: SBJ00000_WGS_L0000000_PRJ00000_tumor.bam
+ * Desired output: SBJ00000_L0000000_PRJ00000_tumor.bam
  *
  * To find the match of metadata for the specific key/path will iterate through the lims record
  * @param props
