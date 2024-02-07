@@ -246,8 +246,11 @@ const constructS3LocalIgvUrl = (props: {
  * We wanted to show more info in the name parameter when opening in IGV
  * Ref: https://umccr.slack.com/archives/CP356DDCH/p1707116441928299?thread_ts=1706583808.733149&cid=CP356DDCH
  *
- * The desired outcome is to include libraryId, sampleId, type, and filetype
+ * For BAM files the desired outcome is to include libraryId, sampleId, type, and filetype
  * Desired output: SBJ00000_L0000000_PRJ00000_tumor.bam
+ *
+ * Other than BAM
+ * Desired output:  SBJ00000_MDX0000.vcf.gz
  *
  * To find the match of metadata for the specific key/path will iterate through the lims record
  * @param props
@@ -261,32 +264,36 @@ export const constructIgvNameParameter = ({
 }): string => {
   const nameArray: string[] = [];
 
-  // find a match in the pathOrKey. It will return the matched key in array.
-  const findMatchingProperty = (propertyName: string) =>
-    subjectData.lims.reduce((acc, curr) => {
-      const value = curr[propertyName] as string;
+  const filetype = pathOrKey.split('.').pop();
+  // Find sampleId from its filename
+  const filename = pathOrKey.split('/').pop() ?? pathOrKey;
+  const sampleId = filename.split('.').shift()?.split('_').shift() ?? filename;
+
+  if (filetype?.toLocaleLowerCase() == 'bam') {
+    const libraryIdArray = subjectData.lims.reduce((acc, curr) => {
+      const currLibId = curr.library_id;
+      const currSampId = curr.sample_id;
 
       // do not want value to appear twice at the return array
-      if (acc.includes(value)) {
+      if (acc.includes(currLibId)) {
         return acc;
       }
 
       // find the matching value and push to the array
-      if (pathOrKey.toLowerCase().includes(value.toLowerCase())) {
-        acc.push(value);
+      if (currSampId == sampleId) {
+        acc.push(currLibId);
       }
 
       return acc;
     }, [] as Array<string>);
 
-  // 1. subjectId
-  nameArray.push(subjectData.id);
-
-  // 2 libraryId
-  nameArray.push(...findMatchingProperty('library_id'));
-
-  // 3. sampleId + filetype
-  nameArray.push(pathOrKey.split('/').pop() ?? pathOrKey);
+    nameArray.push(subjectData.id);
+    nameArray.push(...libraryIdArray);
+    nameArray.push(filename);
+  } else {
+    nameArray.push(subjectData.id);
+    nameArray.push(filename);
+  }
 
   return nameArray.join('_');
 };
