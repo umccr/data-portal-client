@@ -290,7 +290,6 @@ export const constructIgvNameParameter = ({
 
   // 4. sampleId + filetype
   nameArray.push(pathOrKey.split('/').pop() ?? pathOrKey);
-  console.log('nameArray', nameArray);
 
   return nameArray.join('_');
 };
