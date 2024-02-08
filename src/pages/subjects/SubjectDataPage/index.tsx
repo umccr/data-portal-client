@@ -10,7 +10,7 @@ function SubjectDataPage() {
   const { subjectId } = useParams();
 
   if (!subjectId) {
-    return <div>No Subject ID Provided</div>;
+    return <div>No Subject Id Provided</div>;
   }
 
   const chipDataS3: Record<string, string | number>[] = PresetDataFactory.buildAnalysisDataS3();

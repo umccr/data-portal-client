@@ -9,6 +9,8 @@ import { constructGDSUrl } from '../../api/gds';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
 import { post } from 'aws-amplify/api';
+import { useParams } from 'react-router-dom';
+import { SubjectApiRes, usePortalSubjectDataAPI } from '../../api/subject';
 
 type OpenIGVDesktopDialogType = {
   handleClose: () => void;
@@ -19,15 +21,32 @@ type OpenIGVDesktopDialogType = {
   type: 's3' | 'gds';
 };
 export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
+  const { subjectId } = useParams();
   const { toastShow } = useToastContext();
   const { id, bucketOrVolume, pathOrKey, type, handleClose, handleNeedRestore } = props;
+
+  if (!subjectId) return <div>No subject Id found!</div>;
+
+  // Pulling data from usePortalSubjectDataAPI (this hook should cache if it was previously called)
+  const {
+    isError: subjectIsError,
+    error: subjectError,
+    data: subjectData,
+  } = usePortalSubjectDataAPI(subjectId);
 
   // Query data
   const gdsLocalIgvUrl = useQuery(
     ['gds-local-igv', bucketOrVolume, pathOrKey],
-    async () =>
-      await constructGDSLocalIgvUrl({ bucketOrVolume: bucketOrVolume, pathOrKey: pathOrKey }),
-    { enabled: type == 'gds', retry: false }
+    async () => {
+      const igvName = constructIgvNameParameter({ pathOrKey, subjectData: subjectData! });
+
+      return await constructGDSLocalIgvUrl({
+        bucketOrVolume: bucketOrVolume,
+        pathOrKey: pathOrKey,
+        igvName: igvName,
+      });
+    },
+    { enabled: type == 'gds' && !!subjectData, retry: false }
   );
 
   const s3LocalIgvUrl = useQuery(
@@ -39,12 +58,15 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
         handleNeedRestore();
       }
 
+      const igvName = constructIgvNameParameter({ pathOrKey, subjectData: subjectData! });
+
       return constructS3LocalIgvUrl({
+        igvName: igvName,
         bucketOrVolume: bucketOrVolume,
         pathOrKey: pathOrKey,
       });
     },
-    { enabled: type == 's3', retry: false }
+    { enabled: type == 's3' && !!subjectData, retry: false }
   );
 
   // IsError handling
@@ -67,7 +89,23 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
       });
       handleClose();
     }
-  }, [s3LocalIgvUrl.isError, s3LocalIgvUrl.error, gdsLocalIgvUrl.isError, gdsLocalIgvUrl.error]);
+    if (subjectError && subjectIsError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Error on retrieving subject data.',
+        detail: `${subjectError}`,
+        sticky: true,
+      });
+      handleClose();
+    }
+  }, [
+    s3LocalIgvUrl.isError,
+    s3LocalIgvUrl.error,
+    gdsLocalIgvUrl.isError,
+    gdsLocalIgvUrl.error,
+    subjectError,
+    subjectIsError,
+  ]);
 
   useEffect(() => {
     let localIgvUrl: string;
@@ -139,8 +177,12 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
   );
 }
 
-const constructGDSLocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKey: string }) => {
-  const { bucketOrVolume, pathOrKey } = props;
+const constructGDSLocalIgvUrl = async (props: {
+  igvName: string;
+  bucketOrVolume: string;
+  pathOrKey: string;
+}) => {
+  const { bucketOrVolume, pathOrKey, igvName } = props;
 
   let idxFilePath: string;
   if (pathOrKey.endsWith('bam')) {
@@ -183,15 +225,79 @@ const constructGDSLocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKe
 
   const idx = encodeURIComponent(idxFilePresignUrl);
   const enf = encodeURIComponent(filePresignUrl);
-  const name = pathOrKey.split('/').pop() ?? pathOrKey;
-  return `http://localhost:60151/load?index=${idx}&file=${enf}&name=${name}`;
+
+  return `http://localhost:60151/load?index=${idx}&file=${enf}&name=${igvName}`;
 };
 
-const constructS3LocalIgvUrl = async (props: { bucketOrVolume: string; pathOrKey: string }) => {
-  const { bucketOrVolume, pathOrKey } = props;
+const constructS3LocalIgvUrl = (props: {
+  igvName: string;
+  bucketOrVolume: string;
+  pathOrKey: string;
+}) => {
+  const { bucketOrVolume, pathOrKey, igvName } = props;
 
-  const name = pathOrKey.split('/').pop() ?? pathOrKey;
   const file = `s3://${bucketOrVolume + '/' + pathOrKey}`;
 
-  return `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${name}`;
+  return `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${igvName}`;
+};
+
+/**
+ *
+ * We wanted to show more info in the name parameter when opening in IGV
+ * Ref: https://umccr.slack.com/archives/CP356DDCH/p1707116441928299?thread_ts=1706583808.733149&cid=CP356DDCH
+ *
+ * For BAM files the desired outcome is to include libraryId, sampleId, type, and filetype
+ * Desired output: SBJ00000_L0000000_PRJ00000_tumor.bam
+ *
+ * Other than BAM
+ * Desired output:  SBJ00000_MDX0000.vcf.gz
+ *
+ * To find the match of metadata for the specific key/path will iterate through the lims record
+ * @param props
+ */
+export const constructIgvNameParameter = ({
+  subjectData,
+  pathOrKey,
+}: {
+  pathOrKey: string;
+  subjectData: SubjectApiRes;
+}): string => {
+  const nameArray: string[] = [];
+
+  const filetype = pathOrKey.split('.').pop();
+  // Find sampleId from its filename
+  const filename = pathOrKey.split('/').pop() ?? pathOrKey;
+  const sampleId = filename.split('.').shift()?.split('_').shift() ?? filename;
+
+  // Append subjectId if filename does not contain subjectId
+  if (!filename.startsWith(subjectData.id)) {
+    nameArray.push(subjectData.id);
+  }
+
+  // If it is a `bam` file it will try to figure out the appropriate libraryId
+  if (filetype?.toLocaleLowerCase() == 'bam') {
+    const libraryIdArray = subjectData.lims.reduce((acc, curr) => {
+      const currLibId = curr.library_id;
+      const currSampId = curr.sample_id;
+
+      // do not want value to appear twice at the return array
+      if (acc.includes(currLibId)) {
+        return acc;
+      }
+
+      // find the matching value and push to the array
+      if (currSampId == sampleId) {
+        acc.push(currLibId);
+      }
+
+      return acc;
+    }, [] as Array<string>);
+
+    nameArray.push(...libraryIdArray);
+  }
+
+  // Append filename at the end
+  nameArray.push(filename);
+
+  return nameArray.join('_');
 };

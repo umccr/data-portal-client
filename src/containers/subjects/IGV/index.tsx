@@ -1,13 +1,13 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ITrack } from 'igv';
 import { useQuery } from 'react-query';
 import { ProgressBar } from 'primereact/progressbar';
-
 import { Button } from 'primereact/button';
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import { Toolbar } from 'primereact/toolbar';
+import { Dialog } from 'primereact/dialog';
+
 import LoadSubjectDataButton from './LoadSubjectDataButton';
-import { getBaseNameFromKey } from '../../../api/utils';
 import { GDSRow } from '../../../api/gds';
 import { S3Row } from '../../../api/s3';
 import {
@@ -21,6 +21,10 @@ import {
 } from './utils';
 import LoadCustomTrackDataButton from './LoadCustomTrackDataButton';
 import { getJwtToken } from '../../../utils/signer';
+import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
+import { SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
+import { useToastContext } from '../../../providers/ToastProvider';
+import { constructIgvNameParameter } from '../../../components/OpenInIgvDialog';
 
 const toolbarGenomeList = [
   { label: 'hg38', value: 'hg38' },
@@ -36,6 +40,15 @@ export type LoadSubjectDataType = {
 
 type Props = { subjectId: string };
 function IGV({ subjectId }: Props) {
+  const { toastShow } = useToastContext();
+
+  const {
+    isLoading: isSubjectLoading,
+    isError: subjectIsError,
+    error: subjectError,
+    data: subjectData,
+  } = usePortalSubjectDataAPI(subjectId);
+
   // IGV init
   const igv = useQuery(
     ['initIGV', subjectId],
@@ -70,14 +83,19 @@ function IGV({ subjectId }: Props) {
       if (!igvBrowser) return;
 
       // Find and *remove* necessary current Track Data
-      const removalTrackNameList: string[] = createRemovalIgvTrackNameList(
-        igvSubjectTrackData,
-        newChange
-      );
+      const removalTrackNameList: string[] = createRemovalIgvTrackNameList({
+        subjectData: subjectData!,
+        oldTrackData: igvSubjectTrackData,
+        newTrackData: newChange,
+      });
       removeIgvLoadTrackFromName({ trackNameList: removalTrackNameList, igvBrowser: igvBrowser });
 
       // Find and *add* necessary current Track Data
-      const newIgvTrackList = await createNewIgvTrackList(igvSubjectTrackData, newChange);
+      const newIgvTrackList = await createNewIgvTrackList({
+        subjectData: subjectData!,
+        oldTrackData: igvSubjectTrackData,
+        newTrackData: newChange,
+      });
       await addIgvLoadTrackFromITrackList({
         iTrackList: newIgvTrackList,
         igvBrowser: igvBrowser,
@@ -86,7 +104,7 @@ function IGV({ subjectId }: Props) {
       // Save changes to current track data state
       setIgvSubjectTrackData(newChange);
     },
-    [igvBrowser, igvSubjectTrackData]
+    [igvBrowser, igvSubjectTrackData, subjectData]
   );
 
   // Custom State and Handler
@@ -95,7 +113,12 @@ function IGV({ subjectId }: Props) {
     async (s3Row: RequiredS3RowType) => {
       if (!igvBrowser) return;
 
-      const newCustomLoadTrack = convertS3RowToHtsgetIgvTrack(s3Row);
+      const igvName = constructIgvNameParameter({
+        pathOrKey: s3Row.key,
+        subjectData: subjectData!,
+      });
+
+      const newCustomLoadTrack = convertS3RowToHtsgetIgvTrack({ s3Row, igvName });
       if (newCustomLoadTrack) {
         await addIgvLoadTrackFromITrackList({
           iTrackList: [newCustomLoadTrack],
@@ -103,17 +126,24 @@ function IGV({ subjectId }: Props) {
         });
       }
 
-      const basename = getBaseNameFromKey(s3Row.key);
-      setCustomTrackDataNameList((prev) => [...prev, basename]);
+      setCustomTrackDataNameList((prev) => [...prev, igvName]);
     },
-    [igvBrowser]
+    [igvBrowser, subjectData]
   );
 
   const handleCustomIgvGDSTrackDataChange = useCallback(
     async (gdsRow: RequiredGDSRowType) => {
       if (!igvBrowser) return;
 
-      const newCustomLoadTrack = await convertGdsRowToIgvTrack(gdsRow);
+      const igvName = constructIgvNameParameter({
+        pathOrKey: gdsRow.path,
+        subjectData: subjectData!,
+      });
+
+      const newCustomLoadTrack = await convertGdsRowToIgvTrack({
+        gdsRow,
+        igvName,
+      });
       if (newCustomLoadTrack) {
         await addIgvLoadTrackFromITrackList({
           iTrackList: [newCustomLoadTrack],
@@ -121,19 +151,22 @@ function IGV({ subjectId }: Props) {
         });
       }
 
-      const basename = getBaseNameFromKey(gdsRow.path);
-      setCustomTrackDataNameList((prev) => [...prev, basename]);
+      setCustomTrackDataNameList((prev) => [...prev, igvName]);
     },
-    [igvBrowser]
+    [igvBrowser, subjectData]
   );
 
   // Handle remove IGV trackdata
   const handleRemoveAllTrackData = () => {
     if (!igvBrowser) return;
 
-    let removalTrackNameList: string[] = createRemovalIgvTrackNameList(igvSubjectTrackData, {
-      s3RowList: [],
-      gdsRowList: [],
+    let removalTrackNameList: string[] = createRemovalIgvTrackNameList({
+      subjectData: subjectData!,
+      oldTrackData: igvSubjectTrackData,
+      newTrackData: {
+        s3RowList: [],
+        gdsRowList: [],
+      },
     });
 
     if (customTrackDataNameList.length) {
@@ -148,6 +181,18 @@ function IGV({ subjectId }: Props) {
       gdsRowList: [],
     });
   };
+
+  // IsError handling
+  useEffect(() => {
+    if (subjectError && subjectIsError) {
+      toastShow({
+        severity: 'error',
+        summary: 'Error on retrieving subject data.',
+        detail: `${subjectError}`,
+        sticky: true,
+      });
+    }
+  }, [subjectError, subjectIsError]);
 
   const leftToolbarContents = (
     <>
@@ -196,8 +241,20 @@ function IGV({ subjectId }: Props) {
 
   return (
     <>
+      {(isSubjectLoading || !subjectData) && (
+        <Dialog
+          visible={true}
+          showHeader={false}
+          style={{ width: '50vw' }}
+          draggable={false}
+          resizable={false}
+          closable={false}
+          onHide={() => {}}>
+          <CircularLoaderWithText text='retrieving subject data' />
+        </Dialog>
+      )}
       <div className='bg-white'>
-        <Toolbar left={leftToolbarContents} right={rightContents} className='p-2' />
+        <Toolbar start={leftToolbarContents} end={rightContents} className='p-2' />
 
         {igv.isLoading && (
           <ProgressBar
@@ -241,10 +298,15 @@ const diffArrayAlphaAndArrayBetaOnObjData = (props: {
  * @param newTrackData
  * @returns
  */
-const createRemovalIgvTrackNameList = (
-  oldTrackData: LoadSubjectDataType,
-  newTrackData: LoadSubjectDataType
-): string[] => {
+const createRemovalIgvTrackNameList = ({
+  subjectData,
+  oldTrackData,
+  newTrackData,
+}: {
+  subjectData: SubjectApiRes;
+  oldTrackData: LoadSubjectDataType;
+  newTrackData: LoadSubjectDataType;
+}): string[] => {
   const loadTrackNameList: string[] = [];
 
   // Find in S3
@@ -252,15 +314,26 @@ const createRemovalIgvTrackNameList = (
     arrayA: oldTrackData.s3RowList,
     arrayB: newTrackData.s3RowList,
   }) as unknown as S3Row[];
-  for (const s3Row of s3RemovalObjectList) loadTrackNameList.push(getBaseNameFromKey(s3Row.key));
+  for (const s3Row of s3RemovalObjectList) {
+    const name = constructIgvNameParameter({
+      pathOrKey: s3Row.key,
+      subjectData: subjectData!,
+    });
+    loadTrackNameList.push(name);
+  }
 
   // Find in GDS
   const gdsRemovalObjectList = diffArrayAlphaAndArrayBetaOnObjData({
     arrayA: oldTrackData.gdsRowList,
     arrayB: newTrackData.gdsRowList,
   }) as unknown as GDSRow[];
-  for (const gdsRow of gdsRemovalObjectList)
-    loadTrackNameList.push(getBaseNameFromKey(gdsRow.path));
+  for (const gdsRow of gdsRemovalObjectList) {
+    const name = constructIgvNameParameter({
+      pathOrKey: gdsRow.path,
+      subjectData: subjectData!,
+    });
+    loadTrackNameList.push(name);
+  }
 
   return loadTrackNameList;
 };
@@ -271,10 +344,15 @@ const createRemovalIgvTrackNameList = (
  * @param newTrackData
  * @returns
  */
-const createNewIgvTrackList = async (
-  oldTrackData: LoadSubjectDataType,
-  newTrackData: LoadSubjectDataType
-): Promise<ITrack[]> => {
+const createNewIgvTrackList = async ({
+  subjectData,
+  oldTrackData,
+  newTrackData,
+}: {
+  subjectData: SubjectApiRes;
+  oldTrackData: LoadSubjectDataType;
+  newTrackData: LoadSubjectDataType;
+}): Promise<ITrack[]> => {
   const newIgvLoadTrackList: ITrack[] = [];
 
   // Find new IGV Track Data for S3
@@ -283,7 +361,12 @@ const createNewIgvTrackList = async (
     arrayB: oldTrackData.s3RowList,
   }) as unknown as S3Row[];
   for (const s3Row of newS3ObjectList) {
-    const newS3Itrack = convertS3RowToHtsgetIgvTrack(s3Row);
+    const igvName = constructIgvNameParameter({
+      pathOrKey: s3Row.key,
+      subjectData: subjectData!,
+    });
+
+    const newS3Itrack = convertS3RowToHtsgetIgvTrack({ s3Row, igvName });
     if (newS3Itrack != null) newIgvLoadTrackList.push(newS3Itrack);
   }
 
@@ -293,7 +376,12 @@ const createNewIgvTrackList = async (
     arrayB: oldTrackData.gdsRowList,
   }) as unknown as GDSRow[];
   for (const gdsRow of newGdsObjectList) {
-    const newGdsTrack = await convertGdsRowToIgvTrack(gdsRow);
+    const igvName = constructIgvNameParameter({
+      pathOrKey: gdsRow.path,
+      subjectData: subjectData!,
+    });
+
+    const newGdsTrack = await convertGdsRowToIgvTrack({ gdsRow, igvName });
     if (newGdsTrack != null) newIgvLoadTrackList.push(newGdsTrack);
   }
   return newIgvLoadTrackList;
