@@ -269,6 +269,12 @@ export const constructIgvNameParameter = ({
   const filename = pathOrKey.split('/').pop() ?? pathOrKey;
   const sampleId = filename.split('.').shift()?.split('_').shift() ?? filename;
 
+  // Append subjectId if filename does not contain subjectId
+  if (!filename.startsWith(subjectData.id)) {
+    nameArray.push(subjectData.id);
+  }
+
+  // If it is a `bam` file it will try to figure out the appropriate libraryId
   if (filetype?.toLocaleLowerCase() == 'bam') {
     const libraryIdArray = subjectData.lims.reduce((acc, curr) => {
       const currLibId = curr.library_id;
@@ -287,13 +293,12 @@ export const constructIgvNameParameter = ({
       return acc;
     }, [] as Array<string>);
 
-    nameArray.push(subjectData.id);
     nameArray.push(...libraryIdArray);
     nameArray.push(filename);
-  } else {
-    nameArray.push(subjectData.id);
-    nameArray.push(filename);
   }
+
+  // Append filename at the end
+  nameArray.push(filename);
 
   return nameArray.join('_');
 };
