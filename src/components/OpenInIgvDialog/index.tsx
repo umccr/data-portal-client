@@ -294,7 +294,6 @@ export const constructIgvNameParameter = ({
     }, [] as Array<string>);
 
     nameArray.push(...libraryIdArray);
-    nameArray.push(filename);
   }
 
   // Append filename at the end
