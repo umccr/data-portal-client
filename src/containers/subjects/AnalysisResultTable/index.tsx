@@ -389,6 +389,11 @@ function AnalysisResultsTable({ subjectId }: Props) {
             <AnalysisResultGDSTable title='bam' data={groupedData.sash.gdsWgsBams} />
           </div>
         </TabPanel>
+        <TabPanel header='TSO500V2'>
+          <AnalysisResultGDSTable title='tsv' data={groupedData.tsoCtdnaTsv} />
+          <AnalysisResultGDSTable title='vcf' data={groupedData.tsoCtdnaVcfs} />
+          <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
+        </TabPanel>
       </TabView>
     );
   }
