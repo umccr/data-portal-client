@@ -174,7 +174,6 @@ function LimsSideBar({ handleApply }: Props) {
       const sources = selectedMetaSources.map((src) => src.code);
       filteredQueryParam['source'] = sources as string[];
     }
-    console.log(filteredQueryParam);
 
     handleApply(filteredQueryParam);
   };

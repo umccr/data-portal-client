@@ -1,6 +1,7 @@
 import { get } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
 import { DjangoRestApiResponse } from './utils';
+import { objectToSearchString } from 'serialize-query-params';
 
 /**
  * Portal `/metadata/` api
@@ -35,9 +36,14 @@ export function usePortalMetadataAPI({
   return useQuery(
     ['portal-metadata', apiConfig],
     async (): Promise<MetadataApiRes> => {
+      let serializeQueryPath = '';
+      if (apiConfig?.queryParams) {
+        serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+        delete apiConfig.queryParams;
+      }
       const response = await get({
         apiName: 'portal',
-        path: `/metadata/${additionalPath}`,
+        path: `/metadata/${additionalPath}?${serializeQueryPath}`,
         options: apiConfig,
       }).response;
       return (await response.body.json()) as MetadataApiRes;

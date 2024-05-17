@@ -1,6 +1,7 @@
 import { get } from '@aws-amplify/api';
 import { useQuery } from 'react-query';
 import { DjangoRestApiResponse } from './utils';
+import { objectToSearchString } from 'serialize-query-params';
 
 /**
  * Portal `/s3/` api
@@ -24,7 +25,16 @@ export function usePortalS3API(
   return useQuery(
     ['portal-s3', apiConfig],
     async (): Promise<S3ApiData> => {
-      const response = await get({ apiName: 'portal', path: `/s3/`, options: apiConfig }).response;
+      let serializeQueryPath = '';
+      if (apiConfig?.queryParams) {
+        serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+        delete apiConfig.queryParams;
+      }
+      const response = await get({
+        apiName: 'portal',
+        path: `/s3/?${serializeQueryPath}`,
+        options: apiConfig,
+      }).response;
       return (await response.body.json()) as S3ApiData;
     },
     {

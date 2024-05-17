@@ -1,5 +1,6 @@
 import { post } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
+import { objectToSearchString } from 'serialize-query-params';
 
 /**
  * FASTQ PAIRING
@@ -38,9 +39,15 @@ export function usePortalSubjectParingAPI({ apiConfig }: UsePortalSubjectParingA
     ['portal-fastq', apiConfig],
 
     async (): Promise<FASTQPairingPayload[]> => {
+      let serializeQueryPath = '';
+      if (apiConfig?.queryParams) {
+        serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+        delete apiConfig.queryParams;
+      }
+
       const response = await post({
         apiName: 'portal',
-        path: `/pairing/by_subjects/`,
+        path: `/pairing/by_subjects/?${serializeQueryPath}`,
         options: apiConfig,
       }).response;
       return (await response.body.json()) as FASTQPairingPayload[];
