@@ -140,43 +140,41 @@ function LimsSideBar({ handleApply }: Props) {
   const apply = () => {
     const filteredQueryParam: Record<string, string[] | number[]> = {};
 
-    if (selectedMetaWorkflows == null) {
-      // TODO experimental - filter has been remove all together
-      delete filteredQueryParam['workflow'];
-    } else {
+    if (selectedMetaWorkflows.length) {
       const workflows = selectedMetaWorkflows.map((w) => w.code);
       filteredQueryParam['workflow'] = workflows as string[];
     }
 
-    if (selectedMetaProjectNames != null) {
+    if (selectedMetaProjectNames.length) {
       const projects = selectedMetaProjectNames.map((pn) => pn.code);
       filteredQueryParam['project_name'] = projects as string[];
     }
 
-    if (selectedMetaProjectOwners != null) {
+    if (selectedMetaProjectOwners.length) {
       const owners = selectedMetaProjectOwners.map((po) => po.code);
       filteredQueryParam['project_owner'] = owners as string[];
     }
 
-    if (selectedMetaPhenotypes != null) {
+    if (selectedMetaPhenotypes.length) {
       const phenotypes = selectedMetaPhenotypes.map((pt) => pt.code);
       filteredQueryParam['phenotype'] = phenotypes as string[];
     }
 
-    if (selectedMetaTypes != null) {
+    if (selectedMetaTypes.length) {
       const types = selectedMetaTypes.map((t) => t.code);
       filteredQueryParam['type'] = types as string[];
     }
 
-    if (selectedMetaAssays != null) {
+    if (selectedMetaAssays.length) {
       const assays = selectedMetaAssays.map((a) => a.code);
       filteredQueryParam['assay'] = assays as string[];
     }
 
-    if (selectedMetaSources != null) {
+    if (selectedMetaSources.length) {
       const sources = selectedMetaSources.map((src) => src.code);
       filteredQueryParam['source'] = sources as string[];
     }
+    console.log(filteredQueryParam);
 
     handleApply(filteredQueryParam);
   };
