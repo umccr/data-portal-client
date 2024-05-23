@@ -390,9 +390,9 @@ function AnalysisResultsTable({ subjectId }: Props) {
           </div>
         </TabPanel>
         <TabPanel header='TSO500V2'>
-          <AnalysisResultGDSTable title='tsv' data={groupedData.tsoCtdnaTsv} />
-          <AnalysisResultGDSTable title='vcf' data={groupedData.tsoCtdnaVcfs} />
-          <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
+          <AnalysisResultGDSTable title='tsv' data={groupedData.tsov2CtdnaTsv} />
+          <AnalysisResultGDSTable title='vcf' data={groupedData.tsov2CtdnaVcfs} />
+          <AnalysisResultGDSTable title='bam' data={groupedData.tsov2CtdnaBams} />
         </TabPanel>
       </TabView>
     );
@@ -490,6 +490,17 @@ function groupResultsData({
   const tsoCtdnaTsv = results_gds.filter(
     (r) => r.path.includes('tso_ctdna') && r.path.endsWith('tsv')
   );
+  /* TSO500V2 filter spot, need to update after confirmation of cttsov2 file path format  **/
+  const tsov2CtdnaBams = results_gds.filter(
+    (r) => r.path.includes('tsov2_ctdna') && r.path.endsWith('bam')
+  );
+  const tsov2CtdnaVcfs = results_gds.filter(
+    (r) => r.path.includes('tsov2_ctdna') && (r.path.endsWith('vcf') || r.path.endsWith('vcf.gz'))
+  );
+  const tsov2CtdnaTsv = results_gds.filter(
+    (r) => r.path.includes('tsov2_ctdna') && r.path.endsWith('tsv')
+  );
+  /* *************************************************************************************  **/
 
   // Sash results
   const sashGrouped = {
@@ -540,6 +551,9 @@ function groupResultsData({
     tsoCtdnaBams: tsoCtdnaBams,
     tsoCtdnaVcfs: tsoCtdnaVcfs,
     tsoCtdnaTsv: tsoCtdnaTsv,
+    tsov2CtdnaBams: tsov2CtdnaBams,
+    tsov2CtdnaVcfs: tsov2CtdnaVcfs,
+    tsov2CtdnaTsv: tsov2CtdnaTsv,
 
     // S3 - Sash
     sash: sashGrouped,
