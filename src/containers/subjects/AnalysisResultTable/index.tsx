@@ -353,6 +353,11 @@ function AnalysisResultsTable({ subjectId }: Props) {
           <AnalysisResultGDSTable title='vcf' data={groupedData.tsoCtdnaVcfs} />
           <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
         </TabPanel>
+        <TabPanel header='TSO500 (V2)'>
+          <AnalysisResultGDSTable title='tsv' data={groupedData.tsov2CtdnaTsv} />
+          <AnalysisResultGDSTable title='vcf' data={groupedData.tsov2CtdnaVcfs} />
+          <AnalysisResultGDSTable title='bam' data={groupedData.tsov2CtdnaBams} />
+        </TabPanel>
         <TabPanel header='WGS (bcbio)'>
           <AnalysisResultS3Table title='cancer report' data={groupedData.cancer} />
           <AnalysisResultS3Table title='pcgr' data={groupedData.pcgr} />
@@ -388,11 +393,6 @@ function AnalysisResultsTable({ subjectId }: Props) {
             <AnalysisResultS3Table title='circos plot' data={groupedData.sash.circos} />
             <AnalysisResultGDSTable title='bam' data={groupedData.sash.gdsWgsBams} />
           </div>
-        </TabPanel>
-        <TabPanel header='TSO500V2'>
-          <AnalysisResultGDSTable title='tsv' data={groupedData.tsov2CtdnaTsv} />
-          <AnalysisResultGDSTable title='vcf' data={groupedData.tsov2CtdnaVcfs} />
-          <AnalysisResultGDSTable title='bam' data={groupedData.tsov2CtdnaBams} />
         </TabPanel>
       </TabView>
     );
@@ -490,7 +490,7 @@ function groupResultsData({
   const tsoCtdnaTsv = results_gds.filter(
     (r) => r.path.includes('tso_ctdna') && r.path.endsWith('tsv')
   );
-  /* TSO500V2 filter spot, need to update after confirmation of cttsov2 file path format  **/
+  /* TSO500 V2 filter spot, need to update after confirmation of cttsov2 file path format  **/
   const tsov2CtdnaBams = results_gds.filter(
     (r) => r.path.includes('tsov2_ctdna') && r.path.endsWith('bam')
   );
