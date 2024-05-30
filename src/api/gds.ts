@@ -1,6 +1,7 @@
 import { get } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
 import { DjangoRestApiResponse } from './utils';
+import { objectToSearchString } from 'serialize-query-params';
 
 /**
  * Portal `/gds/` api
@@ -40,7 +41,14 @@ export function usePortalGDSAPI(
   return useQuery(
     ['portal-gds', apiConfig],
     async (): Promise<any> => {
-      const response = await get({ apiName: 'portal', path: `/gds`, options: apiConfig }).response;
+      const serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+      delete apiConfig.queryParams;
+
+      const response = await get({
+        apiName: 'portal',
+        path: `/gds?${serializeQueryPath}`,
+        options: apiConfig,
+      }).response;
       return (await response.body.json()) as any;
     },
     {
@@ -58,9 +66,15 @@ export function usePortalGDSPresignAPI(gdsId?: string | number, apiConfig?: Reco
   return useQuery(
     ['portal-gds-presign', gdsId, apiConfig],
     async (): Promise<PresignApiData> => {
+      let serializeQueryPath = '';
+      if (apiConfig?.queryParams) {
+        serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+        delete apiConfig.queryParams;
+      }
+
       const response = await get({
         apiName: 'portal',
-        path: `/gds/${gdsId}/presign`,
+        path: `/gds/${gdsId}/presign?${serializeQueryPath}`,
         options: apiConfig,
       }).response;
       return (await response.body.json()) as PresignApiData;
@@ -88,8 +102,17 @@ export function usePortalGDSPresignAPI(gdsId?: string | number, apiConfig?: Reco
  * @returns
  */
 export async function getGDSPreSignedUrl(id: number, apiConfig?: Record<string, any>) {
-  const response = await get({ apiName: 'portal', path: `/gds/${id}/presign`, options: apiConfig })
-    .response;
+  let serializeQueryPath = '';
+  if (apiConfig?.queryParams) {
+    serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+    delete apiConfig.queryParams;
+  }
+
+  const response = await get({
+    apiName: 'portal',
+    path: `/gds/${id}/presign?${serializeQueryPath}`,
+    options: apiConfig,
+  }).response;
   const { error, signed_url } = (await response.body.json()) as any;
   if (error) {
     throw Error('Unable to get PreSigned URL');

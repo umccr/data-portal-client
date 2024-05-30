@@ -1,5 +1,6 @@
 import { get } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
+import { objectToSearchString } from 'serialize-query-params';
 import { DjangoRestApiResponse } from './utils';
 
 /**
@@ -31,9 +32,15 @@ export function usePortalFastqAPI({
   return useQuery(
     ['portal-fastq', additionalPath, apiConfig],
     async (): Promise<FastqApiRes> => {
+      let serializeQueryPath = '';
+      if (apiConfig?.queryParams) {
+        serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+        delete apiConfig.queryParams;
+      }
+
       const response = await get({
         apiName: 'portal',
-        path: `/fastq/${additionalPath}`,
+        path: `/fastq/${additionalPath}?${serializeQueryPath}`,
         options: apiConfig,
       }).response;
       return (await response.body.json()) as FastqApiRes;

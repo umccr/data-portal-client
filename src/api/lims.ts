@@ -1,5 +1,6 @@
 import { get } from 'aws-amplify/api';
 import { useQuery } from 'react-query';
+import { objectToSearchString } from 'serialize-query-params';
 import { DjangoRestApiResponse } from './utils';
 
 /**
@@ -29,8 +30,17 @@ export function usePortalLimsAPI(apiConfig: Record<string, any>) {
   return useQuery(
     ['portal-lims', apiConfig],
     async (): Promise<LimsApiRes> => {
-      const response = await get({ apiName: 'portal', path: `/lims/`, options: apiConfig })
-        .response;
+      let serializeQueryPath = '';
+      if (apiConfig?.queryParams) {
+        serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+        delete apiConfig.queryParams;
+      }
+
+      const response = await get({
+        apiName: 'portal',
+        path: `/lims/?${serializeQueryPath}`,
+        options: apiConfig,
+      }).response;
       return (await response.body.json()) as LimsApiRes;
     },
     {
@@ -43,9 +53,15 @@ export function usePortalLimsByAggregateCount(apiConfig: Record<string, any>) {
   return useQuery(
     ['portal-lims', apiConfig],
     async (): Promise<any> => {
+      let serializeQueryPath = '';
+      if (apiConfig?.queryParams) {
+        serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+        delete apiConfig.queryParams;
+      }
+
       const response = await get({
         apiName: 'portal',
-        path: `/lims/by_aggregate_count`,
+        path: `/lims/by_aggregate_count?${serializeQueryPath}`,
         options: apiConfig,
       }).response;
       return (await response.body.json()) as any;

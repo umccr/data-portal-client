@@ -1,5 +1,6 @@
 import { get } from '@aws-amplify/api';
 import { useQuery } from 'react-query';
+import { objectToSearchString } from 'serialize-query-params';
 import { S3Row } from './s3';
 import { GDSRow } from './gds';
 import { LimsRow } from './lims';
@@ -36,8 +37,17 @@ export function usePortalSubjectAPI(apiConfig: Record<string, any>) {
   return useQuery(
     ['portal-subject', apiConfig],
     async (): Promise<SubjectListApiRes> => {
-      const response = await get({ apiName: 'portal', path: `/subjects/`, options: apiConfig })
-        .response;
+      let serializeQueryPath = '';
+      if (apiConfig?.queryParams) {
+        serializeQueryPath = objectToSearchString(apiConfig.queryParams);
+        delete apiConfig.queryParams;
+      }
+
+      const response = await get({
+        apiName: 'portal',
+        path: `/subjects/?${serializeQueryPath}`,
+        options: apiConfig,
+      }).response;
       return (await response.body.json()) as SubjectListApiRes;
     },
     {
