@@ -152,8 +152,9 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
 
   const handleFilterApplied = useCallback(
     (filteredQueryParam: Record<string, string[] | number[]>) => {
-      setApiQueryParameter((prev) => ({
-        ...prev,
+      setApiQueryParameter(() => ({
+        rowsPerPage: paginationProps.currentNumberOfRows,
+        ordering: '-subject_id',
         ...filteredQueryParam,
       }));
     },
