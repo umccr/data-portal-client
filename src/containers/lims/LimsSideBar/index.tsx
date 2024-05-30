@@ -178,6 +178,18 @@ function LimsSideBar({ handleApply }: Props) {
     handleApply(filteredQueryParam);
   };
 
+  const clear = () => {
+    setSelectedMetaWorkflows([]);
+    setSelectedMetaProjectNames([]);
+    setSelectedMetaProjectOwners([]);
+    setSelectedMetaPhenotypes([]);
+    setSelectedMetaTypes([]);
+    setSelectedMetaAssays([]);
+    setSelectedMetaSources([]);
+
+    handleApply({});
+  };
+
   return (
     <div className='flex flex-column'>
       {/* Sidebar Title */}
@@ -294,8 +306,13 @@ function LimsSideBar({ handleApply }: Props) {
           />
         </Fieldset>
       </div>
-      <div className='flex justify-content-center py-3'>
-        <Button className='p-button-raised bg-primary w-18rem' label={'Apply'} onClick={apply} />
+      <div className='flex justify-content-evenly py-3'>
+        <Button
+          className='p-button-raised bg-primary-reverse w-9rem'
+          label={'Clear'}
+          onClick={clear}
+        />
+        <Button className='p-button-raised bg-primary w-9rem' label={'Apply'} onClick={apply} />
       </div>
     </div>
   );
