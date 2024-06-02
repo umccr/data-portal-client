@@ -38,6 +38,7 @@ const filenameTemplate = (rowData: Record<string, any>) => {
   if (rowData.key) filename = rowData.key.split('/').pop();
   const split_path = filename.split('.');
   const filetype = split_path[split_path.length - 1].toLowerCase();
+  const portalRunId = rowData.key ? rowData.key.split('/')[3] : rowData.path.split('/')[4];
 
   const handleOpenInBrowser = async (rowData: Record<string, any>) => {
     setBlockedPanel(true);
@@ -92,15 +93,29 @@ const filenameTemplate = (rowData: Record<string, any>) => {
         <BlockUI
           blocked={blockedPanel}
           template={<i className='pi pi-spin pi-spinner' style={{ fontSize: '2em' }} />}>
-          <Button className='p-button-link' onClick={() => handleOpenInBrowser(rowData)}>
-            {filename}
-          </Button>
+          <div className='flex flex-column'>
+            <Button
+              className='p-button-link pb-1 text-left'
+              onClick={() => handleOpenInBrowser(rowData)}>
+              {filename}
+            </Button>
+            <div
+              className='p-button p-button-link text-xs text-color-secondary py-0 text-left'
+              style={{ cursor: 'default' }}>
+              Portal Run Id: {portalRunId}
+            </div>
+          </div>
         </BlockUI>
       </>
     );
   }
 
-  return <div className='white-space-nowrap'>{filename}</div>;
+  return (
+    <div className='flex flex-column'>
+      <div className='white-space-nowrap'>{filename}</div>
+      <div className='text-xs text-color-secondary pt-2'>Portal Run Id: {portalRunId}</div>
+    </div>
+  );
 };
 
 /**
