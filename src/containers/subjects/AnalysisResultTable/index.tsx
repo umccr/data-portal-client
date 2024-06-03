@@ -38,7 +38,6 @@ const filenameTemplate = (rowData: Record<string, any>) => {
   if (rowData.key) filename = rowData.key.split('/').pop();
   const split_path = filename.split('.');
   const filetype = split_path[split_path.length - 1].toLowerCase();
-  const portalRunId = rowData.key ? rowData.key.split('/')[3] : rowData.path.split('/')[4];
 
   const handleOpenInBrowser = async (rowData: Record<string, any>) => {
     setBlockedPanel(true);
@@ -93,35 +92,30 @@ const filenameTemplate = (rowData: Record<string, any>) => {
         <BlockUI
           blocked={blockedPanel}
           template={<i className='pi pi-spin pi-spinner' style={{ fontSize: '2em' }} />}>
-          <div className='flex flex-column'>
-            <Button
-              className='p-button-link pb-1 text-left'
-              onClick={() => handleOpenInBrowser(rowData)}>
-              {filename}
-            </Button>
-            <div
-              className='p-button p-button-link text-xs text-color-secondary py-0 text-left'
-              style={{ cursor: 'default' }}>
-              Portal Run Id: {portalRunId}
-            </div>
-          </div>
+          <Button className='p-button-link' onClick={() => handleOpenInBrowser(rowData)}>
+            {filename}
+          </Button>
         </BlockUI>
       </>
     );
   }
 
-  return (
-    <div className='flex flex-column'>
-      <div className='white-space-nowrap'>{filename}</div>
-      <div className='text-xs text-color-secondary pt-2'>Portal Run Id: {portalRunId}</div>
-    </div>
-  );
+  return <div className='white-space-nowrap'>{filename}</div>;
 };
 
 /**
  * The following some template to view column data.
  * Note that the variable naming might be specific to S3 or GDS.
  */
+
+const portalRunIdTemplate = (rowData: Record<string, any>) => {
+  const portalRunId = rowData.key ? rowData.key.split('/')[3] : rowData.path.split('/')[4];
+  return (
+    <div className='white-space-nowrap overflow-visible' style={{ width: '130x' }}>
+      {portalRunId}
+    </div>
+  );
+};
 
 const actionGDSTemplate = (rowData: GDSRow) => {
   return (
@@ -297,6 +291,7 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
         tableClassName={data.length == 0 ? 'hidden' : ''}>
         {/* Column field determined by the prefix of body Template */}
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
+        <Column body={portalRunIdTemplate} headerStyle={{ display: 'none' }} />
         <Column body={downloadGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={previewGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={actionGDSTemplate} headerStyle={{ display: 'none' }} />
@@ -317,6 +312,7 @@ function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
         tableClassName={data.length == 0 ? 'hidden' : ''}>
         {/* Column field determined by the prefix of body Template */}
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
+        <Column body={portalRunIdTemplate} headerStyle={{ display: 'none' }} />
         <Column body={downloadS3Template} headerStyle={{ display: 'none' }} />
         <Column body={previewS3Template} headerStyle={{ display: 'none' }} />
         <Column body={actionS3Template} headerStyle={{ display: 'none' }} />
