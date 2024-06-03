@@ -108,6 +108,15 @@ const filenameTemplate = (rowData: Record<string, any>) => {
  * Note that the variable naming might be specific to S3 or GDS.
  */
 
+const portalRunIdTemplate = (rowData: Record<string, any>) => {
+  const portalRunId = rowData.key ? rowData.key.split('/')[3] : rowData.path.split('/')[4];
+  return (
+    <div className='white-space-nowrap overflow-visible' style={{ width: '130x' }}>
+      {portalRunId}
+    </div>
+  );
+};
+
 const actionGDSTemplate = (rowData: GDSRow) => {
   return (
     <DataActionButton
@@ -282,6 +291,7 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
         tableClassName={data.length == 0 ? 'hidden' : ''}>
         {/* Column field determined by the prefix of body Template */}
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
+        <Column body={portalRunIdTemplate} headerStyle={{ display: 'none' }} />
         <Column body={downloadGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={previewGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={actionGDSTemplate} headerStyle={{ display: 'none' }} />
@@ -302,6 +312,7 @@ function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
         tableClassName={data.length == 0 ? 'hidden' : ''}>
         {/* Column field determined by the prefix of body Template */}
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
+        <Column body={portalRunIdTemplate} headerStyle={{ display: 'none' }} />
         <Column body={downloadS3Template} headerStyle={{ display: 'none' }} />
         <Column body={previewS3Template} headerStyle={{ display: 'none' }} />
         <Column body={actionS3Template} headerStyle={{ display: 'none' }} />
