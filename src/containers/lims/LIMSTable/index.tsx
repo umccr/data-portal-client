@@ -175,7 +175,7 @@ function LIMSTable({ defaultQueryParam, sideBar = false }: Props) {
       <Card>
         <div className='w-full pb-4'>
           <span className='w-full p-input-icon-left'>
-            <i className='pi pi-search' />
+            {/*<i className='pi pi-search' />*/}
             <InputText
               className='w-full p-inputtext'
               value={searchQuery}

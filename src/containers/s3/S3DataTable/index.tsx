@@ -85,7 +85,7 @@ function S3DataTable({ defaultQueryParam, chipData }: Props) {
       {chipData && <PresetButton chipData={chipData} handleClick={handlePresetButtonClicked} />}
       <div className='w-full pb-1'>
         <span className='lg:w-4 p-input-icon-left'>
-          <i className='pi pi-search' />
+          {/*<i className='pi pi-search' />*/}
           <InputText
             className='w-full p-inputtext'
             value={searchInput}

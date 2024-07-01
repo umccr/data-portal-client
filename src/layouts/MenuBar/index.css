@@ -1,5 +1,21 @@
-.p-menuitem-link:focus {
-  box-shadow: none !important;
+.p-menubar
+  .p-menubar-root-list
+  > .p-menuitem
+  > .p-menuitem-content
+  .p-menuitem-link
+  .p-menuitem-text {
+  color: whitesmoke !important;
+}
+
+.p-menubar .p-menubar-root-list > .p-menuitem:not(.p-disabled) > .p-menuitem-content {
+  background-color: var(--primary-800) !important;
+}
+
+.p-menubar
+  .p-menubar-root-list
+  > .p-menuitem:not(.p-highlight):not(.p-disabled)
+  > .p-menuitem-content:hover {
+  background-color: var(--primary-900) !important;
 }
 
 @media only screen and (min-width: 960px) {
