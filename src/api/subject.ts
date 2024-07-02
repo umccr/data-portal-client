@@ -16,6 +16,7 @@ export type SubjectApiRes = {
   results: S3Row[];
   results_gds: GDSRow[];
   results_sash: S3Row[];
+  results_cttsov2: S3Row[];
 };
 
 export type SubjectListApiRes = DjangoRestApiResponse & { results: string[] };
