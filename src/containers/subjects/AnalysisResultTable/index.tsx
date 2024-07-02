@@ -327,8 +327,9 @@ function AnalysisResultsTable({ subjectId }: Props) {
       results_gds: data.results_gds,
       results_s3: data.results,
       results_sash: data.results_sash,
+      results_cttsov2: data.results_cttsov2,
     });
-
+    console.log(groupedData);
     return (
       <TabView renderActiveOnly panelContainerClassName='px-0'>
         <TabPanel header='WGS'>
@@ -354,9 +355,11 @@ function AnalysisResultsTable({ subjectId }: Props) {
           <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
         </TabPanel>
         <TabPanel header='TSO500 (V2)'>
-          <AnalysisResultGDSTable title='tsv' data={groupedData.tsov2CtdnaTsv} />
-          <AnalysisResultGDSTable title='vcf' data={groupedData.tsov2CtdnaVcfs} />
-          <AnalysisResultGDSTable title='bam' data={groupedData.tsov2CtdnaBams} />
+          <AnalysisResultS3Table title='tsv' data={groupedData.cttsov2Tsv} />
+          <AnalysisResultS3Table title='csv' data={groupedData.cttsov2Csv} />
+          <AnalysisResultS3Table title='vcf' data={groupedData.cttsov2Vcfs} />
+          <AnalysisResultS3Table title='json' data={groupedData.cttsov2Json} />
+          <AnalysisResultS3Table title='bam' data={groupedData.cttsov2Bams} />
         </TabPanel>
         <TabPanel header='WGS (bcbio)'>
           <AnalysisResultS3Table title='cancer report' data={groupedData.cancer} />
@@ -407,10 +410,12 @@ function groupResultsData({
   results_s3,
   results_gds,
   results_sash,
+  results_cttsov2,
 }: {
   results_s3: S3Row[];
   results_gds: GDSRow[];
   results_sash: S3Row[];
+  results_cttsov2: S3Row[];
 }) {
   const wgs = results_s3.filter((r) => r.key.includes('WGS/'));
   const wts = results_s3.filter((r) => r.key.includes('WTS/'));
@@ -490,17 +495,25 @@ function groupResultsData({
   const tsoCtdnaTsv = results_gds.filter(
     (r) => r.path.includes('tso_ctdna') && r.path.endsWith('tsv')
   );
-  /* TSO500 V2 filter spot, need to update after confirmation of cttsov2 file path format  **/
-  const tsov2CtdnaBams = results_gds.filter(
-    (r) => r.path.includes('tsov2_ctdna') && r.path.endsWith('bam')
-  );
-  const tsov2CtdnaVcfs = results_gds.filter(
-    (r) => r.path.includes('tsov2_ctdna') && (r.path.endsWith('vcf') || r.path.endsWith('vcf.gz'))
-  );
-  const tsov2CtdnaTsv = results_gds.filter(
-    (r) => r.path.includes('tsov2_ctdna') && r.path.endsWith('tsv')
-  );
+
   /* *************************************************************************************  **/
+
+  // CTTSOV2
+  const cttsov2Bams = results_cttsov2.filter(
+    (r) => r.key.includes('cttsov2') && r.key.endsWith('bam')
+  );
+  const cttsov2Vcfs = results_cttsov2.filter(
+    (r) => r.key.includes('cttsov2') && (r.key.endsWith('vcf') || r.key.endsWith('vcf.gz'))
+  );
+  const cttsov2Tsv = results_cttsov2.filter(
+    (r) => r.key.includes('cttsov2') && r.key.endsWith('tsv')
+  );
+  const cttsov2Csv = results_cttsov2.filter(
+    (r) => r.key.includes('cttsov2') && r.key.endsWith('csv')
+  );
+  const cttsov2Json = results_cttsov2.filter(
+    (r) => r.key.includes('cttsov2') && (r.key.endsWith('json') || r.key.endsWith('json.gz'))
+  );
 
   // Sash results
   const sashGrouped = {
@@ -551,9 +564,13 @@ function groupResultsData({
     tsoCtdnaBams: tsoCtdnaBams,
     tsoCtdnaVcfs: tsoCtdnaVcfs,
     tsoCtdnaTsv: tsoCtdnaTsv,
-    tsov2CtdnaBams: tsov2CtdnaBams,
-    tsov2CtdnaVcfs: tsov2CtdnaVcfs,
-    tsov2CtdnaTsv: tsov2CtdnaTsv,
+
+    // CTTSOV2
+    cttsov2Bams: cttsov2Bams,
+    cttsov2Vcfs: cttsov2Vcfs,
+    cttsov2Tsv: cttsov2Tsv,
+    cttsov2Csv: cttsov2Csv,
+    cttsov2Json: cttsov2Json,
 
     // S3 - Sash
     sash: sashGrouped,
