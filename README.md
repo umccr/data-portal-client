@@ -38,13 +38,13 @@ git push origin main
 ### TL;DR
 ```
 node -v
-v18.16.0
+v20.15.0
 
 npm i -g yarn
 
 (NOTE: yarn should auto resolve to local version from `.yarn` that configure in `package.json` > `packageManager`)
 yarn -v
-3.5.1
+4.3.1
 
 yarn install
 
@@ -60,11 +60,15 @@ yarn start
 
 See [htsget/README](htsget) for local dev htsget server setup
 
+### Code Formatting
+
+- Run prettier: `yarn prettier`
+- Fix prettier: `yarn prettier-fix`
 
 ### Lint
 
-- Run lint: `yarn lint`
-- Fix lint issue: `yarn lint --fix`
+- Run eslint: `yarn lint`
+- See eslint help: `yarn lint --help`
 
 ### Audit
 

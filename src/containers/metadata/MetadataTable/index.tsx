@@ -146,7 +146,7 @@ function MetadataTable() {
       <div className={isFetching || isLoading ? 'hidden' : ''}>
         <div className='w-full flex justify-content-between pb-4'>
           <span className='w-3 p-input-icon-left'>
-            <i className='pi pi-search' />
+            {/*<i className='pi pi-search' />*/}
             <InputText
               className='w-full p-inputtext'
               value={searchQuery}

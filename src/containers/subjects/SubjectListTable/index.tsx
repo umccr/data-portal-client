@@ -152,7 +152,7 @@ function SubjectListTable() {
         <div className='flex justify-content-between pb-4'>
           <div className='inline font-bold text-3xl flex align-items-center'>Subject Table</div>
           <span className='p-input-icon-left'>
-            <i className='pi pi-search' />
+            {/*<i className='pi pi-search' />*/}
             <InputText
               className='p-inputtext-sm w-12'
               value={searchQuery}
