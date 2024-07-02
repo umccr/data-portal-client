@@ -109,13 +109,20 @@ const filenameTemplate = (rowData: Record<string, any>) => {
  */
 
 const portalRunIdTemplate = (rowData: Record<string, any>) => {
-  const portalRunId = rowData.key ? rowData.key.split('/')[3] : rowData.path.split('/')[4];
+  const portalRunId = rowData.key ? getPortalRunIdFromS3Key(rowData.key) : rowData.path.split('/')[4];
   return (
     <div className='white-space-nowrap overflow-visible' style={{ width: '130x' }}>
       {portalRunId}
     </div>
   );
 };
+
+// Fix: cttsov2 have one more layer than other data in the s3 key
+const getPortalRunIdFromS3Key = (key: string) => {
+  const tmp = key.split('/')[3]
+  // if tmp not shtart with 8 digits, then it is the extra layer
+  return /^\d{8}/.test(tmp) ? tmp : key.split('/')[4];
+}
 
 const actionGDSTemplate = (rowData: GDSRow) => {
   return (
