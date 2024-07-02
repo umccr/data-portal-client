@@ -231,7 +231,7 @@ const downloadTemplate = ({
   const filename = keyOrPath.split('/').pop() ?? keyOrPath;
   // const fileSizeInBytes = rowData.size_in_bytes;
   const filetype = filename.split('.').pop();
-  const allowFileTypes = ['gz', 'maf', ...DATA_TYPE_SUPPORTED];
+  const allowFileTypes = ['vcf', 'gz', 'maf', ...DATA_TYPE_SUPPORTED];
   const allowDownload = allowFileTypes.includes(filetype as string);
 
   const handleDownload = async () => {
@@ -501,7 +501,7 @@ function groupResultsData({
     (r) => r.key.includes('cttsov2') && r.key.endsWith('bam')
   );
   const cttsov2Vcfs = results_cttsov2.filter(
-    (r) => r.key.includes('cttsov2') && (r.key.endsWith('vcf') || r.key.endsWith('vcf.gz'))
+    (r) => r.key.includes('cttsov2') && (r.key.endsWith('.vcf') || r.key.endsWith('.vcf.gz'))
   );
   const cttsov2Tsv = results_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('tsv')
