@@ -329,7 +329,7 @@ function AnalysisResultsTable({ subjectId }: Props) {
       results_sash: data.results_sash,
       results_cttsov2: data.results_cttsov2,
     });
-    console.log(groupedData);
+
     return (
       <TabView renderActiveOnly panelContainerClassName='px-0'>
         <TabPanel header='WGS'>
@@ -496,9 +496,7 @@ function groupResultsData({
     (r) => r.path.includes('tso_ctdna') && r.path.endsWith('tsv')
   );
 
-  /* *************************************************************************************  **/
-
-  // CTTSOV2
+  // CTTSOV2 results
   const cttsov2Bams = results_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('bam')
   );
