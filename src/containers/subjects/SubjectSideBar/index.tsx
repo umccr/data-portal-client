@@ -24,7 +24,7 @@ function SubjectSideBar() {
   const itemTemplate = (option: { postfixPath: string; label: string }) => {
     return (
       // Will wrap in an '<a>' tag (with href) to get the benefit open in new tab/window from right-click
-      <a href={option.postfixPath} style={{ all: 'unset' }}>
+      <a onClick={(e) => e.preventDefault()} href={option.postfixPath} style={{ all: 'unset' }}>
         <div>{option.label}</div>
       </a>
     );
