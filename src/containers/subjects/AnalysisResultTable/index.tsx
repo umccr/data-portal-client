@@ -526,7 +526,10 @@ function groupResultsData({
   const cttsov2Vcfs = results_cttsov2.filter(
     (r) =>
       r.key.includes('cttsov2') &&
-      (r.key.endsWith('.vcf') || r.key.endsWith('.gvcf') || r.key.endsWith('.vcf.gz'))
+      (r.key.endsWith('.vcf') ||
+        r.key.endsWith('.gvcf') ||
+        r.key.endsWith('.vcf.gz') ||
+        r.key.endsWith('.gvcf.gz'))
   );
   const cttsov2Tsv = results_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('tsv')
