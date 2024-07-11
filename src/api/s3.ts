@@ -48,6 +48,8 @@ export type PresignApiData = {
   signed_url: string;
   error?: string;
 } & Record<string, any>;
+// NOTE: This function is used to get the 'preview' presigned URL for the S3 object
+// By default, the 'Content-Disposition' header is set to 'inline' to open the file in the browser
 export function usePortalS3PresignAPI(s3Id?: string | number) {
   return useQuery(
     ['portal-s3-presign', s3Id],
@@ -55,6 +57,11 @@ export function usePortalS3PresignAPI(s3Id?: string | number) {
       const response = await get({
         apiName: 'portal',
         path: `/s3/${s3Id}/presign`,
+        options: {
+          headers: {
+            'Content-Disposition': 'inline',
+          },
+        },
       }).response;
       return (await response.body.json()) as PresignApiData;
     },
@@ -122,6 +129,8 @@ export function usePortalS3StatusAPI(s3Id?: string | number) {
   });
 }
 
+// NOTE: This function is used to get the 'download' presigned URL for the S3 object
+// By default, the 'Content-Disposition' header is set to 'attachment' in the api side to download the file
 export async function getS3PreSignedUrl(id: number) {
   const response = await get({
     apiName: 'portal',

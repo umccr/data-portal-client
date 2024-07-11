@@ -32,18 +32,18 @@ type AnalysisResultS3TableProps = {
   data: S3Row[];
 };
 
-const filenameTemplate = (rowData: Record<string, any>) => {
+const filenameTemplate = (rowData: S3Row | GDSRow) => {
   const toast = useRef(null);
   const [blockedPanel, setBlockedPanel] = useState<boolean>(false);
   let filename;
-  if (rowData.path) filename = rowData.path.split('/').pop();
-  if (rowData.key) filename = rowData.key.split('/').pop();
-  const split_path = filename.split('.');
+  if ('path' in rowData && rowData.path) filename = rowData.path.split('/').pop();
+  if ('key' in rowData && rowData.key) filename = rowData.key.split('/').pop();
+  const split_path = filename ? filename.split('.') : [];
   const filetype = split_path[split_path.length - 1].toLowerCase();
 
-  const handleOpenInBrowser = async (rowData: Record<string, any>) => {
+  const handleOpenInBrowser = async (rowData: S3Row | GDSRow) => {
     setBlockedPanel(true);
-    if (rowData.path) {
+    if ('path' in rowData && rowData.path) {
       try {
         const signed_url = await getGDSPreSignedUrl(rowData.id, {
           headers: {
@@ -67,7 +67,7 @@ const filenameTemplate = (rowData: Record<string, any>) => {
         // throw e;
       }
     }
-    if (rowData.key) {
+    if ('key' in rowData && rowData.key) {
       try {
         const signed_url = await getS3PreSignedUrl(rowData.id);
         window.open(signed_url, '_blank');
@@ -87,7 +87,10 @@ const filenameTemplate = (rowData: Record<string, any>) => {
     setBlockedPanel(false);
   };
 
-  if (filename.endsWith('html') || filename.endsWith('png') || filename.endsWith('pdf')) {
+  if (
+    filename &&
+    (filename.endsWith('html') || filename.endsWith('png') || filename.endsWith('pdf'))
+  ) {
     return (
       <>
         <Toast ref={toast} position='bottom-left' />
@@ -110,10 +113,10 @@ const filenameTemplate = (rowData: Record<string, any>) => {
  * Note that the variable naming might be specific to S3 or GDS.
  */
 
-const portalRunIdTemplate = (rowData: Record<string, any>) => {
-  const portalRunId = rowData.key
-    ? getPortalRunIdFromS3Key(rowData.key)
-    : rowData.path.split('/')[4];
+const portalRunIdTemplate = (rowData: S3Row | GDSRow) => {
+  let portalRunId;
+  if ('key' in rowData && rowData.key) portalRunId = getPortalRunIdFromS3Key(rowData.key);
+  if ('path' in rowData && rowData.path) portalRunId = rowData.path.split('/')[4];
   return (
     <div className='white-space-nowrap overflow-visible' style={{ width: '130x' }}>
       {portalRunId}
@@ -135,7 +138,7 @@ const downloadTemplate = ({
 }: {
   id: number;
   keyOrPath: string;
-  getPresignedUrl: (id: number) => Promise<any>;
+  getPresignedUrl: (id: number) => Promise<string>;
 }) => {
   /**
    * For now download option is the special case that only offer within Analysis Results summary panel.
@@ -553,7 +556,12 @@ function groupResultsData({
     (r) => r.key.includes('cttsov2') && r.key.endsWith('bam')
   );
   const cttsov2Vcfs = results_cttsov2.filter(
-    (r) => r.key.includes('cttsov2') && (r.key.endsWith('.vcf') || r.key.endsWith('.vcf.gz'))
+    (r) =>
+      r.key.includes('cttsov2') &&
+      (r.key.endsWith('.vcf') ||
+        r.key.endsWith('.gvcf') ||
+        r.key.endsWith('.vcf.gz') ||
+        r.key.endsWith('.gvcf.gz'))
   );
   const cttsov2Tsv = results_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('tsv')
