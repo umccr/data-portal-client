@@ -5,12 +5,13 @@ import { Dialog } from 'primereact/dialog';
 import { useQuery } from 'react-query';
 
 import { getS3Status, S3StatusData } from '../../api/s3';
-import { constructGDSUrl } from '../../api/gds';
 import { useToastContext } from '../../providers/ToastProvider';
 import CircularLoaderWithText from '../../components/CircularLoaderWithText';
-import { post } from 'aws-amplify/api';
 import { useParams } from 'react-router-dom';
-import { SubjectApiRes, usePortalSubjectDataAPI } from '../../api/subject';
+import { usePortalSubjectDataAPI } from '../../api/subject';
+import { constructIgvNameParameter } from './utils';
+import { constructGDSLocalIgvUrl } from './gds';
+import { constructS3LocalIgvUrl, constructS3LocalIgvUrlWithPresignedUrl } from './s3';
 
 type OpenIGVDesktopDialogType = {
   handleClose: () => void;
@@ -19,11 +20,20 @@ type OpenIGVDesktopDialogType = {
   bucketOrVolume: string;
   pathOrKey: string;
   type: 's3' | 'gds';
+  enforceIgvPresignedMode?: boolean;
 };
 export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
   const { subjectId } = useParams();
   const { toastShow } = useToastContext();
-  const { id, bucketOrVolume, pathOrKey, type, handleClose, handleNeedRestore } = props;
+  const {
+    id,
+    bucketOrVolume,
+    pathOrKey,
+    type,
+    enforceIgvPresignedMode,
+    handleClose,
+    handleNeedRestore,
+  } = props;
 
   if (!subjectId) return <div>No subject Id found!</div>;
 
@@ -52,19 +62,32 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
   const s3LocalIgvUrl = useQuery(
     ['s3-local-igv', bucketOrVolume, pathOrKey],
     async () => {
-      const objStatus = await getS3Status(id);
-      // When unavailable redirect to Restore objects
-      if (objStatus != S3StatusData.AVAILABLE) {
-        handleNeedRestore();
-      }
-
       const igvName = constructIgvNameParameter({ pathOrKey, subjectData: subjectData! });
 
-      return constructS3LocalIgvUrl({
-        igvName: igvName,
-        bucketOrVolume: bucketOrVolume,
-        pathOrKey: pathOrKey,
-      });
+      if (enforceIgvPresignedMode) {
+        //  We are not doing any status check here, as data is in the Data account and archiving/restoring mechanism is
+        //  not in place.
+
+        return await constructS3LocalIgvUrlWithPresignedUrl({
+          igvName: igvName,
+          bucketOrVolume: bucketOrVolume,
+          pathOrKey: pathOrKey,
+          baseFileS3ObjectId: id,
+        });
+      } else {
+        const objStatus = await getS3Status(id);
+
+        // When unavailable redirect to Restore objects
+        if (objStatus != S3StatusData.AVAILABLE) {
+          handleNeedRestore();
+        }
+
+        return constructS3LocalIgvUrl({
+          igvName: igvName,
+          bucketOrVolume: bucketOrVolume,
+          pathOrKey: pathOrKey,
+        });
+      }
     },
     { enabled: type == 's3' && !!subjectData, retry: false }
   );
@@ -176,128 +199,3 @@ export default function OpenIGVDesktopDialog(props: OpenIGVDesktopDialogType) {
     </Dialog>
   );
 }
-
-const constructGDSLocalIgvUrl = async (props: {
-  igvName: string;
-  bucketOrVolume: string;
-  pathOrKey: string;
-}) => {
-  const { bucketOrVolume, pathOrKey, igvName } = props;
-
-  let idxFilePath: string;
-  if (pathOrKey.endsWith('bam')) {
-    idxFilePath = pathOrKey + '.bai';
-  } else if (pathOrKey.endsWith('vcf') || pathOrKey.endsWith('vcf.gz')) {
-    idxFilePath = pathOrKey + '.tbi';
-  } else if (pathOrKey.endsWith('cram')) {
-    idxFilePath = pathOrKey + '.crai';
-  } else {
-    console.log('No index file for this file');
-    return;
-  }
-
-  let filePresignUrl = '';
-  let idxFilePresignUrl = '';
-
-  // GDS
-  const fileGdsUrl = constructGDSUrl({ volume_name: bucketOrVolume, path: pathOrKey });
-  const idxFileGdsUrl = constructGDSUrl({ volume_name: bucketOrVolume, path: idxFilePath });
-
-  const response = await post({
-    apiName: 'portal',
-    path: `/presign`,
-    options: {
-      body: [fileGdsUrl, idxFileGdsUrl],
-    },
-  }).response;
-  const { signed_urls } = (await response.body.json()) as any;
-
-  // Find which presign is which
-  for (const signed_url of signed_urls) {
-    const { volume, path, presigned_url } = signed_url;
-    const gdsUrl = constructGDSUrl({ volume_name: volume, path: path });
-    if (gdsUrl === fileGdsUrl) {
-      filePresignUrl = presigned_url;
-    } else if (gdsUrl === idxFileGdsUrl) {
-      idxFilePresignUrl = presigned_url;
-    }
-  }
-
-  const idx = encodeURIComponent(idxFilePresignUrl);
-  const enf = encodeURIComponent(filePresignUrl);
-
-  return `http://localhost:60151/load?index=${idx}&file=${enf}&name=${igvName}`;
-};
-
-const constructS3LocalIgvUrl = (props: {
-  igvName: string;
-  bucketOrVolume: string;
-  pathOrKey: string;
-}) => {
-  const { bucketOrVolume, pathOrKey, igvName } = props;
-
-  const file = `s3://${bucketOrVolume + '/' + pathOrKey}`;
-
-  return `http://localhost:60151/load?file=${encodeURIComponent(file)}&name=${igvName}`;
-};
-
-/**
- *
- * We wanted to show more info in the name parameter when opening in IGV
- * Ref: https://umccr.slack.com/archives/CP356DDCH/p1707116441928299?thread_ts=1706583808.733149&cid=CP356DDCH
- *
- * For BAM files the desired outcome is to include libraryId, sampleId, type, and filetype
- * Desired output: SBJ00000_L0000000_PRJ00000_tumor.bam
- *
- * Other than BAM
- * Desired output:  SBJ00000_MDX0000.vcf.gz
- *
- * To find the match of metadata for the specific key/path will iterate through the lims record
- * @param props
- */
-export const constructIgvNameParameter = ({
-  subjectData,
-  pathOrKey,
-}: {
-  pathOrKey: string;
-  subjectData: SubjectApiRes;
-}): string => {
-  const nameArray: string[] = [];
-
-  const filetype = pathOrKey.split('.').pop();
-  // Find sampleId from its filename
-  const filename = pathOrKey.split('/').pop() ?? pathOrKey;
-  const sampleId = filename.split('.').shift()?.split('_').shift() ?? filename;
-
-  // Append subjectId if filename does not contain subjectId
-  if (!filename.startsWith(subjectData.id)) {
-    nameArray.push(subjectData.id);
-  }
-
-  // If it is a `bam` file it will try to figure out the appropriate libraryId
-  if (filetype?.toLocaleLowerCase() == 'bam') {
-    const libraryIdArray = subjectData.lims.reduce((acc, curr) => {
-      const currLibId = curr.library_id;
-      const currSampId = curr.sample_id;
-
-      // do not want value to appear twice at the return array
-      if (acc.includes(currLibId)) {
-        return acc;
-      }
-
-      // find the matching value and push to the array
-      if (currSampId == sampleId) {
-        acc.push(currLibId);
-      }
-
-      return acc;
-    }, [] as Array<string>);
-
-    nameArray.push(...libraryIdArray);
-  }
-
-  // Append filename at the end
-  nameArray.push(filename);
-
-  return nameArray.join('_');
-};

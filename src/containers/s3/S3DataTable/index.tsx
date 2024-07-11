@@ -160,6 +160,10 @@ for (const column of column_to_display) {
     columnList.push({
       ...defaultProps,
       body: (rowData: S3Row): React.ReactNode => {
+        // Side note for not enforcing the IGV presigned mode or disable restore object here (use case for cttsov2)
+        // The results from the `/s3` path is not shown here as it is filtered out based on SubjectId
+        // The cttsov2 results do not have the `subject_id` linked in the portal.
+
         return (
           <DataActionButton
             id={rowData.id}

@@ -45,4 +45,9 @@ export default [
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
 ];

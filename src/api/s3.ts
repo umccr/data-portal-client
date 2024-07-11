@@ -143,3 +143,24 @@ export async function getS3PreSignedUrl(id: number) {
   }
   return signed_url;
 }
+
+export async function getS3ObjectFromProps(props: { bucketOrVolume: string; pathOrKey: string }) {
+  const response = await get({
+    apiName: 'portal',
+    path: `/s3/`,
+    options: {
+      queryParams: {
+        bucket: props.bucketOrVolume,
+        key: props.pathOrKey,
+      },
+    },
+  }).response;
+
+  const data = (await response.body.json()) as S3ApiData;
+
+  if (data.results.length !== 1) {
+    throw new Error('No or more than one s3 object found!');
+  }
+
+  return data.results[0];
+}

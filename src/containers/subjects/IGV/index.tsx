@@ -24,7 +24,7 @@ import { getJwtToken } from '../../../utils/signer';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import { SubjectApiRes, usePortalSubjectDataAPI } from '../../../api/subject';
 import { useToastContext } from '../../../providers/ToastProvider';
-import { constructIgvNameParameter } from '../../../components/OpenInIgvDialog';
+import { constructIgvNameParameter } from '../../../components/OpenInIgvDialog/utils';
 
 const toolbarGenomeList = [
   { label: 'hg38', value: 'hg38' },

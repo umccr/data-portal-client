@@ -6,7 +6,7 @@ import { Column } from 'primereact/column';
 import { getStringReadableBytes } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
-import DataActionButton from '../../utils/DataActionButton';
+import DataActionButton, { DataAction } from '../../utils/DataActionButton';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { getS3PreSignedUrl, S3Row } from '../../../api/s3';
 import { GDSRow, getGDSPreSignedUrl } from '../../../api/gds';
@@ -26,6 +26,8 @@ type AnalysisResultGDSTableProps = {
   data: GDSRow[];
 };
 type AnalysisResultS3TableProps = {
+  isDisableObjectRestore?: boolean;
+  enforceIgvPresignedMode?: boolean;
   title: string;
   data: S3Row[];
 };
@@ -129,111 +131,6 @@ const getPortalRunIdFromS3Key = (key: string) => {
   return /^\d{8}/.test(tmp) ? tmp : key.split('/')[4];
 };
 
-const actionGDSTemplate = (rowData: GDSRow) => {
-  return (
-    <DataActionButton
-      type='gds'
-      pathOrKey={rowData.path}
-      id={rowData.id}
-      bucketOrVolume={rowData.volume_name}
-    />
-  );
-};
-
-const actionS3Template = (rowData: S3Row) => {
-  return (
-    <DataActionButton
-      type='s3'
-      pathOrKey={rowData.key}
-      id={rowData.id}
-      bucketOrVolume={rowData.bucket}
-    />
-  );
-};
-
-const fileSizeS3Template = (rowData: S3Row) => {
-  const readableSize = getStringReadableBytes(rowData.size);
-  return (
-    <div className='white-space-nowrap overflow-visible' style={{ width: '75px' }}>
-      {readableSize}
-    </div>
-  );
-};
-
-const fileSizeGDSTemplate = (rowData: GDSRow) => {
-  const readableSize = getStringReadableBytes(rowData.size_in_bytes);
-  return (
-    <div className='white-space-nowrap overflow-visible' style={{ width: '75px' }}>
-      {readableSize}
-    </div>
-  );
-};
-
-const timeModifiedS3Template = (rowData: S3Row) => {
-  const readableTimeStamp = moment(rowData.last_modified_date).toString();
-  return (
-    <div className='white-space-nowrap' style={{ width: '300px' }}>
-      {readableTimeStamp}
-    </div>
-  );
-};
-
-const timeModifiedGDSTemplate = (rowData: GDSRow) => {
-  return (
-    <div className='white-space-nowrap' style={{ width: '300px' }}>
-      {moment(rowData.time_modified).toString()}
-    </div>
-  );
-};
-
-const previewS3Template = (rowData: S3Row) => {
-  const filename = rowData.key.split('/').pop() ?? rowData.key;
-  const fileSizeInBytes = rowData.size;
-
-  return (
-    <div style={{ width: '15px' }}>
-      <FilePreviewButton
-        fileSizeInBytes={fileSizeInBytes}
-        id={rowData.id}
-        filename={filename}
-        type='s3'
-      />
-    </div>
-  );
-};
-
-const previewGDSTemplate = (rowData: GDSRow) => {
-  const filename = rowData.path.split('/').pop() ?? rowData.path;
-  const fileSizeInBytes = rowData.size_in_bytes;
-
-  return (
-    <div style={{ width: '15px' }}>
-      <FilePreviewButton
-        id={rowData.id}
-        filename={filename}
-        fileSizeInBytes={fileSizeInBytes}
-        type='gds'
-      />
-    </div>
-  );
-};
-
-// An adapter for GDS and S3 row before passing in through the download template
-const downloadGDSTemplate = (rowData: GDSRow) => {
-  return downloadTemplate({
-    id: rowData.id,
-    keyOrPath: rowData.path,
-    getPresignedUrl: getGDSPreSignedUrl,
-  });
-};
-const downloadS3Template = (rowData: S3Row) => {
-  return downloadTemplate({
-    id: rowData.id,
-    keyOrPath: rowData.key,
-    getPresignedUrl: getS3PreSignedUrl,
-  });
-};
-
 const downloadTemplate = ({
   id,
   keyOrPath,
@@ -295,6 +192,60 @@ const downloadTemplate = ({
 
 function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
   const { title, data } = prop;
+
+  const actionGDSTemplate = (rowData: GDSRow) => {
+    return (
+      <DataActionButton
+        type='gds'
+        pathOrKey={rowData.path}
+        id={rowData.id}
+        bucketOrVolume={rowData.volume_name}
+      />
+    );
+  };
+
+  const fileSizeGDSTemplate = (rowData: GDSRow) => {
+    const readableSize = getStringReadableBytes(rowData.size_in_bytes);
+    return (
+      <div className='white-space-nowrap overflow-visible' style={{ width: '75px' }}>
+        {readableSize}
+      </div>
+    );
+  };
+
+  const timeModifiedGDSTemplate = (rowData: GDSRow) => {
+    return (
+      <div className='white-space-nowrap' style={{ width: '300px' }}>
+        {moment(rowData.time_modified).toString()}
+      </div>
+    );
+  };
+
+  const previewGDSTemplate = (rowData: GDSRow) => {
+    const filename = rowData.path.split('/').pop() ?? rowData.path;
+    const fileSizeInBytes = rowData.size_in_bytes;
+
+    return (
+      <div style={{ width: '15px' }}>
+        <FilePreviewButton
+          id={rowData.id}
+          filename={filename}
+          fileSizeInBytes={fileSizeInBytes}
+          type='gds'
+        />
+      </div>
+    );
+  };
+
+  // An adapter for GDS and S3 row before passing in through the download template
+  const downloadGDSTemplate = (rowData: GDSRow) => {
+    return downloadTemplate({
+      id: rowData.id,
+      keyOrPath: rowData.path,
+      getPresignedUrl: getGDSPreSignedUrl,
+    });
+  };
+
   return (
     <div>
       <DataTable
@@ -315,7 +266,63 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
 }
 
 function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
-  const { title, data } = prop;
+  const { title, data, enforceIgvPresignedMode, isDisableObjectRestore } = prop;
+
+  const fileSizeS3Template = (rowData: S3Row) => {
+    const readableSize = getStringReadableBytes(rowData.size);
+    return (
+      <div className='white-space-nowrap overflow-visible' style={{ width: '75px' }}>
+        {readableSize}
+      </div>
+    );
+  };
+
+  const downloadS3Template = (rowData: S3Row) => {
+    return downloadTemplate({
+      id: rowData.id,
+      keyOrPath: rowData.key,
+      getPresignedUrl: getS3PreSignedUrl,
+    });
+  };
+
+  const previewS3Template = (rowData: S3Row) => {
+    const filename = rowData.key.split('/').pop() ?? rowData.key;
+    const fileSizeInBytes = rowData.size;
+
+    return (
+      <div style={{ width: '15px' }}>
+        <FilePreviewButton
+          fileSizeInBytes={fileSizeInBytes}
+          id={rowData.id}
+          filename={filename}
+          type='s3'
+        />
+      </div>
+    );
+  };
+
+  const actionS3Template = (rowData: S3Row) => {
+    return (
+      <DataActionButton
+        type='s3'
+        pathOrKey={rowData.key}
+        id={rowData.id}
+        bucketOrVolume={rowData.bucket}
+        enforceIgvPresignedMode={enforceIgvPresignedMode}
+        isDisableObjectRestore={isDisableObjectRestore}
+      />
+    );
+  };
+
+  const timeModifiedS3Template = (rowData: S3Row) => {
+    const readableTimeStamp = moment(rowData.last_modified_date).toString();
+    return (
+      <div className='white-space-nowrap' style={{ width: '300px' }}>
+        {readableTimeStamp}
+      </div>
+    );
+  };
+
   return (
     <div>
       <DataTable
@@ -378,11 +385,36 @@ function AnalysisResultsTable({ subjectId }: Props) {
           <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
         </TabPanel>
         <TabPanel header='TSO500 (V2)'>
-          <AnalysisResultS3Table title='tsv' data={groupedData.cttsov2Tsv} />
-          <AnalysisResultS3Table title='csv' data={groupedData.cttsov2Csv} />
-          <AnalysisResultS3Table title='vcf' data={groupedData.cttsov2Vcfs} />
-          <AnalysisResultS3Table title='json' data={groupedData.cttsov2Json} />
-          <AnalysisResultS3Table title='bam' data={groupedData.cttsov2Bams} />
+          <AnalysisResultS3Table
+            title='tsv'
+            data={groupedData.cttsov2Tsv}
+            enforceIgvPresignedMode={true}
+            isDisableObjectRestore={true}
+          />
+          <AnalysisResultS3Table
+            title='csv'
+            data={groupedData.cttsov2Csv}
+            enforceIgvPresignedMode={true}
+            isDisableObjectRestore={true}
+          />
+          <AnalysisResultS3Table
+            title='vcf'
+            data={groupedData.cttsov2Vcfs}
+            enforceIgvPresignedMode={true}
+            isDisableObjectRestore={true}
+          />
+          <AnalysisResultS3Table
+            title='json'
+            data={groupedData.cttsov2Json}
+            enforceIgvPresignedMode={true}
+            isDisableObjectRestore={true}
+          />
+          <AnalysisResultS3Table
+            title='bam'
+            data={groupedData.cttsov2Bams}
+            enforceIgvPresignedMode={true}
+            isDisableObjectRestore={true}
+          />
         </TabPanel>
         <TabPanel header='WGS (bcbio)'>
           <AnalysisResultS3Table title='cancer report' data={groupedData.cancer} />
