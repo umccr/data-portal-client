@@ -2,9 +2,7 @@ import config from '../../../config';
 import { GDSRow, constructGDSUrl } from '../../../api/gds';
 import igv, { IGVBrowser, ITrack } from 'igv';
 import { post } from 'aws-amplify/api';
-import { constructIgvNameParameter } from '../../../components/OpenInIgvDialog';
 import genomes from './genomes';
-import { SubjectApiRes } from '../../../api/subject';
 import { S3Row } from '../../../api/s3';
 
 /**

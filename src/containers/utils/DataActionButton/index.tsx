@@ -11,7 +11,7 @@ import OpenIGVDesktopDialog from '../../../components/OpenInIgvDialog';
 import { IFRAME_FILETYPE_LIST, IMAGE_FILETYPE_LIST } from '../../../components/ViewPresignedUrl';
 import { OpenInNewTab } from '../../../components/OpenInNewTab';
 
-enum DataAction {
+export enum DataAction {
   NONE,
   COPY_URI,
   GENERATE_PRESIGN,
@@ -20,16 +20,18 @@ enum DataAction {
   OPEN_IN_NEW_TAB,
 }
 
-type DataActionButtonProps = {
+export type DataActionButtonProps = {
   id: number;
   type: 's3' | 'gds';
   pathOrKey: string;
   bucketOrVolume: string;
+  enforceIgvPresignedMode?: boolean;
+  isDisableObjectRestore?: boolean;
 };
 
 function DataActionButton(props: DataActionButtonProps) {
   const { toastShow } = useToastContext();
-  const { bucketOrVolume, pathOrKey, type } = props;
+  const { bucketOrVolume, pathOrKey, type, isDisableObjectRestore } = props;
 
   const [actionSelected, setActionSelected] = useState<DataAction>(DataAction.NONE);
   const handleCloseActionSelected = useCallback(() => setActionSelected(DataAction.NONE), []);
@@ -37,7 +39,6 @@ function DataActionButton(props: DataActionButtonProps) {
     () => setActionSelected(DataAction.RESTORE_OBJECT),
     []
   );
-
   const menu = useRef<Menu>(null);
   const items: MenuItem[] = [
     {
@@ -70,7 +71,7 @@ function DataActionButton(props: DataActionButtonProps) {
     });
   }
 
-  if (pathOrKey.endsWith('.bam') && type == 's3') {
+  if (pathOrKey.endsWith('.bam') && type == 's3' && !isDisableObjectRestore) {
     items.push({
       label: 'Check and Restore Object',
       icon: 'pi pi-history',
