@@ -61,14 +61,18 @@ function DataActionButton(props: DataActionButtonProps) {
     },
   ];
 
+  // no download link for bam
   if (!pathOrKey.endsWith('.bam')) {
-    items.push({
-      label: 'Generate Download Link',
-      icon: 'pi pi-link',
-      command: () => {
-        setActionSelected(DataAction.GENERATE_PRESIGN);
-      },
-    });
+    // TODO no download link for fastq.gz on s3 for now - need to discuss egress policy ~victor
+    if (!(type == 's3' && pathOrKey.endsWith('.fastq.gz'))) {
+      items.push({
+        label: 'Generate Download Link',
+        icon: 'pi pi-link',
+        command: () => {
+          setActionSelected(DataAction.GENERATE_PRESIGN);
+        },
+      });
+    }
   }
 
   if (pathOrKey.endsWith('.bam') && type == 's3' && !isDisableObjectRestore) {
