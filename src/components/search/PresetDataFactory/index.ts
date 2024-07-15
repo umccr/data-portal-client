@@ -8,7 +8,12 @@ export class PresetDataFactory {
     return [
       { key: 0, label: 'reset', keyword: '', style: 'p-button-primary' },
       { key: 1, label: 'qc reports', keyword: 'multiqc .html$', style: this.chipStyle },
-      { key: 2, label: 'dragen demux reports', keyword: 'Reports report.html$', style: this.chipStyle },
+      {
+        key: 2,
+        label: 'dragen demux reports',
+        keyword: 'Reports report.html$',
+        style: this.chipStyle,
+      },
       { key: 3, label: 'stats csv', keyword: 'Reports .csv$', style: this.chipStyle },
       { key: 4, label: 'fastq', keyword: '.fastq.gz$', style: this.chipStyle },
     ];
