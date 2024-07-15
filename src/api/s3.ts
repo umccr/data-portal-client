@@ -131,11 +131,25 @@ export function usePortalS3StatusAPI(s3Id?: string | number) {
 
 // NOTE: This function is used to get the 'download' presigned URL for the S3 object
 // By default, the 'Content-Disposition' header is set to 'attachment' in the api side to download the file
-export async function getS3PreSignedUrl(id: number) {
-  const response = await get({
-    apiName: 'portal',
-    path: `/s3/${id}/presign`,
-  }).response;
+export async function getS3PreSignedUrl(id: number, inline: boolean = false): Promise<string> {
+  let response;
+  if (inline) {
+    response = await get({
+      apiName: 'portal',
+      path: `/s3/${id}/presign`,
+      options: {
+        headers: {
+          'Content-Disposition': 'inline',
+        },
+      },
+    }).response;
+  } else {
+    response = await get({
+      apiName: 'portal',
+      path: `/s3/${id}/presign`,
+    }).response;
+  }
+
   const { error, signed_url } = (await response.body.json()) as any;
 
   if (error) {
@@ -159,7 +173,9 @@ export async function getS3ObjectFromProps(props: { bucketOrVolume: string; path
   const data = (await response.body.json()) as S3ApiData;
 
   if (data.results.length !== 1) {
-    throw new Error('No or more than one s3 object found!');
+    // At the mo, this is only used in OpenInIgvDialog for opening bam, vcf, cram
+    // file. So, we are tuning error feedback to user more precisely what went wrong.
+    throw new Error('Corresponding index file (tbi, bai, crai) not found');
   }
 
   return data.results[0];

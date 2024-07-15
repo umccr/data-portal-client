@@ -6,7 +6,7 @@ import { Column } from 'primereact/column';
 import { getStringReadableBytes } from '../../../utils/util';
 import FilePreviewButton from '../../../components/FilePreviewButton';
 import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
-import DataActionButton, { DataAction } from '../../utils/DataActionButton';
+import DataActionButton from '../../utils/DataActionButton';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { getS3PreSignedUrl, S3Row } from '../../../api/s3';
 import { GDSRow, getGDSPreSignedUrl } from '../../../api/gds';
@@ -69,7 +69,8 @@ const filenameTemplate = (rowData: S3Row | GDSRow) => {
     }
     if ('key' in rowData && rowData.key) {
       try {
-        const signed_url = await getS3PreSignedUrl(rowData.id);
+        // use s3 signed url with inline method as we are opening in browser
+        const signed_url = await getS3PreSignedUrl(rowData.id, true);
         window.open(signed_url, '_blank');
       } catch (e) {
         setBlockedPanel(false);
@@ -447,7 +448,12 @@ function AnalysisResultsTable({ subjectId }: Props) {
             <AnalysisResultS3Table title='cpsr' data={groupedData.sash.cpsr} />
             <AnalysisResultS3Table title='linx report' data={groupedData.sash.linx} />
             <AnalysisResultS3Table title='qc report' data={groupedData.sash.multiqc} />
-            <AnalysisResultS3Table title='vcf' data={groupedData.sash.vcfs} />
+            <AnalysisResultS3Table
+              title='vcf'
+              data={groupedData.sash.vcfs}
+              enforceIgvPresignedMode={true}
+              isDisableObjectRestore={true}
+            />
             <AnalysisResultS3Table title='circos plot' data={groupedData.sash.circos} />
             <AnalysisResultGDSTable title='bam' data={groupedData.sash.gdsWgsBams} />
           </div>
