@@ -38,13 +38,13 @@ git push origin main
 ### TL;DR
 ```
 node -v
-v20.16.0
+v20.17.0
 
 npm i -g yarn
 
 (NOTE: yarn should auto resolve to local version from `.yarn` that configure in `package.json` > `packageManager`)
 yarn -v
-4.4.0
+4.5.0
 
 yarn install
 
