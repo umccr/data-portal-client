@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "data-portal-client",
-  "version": "2.2.3-rc.1",
+  "version": "2.2.3",
   "private": true,
   "engines": {
     "node": ">=20.0.0"
