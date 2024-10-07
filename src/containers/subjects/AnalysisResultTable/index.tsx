@@ -289,7 +289,8 @@ function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
   const previewS3Template = (rowData: S3Row) => {
     const filename = rowData.key.split('/').pop() ?? rowData.key;
     const fileSizeInBytes = rowData.size;
-    const isByobIcaV2File = rowData.key.startsWith('byob-icav2');
+    const isByobCttsoV2File =
+      rowData.key.startsWith('byob-icav2') && rowData.key.includes('cttsov2');
 
     return (
       <div style={{ width: '15px' }}>
@@ -298,7 +299,7 @@ function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
           id={rowData.id}
           filename={filename}
           type='s3'
-          isByobIcaV2File={isByobIcaV2File}
+          isByobCttsoV2File={isByobCttsoV2File}
         />
       </div>
     );
