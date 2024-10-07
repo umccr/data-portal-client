@@ -16,10 +16,11 @@ type FilePreviewButtonProps = {
   type: 's3' | 'gds';
   id: number;
   fileSizeInBytes: number;
+  isByobCttsoV2File?: boolean;
 };
 
 export default function FilePreviewButton(props: FilePreviewButtonProps) {
-  const { type, fileSizeInBytes } = props;
+  const { type, fileSizeInBytes, isByobCttsoV2File } = props;
 
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
@@ -32,6 +33,7 @@ export default function FilePreviewButton(props: FilePreviewButtonProps) {
   // Unable to fetch from s3 due to cors-origin policy
   const isCorsOriginBlock =
     type == 's3' &&
+    !isByobCttsoV2File &&
     !IMAGE_FILETYPE_LIST.includes(filetype) &&
     !IFRAME_FILETYPE_LIST.includes(filetype);
 
