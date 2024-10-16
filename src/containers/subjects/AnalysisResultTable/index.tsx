@@ -361,7 +361,9 @@ function AnalysisResultsTable({ subjectId }: Props) {
       results_gds: data.results_gds,
       results_s3: data.results,
       results_sash: data.results_sash,
-      results_cttsov2: data.results_cttsov2,
+      results_byob_cttsov2: data.results_byob_cttsov2,
+      results_byob_wgts: data.results_byob_wgts,
+      results_byob_sash: data.results_byob_sash,
     });
 
     return (
@@ -461,6 +463,44 @@ function AnalysisResultsTable({ subjectId }: Props) {
             <AnalysisResultGDSTable title='bam' data={groupedData.sash.gdsWgsBams} />
           </div>
         </TabPanel>
+        <TabPanel header='WGS (orcabus)'>
+          <AnalysisResultS3Table title='cancer report' data={groupedData.wgtsByob.wgsCancer} />
+          <AnalysisResultS3Table title='pcgr' data={groupedData.wgtsByob.wgsPcgr} />
+          <AnalysisResultS3Table title='cpsr' data={groupedData.wgtsByob.wgsCpsr} />
+          <AnalysisResultS3Table title='qc report' data={groupedData.wgtsByob.wgsMultiqc} />
+          <AnalysisResultS3Table title='coverage report' data={groupedData.wgtsByob.wgsCoverage} />
+          <AnalysisResultS3Table title='vcf' data={groupedData.wgtsByob.wgsVcfs} />
+          <AnalysisResultS3Table title='circos plot' data={groupedData.wgtsByob.wgsCircos} />
+          <AnalysisResultS3Table title='bam' data={groupedData.wgtsByob.wgsBams} />
+        </TabPanel>
+        <TabPanel header='WTS (orcabus)'>
+          <AnalysisResultS3Table title='rnasum report' data={groupedData.wgtsByob.wtsRNAsum} />
+          <AnalysisResultS3Table title='qc report' data={groupedData.wgtsByob.wtsMultiqc} />
+          <AnalysisResultS3Table title='fusions report' data={groupedData.wgtsByob.wtsFusionsIca} />
+          <AnalysisResultS3Table title='bam' data={groupedData.wgtsByob.wtsBamsIca} />
+        </TabPanel>
+        <TabPanel header='WGS (orcabus-sash)'>
+          <div className='bg-yellow-100 p-3'>
+            <Message
+              className='w-full mb-3 bg-yellow-100'
+              severity='warn'
+              text='RESEARCH USE ONLY'
+              pt={{ text: { className: 'font-bold' } }}
+            />
+            <AnalysisResultS3Table title='cancer report' data={groupedData.sashByob.cancer} />
+            <AnalysisResultS3Table title='pcgr' data={groupedData.sashByob.pcgr} />
+            <AnalysisResultS3Table title='cpsr' data={groupedData.sashByob.cpsr} />
+            <AnalysisResultS3Table title='linx report' data={groupedData.sashByob.linx} />
+            <AnalysisResultS3Table title='qc report' data={groupedData.sashByob.multiqc} />
+            <AnalysisResultS3Table
+              title='vcf'
+              data={groupedData.sashByob.vcfs}
+              enforceIgvPresignedMode={true}
+              isDisableObjectRestore={true}
+            />
+            <AnalysisResultS3Table title='circos plot' data={groupedData.sashByob.circos} />
+          </div>
+        </TabPanel>
       </TabView>
     );
   }
@@ -474,12 +514,16 @@ function groupResultsData({
   results_s3,
   results_gds,
   results_sash,
-  results_cttsov2,
+  results_byob_cttsov2,
+  results_byob_wgts,
+  results_byob_sash,
 }: {
   results_s3: S3Row[];
   results_gds: GDSRow[];
   results_sash: S3Row[];
-  results_cttsov2: S3Row[];
+  results_byob_cttsov2: S3Row[];
+  results_byob_wgts: S3Row[];
+  results_byob_sash: S3Row[];
 }) {
   const wgs = results_s3.filter((r) => r.key.includes('WGS/'));
   const wts = results_s3.filter((r) => r.key.includes('WTS/'));
@@ -561,10 +605,10 @@ function groupResultsData({
   );
 
   // CTTSOV2 results
-  const cttsov2Bams = results_cttsov2.filter(
+  const cttsov2Bams = results_byob_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('bam')
   );
-  const cttsov2Vcfs = results_cttsov2.filter(
+  const cttsov2Vcfs = results_byob_cttsov2.filter(
     (r) =>
       r.key.includes('cttsov2') &&
       (r.key.endsWith('.vcf') ||
@@ -572,15 +616,68 @@ function groupResultsData({
         r.key.endsWith('.vcf.gz') ||
         r.key.endsWith('.gvcf.gz'))
   );
-  const cttsov2Tsv = results_cttsov2.filter(
+  const cttsov2Tsv = results_byob_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('tsv')
   );
-  const cttsov2Csv = results_cttsov2.filter(
+  const cttsov2Csv = results_byob_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('csv')
   );
-  const cttsov2Json = results_cttsov2.filter(
+  const cttsov2Json = results_byob_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && (r.key.endsWith('json') || r.key.endsWith('json.gz'))
   );
+
+  // WGTS BYOB results from ICA v2
+  const wgtsByobGrouped = {
+
+    wgsBams: results_byob_wgts.filter(
+      (r) => r.key.includes('tumor') && r.key.includes('normal') && r.key.endsWith('bam')
+    ),
+    wgsVcfs: results_byob_wgts.filter(
+      (r) =>
+        (r.key.includes('umccrise') || r.key.includes('tumor') || r.key.includes('normal')) &&
+        (r.key.endsWith('vcf.gz') || r.key.endsWith('.maf'))
+    ),
+    wgsCircos: results_byob_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('png')
+    ),
+    wgsPcgr: results_byob_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('pcgr.html')
+    ),
+    wgsCpsr: results_byob_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('cpsr.html')
+    ),
+    wgsMultiqc: results_byob_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('multiqc_report.html')
+    ),
+    wgsCancer: results_byob_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('cancer_report.html')
+    ),
+    wgsCoverage: results_byob_wgts.filter(
+      (r) => r.key.includes('cacao') && r.key.endsWith('html')
+    ),
+    wtsBamsIca: results_byob_wgts.filter(
+      (r) => r.key.includes('wts') && r.key.endsWith('bam')
+    ),
+    wtsMultiqc: results_byob_wgts.filter(
+      (r) => r.key.includes('wts') && r.key.endsWith('multiqc.html')
+    ),
+    wtsFusionsIca: results_byob_wgts.filter(
+      (r) => r.key.includes('wts') && r.key.endsWith('fusions.pdf')
+    ),
+    wtsRNAsum: results_byob_wgts.filter((r) => r.key.endsWith('RNAseq_report.html')),
+  }
+
+  // Sash BYOB results from orcabus
+  const sashByobGrouped = {
+    // The rest of the output needed to show
+    vcfs: results_byob_sash.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf')),
+    circos: results_byob_sash.filter((r) => r.key.includes('circos') && r.key.endsWith('.png')),
+    pcgr: results_byob_sash.filter((r) => r.key.endsWith('pcgr.html')),
+    cpsr: results_byob_sash.filter((r) => r.key.endsWith('cpsr.html')),
+    multiqc: results_byob_sash.filter((r) => r.key.includes('multiqc') && r.key.endsWith('.html')),
+    cancer: results_byob_sash.filter((r) => r.key.endsWith('cancer_report.html')),
+    linx: results_byob_sash.filter((r) => r.key.endsWith('linx.html')),
+  };
 
   // Sash results
   const sashGrouped = {
@@ -641,5 +738,11 @@ function groupResultsData({
 
     // S3 - Sash
     sash: sashGrouped,
+
+    // S3 - BYOB from orcabus
+    wgtsByob: wgtsByobGrouped,
+
+    // S3 - BYOB from orcabus sash
+    sashByob: sashByobGrouped,
   };
 }
