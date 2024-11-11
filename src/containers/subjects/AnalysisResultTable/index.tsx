@@ -464,20 +464,64 @@ function AnalysisResultsTable({ subjectId }: Props) {
           </div>
         </TabPanel>
         <TabPanel header='WGS (orcabus)'>
-          <AnalysisResultS3Table title='cancer report' data={groupedData.wgtsByob.wgsCancer} />
-          <AnalysisResultS3Table title='pcgr' data={groupedData.wgtsByob.wgsPcgr} />
-          <AnalysisResultS3Table title='cpsr' data={groupedData.wgtsByob.wgsCpsr} />
-          <AnalysisResultS3Table title='qc report' data={groupedData.wgtsByob.wgsMultiqc} />
-          <AnalysisResultS3Table title='coverage report' data={groupedData.wgtsByob.wgsCoverage} />
-          <AnalysisResultS3Table title='vcf' data={groupedData.wgtsByob.wgsVcfs} />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='cancer report'
+            data={groupedData.wgtsByob.wgsCancer}
+          />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='pcgr'
+            data={groupedData.wgtsByob.wgsPcgr}
+          />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='cpsr'
+            data={groupedData.wgtsByob.wgsCpsr}
+          />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='qc report'
+            data={groupedData.wgtsByob.wgsMultiqc}
+          />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='coverage report'
+            data={groupedData.wgtsByob.wgsCoverage}
+          />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='vcf'
+            data={groupedData.wgtsByob.wgsVcfs}
+          />
           <AnalysisResultS3Table title='circos plot' data={groupedData.wgtsByob.wgsCircos} />
-          <AnalysisResultS3Table title='bam' data={groupedData.wgtsByob.wgsBams} />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='bam'
+            data={groupedData.wgtsByob.wgsBams}
+          />
         </TabPanel>
         <TabPanel header='WTS (orcabus)'>
-          <AnalysisResultS3Table title='rnasum report' data={groupedData.wgtsByob.wtsRNAsum} />
-          <AnalysisResultS3Table title='qc report' data={groupedData.wgtsByob.wtsMultiqc} />
-          <AnalysisResultS3Table title='fusions report' data={groupedData.wgtsByob.wtsFusionsIca} />
-          <AnalysisResultS3Table title='bam' data={groupedData.wgtsByob.wtsBamsIca} />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='rnasum report'
+            data={groupedData.wgtsByob.wtsRNAsum}
+          />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='qc report'
+            data={groupedData.wgtsByob.wtsMultiqc}
+          />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='fusions report'
+            data={groupedData.wgtsByob.wtsFusionsIca}
+          />
+          <AnalysisResultS3Table
+            enforceIgvPresignedMode={true}
+            title='bam'
+            data={groupedData.wgtsByob.wtsBamsIca}
+          />
         </TabPanel>
         <TabPanel header='WGS (orcabus-sash)'>
           <div className='bg-yellow-100 p-3'>
@@ -487,18 +531,42 @@ function AnalysisResultsTable({ subjectId }: Props) {
               text='RESEARCH USE ONLY'
               pt={{ text: { className: 'font-bold' } }}
             />
-            <AnalysisResultS3Table title='cancer report' data={groupedData.sashByob.cancer} />
-            <AnalysisResultS3Table title='pcgr' data={groupedData.sashByob.pcgr} />
-            <AnalysisResultS3Table title='cpsr' data={groupedData.sashByob.cpsr} />
-            <AnalysisResultS3Table title='linx report' data={groupedData.sashByob.linx} />
-            <AnalysisResultS3Table title='qc report' data={groupedData.sashByob.multiqc} />
+            <AnalysisResultS3Table
+              enforceIgvPresignedMode={true}
+              title='cancer report'
+              data={groupedData.sashByob.cancer}
+            />
+            <AnalysisResultS3Table
+              enforceIgvPresignedMode={true}
+              title='pcgr'
+              data={groupedData.sashByob.pcgr}
+            />
+            <AnalysisResultS3Table
+              enforceIgvPresignedMode={true}
+              title='cpsr'
+              data={groupedData.sashByob.cpsr}
+            />
+            <AnalysisResultS3Table
+              enforceIgvPresignedMode={true}
+              title='linx report'
+              data={groupedData.sashByob.linx}
+            />
+            <AnalysisResultS3Table
+              enforceIgvPresignedMode={true}
+              title='qc report'
+              data={groupedData.sashByob.multiqc}
+            />
             <AnalysisResultS3Table
               title='vcf'
               data={groupedData.sashByob.vcfs}
               enforceIgvPresignedMode={true}
               isDisableObjectRestore={true}
             />
-            <AnalysisResultS3Table title='circos plot' data={groupedData.sashByob.circos} />
+            <AnalysisResultS3Table
+              enforceIgvPresignedMode={true}
+              title='circos plot'
+              data={groupedData.sashByob.circos}
+            />
           </div>
         </TabPanel>
       </TabView>
@@ -628,7 +696,6 @@ function groupResultsData({
 
   // WGTS BYOB results from ICA v2
   const wgtsByobGrouped = {
-
     wgsBams: results_byob_wgts.filter(
       (r) => r.key.includes('tumor') && r.key.includes('normal') && r.key.endsWith('bam')
     ),
@@ -637,9 +704,7 @@ function groupResultsData({
         (r.key.includes('umccrise') || r.key.includes('tumor') || r.key.includes('normal')) &&
         (r.key.endsWith('vcf.gz') || r.key.endsWith('.maf'))
     ),
-    wgsCircos: results_byob_wgts.filter(
-      (r) => r.key.includes('umccrise') && r.key.endsWith('png')
-    ),
+    wgsCircos: results_byob_wgts.filter((r) => r.key.includes('umccrise') && r.key.endsWith('png')),
     wgsPcgr: results_byob_wgts.filter(
       (r) => r.key.includes('umccrise') && r.key.endsWith('pcgr.html')
     ),
@@ -652,12 +717,8 @@ function groupResultsData({
     wgsCancer: results_byob_wgts.filter(
       (r) => r.key.includes('umccrise') && r.key.endsWith('cancer_report.html')
     ),
-    wgsCoverage: results_byob_wgts.filter(
-      (r) => r.key.includes('cacao') && r.key.endsWith('html')
-    ),
-    wtsBamsIca: results_byob_wgts.filter(
-      (r) => r.key.includes('wts') && r.key.endsWith('bam')
-    ),
+    wgsCoverage: results_byob_wgts.filter((r) => r.key.includes('cacao') && r.key.endsWith('html')),
+    wtsBamsIca: results_byob_wgts.filter((r) => r.key.includes('wts') && r.key.endsWith('bam')),
     wtsMultiqc: results_byob_wgts.filter(
       (r) => r.key.includes('wts') && r.key.endsWith('multiqc.html')
     ),
@@ -665,7 +726,7 @@ function groupResultsData({
       (r) => r.key.includes('wts') && r.key.endsWith('fusions.pdf')
     ),
     wtsRNAsum: results_byob_wgts.filter((r) => r.key.endsWith('RNAseq_report.html')),
-  }
+  };
 
   // Sash BYOB results from orcabus
   const sashByobGrouped = {
