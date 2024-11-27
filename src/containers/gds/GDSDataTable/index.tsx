@@ -10,8 +10,8 @@ import { useToastContext } from '../../../providers/ToastProvider';
 import { ColumnProps } from 'primereact/column';
 import { getStringReadableBytes, showDisplayText } from '../../../utils/util';
 import moment from 'moment';
-import DataActionButton from '../../utils/DataActionButton';
-import FilePreviewButton from '../../../components/FilePreviewButton';
+// import DataActionButton from '../../utils/DataActionButton';
+// import FilePreviewButton from '../../../components/FilePreviewButton';
 import { InputText } from 'primereact/inputtext';
 import PresetButton from '../../../components/search/PresetButton';
 
@@ -117,8 +117,8 @@ const textBodyTemplate = (text: string | number | boolean | null): React.ReactNo
 const column_to_display = [
   'volume_name',
   'path',
-  'preview',
-  'action',
+  // 'preview',
+  // 'action',
   'size_in_bytes',
   'time_modified',
 ] as const;
@@ -137,44 +137,45 @@ for (const column of column_to_display) {
     className: 'text-left white-space-nowrap',
   };
 
-  if (column == 'preview') {
-    columnList.push({
-      ...defaultProps,
-      header: (
-        <p className='w-2 uppercase text-left font-bold text-color white-space-nowrap overflow-visible'>
-          {showDisplayText(column)}
-        </p>
-      ),
-      className: 'text-center white-space-nowrap overflow-visible',
-      body: (rowData: GDSRow): React.ReactNode => {
-        const filename = rowData.path.split('/').pop() ?? rowData.path;
-        const fileSizeInBytes = rowData.size_in_bytes;
-        return (
-          <FilePreviewButton
-            filename={filename}
-            fileSizeInBytes={fileSizeInBytes}
-            type='gds'
-            id={rowData.id}
-          />
-        );
-      },
-    });
-  } else if (column == 'action') {
-    columnList.push({
-      ...defaultProps,
-      body: (rowData: GDSRow): React.ReactNode => {
-        return (
-          <DataActionButton
-            id={rowData.id}
-            type='gds'
-            pathOrKey={rowData.path}
-            bucketOrVolume={rowData.volume_name}
-          />
-        );
-      },
-      className: 'text-center white-space-nowrap overflow-visible',
-    });
-  } else if (column == 'size_in_bytes') {
+  // if (column == 'preview') {
+  //   columnList.push({
+  //     ...defaultProps,
+  //     header: (
+  //       <p className='w-2 uppercase text-left font-bold text-color white-space-nowrap overflow-visible'>
+  //         {showDisplayText(column)}
+  //       </p>
+  //     ),
+  //     className: 'text-center white-space-nowrap overflow-visible',
+  //     body: (rowData: GDSRow): React.ReactNode => {
+  //       const filename = rowData.path.split('/').pop() ?? rowData.path;
+  //       const fileSizeInBytes = rowData.size_in_bytes;
+  //       return (
+  //         <FilePreviewButton
+  //           filename={filename}
+  //           fileSizeInBytes={fileSizeInBytes}
+  //           type='gds'
+  //           id={rowData.id}
+  //         />
+  //       );
+  //     },
+  //   });
+  // } else if (column == 'action') {
+  //   columnList.push({
+  //     ...defaultProps,
+  //     body: (rowData: GDSRow): React.ReactNode => {
+  //       return (
+  //         <DataActionButton
+  //           id={rowData.id}
+  //           type='gds'
+  //           pathOrKey={rowData.path}
+  //           bucketOrVolume={rowData.volume_name}
+  //         />
+  //       );
+  //     },
+  //     className: 'text-center white-space-nowrap overflow-visible',
+  //   });
+  // } else
+    if (column == 'size_in_bytes') {
     columnList.push({
       ...defaultProps,
       body: (rowData: GDSRow): React.ReactNode => {

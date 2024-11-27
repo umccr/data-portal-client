@@ -29,6 +29,7 @@ function ConfirmationDialog({ header, payload, onConfirm, descriptionElement }: 
             />
             <Button
               label='Launch'
+              disabled
               className='p-button-raised p-button-primary'
               onClick={() => {
                 onConfirm(payload);
