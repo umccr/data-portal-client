@@ -9,15 +9,15 @@ import CircularLoaderWithText from '../../../components/CircularLoaderWithText';
 import DataActionButton from '../../utils/DataActionButton';
 import { usePortalSubjectDataAPI } from '../../../api/subject';
 import { getS3PreSignedUrl, S3Row } from '../../../api/s3';
-import { GDSRow, getGDSPreSignedUrl } from '../../../api/gds';
+import { GDSRow } from '../../../api/gds';
 import { Button } from 'primereact/button';
 import { BlockUI } from 'primereact/blockui';
 import {
   DATA_TYPE_SUPPORTED,
-  isRequestInlineContentDisposition,
+  // isRequestInlineContentDisposition,
 } from '../../../components/ViewPresignedUrl';
 import { Toast } from 'primereact/toast';
-import mime from 'mime';
+// import mime from 'mime';
 import { Message } from 'primereact/message';
 
 // Creating Table
@@ -38,35 +38,35 @@ const filenameTemplate = (rowData: S3Row | GDSRow) => {
   let filename;
   if ('path' in rowData && rowData.path) filename = rowData.path.split('/').pop();
   if ('key' in rowData && rowData.key) filename = rowData.key.split('/').pop();
-  const split_path = filename ? filename.split('.') : [];
-  const filetype = split_path[split_path.length - 1].toLowerCase();
+  // const split_path = filename ? filename.split('.') : [];
+  // const filetype = split_path[split_path.length - 1].toLowerCase();
 
   const handleOpenInBrowser = async (rowData: S3Row | GDSRow) => {
     setBlockedPanel(true);
-    if ('path' in rowData && rowData.path) {
-      try {
-        const signed_url = await getGDSPreSignedUrl(rowData.id, {
-          headers: {
-            'Content-Disposition': isRequestInlineContentDisposition(filetype)
-              ? 'inline'
-              : 'attachment',
-            'Content-Type': mime.getType(rowData.path),
-          },
-        });
-        window.open(signed_url, '_blank');
-      } catch (e) {
-        setBlockedPanel(false);
-        const msg = (e as Error).message;
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        toast.current.show({
-          severity: 'error',
-          summary: 'Invalid URL',
-          detail: msg,
-        });
-        // throw e;
-      }
-    }
+    // if ('path' in rowData && rowData.path) {
+    //   try {
+    //     const signed_url = await getGDSPreSignedUrl(rowData.id, {
+    //       headers: {
+    //         'Content-Disposition': isRequestInlineContentDisposition(filetype)
+    //           ? 'inline'
+    //           : 'attachment',
+    //         'Content-Type': mime.getType(rowData.path),
+    //       },
+    //     });
+    //     window.open(signed_url, '_blank');
+    //   } catch (e) {
+    //     setBlockedPanel(false);
+    //     const msg = (e as Error).message;
+    //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //     // @ts-ignore
+    //     toast.current.show({
+    //       severity: 'error',
+    //       summary: 'Invalid URL',
+    //       detail: msg,
+    //     });
+    //     // throw e;
+    //   }
+    // }
     if ('key' in rowData && rowData.key) {
       try {
         // use s3 signed url with inline method as we are opening in browser
@@ -194,16 +194,16 @@ const downloadTemplate = ({
 function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
   const { title, data } = prop;
 
-  const actionGDSTemplate = (rowData: GDSRow) => {
-    return (
-      <DataActionButton
-        type='gds'
-        pathOrKey={rowData.path}
-        id={rowData.id}
-        bucketOrVolume={rowData.volume_name}
-      />
-    );
-  };
+  // const actionGDSTemplate = (rowData: GDSRow) => {
+  //   return (
+  //     <DataActionButton
+  //       type='gds'
+  //       pathOrKey={rowData.path}
+  //       id={rowData.id}
+  //       bucketOrVolume={rowData.volume_name}
+  //     />
+  //   );
+  // };
 
   const fileSizeGDSTemplate = (rowData: GDSRow) => {
     const readableSize = getStringReadableBytes(rowData.size_in_bytes);
@@ -222,30 +222,30 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
     );
   };
 
-  const previewGDSTemplate = (rowData: GDSRow) => {
-    const filename = rowData.path.split('/').pop() ?? rowData.path;
-    const fileSizeInBytes = rowData.size_in_bytes;
-
-    return (
-      <div style={{ width: '15px' }}>
-        <FilePreviewButton
-          id={rowData.id}
-          filename={filename}
-          fileSizeInBytes={fileSizeInBytes}
-          type='gds'
-        />
-      </div>
-    );
-  };
+  // const previewGDSTemplate = (rowData: GDSRow) => {
+  //   const filename = rowData.path.split('/').pop() ?? rowData.path;
+  //   const fileSizeInBytes = rowData.size_in_bytes;
+  //
+  //   return (
+  //     <div style={{ width: '15px' }}>
+  //       <FilePreviewButton
+  //         id={rowData.id}
+  //         filename={filename}
+  //         fileSizeInBytes={fileSizeInBytes}
+  //         type='gds'
+  //       />
+  //     </div>
+  //   );
+  // };
 
   // An adapter for GDS and S3 row before passing in through the download template
-  const downloadGDSTemplate = (rowData: GDSRow) => {
-    return downloadTemplate({
-      id: rowData.id,
-      keyOrPath: rowData.path,
-      getPresignedUrl: getGDSPreSignedUrl,
-    });
-  };
+  // const downloadGDSTemplate = (rowData: GDSRow) => {
+  //   return downloadTemplate({
+  //     id: rowData.id,
+  //     keyOrPath: rowData.path,
+  //     getPresignedUrl: getGDSPreSignedUrl,
+  //   });
+  // };
 
   return (
     <div>
@@ -256,9 +256,9 @@ function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
         {/* Column field determined by the prefix of body Template */}
         <Column body={filenameTemplate} bodyClassName='w-12' headerStyle={{ display: 'none' }} />
         <Column body={portalRunIdTemplate} headerStyle={{ display: 'none' }} />
-        <Column body={downloadGDSTemplate} headerStyle={{ display: 'none' }} />
-        <Column body={previewGDSTemplate} headerStyle={{ display: 'none' }} />
-        <Column body={actionGDSTemplate} headerStyle={{ display: 'none' }} />
+        {/*<Column body={downloadGDSTemplate} headerStyle={{ display: 'none' }} />*/}
+        {/*<Column body={previewGDSTemplate} headerStyle={{ display: 'none' }} />*/}
+        {/*<Column body={actionGDSTemplate} headerStyle={{ display: 'none' }} />*/}
         <Column body={fileSizeGDSTemplate} headerStyle={{ display: 'none' }} />
         <Column body={timeModifiedGDSTemplate} headerStyle={{ display: 'none' }} />
       </DataTable>
@@ -369,26 +369,50 @@ function AnalysisResultsTable({ subjectId }: Props) {
     return (
       <TabView renderActiveOnly panelContainerClassName='px-0'>
         <TabPanel header='WGS'>
-          <AnalysisResultGDSTable title='cancer report' data={groupedData.wgsCancer} />
-          <AnalysisResultGDSTable title='pcgr' data={groupedData.wgsPcgr} />
-          <AnalysisResultGDSTable title='cpsr' data={groupedData.wgsCpsr} />
-          <AnalysisResultGDSTable title='gpl report' data={groupedData.wgsGpl} />
-          <AnalysisResultGDSTable title='qc report' data={groupedData.wgsMultiqc} />
-          <AnalysisResultGDSTable title='coverage report' data={groupedData.wgsCoverage} />
-          <AnalysisResultGDSTable title='vcf' data={groupedData.wgsVcfs} />
-          <AnalysisResultGDSTable title='circos plot' data={groupedData.wgsCircos} />
-          <AnalysisResultGDSTable title='bam' data={groupedData.wgsBams} />
+          <div className='bg-yellow-100 p-3'>
+            <Message
+              className='w-full mb-3 bg-yellow-100'
+              severity='warn'
+              text='DATA UNDER MIGRATION'
+              pt={{ text: { className: 'font-bold' } }}
+            />
+            <AnalysisResultGDSTable title='cancer report' data={groupedData.wgsCancer} />
+            <AnalysisResultGDSTable title='pcgr' data={groupedData.wgsPcgr} />
+            <AnalysisResultGDSTable title='cpsr' data={groupedData.wgsCpsr} />
+            <AnalysisResultGDSTable title='gpl report' data={groupedData.wgsGpl} />
+            <AnalysisResultGDSTable title='qc report' data={groupedData.wgsMultiqc} />
+            <AnalysisResultGDSTable title='coverage report' data={groupedData.wgsCoverage} />
+            <AnalysisResultGDSTable title='vcf' data={groupedData.wgsVcfs} />
+            <AnalysisResultGDSTable title='circos plot' data={groupedData.wgsCircos} />
+            <AnalysisResultGDSTable title='bam' data={groupedData.wgsBams} />
+          </div>
         </TabPanel>
         <TabPanel header='WTS'>
-          <AnalysisResultGDSTable title='rnasum report' data={groupedData.wtsRNAsum} />
-          <AnalysisResultGDSTable title='qc report' data={groupedData.wtsMultiqc} />
-          <AnalysisResultGDSTable title='fusions report' data={groupedData.wtsFusionsIca} />
-          <AnalysisResultGDSTable title='bam' data={groupedData.wtsBamsIca} />
+          <div className='bg-yellow-100 p-3'>
+            <Message
+              className='w-full mb-3 bg-yellow-100'
+              severity='warn'
+              text='DATA UNDER MIGRATION'
+              pt={{ text: { className: 'font-bold' } }}
+            />
+            <AnalysisResultGDSTable title='rnasum report' data={groupedData.wtsRNAsum} />
+            <AnalysisResultGDSTable title='qc report' data={groupedData.wtsMultiqc} />
+            <AnalysisResultGDSTable title='fusions report' data={groupedData.wtsFusionsIca} />
+            <AnalysisResultGDSTable title='bam' data={groupedData.wtsBamsIca} />
+          </div>
         </TabPanel>
         <TabPanel header='TSO500'>
-          <AnalysisResultGDSTable title='tsv' data={groupedData.tsoCtdnaTsv} />
-          <AnalysisResultGDSTable title='vcf' data={groupedData.tsoCtdnaVcfs} />
-          <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
+          <div className='bg-yellow-100 p-3'>
+            <Message
+              className='w-full mb-3 bg-yellow-100'
+              severity='warn'
+              text='DATA UNDER MIGRATION'
+              pt={{ text: { className: 'font-bold' } }}
+            />
+            <AnalysisResultGDSTable title='tsv' data={groupedData.tsoCtdnaTsv} />
+            <AnalysisResultGDSTable title='vcf' data={groupedData.tsoCtdnaVcfs} />
+            <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
+          </div>
         </TabPanel>
         <TabPanel header='TSO500 (V2)'>
           <AnalysisResultS3Table
