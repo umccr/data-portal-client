@@ -15,7 +15,7 @@ export class PresetDataFactory {
         style: this.chipStyle,
       },
       { key: 3, label: 'stats csv', keyword: 'Reports .csv$', style: this.chipStyle },
-      { key: 4, label: 'fastq', keyword: '.fastq.gz$', style: this.chipStyle },
+      { key: 4, label: 'fastq', keyword: '.fastq.(gz|ora)$', style: this.chipStyle },
     ];
   }
 
