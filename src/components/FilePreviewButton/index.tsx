@@ -3,8 +3,8 @@ import { Dialog } from 'primereact/dialog';
 import CircularLoaderWithText from '../CircularLoaderWithText';
 import ViewPresignedUrl, {
   DATA_TYPE_SUPPORTED,
-  IFRAME_FILETYPE_LIST,
-  IMAGE_FILETYPE_LIST,
+  // IFRAME_FILETYPE_LIST,
+  // IMAGE_FILETYPE_LIST,
   isRequestInlineContentDisposition,
 } from '../ViewPresignedUrl';
 import { usePortalGDSPresignAPI } from '../../api/gds';
@@ -16,11 +16,11 @@ type FilePreviewButtonProps = {
   type: 's3' | 'gds';
   id: number;
   fileSizeInBytes: number;
-  isByobCttsoV2File?: boolean;
 };
 
 export default function FilePreviewButton(props: FilePreviewButtonProps) {
-  const { type, fileSizeInBytes, isByobCttsoV2File } = props;
+  // const { type, fileSizeInBytes } = props;
+  const { fileSizeInBytes } = props;
 
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
@@ -31,22 +31,21 @@ export default function FilePreviewButton(props: FilePreviewButtonProps) {
   }
 
   // Unable to fetch from s3 due to cors-origin policy
-  const isCorsOriginBlock =
-    type == 's3' &&
-    !isByobCttsoV2File &&
-    !IMAGE_FILETYPE_LIST.includes(filetype) &&
-    !IFRAME_FILETYPE_LIST.includes(filetype);
+  // const isCorsOriginBlock =
+  //   type == 's3' &&
+  //   !IMAGE_FILETYPE_LIST.includes(filetype) &&
+  //   !IFRAME_FILETYPE_LIST.includes(filetype);
 
   const isFileSizeAcceptable = fileSizeInBytes > 60000000;
   const isDataTypeSupported = !DATA_TYPE_SUPPORTED.includes(filetype);
 
-  if (isCorsOriginBlock) {
-    return (
-      <div>
-        <div className='pi pi-eye-slash text-400' />
-      </div>
-    );
-  }
+  // if (isCorsOriginBlock) {
+  //   return (
+  //     <div>
+  //       <div className='pi pi-eye-slash text-400' />
+  //     </div>
+  //   );
+  // }
   if (isFileSizeAcceptable) {
     return (
       <div>

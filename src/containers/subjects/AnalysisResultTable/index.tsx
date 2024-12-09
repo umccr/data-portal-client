@@ -289,8 +289,6 @@ function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
   const previewS3Template = (rowData: S3Row) => {
     const filename = rowData.key.split('/').pop() ?? rowData.key;
     const fileSizeInBytes = rowData.size;
-    const isByobCttsoV2File =
-      rowData.key.startsWith('byob-icav2') && rowData.key.includes('cttsov2');
 
     return (
       <div style={{ width: '15px' }}>
@@ -299,7 +297,6 @@ function AnalysisResultS3Table(prop: AnalysisResultS3TableProps) {
           id={rowData.id}
           filename={filename}
           type='s3'
-          isByobCttsoV2File={isByobCttsoV2File}
         />
       </div>
     );
@@ -361,9 +358,11 @@ function AnalysisResultsTable({ subjectId }: Props) {
       results_gds: data.results_gds,
       results_s3: data.results,
       results_sash: data.results_sash,
-      results_byob_cttsov2: data.results_byob_cttsov2,
-      results_byob_wgts: data.results_byob_wgts,
-      results_byob_sash: data.results_byob_sash,
+      results_icav1_cttsov1: data.results_icav1_cttsov1,
+      results_icav1_wgts: data.results_icav1_wgts,
+      results_icav2_cttsov2: data.results_icav2_cttsov2,
+      results_icav2_wgts: data.results_icav2_wgts,
+      results_icav2_sash: data.results_icav2_sash,
     });
 
     return (
@@ -376,15 +375,24 @@ function AnalysisResultsTable({ subjectId }: Props) {
               text='DATA UNDER MIGRATION'
               pt={{ text: { className: 'font-bold' } }}
             />
-            <AnalysisResultGDSTable title='cancer report' data={groupedData.wgsCancer} />
-            <AnalysisResultGDSTable title='pcgr' data={groupedData.wgsPcgr} />
-            <AnalysisResultGDSTable title='cpsr' data={groupedData.wgsCpsr} />
-            <AnalysisResultGDSTable title='gpl report' data={groupedData.wgsGpl} />
-            <AnalysisResultGDSTable title='qc report' data={groupedData.wgsMultiqc} />
-            <AnalysisResultGDSTable title='coverage report' data={groupedData.wgsCoverage} />
-            <AnalysisResultGDSTable title='vcf' data={groupedData.wgsVcfs} />
-            <AnalysisResultGDSTable title='circos plot' data={groupedData.wgsCircos} />
-            <AnalysisResultGDSTable title='bam' data={groupedData.wgsBams} />
+            {/*<AnalysisResultGDSTable title='cancer report' data={groupedData.wgsCancer} />*/}
+            {/*<AnalysisResultGDSTable title='pcgr' data={groupedData.wgsPcgr} />*/}
+            {/*<AnalysisResultGDSTable title='cpsr' data={groupedData.wgsCpsr} />*/}
+            {/*<AnalysisResultGDSTable title='gpl report' data={groupedData.wgsGpl} />*/}
+            {/*<AnalysisResultGDSTable title='qc report' data={groupedData.wgsMultiqc} />*/}
+            {/*<AnalysisResultGDSTable title='coverage report' data={groupedData.wgsCoverage} />*/}
+            {/*<AnalysisResultGDSTable title='vcf' data={groupedData.wgsVcfs} />*/}
+            {/*<AnalysisResultGDSTable title='circos plot' data={groupedData.wgsCircos} />*/}
+            {/*<AnalysisResultGDSTable title='bam' data={groupedData.wgsBams} />*/}
+            <AnalysisResultS3Table title='cancer report' data={groupedData.icav1Grouped.wgsCancer} />
+            <AnalysisResultS3Table title='pcgr' data={groupedData.icav1Grouped.wgsPcgr} />
+            <AnalysisResultS3Table title='cpsr' data={groupedData.icav1Grouped.wgsCpsr} />
+            <AnalysisResultS3Table title='gpl report' data={groupedData.icav1Grouped.wgsGpl} />
+            <AnalysisResultS3Table title='qc report' data={groupedData.icav1Grouped.wgsMultiqc} />
+            <AnalysisResultS3Table title='coverage report' data={groupedData.icav1Grouped.wgsCoverage} />
+            <AnalysisResultS3Table title='vcf' data={groupedData.icav1Grouped.wgsVcfs} />
+            <AnalysisResultS3Table title='circos plot' data={groupedData.icav1Grouped.wgsCircos} />
+            <AnalysisResultS3Table title='bam' data={groupedData.icav1Grouped.wgsBams} />
           </div>
         </TabPanel>
         <TabPanel header='WTS'>
@@ -395,10 +403,14 @@ function AnalysisResultsTable({ subjectId }: Props) {
               text='DATA UNDER MIGRATION'
               pt={{ text: { className: 'font-bold' } }}
             />
-            <AnalysisResultGDSTable title='rnasum report' data={groupedData.wtsRNAsum} />
-            <AnalysisResultGDSTable title='qc report' data={groupedData.wtsMultiqc} />
-            <AnalysisResultGDSTable title='fusions report' data={groupedData.wtsFusionsIca} />
-            <AnalysisResultGDSTable title='bam' data={groupedData.wtsBamsIca} />
+            {/*<AnalysisResultGDSTable title='rnasum report' data={groupedData.wtsRNAsum} />*/}
+            {/*<AnalysisResultGDSTable title='qc report' data={groupedData.wtsMultiqc} />*/}
+            {/*<AnalysisResultGDSTable title='fusions report' data={groupedData.wtsFusionsIca} />*/}
+            {/*<AnalysisResultGDSTable title='bam' data={groupedData.wtsBamsIca} />*/}
+            <AnalysisResultS3Table title='rnasum report' data={groupedData.icav1Grouped.wtsRNAsum} />
+            <AnalysisResultS3Table title='qc report' data={groupedData.icav1Grouped.wtsMultiqc} />
+            <AnalysisResultS3Table title='fusions report' data={groupedData.icav1Grouped.wtsFusionsIca} />
+            <AnalysisResultS3Table title='bam' data={groupedData.icav1Grouped.wtsBamsIca} />
           </div>
         </TabPanel>
         <TabPanel header='TSO500'>
@@ -409,9 +421,12 @@ function AnalysisResultsTable({ subjectId }: Props) {
               text='DATA UNDER MIGRATION'
               pt={{ text: { className: 'font-bold' } }}
             />
-            <AnalysisResultGDSTable title='tsv' data={groupedData.tsoCtdnaTsv} />
-            <AnalysisResultGDSTable title='vcf' data={groupedData.tsoCtdnaVcfs} />
-            <AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />
+            {/*<AnalysisResultGDSTable title='tsv' data={groupedData.tsoCtdnaTsv} />*/}
+            {/*<AnalysisResultGDSTable title='vcf' data={groupedData.tsoCtdnaVcfs} />*/}
+            {/*<AnalysisResultGDSTable title='bam' data={groupedData.tsoCtdnaBams} />*/}
+            <AnalysisResultS3Table title='tsv' data={groupedData.icav1Grouped.tsoCtdnaTsv} />
+            <AnalysisResultS3Table title='vcf' data={groupedData.icav1Grouped.tsoCtdnaVcfs} />
+            <AnalysisResultS3Table title='bam' data={groupedData.icav1Grouped.tsoCtdnaBams} />
           </div>
         </TabPanel>
         <TabPanel header='TSO500 (V2)'>
@@ -537,16 +552,20 @@ function groupResultsData({
   results_s3,
   results_gds,
   results_sash,
-  results_byob_cttsov2,
-  results_byob_wgts,
-  results_byob_sash,
+  results_icav1_cttsov1,
+  results_icav1_wgts,
+  results_icav2_cttsov2,
+  results_icav2_wgts,
+  results_icav2_sash,
 }: {
   results_s3: S3Row[];
   results_gds: GDSRow[];
   results_sash: S3Row[];
-  results_byob_cttsov2: S3Row[];
-  results_byob_wgts: S3Row[];
-  results_byob_sash: S3Row[];
+  results_icav1_cttsov1: S3Row[];
+  results_icav1_wgts: S3Row[];
+  results_icav2_cttsov2: S3Row[];
+  results_icav2_wgts: S3Row[];
+  results_icav2_sash: S3Row[];
 }) {
   const wgs = results_s3.filter((r) => r.key.includes('WGS/'));
   const wts = results_s3.filter((r) => r.key.includes('WTS/'));
@@ -627,11 +646,66 @@ function groupResultsData({
     (r) => r.path.includes('tso_ctdna') && r.path.endsWith('tsv')
   );
 
+  // migrated icav1 results
+  const icav1Grouped = {
+    wgsBams: results_icav1_wgts.filter(
+      (r) => r.key.includes('tumor-normal') && r.key.endsWith('bam')
+    ),
+    wgsVcfs: results_icav1_wgts.filter(
+      (r) =>
+        (r.key.includes('umccrise') || r.key.includes('tumor-normal')) &&
+        (r.key.endsWith('vcf.gz') || r.key.endsWith('.maf'))
+    ),
+    wgsCircos: results_icav1_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('png')
+    ),
+    wgsPcgr: results_icav1_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('pcgr.html')
+    ),
+    wgsCpsr: results_icav1_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('cpsr.html')
+    ),
+    wgsMultiqc: results_icav1_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('multiqc_report.html')
+    ),
+    wgsCancer: results_icav1_wgts.filter(
+      (r) => r.key.includes('umccrise') && r.key.endsWith('cancer_report.html')
+    ),
+    wgsCoverage: results_icav1_wgts.filter(
+      (r) => r.key.includes('cacao') && r.key.endsWith('html')
+    ),
+
+    wgsGpl: results_icav1_wgts.filter(
+      (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
+    ),
+
+    wtsBamsIca: results_icav1_wgts.filter(
+      (r) => r.key.includes('wts') && r.key.endsWith('bam')
+    ),
+    wtsMultiqc: results_icav1_wgts.filter(
+      (r) => r.key.includes('wts') && r.key.endsWith('multiqc.html')
+    ),
+    wtsFusionsIca: results_icav1_wgts.filter(
+      (r) => r.key.includes('wts') && r.key.endsWith('fusions.pdf')
+    ),
+    wtsRNAsum: results_icav1_wgts.filter((r) => r.key.endsWith('RNAseq_report.html')),
+
+    tsoCtdnaBams: results_icav1_cttsov1.filter(
+      (r) => r.key.includes('cttsov1') && r.key.endsWith('bam')
+    ),
+    tsoCtdnaVcfs: results_icav1_cttsov1.filter(
+      (r) => r.key.includes('cttsov1') && (r.key.endsWith('vcf') || r.key.endsWith('vcf.gz'))
+    ),
+    tsoCtdnaTsv: results_icav1_cttsov1.filter(
+      (r) => r.key.includes('cttsov1') && r.key.endsWith('tsv')
+    ),
+  }
+
   // CTTSOV2 results
-  const cttsov2Bams = results_byob_cttsov2.filter(
+  const cttsov2Bams = results_icav2_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('bam')
   );
-  const cttsov2Vcfs = results_byob_cttsov2.filter(
+  const cttsov2Vcfs = results_icav2_cttsov2.filter(
     (r) =>
       r.key.includes('cttsov2') &&
       (r.key.endsWith('.vcf') ||
@@ -639,60 +713,60 @@ function groupResultsData({
         r.key.endsWith('.vcf.gz') ||
         r.key.endsWith('.gvcf.gz'))
   );
-  const cttsov2Tsv = results_byob_cttsov2.filter(
+  const cttsov2Tsv = results_icav2_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('tsv')
   );
-  const cttsov2Csv = results_byob_cttsov2.filter(
+  const cttsov2Csv = results_icav2_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && r.key.endsWith('csv')
   );
-  const cttsov2Json = results_byob_cttsov2.filter(
+  const cttsov2Json = results_icav2_cttsov2.filter(
     (r) => r.key.includes('cttsov2') && (r.key.endsWith('json') || r.key.endsWith('json.gz'))
   );
 
   // WGTS BYOB results from ICA v2
   const wgtsByobGrouped = {
-    wgsBams: results_byob_wgts.filter(
+    wgsBams: results_icav2_wgts.filter(
       (r) => r.key.includes('tumor') && r.key.includes('normal') && r.key.endsWith('bam')
     ),
-    wgsVcfs: results_byob_wgts.filter(
+    wgsVcfs: results_icav2_wgts.filter(
       (r) =>
         (r.key.includes('umccrise') || r.key.includes('tumor') || r.key.includes('normal')) &&
         (r.key.endsWith('vcf.gz') || r.key.endsWith('.maf'))
     ),
-    wgsCircos: results_byob_wgts.filter((r) => r.key.includes('umccrise') && r.key.endsWith('png')),
-    wgsPcgr: results_byob_wgts.filter(
+    wgsCircos: results_icav2_wgts.filter((r) => r.key.includes('umccrise') && r.key.endsWith('png')),
+    wgsPcgr: results_icav2_wgts.filter(
       (r) => r.key.includes('umccrise') && r.key.endsWith('pcgr.html')
     ),
-    wgsCpsr: results_byob_wgts.filter(
+    wgsCpsr: results_icav2_wgts.filter(
       (r) => r.key.includes('umccrise') && r.key.endsWith('cpsr.html')
     ),
-    wgsMultiqc: results_byob_wgts.filter(
+    wgsMultiqc: results_icav2_wgts.filter(
       (r) => r.key.includes('umccrise') && r.key.endsWith('multiqc_report.html')
     ),
-    wgsCancer: results_byob_wgts.filter(
+    wgsCancer: results_icav2_wgts.filter(
       (r) => r.key.includes('umccrise') && r.key.endsWith('cancer_report.html')
     ),
-    wgsCoverage: results_byob_wgts.filter((r) => r.key.includes('cacao') && r.key.endsWith('html')),
-    wtsBamsIca: results_byob_wgts.filter((r) => r.key.includes('wts') && r.key.endsWith('bam')),
-    wtsMultiqc: results_byob_wgts.filter(
+    wgsCoverage: results_icav2_wgts.filter((r) => r.key.includes('cacao') && r.key.endsWith('html')),
+    wtsBamsIca: results_icav2_wgts.filter((r) => r.key.includes('wts') && r.key.endsWith('bam')),
+    wtsMultiqc: results_icav2_wgts.filter(
       (r) => r.key.includes('wts') && r.key.endsWith('multiqc.html')
     ),
-    wtsFusionsIca: results_byob_wgts.filter(
+    wtsFusionsIca: results_icav2_wgts.filter(
       (r) => r.key.includes('wts') && r.key.endsWith('fusions.pdf')
     ),
-    wtsRNAsum: results_byob_wgts.filter((r) => r.key.endsWith('RNAseq_report.html')),
+    wtsRNAsum: results_icav2_wgts.filter((r) => r.key.endsWith('RNAseq_report.html')),
   };
 
   // Sash BYOB results from orcabus
   const sashByobGrouped = {
     // The rest of the output needed to show
-    vcfs: results_byob_sash.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf')),
-    circos: results_byob_sash.filter((r) => r.key.includes('circos') && r.key.endsWith('.png')),
-    pcgr: results_byob_sash.filter((r) => r.key.endsWith('pcgr.html')),
-    cpsr: results_byob_sash.filter((r) => r.key.endsWith('cpsr.html')),
-    multiqc: results_byob_sash.filter((r) => r.key.includes('multiqc') && r.key.endsWith('.html')),
-    cancer: results_byob_sash.filter((r) => r.key.endsWith('cancer_report.html')),
-    linx: results_byob_sash.filter((r) => r.key.endsWith('linx.html')),
+    vcfs: results_icav2_sash.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf')),
+    circos: results_icav2_sash.filter((r) => r.key.includes('circos') && r.key.endsWith('.png')),
+    pcgr: results_icav2_sash.filter((r) => r.key.endsWith('pcgr.html')),
+    cpsr: results_icav2_sash.filter((r) => r.key.endsWith('cpsr.html')),
+    multiqc: results_icav2_sash.filter((r) => r.key.includes('multiqc') && r.key.endsWith('.html')),
+    cancer: results_icav2_sash.filter((r) => r.key.endsWith('cancer_report.html')),
+    linx: results_icav2_sash.filter((r) => r.key.endsWith('linx.html')),
   };
 
   // Sash results
@@ -744,6 +818,9 @@ function groupResultsData({
     tsoCtdnaBams: tsoCtdnaBams,
     tsoCtdnaVcfs: tsoCtdnaVcfs,
     tsoCtdnaTsv: tsoCtdnaTsv,
+
+    // icav1
+    icav1Grouped: icav1Grouped,
 
     // CTTSOV2
     cttsov2Bams: cttsov2Bams,

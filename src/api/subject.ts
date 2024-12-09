@@ -16,9 +16,11 @@ export type SubjectApiRes = {
   results: S3Row[];
   results_gds: GDSRow[];
   results_sash: S3Row[];
-  results_byob_cttsov2: S3Row[];
-  results_byob_wgts: S3Row[];
-  results_byob_sash: S3Row[];
+  results_icav1_cttsov1: S3Row[];
+  results_icav1_wgts: S3Row[];
+  results_icav2_cttsov2: S3Row[];
+  results_icav2_wgts: S3Row[];
+  results_icav2_sash: S3Row[];
 };
 
 export type SubjectListApiRes = DjangoRestApiResponse & { results: string[] };
