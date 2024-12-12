@@ -653,51 +653,62 @@ function groupResultsData({
     ),
     wgsVcfs: results_icav1_wgts.filter(
       (r) =>
-        (r.key.includes('umccrise') || r.key.includes('tumor-normal')) &&
+        // (r.key.includes('umccrise') || r.key.includes('tumor-normal')) &&
         (r.key.endsWith('vcf.gz') || r.key.endsWith('.maf'))
     ),
     wgsCircos: results_icav1_wgts.filter(
-      (r) => r.key.includes('umccrise') && r.key.endsWith('png')
+      // (r) => r.key.includes('umccrise') && r.key.endsWith('png')
+      (r) => r.key.endsWith('png')
     ),
     wgsPcgr: results_icav1_wgts.filter(
-      (r) => r.key.includes('umccrise') && r.key.endsWith('pcgr.html')
+      // (r) => r.key.includes('umccrise') && r.key.endsWith('pcgr.html')
+      (r) => r.key.endsWith('pcgr.html')
     ),
     wgsCpsr: results_icav1_wgts.filter(
-      (r) => r.key.includes('umccrise') && r.key.endsWith('cpsr.html')
+      // (r) => r.key.includes('umccrise') && r.key.endsWith('cpsr.html')
+      (r) => r.key.endsWith('cpsr.html')
     ),
     wgsMultiqc: results_icav1_wgts.filter(
-      (r) => r.key.includes('umccrise') && r.key.endsWith('multiqc_report.html')
+      // (r) => r.key.includes('umccrise') && r.key.endsWith('multiqc_report.html')
+      (r) => r.key.endsWith('multiqc_report.html')
     ),
     wgsCancer: results_icav1_wgts.filter(
-      (r) => r.key.includes('umccrise') && r.key.endsWith('cancer_report.html')
+      // (r) => r.key.includes('umccrise') && r.key.endsWith('cancer_report.html')
+      (r) => r.key.endsWith('cancer_report.html')
     ),
     wgsCoverage: results_icav1_wgts.filter(
       (r) => r.key.includes('cacao') && r.key.endsWith('html')
     ),
 
     wgsGpl: results_icav1_wgts.filter(
-      (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
+      // (r) => r.key.includes('gridss_purple_linx') && r.key.endsWith('linx.html')
+      (r) => r.key.endsWith('linx.html')
     ),
 
     wtsBamsIca: results_icav1_wgts.filter(
       (r) => r.key.includes('wts') && r.key.endsWith('bam')
     ),
     wtsMultiqc: results_icav1_wgts.filter(
-      (r) => r.key.includes('wts') && r.key.endsWith('multiqc.html')
+      // (r) => r.key.includes('wts') && r.key.endsWith('multiqc.html')
+      (r) => r.key.endsWith('multiqc.html')
     ),
     wtsFusionsIca: results_icav1_wgts.filter(
-      (r) => r.key.includes('wts') && r.key.endsWith('fusions.pdf')
+      // (r) => r.key.includes('wts') && r.key.endsWith('fusions.pdf')
+      (r) => r.key.endsWith('fusions.pdf')
     ),
     wtsRNAsum: results_icav1_wgts.filter((r) => r.key.endsWith('RNAseq_report.html')),
 
     tsoCtdnaBams: results_icav1_cttsov1.filter(
-      (r) => r.key.includes('cttsov1') && r.key.endsWith('bam')
+      // (r) => r.key.includes('cttsov1') && r.key.endsWith('bam')
+      (r) => r.key.endsWith('bam')
     ),
     tsoCtdnaVcfs: results_icav1_cttsov1.filter(
-      (r) => r.key.includes('cttsov1') && (r.key.endsWith('vcf') || r.key.endsWith('vcf.gz'))
+      // (r) => r.key.includes('cttsov1') && (r.key.endsWith('vcf') || r.key.endsWith('vcf.gz'))
+      (r) => (r.key.endsWith('vcf') || r.key.endsWith('vcf.gz'))
     ),
     tsoCtdnaTsv: results_icav1_cttsov1.filter(
-      (r) => r.key.includes('cttsov1') && r.key.endsWith('tsv')
+      // (r) => r.key.includes('cttsov1') && r.key.endsWith('tsv')
+      (r) => r.key.endsWith('tsv')
     ),
   }
 
