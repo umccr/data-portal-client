@@ -191,6 +191,7 @@ const downloadTemplate = ({
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function AnalysisResultGDSTable(prop: AnalysisResultGDSTableProps) {
   const { title, data } = prop;
 
@@ -499,7 +500,7 @@ function AnalysisResultsTable({ subjectId }: Props) {
               isDisableObjectRestore={true}
             />
             <AnalysisResultS3Table title='circos plot' data={groupedData.sash.circos} />
-            <AnalysisResultGDSTable title='bam' data={groupedData.sash.gdsWgsBams} />
+            <AnalysisResultS3Table title='bam' data={groupedData.sash.wgsBams} />
           </div>
         </TabPanel>
         <TabPanel header='WGS (orcabus)'>
@@ -783,7 +784,8 @@ function groupResultsData({
   // Sash results
   const sashGrouped = {
     // The input bam
-    gdsWgsBams: wgsBams,
+    // gdsWgsBams: wgsBams, // deprecated, data migrated to BYOB or Archive bucket
+    wgsBams: wgtsByobGrouped.wgsBams, // FIXME: temporary using this way, might need to update later to better support cohort data use case at backend ~victor
     // The rest of the output needed to show
     vcfs: results_sash.filter((r) => r.key.endsWith('vcf.gz') || r.key.endsWith('.maf')),
     circos: results_sash.filter((r) => r.key.includes('circos') && r.key.endsWith('.png')),
